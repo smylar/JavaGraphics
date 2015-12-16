@@ -1,7 +1,7 @@
 package com.graphics.lib.camera;
 
-import com.graphics.lib.CanvasObject;
 import com.graphics.lib.Point;
+import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.interfaces.IOrientation;
 
 public class FocusPointCamera extends Camera {

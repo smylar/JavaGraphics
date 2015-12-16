@@ -94,7 +94,7 @@ public class Facet {
 	}
 	
 	/**
-	 * Check whether a point is within the footprint of this facet
+	 * Check whether a point is within the footprint of this facet (i.e. z value unimportant)
 	 * 
 	 * @param p - Point to test
 	 * @return <code>True</code> if p is within facet footprint, <code>False</code> otherwise

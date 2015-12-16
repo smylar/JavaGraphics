@@ -1,8 +1,5 @@
 package com.graphics.lib;
 
-import com.graphics.lib.interfaces.ILightIntensityFinder;
-import com.graphics.lib.interfaces.IVertexNormalFinder;
-
 /**
  * Representation of a 3D point in space
  * 
@@ -17,8 +14,6 @@ public class Point {
 	public double x = 0;
 	public double y = 0;
 	public double z = 0;
-	private Vector normal = new Vector();
-	private IntensityComponents lightIntensity;
 	private String tag = "";
 	
 	public Point(Point p)
@@ -43,30 +38,30 @@ public class Point {
 		this.tag = tag;
 	}
 
-	public Vector getNormal() {
+	/*public Vector getNormal() {
 		return normal;
-	}
+	}*/
 
-	public void setNormal(IVertexNormalFinder vnFinder, Facet f, CanvasObject obj) {
+	/*public void setNormal(IVertexNormalFinder vnFinder, Facet f, CanvasObject obj) {
 		this.normal = vnFinder.getVertexNormal(obj, this, f);
-	}
+	}*/
 	
-	public void setNormal(Vector normal) {
+	/*public void setNormal(Vector normal) {
 		this.normal = normal;
-	}
+	}*/
 	
-	public IntensityComponents getLightIntensity() {
+	/*public IntensityComponents getLightIntensity() {
 		if (this.lightIntensity == null) return new IntensityComponents();
 		return this.lightIntensity;
-	}
+	}*/
 
-	public void setLightIntensity(IntensityComponents lightIntensity) {
+	/*public void setLightIntensity(IntensityComponents lightIntensity) {
 		this.lightIntensity = lightIntensity;
-	}
+	}*/
 	
-	public void setLightIntensity(ILightIntensityFinder liFinder, boolean isPartOfBackface, CanvasObject obj) {
-		this.lightIntensity = liFinder.getLightIntensity(obj, this, isPartOfBackface);
-	}
+	/*public void setLightIntensity(ILightIntensityFinder liFinder, boolean isPartOfBackface, CanvasObject obj, Vector v) {
+		this.lightIntensity = liFinder.getLightIntensity(obj, this, v, isPartOfBackface);
+	}*/
 	
 	/**
 	 * Calculates the (positive) unit distance from this point to another given point
@@ -121,11 +116,11 @@ public class Point {
 		if (getClass() != obj.getClass())
 			return false;
 		Point other = (Point) obj;
-		if (normal == null) {
+		/*if (normal == null) {
 			if (other.normal != null)
 				return false;
 		} else if (!normal.equals(other.normal))
-			return false;
+			return false;*/
 		if (tag == null) {
 			if (other.tag != null)
 				return false;

@@ -12,22 +12,23 @@ import java.util.Set;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
-import com.graphics.lib.Canvas3D;
-import com.graphics.lib.CanvasObject;
 import com.graphics.lib.ObjectControls;
-import com.graphics.lib.OrientableCanvasObject;
-import com.graphics.lib.PlugableCanvasObject;
 import com.graphics.lib.Point;
-import com.graphics.lib.SimpleOrientation;
-import com.graphics.lib.SlaveCanvas3D;
 import com.graphics.lib.Vector;
 import com.graphics.shapes.Cuboid;
 import com.graphics.shapes.Ovoid;
 import com.graphics.shapes.Sphere;
+import com.graphics.shapes.Whale;
 import com.graphics.lib.camera.ViewAngleCamera;
+import com.graphics.lib.canvas.Canvas3D;
+import com.graphics.lib.canvas.CanvasObject;
+import com.graphics.lib.canvas.OrientableCanvasObject;
+import com.graphics.lib.canvas.PlugableCanvasObject;
+import com.graphics.lib.canvas.SlaveCanvas3D;
 import com.graphics.lib.lightsource.CameraTiedLightSource;
 import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.lightsource.ObjectTiedLightSource;
+import com.graphics.lib.orientation.SimpleOrientation;
 import com.graphics.lib.plugins.Events;
 import com.graphics.lib.plugins.IPlugin;
 import com.graphics.lib.plugins.PluginLibrary;
@@ -98,8 +99,17 @@ public class GraphicsTest extends JFrame {
 		slave.setLayout(new BorderLayout());
 		slave.setSize(300, 300);
 		slave.setLocation(750, 50);
+		
+		CanvasObject camcube = new Cuboid(20,20,20);
+		cnv.registerObject(camcube, new Point(1515, 300, 400), false, ShaderFactory.GetShader(ShaderFactory.ShaderEnum.FLAT));
+		
+		OrientableCanvasObject<Whale> whale = new Whale();
+		whale.setColour(Color.cyan);
+		
+		cnv.registerObject(whale, new Point(1515, 300, 400), false, ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
+		
 		ViewAngleCamera slaveCam = new ViewAngleCamera(new SimpleOrientation(OrientableCanvasObject.ORIENTATION_TAG));
-		slaveCam.setPosition(new Point(1500, 350, 400));
+		slaveCam.setPosition(new Point(1500, 300, 400));
 		slaveCam.addTransform("INIT", new PanCamera<YRotation>(YRotation.class, -90));
 		slaveCam.doTransforms();
 		SlaveCanvas3D scnv = new SlaveCanvas3D(slaveCam, cnv);
@@ -122,12 +132,14 @@ public class GraphicsTest extends JFrame {
 		torust.addTransform(torust1);
 		torust.addTransform(torust2);
 		torus.addTransformAboutCentre(torust);
+		torus.addFlag(Events.EXPLODE_PERSIST);
 		
 		
 		PlugableCanvasObject<Cuboid> cube = new PlugableCanvasObject<Cuboid>(new Cuboid(200,200,200));
 		cnv.registerObject(cube, new Point(500,500,450), false, ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
 		Transform cubet2 = new RepeatingTransform<Rotation<?>>(new Rotation<ZRotation>(ZRotation.class, 3), 30);
 		cube.addTransformAboutCentre(cubet2);
+		cube.addFlag(Events.STICKY);
 		
 		Transform cubet = new RepeatingTransform<Translation>(new Translation(-5,0,0), (t) -> {
 			return cube.getCentre().x <= 200; 
@@ -137,6 +149,7 @@ public class GraphicsTest extends JFrame {
 		
 		PlugableCanvasObject<Sphere> sphere = new PlugableCanvasObject<Sphere>(new Sphere(100,15));
 		sphere.setColour(new Color(255, 255, 0));
+		sphere.addFlag(Events.EXPLODE_PERSIST);
 		cnv.registerObject(sphere, new Point(500,200,400), false, ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
 		
 		for (int i = 0; i < sphere.getFacetList().size() ; i++)
@@ -166,7 +179,8 @@ public class GraphicsTest extends JFrame {
 					PlugableCanvasObject<?> p = new PlugableCanvasObject<CanvasObject>(c);
 					obj.getChildren().add(p);
 					cnv.replaceShader(obj, ShaderFactory.GetShader(ShaderFactory.ShaderEnum.FLAT));
-					p.registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollided(getObjects, PluginLibrary.onCollision(), null), true);
+					p.registerPlugin("STOP", PluginLibrary.stop(), false);
+					p.registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollided(getObjects, "STOP", null), true);
 				});
 				obj.registerSingleAfterDrawPlugin(Events.FLASH, PluginLibrary.flash(cnv.getLightSources()));
 				return null;
@@ -178,7 +192,8 @@ public class GraphicsTest extends JFrame {
 			public Void execute(PlugableCanvasObject<?> obj) {	
 				PlugableCanvasObject<?> impactee = PluginLibrary.hasCollided(getObjects,null, null).execute(obj);
 				if (impactee != null){
-					PluginLibrary.bounce(impactee).execute(obj);
+					if (impactee.hasFlag(Events.STICKY)) PluginLibrary.stop2().execute(obj);
+					else PluginLibrary.bounce(impactee).execute(obj);
 				}
 				return null;
 			}			
@@ -195,14 +210,14 @@ public class GraphicsTest extends JFrame {
 		RepeatingTransform<RepeatingTransform<?>> spheret = new RepeatingTransform<RepeatingTransform<?>>(rpt,30);
 			
 		sphere.addTransformAboutCentre(spheret);
-		sphere.registerPlugin(Events.EXPLODE, explode, false);
-		torus.registerPlugin(Events.EXPLODE, explode, false);
-		cube.registerPlugin(Events.EXPLODE, explode, false);
 		
 		CameraTiedLightSource l4 = new CameraTiedLightSource(cam.getPosition().x, cam.getPosition().y, cam.getPosition().z);
 		l4.tieTo(cam);
 		l4.setColour(new Color(255, 255, 255));
 		cnv.addLightSource(l4);
+		
+		sphere.registerPlugin(Events.EXPLODE, explode, false);
+		torus.registerPlugin(Events.EXPLODE, explode, false);
 		
 		this.addKeyListener(new ObjectControls(ship){
 			@Override
@@ -228,9 +243,9 @@ public class GraphicsTest extends JFrame {
 					cam.addCameraRotation(proj);				
 
 					Optional<MovementTransform> shipMove = ship.getTransformsOfType(MovementTransform.class).stream().filter(m -> m.getName().equals(ObjectControls.FORWARD) || m.getName().equals(ObjectControls.BACKWARD) ).findFirst();
-					double baseSpeed = 0;
-					if (shipMove.isPresent()) baseSpeed = shipMove.get().getName().equals(ObjectControls.FORWARD) ? shipMove.get().getVelocity() : -shipMove.get().getVelocity();
-					MovementTransform move = new MovementTransform(new Vector(cam.getOrientation().getForward().x, cam.getOrientation().getForward().y, cam.getOrientation().getForward().z), 18 + baseSpeed){
+					double speed = 18;
+					if (shipMove.isPresent()) speed += shipMove.get().getName().equals(ObjectControls.FORWARD) ? shipMove.get().getVelocity() : -shipMove.get().getVelocity();
+					MovementTransform move = new MovementTransform(new Vector(cam.getOrientation().getForward().x, cam.getOrientation().getForward().y, cam.getOrientation().getForward().z), speed){
 						@Override
 						public void onComplete(){
 							proj.executePlugin(Events.EXPLODE); //TODO may need a life on exploded fragments with projectiles
@@ -261,7 +276,7 @@ public class GraphicsTest extends JFrame {
 					proj.deleteAfterTransforms();
 					proj.setProcessBackfaces(true);
 					
-					proj.registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollided(getObjects, explode, explode), true);
+					proj.registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollided(getObjects, Events.EXPLODE, Events.EXPLODE), true);
 					
 					Point pos = new Point(cam.getPosition());
 					Vector right = cam.getOrientation().getRight();
@@ -284,15 +299,20 @@ public class GraphicsTest extends JFrame {
 					
 					proj.deleteAfterTransforms();
 					proj.setProcessBackfaces(true);
-					Optional<MovementTransform> shipMove = ship.getTransformsOfType(MovementTransform.class).stream().filter(m -> m.getName().equals(ObjectControls.FORWARD) || m.getName().equals(ObjectControls.BACKWARD) ).findFirst();
+					Optional<MovementTransform> shipMove = ship.getTransformsOfType(MovementTransform.class)
+							.stream()
+							.filter(m -> m.getName().equals(ObjectControls.FORWARD) || m.getName().equals(ObjectControls.BACKWARD) )
+							.findFirst();
+					
 					double baseSpeed = 0;
 					if (shipMove.isPresent()) baseSpeed = shipMove.get().getName().equals(ObjectControls.FORWARD) ? shipMove.get().getVelocity() : -shipMove.get().getVelocity();
 					MovementTransform move = new MovementTransform(new Vector(cam.getOrientation().getForward().x, cam.getOrientation().getForward().y, cam.getOrientation().getForward().z), 15 + baseSpeed);
-					move.moveUntil(t -> t.getDistanceMoved() >= 1000);
+					long delTime = new Date().getTime() + 5000;
+					move.moveUntil(t -> t.getDistanceMoved() > 1000 || (t.getVelocity() == 0 && new Date().getTime() > delTime));
 					proj.addTransform(move);
 
 					proj.registerPlugin(Events.CHECK_COLLISION, bounce, true);
-					proj.registerPlugin("Trail", PluginLibrary.generateTrailParticles(Color.LIGHT_GRAY, 20, 13), true);
+					proj.registerPlugin("Trail", PluginLibrary.generateTrailParticles(Color.LIGHT_GRAY, 20, 13, 0.66), true);
 					
 					Point pos = new Point(cam.getPosition());
 					Vector right = cam.getOrientation().getRight();
@@ -324,7 +344,7 @@ public class GraphicsTest extends JFrame {
 	
 	public void drawCycle()
 	{
-		long sleep = 75;
+		long sleep = 50;
 		while (go){
 
 			try {
@@ -337,7 +357,7 @@ public class GraphicsTest extends JFrame {
 			long cycleStart = new Date().getTime();
 			canvas.doDraw();
 			
-			sleep = 75 - (new Date().getTime() - cycleStart);
+			sleep = 50 - (new Date().getTime() - cycleStart);
 		}
 		
 		System.exit(0);

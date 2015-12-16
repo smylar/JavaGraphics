@@ -1,8 +1,8 @@
 package com.graphics.lib.interfaces;
 
-import com.graphics.lib.CanvasObject;
 import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
+import com.graphics.lib.canvas.CanvasObject;
 
 public interface IOrientation {
 	public Vector getForward();

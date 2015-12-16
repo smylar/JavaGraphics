@@ -1,13 +1,20 @@
-package com.graphics.lib;
+package com.graphics.lib.zbuffer;
 
 import java.awt.Color;
 import java.util.TreeMap;
 
+/**
+ * Stores information about Z values and colour for a screen coordinate this item represents
+ * 
+ * @author Paul Brandon
+ *
+ */
 public class ZBufferItem
 {
-	private TreeMap<Integer, Color> items = new TreeMap<Integer, Color>();
+	private TreeMap<Double, Color> items = new TreeMap<Double, Color>();
 	private int x = 0;
 	private int y = 0;
+	public boolean active = false;
 	
 	public ZBufferItem(int x, int y){
 		this.x = x;
@@ -22,8 +29,15 @@ public class ZBufferItem
 		return y;
 	}
 
-	Color getColour() {
-		//N.B. TreeMap will automatically order lowest to highest key
+	/**
+	 * Gets the colour of the pixel represented by this item
+	 * <br/>
+	 * The buffer can store multiple values in Z value order, this allows us to take account of transparent colourings etc.
+	 * 
+	 * @return
+	 */
+	public Color getColour() {
+		//N.B. TreeMap will automatically order lowest to highest key (natural ordering)
 		int red = 0;
 		int green = 0;
 		int blue = 0;
@@ -39,12 +53,27 @@ public class ZBufferItem
 		if (red > 255) red = 255;
 		if (green > 255) green = 255;
 		if (blue > 255) blue = 255;
+		
+		this.clear(); //assumption here is that getColour will only be called once per draw cycle
+		
 		return new Color(red, green, blue, alpha);
 	}
 	
-	public void add(int z, Color colour)
+	/**
+	 * Add and Z value / colour combination to this item
+	 * 
+	 * @param z
+	 * @param colour
+	 */
+	public synchronized void add(double z, Color colour)
 	{
-		items.put(z, colour);			
+		items.put(z, colour);
+		active = true;
+	}
+	
+	public void clear(){
+		active = false;
+		items.clear();
 	}
 
 	@Override

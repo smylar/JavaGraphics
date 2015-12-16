@@ -3,11 +3,11 @@ package com.graphics.shapes;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.graphics.lib.CanvasObject;
 import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
+import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.interfaces.IVertexNormalFinder;
 import com.graphics.lib.transform.Rotation;
 import com.graphics.lib.transform.Translation;

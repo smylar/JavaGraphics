@@ -1,24 +1,30 @@
-package com.graphics.lib;
+package com.graphics.lib.canvas;
 
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 import javax.swing.JPanel;
 
+import com.graphics.lib.Facet;
+import com.graphics.lib.GeneralPredicates;
+import com.graphics.lib.Point;
+import com.graphics.lib.Utils;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasUpdateListener;
 import com.graphics.lib.interfaces.IZBuffer;
 import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.shader.IShader;
 import com.graphics.lib.transform.Translation;
+import com.graphics.lib.zbuffer.ZBufferItem;
 
 public class Canvas3D extends JPanel{
 
@@ -26,12 +32,16 @@ public class Canvas3D extends JPanel{
 	
 	//private List<CanvasObject> shapes = new ArrayList<CanvasObject>();
 	private Map<CanvasObject, IShader> shapes = new HashMap<CanvasObject, IShader>();
-	private List<LightSource> lightSources = new ArrayList<LightSource>(); 
+	private Map<CanvasObject, IShader> shapesToAdd = Collections.synchronizedMap(new HashMap<CanvasObject, IShader>());
+	
+	private Set<LightSource> lightSources = new HashSet<LightSource>(); 
+	private Set<LightSource> lightSourcesToAdd = Collections.synchronizedSet(new HashSet<LightSource>()); 
 	private Camera camera;
 	private IZBuffer zBuffer;
 	private double horizon = 8000;
 	private Set<ICanvasUpdateListener> slaves = new HashSet<ICanvasUpdateListener>();
 	private List<BiConsumer<Canvas3D,Graphics>> drawPlugins = new ArrayList<BiConsumer<Canvas3D,Graphics>>();
+	private boolean okToPaint = false;
 
 	public Canvas3D(Camera camera)
 	{
@@ -51,7 +61,7 @@ public class Canvas3D extends JPanel{
 	}
 
 	public void addLightSource(LightSource lightSource) {
-		this.lightSources.add(lightSource);
+		this.lightSourcesToAdd.add(lightSource);
 	}
 
 	public void registerObject(CanvasObject obj, Point position)
@@ -71,7 +81,7 @@ public class Canvas3D extends JPanel{
 		this.shapes.replace(obj, shader);
 	}
 
-	public List<LightSource> getLightSources() {
+	public Set<LightSource> getLightSources() {
 		return lightSources;
 	}
 
@@ -87,10 +97,22 @@ public class Canvas3D extends JPanel{
 		this.slaves.add(l);
 	}
 	
-	protected void setzBuffer(IZBuffer zBuffer) {
+	public void setzBuffer(IZBuffer zBuffer) {
 		this.zBuffer = zBuffer;
 	}
 	
+	public IZBuffer getzBuffer() {
+		return zBuffer;
+	}
+
+	public boolean isOkToPaint() {
+		return okToPaint;
+	}
+
+	public void setOkToPaint(boolean okToPaint) {
+		this.okToPaint = okToPaint;
+	}
+
 	@Override
 	public void setVisible(boolean flag)
 	{
@@ -102,32 +124,43 @@ public class Canvas3D extends JPanel{
 		this.registerObject(obj, position, drawNow, null);
 	}
 	
-	public synchronized void registerObject(CanvasObject obj, Point position, boolean drawNow, IShader shader)
+	public void registerObject(CanvasObject obj, Point position, boolean drawNow, IShader shader)
 	{
-		if (this.shapes.containsKey(obj)) return;
+		if (this.shapes.containsKey(obj) || this.shapesToAdd.containsKey(obj)) return;
 
-		this.shapes.put(obj, shader);
 		obj.applyTransform(new Translation(position));
+		this.shapesToAdd.put(obj, shader);
+		
 		if (drawNow)
 		{
 			this.doDraw();
 		}
 	}
 	
-	public synchronized void doDraw()
+	public void doDraw()
 	{
-		IZBuffer zBuffer = null;
-		if (this.zBuffer == null)
-			zBuffer = Utils.getDefaultZBuffer(); //default, may put in a factory
-		else
-			try {
-				zBuffer = this.zBuffer.getClass().newInstance();
-			} catch (Exception e) {
-				return;
-			}
+		if (shapesToAdd.size() > 0){
+			shapes.putAll(shapesToAdd);
+			shapesToAdd.clear();
+		}
 		
-		zBuffer.setDispHeight(this.getHeight());
-		zBuffer.setDispWidth(this.getWidth());
+		if (lightSourcesToAdd.size() > 0){
+			lightSources.addAll(lightSourcesToAdd);
+			lightSourcesToAdd.clear();
+		}
+		
+		while(this.zBuffer != null && this.isOkToPaint()){
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {}
+		}
+		
+		if (this.zBuffer == null)
+			this.zBuffer = Utils.getDefaultZBuffer();
+		
+		this.zBuffer.setDimensions(new Dimension(this.getWidth(), this.getHeight()));
+		this.camera.setViewport(this.getWidth(), this.getHeight());
+		
 		this.lightSources.removeIf(l -> l.isDeleted());
 		
 		//this.shapes.removeIf(s -> s.isDeleted());
@@ -137,12 +170,15 @@ public class Canvas3D extends JPanel{
 		this.camera.doTransforms();
 		
 		Set<CanvasObject> processShapes = this.getShapes();
-		final IZBuffer fZBuffer = zBuffer;
+		
 		processShapes.parallelStream().forEach(s -> {
-			this.processShape(s, fZBuffer, getShader(s));
+			this.processShape(s, this.zBuffer, getShader(s));
 		});
-		this.zBuffer = zBuffer;
-		this.repaint(); this.slaves.forEach(s -> s.update(this));
+
+		this.setOkToPaint(true);
+		this.repaint(); 
+		
+		this.slaves.forEach(s -> s.update(this));
 			
 		processShapes.parallelStream().forEach(s -> {
 			s.onDrawComplete();
@@ -156,7 +192,7 @@ public class Canvas3D extends JPanel{
 		{
 			this.camera.getView(obj);
 			if (shader != null) shader.setLightsources(lightSources);
-			Stream<Facet> facetStream = obj.getFacetList().stream();
+			Stream<Facet> facetStream = obj.getFacetList().parallelStream();
 			if (!obj.isProcessBackfaces()){
 				facetStream = facetStream.filter(GeneralPredicates.isFrontface(this.camera));
 			}
@@ -172,34 +208,31 @@ public class Canvas3D extends JPanel{
 	}
 	
 	@Override
-	public void paint(Graphics g)
+	public void paintComponent(Graphics g)
 	{
-		super.paint(g);
-
-		if (this.zBuffer == null) return;
+		//TODO maybe find a way of not dumping all the ZBufferItem objects each cycle, there is a noticeable slow down with larger buffer
+		//every few seconds, presumably when the GC clears them up, but running GC each cycle hurts more, 
+		//ZBufferItems now reused and not dumped, think it has improved, however, the TreeMap in that item is still being cleared each cycle
+		//may also want to look at all the temporary Vector objects etc that get created too, though don't think that is as much an issue
 		
-		this.zBuffer.getBuffer().keySet().stream().forEach(x -> {
-			Map<Integer, ZBufferItem> item = this.zBuffer.getBuffer().get(x);
-			if (item != null){
-			for (Entry<Integer, ZBufferItem> entry : item.entrySet())
-			{
-				g.setColor(entry.getValue().getColour());
-				g.drawLine(x,entry.getKey(), x,entry.getKey());
-			}
-			}
-		});
-		/*this.zBuffer.getBuffer().stream().forEach(item -> {
-			if (item != null){
+		//did have paint synchronised as can't be sure when paint triggered, 
+		//but that takes resources, so trying to remove as many as possible - using an ok to paint flag here
+		if (this.zBuffer == null || !this.isOkToPaint()) return;
+		super.paintComponent(g);
+		
+		this.zBuffer.getBuffer().values().stream().forEach(m -> {
+			for (ZBufferItem item : m.values()){
+				if (item == null || !item.active) continue;
 				g.setColor(item.getColour());
 				g.drawLine(item.getX(), item.getY(), item.getX(), item.getY());
 			}
-		});*/
+		});
 		
+		this.setOkToPaint(false);
 		
 		for(BiConsumer<Canvas3D,Graphics> op : drawPlugins){
 			op.accept(this,g);
 		}
-		
 	}
 
 }

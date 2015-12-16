@@ -1,18 +1,19 @@
 package com.graphics.lib.plugins;
 
 import java.awt.Color;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.graphics.lib.CanvasObject;
 import com.graphics.lib.Facet;
-import com.graphics.lib.PlugableCanvasObject;
 import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
+import com.graphics.lib.canvas.CanvasObject;
+import com.graphics.lib.canvas.PlugableCanvasObject;
 import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.transform.MovementTransform;
 import com.graphics.lib.transform.RepeatingTransform;
@@ -23,7 +24,7 @@ import com.graphics.lib.transform.YRotation;
 
 public class PluginLibrary {
 	
-	public static IPlugin<PlugableCanvasObject<?>, Void> generateTrailParticles(Color colour, int density, double exhaustVelocity)
+	public static IPlugin<PlugableCanvasObject<?>, Void> generateTrailParticles(Color colour, int density, double exhaustVelocity, double particleSize)
 	{
 		return (obj) -> {
 			Optional<MovementTransform> movement = obj.getTransformsOfType(MovementTransform.class).stream().findFirst();
@@ -32,12 +33,12 @@ public class PluginLibrary {
 			
 			for (int i = 0 ; i < density ; i++)
 			{
-				int index = (int)Math.round(Math.random() * (obj.getVertexList().size() - 1));
+				int index = (int)Math.round(Math.random() * (obj.getVertexList().size() - 1)); //TODO only get untagged points (tagged points usually hidden and have special purpose)
 				Point p = obj.getVertexList().get(index);
 				CanvasObject fragment = new CanvasObject();
 				fragment.getVertexList().add(new WorldCoord(p.x , p.y, p.z));
-				fragment.getVertexList().add(new WorldCoord(p.x + 0.66 , p.y, p.z));
-				fragment.getVertexList().add(new WorldCoord(p.x, p.y + 0.66, p.z));
+				fragment.getVertexList().add(new WorldCoord(p.x + particleSize , p.y, p.z));
+				fragment.getVertexList().add(new WorldCoord(p.x, p.y + particleSize, p.z));
 				fragment.getFacetList().add(new Facet(fragment.getVertexList().get(0), fragment.getVertexList().get(1), fragment.getVertexList().get(2)));
 				fragment.setColour(colour);
 				fragment.setProcessBackfaces(true);
@@ -58,7 +59,7 @@ public class PluginLibrary {
 		};
 	}
 	
-	public static IPlugin<PlugableCanvasObject<?>, Set<CanvasObject>> explode(List<LightSource> lightSources) 
+	public static IPlugin<PlugableCanvasObject<?>, Set<CanvasObject>> explode(Collection<LightSource> lightSources) 
 	{
 		return (obj) -> {
 		Set<CanvasObject> children = new HashSet<CanvasObject>();
@@ -75,8 +76,13 @@ public class PluginLibrary {
 			double xVector = baseVector.x + (Math.random()/2) - 0.25;
 			double yVector = baseVector.y + (Math.random()/2) - 0.25;
 			double zVector = baseVector.z + (Math.random()/2) - 0.25;
-			fragment.addTransform(new MovementTransform(new Vector(xVector, yVector, zVector), Math.random() * 15 + 1 ));
-			fragment.addTransformAboutCentre(new RepeatingTransform<Rotation<?>>(new Rotation<YRotation>(YRotation.class, Math.random() * 10), -1), new RepeatingTransform<Rotation<?>>(new Rotation<XRotation>(XRotation.class, Math.random() * 10), -1));
+			MovementTransform move = new MovementTransform(new Vector(xVector, yVector, zVector), Math.random() * 15 + 1 );
+			fragment.addTransform(move);
+			fragment.addTransformAboutCentre(new RepeatingTransform<Rotation<?>>(new Rotation<YRotation>(YRotation.class, Math.random() * 10), t -> move.isComplete()), new RepeatingTransform<Rotation<?>>(new Rotation<XRotation>(XRotation.class, Math.random() * 10), t -> move.isComplete()));
+			if (!obj.hasFlag(Events.EXPLODE_PERSIST)){
+				move.moveUntil(t -> t.getDistanceMoved() > 100);
+				fragment.deleteAfterTransforms();
+			}
 			children.add(fragment);
 		}
 		
@@ -84,24 +90,11 @@ public class PluginLibrary {
 		obj.cancelTransforms();
 		obj.removePlugins();
 		
-		/*LightSource flash = new LightSource(obj.getCentre().x,  obj.getCentre().y, obj.getCentre().z);
-		flash.setRange(-1);
-		lightSources.add(flash);
-		new Thread(() -> {
-			try {
-				for (int i = 0 ; i < 15 ; i++)
-				{
-					Thread.sleep(200);
-					flash.setIntensity(flash.getIntensity() - 0.075);
-				}
-			} catch (Exception e) {}
-			flash.setDeleted(true);
-		}).start();*/
 		return children;
 		};
 	}
 	
-	public static IPlugin<PlugableCanvasObject<?>,Void> flash(List<LightSource> lightSources)
+	public static IPlugin<PlugableCanvasObject<?>,Void> flash(Collection<LightSource> lightSources)
 	{
 		return (obj)-> {
 			LightSource flash = new LightSource(obj.getCentre().x,  obj.getCentre().y, obj.getCentre().z);
@@ -122,19 +115,20 @@ public class PluginLibrary {
 		};
 	}
 	
-	public static IPlugin<PlugableCanvasObject<?>,PlugableCanvasObject<?>> hasCollided(IPlugin<?,Set<PlugableCanvasObject<?>>> objects, IPlugin<PlugableCanvasObject<?>, ?> impactorPlugin, IPlugin<PlugableCanvasObject<?>, ?> impacteePlugin)
+	public static IPlugin<PlugableCanvasObject<?>,PlugableCanvasObject<?>> hasCollided(IPlugin<?,Set<PlugableCanvasObject<?>>> objects, String impactorPlugin, String impacteePlugin)
 	{
 		return (obj) -> {
 			PlugableCanvasObject<?> inCollision = (PlugableCanvasObject<?>)obj.executePlugin("IN_COLLISION"); //may need to be a list - may hit more than one!
 			
 			for (PlugableCanvasObject<?> impactee : objects.execute(null)){
 				if (impactee == obj) continue;
+				//TODO will need to factor in possibility object was drawn completely on the other side of an object and thus not detected as a collision
 				if (obj.getVertexList().stream().anyMatch(p -> impactee.isPointInside(p)))
 				{
 					if (inCollision == impactee) { return null;}
-					if (impactorPlugin != null) impactorPlugin.execute(obj);
-					if (impacteePlugin != null) impacteePlugin.execute(impactee);
-					//impactee.addObserver(obj);
+					if (impactorPlugin != null) obj.executePlugin(impactorPlugin);
+					if (impacteePlugin != null) impactee.executePlugin(impacteePlugin);
+
 					obj.registerPlugin("IN_COLLISION", (o) -> {return impactee;}, false);
 					return impactee;
 				}else if (inCollision == impactee){
@@ -145,10 +139,21 @@ public class PluginLibrary {
 		};
 	}
 	
-	public static IPlugin<PlugableCanvasObject<?>, Void> onCollision()
+	public static IPlugin<PlugableCanvasObject<?>, Void> stop()
 	{
 		return (obj) -> {
 			obj.cancelTransforms();
+			obj.removePlugins();
+			return null;
+		};
+	}
+	
+	public static IPlugin<PlugableCanvasObject<?>, Void> stop2()
+	{
+		return (obj) -> {
+			for (MovementTransform t : obj.getTransformsOfType(MovementTransform.class)){
+				t.setVelocity(0);
+			}
 			obj.removePlugins();
 			return null;
 		};

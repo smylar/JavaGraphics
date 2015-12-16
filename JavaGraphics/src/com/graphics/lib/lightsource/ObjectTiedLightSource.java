@@ -2,8 +2,8 @@ package com.graphics.lib.lightsource;
 
 import java.util.Observable;
 
-import com.graphics.lib.CanvasObject;
 import com.graphics.lib.WorldCoord;
+import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.transform.Transform;
 
 

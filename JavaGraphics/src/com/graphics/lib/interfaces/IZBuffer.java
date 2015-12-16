@@ -1,12 +1,13 @@
 package com.graphics.lib.interfaces;
 
+import java.awt.Dimension;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.graphics.lib.CanvasObject;
 import com.graphics.lib.Facet;
-import com.graphics.lib.ZBufferItem;
+import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.shader.IShader;
+import com.graphics.lib.zbuffer.ZBufferItem;
 
 /**
  * Interface for a Z Buffer.
@@ -36,15 +37,10 @@ public interface IZBuffer {
 	 */
 	public Map<Integer, HashMap<Integer, ZBufferItem>> getBuffer();
 	
+	
 	/**
 	 * Set the width of the buffer in pixels
 	 * @param dispWidth
 	 */
-	public void setDispWidth(int dispWidth);
-	
-	/**
-	 * Set the height of the buffer in pixels
-	 * @param dispHeight
-	 */
-	public void setDispHeight(int dispHeight);
+	public void setDimensions(Dimension dimension);
 }

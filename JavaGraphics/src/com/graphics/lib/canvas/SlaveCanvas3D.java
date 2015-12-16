@@ -1,8 +1,11 @@
-package com.graphics.lib;
+package com.graphics.lib.canvas;
 
+import java.awt.Dimension;
 import java.util.stream.Stream;
 
-import com.graphics.lib.Canvas3D;
+import com.graphics.lib.Facet;
+import com.graphics.lib.GeneralPredicates;
+import com.graphics.lib.Utils;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasUpdateListener;
 import com.graphics.lib.interfaces.IZBuffer;
@@ -23,14 +26,21 @@ public class SlaveCanvas3D extends Canvas3D implements ICanvasUpdateListener {
 	@Override
 	public void doDraw()
 	{
-		ZBuffer zBuffer = new ZBuffer();
-		zBuffer.setDispHeight(this.getHeight());
-		zBuffer.setDispWidth(this.getWidth());
+		while(this.isOkToPaint()){
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {}
+		}
+		
+		if (this.getzBuffer() == null)
+			this.setzBuffer(Utils.getDefaultZBuffer());
+
+		this.getzBuffer().setDimensions(new Dimension(this.getWidth(), this.getHeight()));
 
 		parent.getShapes().parallelStream().forEach(s -> {
-			this.processShape(s, zBuffer, parent.getShader(s));
+			this.processShape(s, this.getzBuffer(), parent.getShader(s));
 		});
-		this.setzBuffer(zBuffer);
+		this.setOkToPaint(true);
 		this.repaint();
 	}
 	
@@ -40,7 +50,7 @@ public class SlaveCanvas3D extends Canvas3D implements ICanvasUpdateListener {
 		if (obj.isVisible())
 		{
 			this.getCamera().getView(obj);
-			Stream<Facet> facetStream = obj.getFacetList().stream();
+			Stream<Facet> facetStream = obj.getFacetList().parallelStream();
 			if (shader != null) shader.setLightsources(parent.getLightSources());
 			if (!obj.isProcessBackfaces()){
 				facetStream = facetStream.filter(GeneralPredicates.isFrontface(this.getCamera()));

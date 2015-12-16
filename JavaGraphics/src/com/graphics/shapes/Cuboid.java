@@ -1,10 +1,10 @@
 package com.graphics.shapes;
 
 
-import com.graphics.lib.CanvasObject;
 import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
 import com.graphics.lib.WorldCoord;
+import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.transform.Translation;
 
 public class Cuboid extends CanvasObject{

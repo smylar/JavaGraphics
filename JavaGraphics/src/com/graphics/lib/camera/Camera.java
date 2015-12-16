@@ -6,15 +6,22 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.function.BiConsumer;
 
-import com.graphics.lib.CanvasObject;
-import com.graphics.lib.OrientableCanvasObject;
-import com.graphics.lib.OrientationTransform;
 import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
+import com.graphics.lib.canvas.CanvasObject;
+import com.graphics.lib.canvas.OrientableCanvasObject;
 import com.graphics.lib.interfaces.IOrientable;
 import com.graphics.lib.interfaces.IOrientation;
+import com.graphics.lib.orientation.OrientationTransform;
 import com.graphics.lib.transform.*;
 
+/**
+ * Abstract camera providing base functionality of a camera, such as setting its position and moving it around.
+ * Extending classes must implement getViewSpecific() to generate what is seen on the screen
+ * 
+ * @author Paul Brandon
+ *
+ */
 public abstract class Camera extends Observable implements IOrientable, Observer {
 	public static final String CAMERA_MOVED = "cameraMoved";
 	private Point position = new Point(0,0,0);
@@ -40,6 +47,12 @@ public abstract class Camera extends Observable implements IOrientable, Observer
 		return tiedTo;
 	}
 
+	/**
+	 * Tie this camera to a canvas object, as that object moves then so will the camera
+	 * 
+	 * @param tiedTo				Canvas Object the camera is tied to
+	 * @param tiedObjectLocator		Anonymous function defining the camera's position in relation to the tied object
+	 */
 	public void setTiedTo(CanvasObject tiedTo, BiConsumer<CanvasObject, Camera> tiedObjectLocator) {
 		this.tiedTo = tiedTo;
 		this.tiedObjectLocator = tiedObjectLocator;
@@ -51,10 +64,20 @@ public abstract class Camera extends Observable implements IOrientable, Observer
 		}
 	}
 
+	/**
+	 * Gets the angle between the forward vector of the camera and a horizontal plane
+	 * 
+	 * @return Angle in degrees
+	 */
 	public double getPitch(){
 		return Math.toDegrees(Math.asin(this.orientation.getForward().y));
 	}
 	
+	/**
+	 * Gets the angle between Vector 0,0,1 and the forward vector in the horizontal plane
+	 * 
+	 * @return Angle in degrees
+	 */
 	public double getBearing(){
 		Vector forward = this.orientation.getForward();
 		double angle = Math.toDegrees(Math.asin(forward.x));
@@ -81,7 +104,7 @@ public abstract class Camera extends Observable implements IOrientable, Observer
 		this.position = position;
 	}
 	
-	public void setViewport(double height, double width)
+	public void setViewport(double width, double height)
 	{
 		this.dispheight = height;
 		this.dispwidth = width;
@@ -97,6 +120,9 @@ public abstract class Camera extends Observable implements IOrientable, Observer
 		this.transforms.remove(key);
 	}
 	
+	/**
+	 * Apply transformations to this camera
+	 */
 	public synchronized void doTransforms()
 	{
 		if (this.tiedObjectUpdated){

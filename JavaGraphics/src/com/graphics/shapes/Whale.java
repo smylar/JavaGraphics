@@ -1,0 +1,171 @@
+package com.graphics.shapes;
+
+import com.graphics.lib.Facet;
+import com.graphics.lib.WorldCoord;
+import com.graphics.lib.canvas.OrientableCanvasObject;
+import com.graphics.lib.orientation.SimpleOrientation;
+
+public class Whale extends OrientableCanvasObject<Whale> {
+	
+	private int multiplier = 1;
+	
+	public Whale(){
+		this.getVertexList().add(new WorldCoord(62, 40, 0));
+		this.getVertexList().add(new WorldCoord(98, 40, 0));
+		
+		this.getVertexList().add(new WorldCoord(50, 0, 90));
+		this.getVertexList().add(new WorldCoord(110, 0, 90));
+		this.getVertexList().add(new WorldCoord(110, 100, 90));
+		this.getVertexList().add(new WorldCoord(50, 100, 90));
+		
+		this.getVertexList().add(new WorldCoord(21,90, 98));
+		this.getVertexList().add(new WorldCoord(2,65, 106));
+		this.getVertexList().add(new WorldCoord(2,35, 106));
+		this.getVertexList().add(new WorldCoord(21,10, 98));
+		
+		this.getVertexList().add(new WorldCoord(139,90, 98));
+		this.getVertexList().add(new WorldCoord(158,65, 106));
+		this.getVertexList().add(new WorldCoord(158,35, 106));
+		this.getVertexList().add(new WorldCoord(139,10, 98));
+		
+		this.getVertexList().add(new WorldCoord(50, 0, 170));
+		this.getVertexList().add(new WorldCoord(110, 0, 170));
+		this.getVertexList().add(new WorldCoord(110, 90, 185));
+		this.getVertexList().add(new WorldCoord(50, 90, 185));
+		
+		this.getVertexList().add(new WorldCoord(21,90, 170));
+		this.getVertexList().add(new WorldCoord(2,65, 170));
+		this.getVertexList().add(new WorldCoord(2,35, 170));
+		this.getVertexList().add(new WorldCoord(21,10, 170));
+		
+		this.getVertexList().add(new WorldCoord(139,90, 170));
+		this.getVertexList().add(new WorldCoord(158,65, 170));
+		this.getVertexList().add(new WorldCoord(158,35, 170));
+		this.getVertexList().add(new WorldCoord(139,10, 170));
+		
+		this.getVertexList().add(new WorldCoord(75, 40, 330));
+		this.getVertexList().add(new WorldCoord(85, 40, 330));
+		
+		this.getVertexList().add(new WorldCoord(150, 40, 350));
+		this.getVertexList().add(new WorldCoord(170, 39, 385));
+		this.getVertexList().add(new WorldCoord(80, 39, 365));
+		this.getVertexList().add(new WorldCoord(-10, 39, 385));
+		this.getVertexList().add(new WorldCoord(10, 40, 350));
+		
+		this.getVertexList().add(new WorldCoord(80, 41, 365));
+		
+		this.getVertexList().add(new WorldCoord(158, 50, 120));
+		this.getVertexList().add(new WorldCoord(158, 50, 170));
+		this.getVertexList().add(new WorldCoord(240, 65, 180));
+		
+		this.getVertexList().add(new WorldCoord(2, 50, 120));
+		this.getVertexList().add(new WorldCoord(2, 50, 170));
+		this.getVertexList().add(new WorldCoord(-80, 65, 180));
+		
+		
+		//snout ----------------------------------------
+		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(1), this.getVertexList().get(3)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(3), this.getVertexList().get(2)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(4), this.getVertexList().get(1)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(5), this.getVertexList().get(4)));
+		
+		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(6), this.getVertexList().get(5)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(7), this.getVertexList().get(6)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(8), this.getVertexList().get(7)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(9), this.getVertexList().get(8)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(2), this.getVertexList().get(9)));
+		
+		this.getFacetList().add(new Facet(this.getVertexList().get(1), this.getVertexList().get(4), this.getVertexList().get(10)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(1), this.getVertexList().get(10), this.getVertexList().get(11)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(1), this.getVertexList().get(11), this.getVertexList().get(12)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(1), this.getVertexList().get(12), this.getVertexList().get(13)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(1), this.getVertexList().get(13), this.getVertexList().get(3)));
+		
+		//body -------------------------------------------
+		
+		this.getFacetList().add(new Facet(this.getVertexList().get(2), this.getVertexList().get(3), this.getVertexList().get(15)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(2), this.getVertexList().get(15), this.getVertexList().get(14)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(3), this.getVertexList().get(13), this.getVertexList().get(25)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(3), this.getVertexList().get(25), this.getVertexList().get(15)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(13), this.getVertexList().get(12), this.getVertexList().get(24)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(13), this.getVertexList().get(24), this.getVertexList().get(25)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(12), this.getVertexList().get(11), this.getVertexList().get(23)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(12), this.getVertexList().get(23), this.getVertexList().get(24)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(11), this.getVertexList().get(10), this.getVertexList().get(22)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(11), this.getVertexList().get(22), this.getVertexList().get(23)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(10), this.getVertexList().get(4), this.getVertexList().get(22)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(4), this.getVertexList().get(16), this.getVertexList().get(22)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(4), this.getVertexList().get(5), this.getVertexList().get(17)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(4), this.getVertexList().get(17), this.getVertexList().get(16)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(5), this.getVertexList().get(6), this.getVertexList().get(18)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(5), this.getVertexList().get(18), this.getVertexList().get(17)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(6), this.getVertexList().get(7), this.getVertexList().get(19)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(6), this.getVertexList().get(19), this.getVertexList().get(18)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(7), this.getVertexList().get(8), this.getVertexList().get(20)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(7), this.getVertexList().get(20), this.getVertexList().get(19)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(8), this.getVertexList().get(9), this.getVertexList().get(21)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(8), this.getVertexList().get(21), this.getVertexList().get(20)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(9), this.getVertexList().get(2), this.getVertexList().get(14)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(9), this.getVertexList().get(14), this.getVertexList().get(21)));
+		
+		//tail ----------------------------------------------
+		this.getFacetList().add(new Facet(this.getVertexList().get(14), this.getVertexList().get(15), this.getVertexList().get(27)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(14), this.getVertexList().get(27), this.getVertexList().get(26)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(15), this.getVertexList().get(25), this.getVertexList().get(27)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(25), this.getVertexList().get(24), this.getVertexList().get(27)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(24), this.getVertexList().get(23), this.getVertexList().get(27)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(23), this.getVertexList().get(22), this.getVertexList().get(27)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(22), this.getVertexList().get(16), this.getVertexList().get(27)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(16), this.getVertexList().get(17), this.getVertexList().get(26)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(16), this.getVertexList().get(26), this.getVertexList().get(27)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(17), this.getVertexList().get(18), this.getVertexList().get(26)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(18), this.getVertexList().get(19), this.getVertexList().get(26)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(19), this.getVertexList().get(20), this.getVertexList().get(26)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(20), this.getVertexList().get(21), this.getVertexList().get(26)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(21), this.getVertexList().get(14), this.getVertexList().get(26)));
+		
+		// tailfin (fluke) -------------------------------------
+		
+			//top
+		this.getFacetList().add(new Facet(this.getVertexList().get(27), this.getVertexList().get(28), this.getVertexList().get(29)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(27), this.getVertexList().get(29), this.getVertexList().get(30)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(32), this.getVertexList().get(26), this.getVertexList().get(30)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(31), this.getVertexList().get(32), this.getVertexList().get(30)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(26), this.getVertexList().get(27), this.getVertexList().get(30)));
+			//bottom
+		this.getFacetList().add(new Facet(this.getVertexList().get(33), this.getVertexList().get(28), this.getVertexList().get(27)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(33), this.getVertexList().get(29), this.getVertexList().get(28)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(26), this.getVertexList().get(33), this.getVertexList().get(27)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(32), this.getVertexList().get(33), this.getVertexList().get(26)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(31), this.getVertexList().get(33), this.getVertexList().get(32)));
+			//infill
+		this.getFacetList().add(new Facet(this.getVertexList().get(30), this.getVertexList().get(33), this.getVertexList().get(31)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(30), this.getVertexList().get(29), this.getVertexList().get(33)));
+		
+		//fins -------------------------------------------------
+		this.getFacetList().add(new Facet(this.getVertexList().get(34), this.getVertexList().get(36), this.getVertexList().get(35)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(34), this.getVertexList().get(35), this.getVertexList().get(36)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(37), this.getVertexList().get(38), this.getVertexList().get(39)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(37), this.getVertexList().get(39), this.getVertexList().get(38)));
+		
+		this.UseAveragedNormals(90);
+		this.setOrientation(new SimpleOrientation(ORIENTATION_TAG));
+		this.getOrientation().getRepresentation().getVertexList().get(0).z = -1;
+	}
+
+	@Override
+	public void onDrawComplete(){
+		///animation effect - TODO only apply when moving?
+		this.toBaseOrientation();
+		double curPosition = this.getVertexList().get(26).y;
+		double maxPosition = this.getVertexList().get(22).y + 20;
+		double minPosition = this.getVertexList().get(25).y + 10;
+		if (curPosition >= maxPosition) multiplier = -1;
+		if (curPosition <= minPosition) multiplier = 1;
+		for (int i = 26 ; i < 34 ; i++){
+			this.getVertexList().get(i).y += (3 * multiplier);
+		}
+		this.reapplyOrientation();
+		super.onDrawComplete();
+	}
+}

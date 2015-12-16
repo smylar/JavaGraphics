@@ -5,7 +5,7 @@ import java.util.List;
 import com.graphics.lib.interfaces.ILightIntensityFinder;
 import com.graphics.lib.interfaces.IVertexNormalFinder;
 import com.graphics.lib.interfaces.IZBuffer;
-import com.graphics.lib.lightsource.LightSource;
+import com.graphics.lib.zbuffer.ZBuffer;
 
 
 public class Utils {
@@ -24,17 +24,17 @@ public class Utils {
 		return new ZBuffer();
 	}
 	
-	public static ILightIntensityFinder getLightIntensityFinder(List<LightSource> ls, LightIntensityFinderEnum type)
+	public static ILightIntensityFinder getLightIntensityFinder(LightIntensityFinderEnum type)
 	{
 		switch(type){
-			case DEFAULT: return getDefaultLightIntensityFinder(ls);
-			default: return getDefaultLightIntensityFinder(ls);
+			case DEFAULT: return getDefaultLightIntensityFinder();
+			default: return getDefaultLightIntensityFinder();
 		}
 	}
 	
-	private static ILightIntensityFinder getDefaultLightIntensityFinder(List<LightSource> ls)
+	private static ILightIntensityFinder getDefaultLightIntensityFinder()
 	{
-		return (obj, p, bf) -> {
+		return (ls, obj, p, v, bf) -> {
 			IntensityComponents maxIntensity = new IntensityComponents();
 			
 			ls.stream().filter(l -> l.isOn()).forEach(l ->
@@ -42,7 +42,7 @@ public class Utils {
 				double percent = 0;
 				Vector lightVector = l.getPosition().vectorToPoint(p).getUnitVector();
 				
-				double answer = p.getNormal().dotProduct(lightVector);
+				double answer = v.dotProduct(lightVector);
 				
 				double deg = Math.toDegrees(Math.acos(answer));
 				if (deg > 90 && !bf)

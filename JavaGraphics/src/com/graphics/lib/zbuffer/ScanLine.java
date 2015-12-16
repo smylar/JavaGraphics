@@ -1,4 +1,6 @@
-package com.graphics.lib;
+package com.graphics.lib.zbuffer;
+
+import com.graphics.lib.LineEquation;
 
 public class ScanLine {
 	public Double startY = null;

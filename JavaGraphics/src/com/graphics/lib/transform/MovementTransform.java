@@ -64,7 +64,7 @@ public class MovementTransform extends Transform {
 
 	@Override
 	public boolean isCompleteSpecific() {
-		return this.velocity <= 0 || (this.until != null && this.until.test(this));
+		return this.until != null && this.until.test(this);
 	}
 	
 	@Override

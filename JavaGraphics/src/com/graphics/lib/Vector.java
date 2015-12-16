@@ -14,6 +14,11 @@ public class Vector {
 		this.z = z;
 	}
 	
+	/**
+	 * A unit vector is one where it's magnitude is exactly 1
+	 * 
+	 * @return Unit Vector
+	 */
 	public Vector getUnitVector()
 	{
 		double squareadd = (x*x)+(y*y)+(z*z);
@@ -25,11 +30,25 @@ public class Vector {
 		return new Vector(this.x/divider, this.y/divider, this.z/divider);
 	}
 	
+	/**
+	 * The dot product of 2 vectors equals the cosine of the angle between them
+	 * 
+	 * @param v2
+	 * @return Cosine of angle between vectors
+	 */
 	public double dotProduct (Vector v2)
 	{
 		return (this.x * v2.x) + (this.y * v2.y) + (this.z * v2.z);
 	}
 	
+	/**
+	 * Generates a vector that is perpendicular to the plane occupied by the 2 vectors it is generated from
+	 * <br/>
+	 * N.B. Ordering is important v1 x v2 will generate a vector opposite to v2 x v1
+	 * 
+	 * @param v2
+	 * @return Perpendicular Vector
+	 */
 	public Vector crossProduct(Vector v2)
 	{
 		Vector normal = new Vector();

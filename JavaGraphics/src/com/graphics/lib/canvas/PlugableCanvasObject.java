@@ -1,4 +1,4 @@
-package com.graphics.lib;
+package com.graphics.lib.canvas;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,12 +7,25 @@ import java.util.Map;
 
 import com.graphics.lib.plugins.IPlugin;
 
-
+/**
+ * Wrapper for a canvas object providing plugin functionality, i.e. Anonymous functions can be registered with the object 
+ * to be triggered at the end of each draw cycle, or in response to other events
+ * 
+ * @author Paul Brandon
+ *
+ * @param <T> Type of the CanvasObject being wrapped
+ */
 public class PlugableCanvasObject<T extends CanvasObject> extends CanvasObject {
 	private T wrappedObject;
 	private Map<String,IPlugin<PlugableCanvasObject<?>,?>> plugins = new HashMap<String,IPlugin<PlugableCanvasObject<?>,?>>();
 	private List<String> afterDrawPlugins = new ArrayList<String>();
 	private List<String> singleAfterDrawPlugins = new ArrayList<String>();
+	
+	
+	public PlugableCanvasObject()
+	{
+		this.setData(getData());
+	}
 	
 	public PlugableCanvasObject(T obj)
 	{
@@ -27,15 +40,10 @@ public class PlugableCanvasObject<T extends CanvasObject> extends CanvasObject {
 	}
 	
 	@Override
-	protected CanvasObject getBaseObject()
-	{
-		return wrappedObject.getBaseObject();
-	}
-	
-	@Override
 	public void onDrawComplete()
 	{
-		wrappedObject.onDrawComplete();
+		if (wrappedObject != null) wrappedObject.onDrawComplete();
+		else super.onDrawComplete();
 		
 		List<String> pluginList = new ArrayList<String>(this.afterDrawPlugins);
 		for (String key : pluginList)

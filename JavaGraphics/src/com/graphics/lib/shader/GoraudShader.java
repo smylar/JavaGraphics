@@ -2,16 +2,22 @@ package com.graphics.lib.shader;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import com.graphics.lib.CanvasObject;
 import com.graphics.lib.Facet;
 import com.graphics.lib.IntensityComponents;
 import com.graphics.lib.LineEquation;
 import com.graphics.lib.Point;
-import com.graphics.lib.ScanLine;
+import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
+import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.lightsource.LightSource;
+import com.graphics.lib.plugins.Events;
+import com.graphics.lib.zbuffer.ScanLine;
 
 public class GoraudShader implements IShader{
 
@@ -20,21 +26,27 @@ public class GoraudShader implements IShader{
 	private ScanLine curScanline;
 	private IntensityComponents startIntensity;
 	private IntensityComponents endIntensity;
-	private List<LightSource> ls = new ArrayList<LightSource>();
+	private double lineLength = 0;
+	private Set<LightSource> ls = new HashSet<LightSource>();
+	private Map<Point, IntensityComponents> pointLight = new HashMap<Point, IntensityComponents>();
 	
 	@Override
 	public void init(CanvasObject parent, Facet facet) {
 		colour = facet.getColour() == null ? parent.getColour() : facet.getColour();
+		if (colour == null) colour = new Color(255,255,255);
+		
+		if (parent.hasFlag(Events.NO_SHADE)) return;
 		
 		List<WorldCoord> points = new ArrayList<WorldCoord>();
 		points.add(facet.point1);
 		points.add(facet.point2);
 		points.add(facet.point3);
-		for (Point p : points)
+		for (WorldCoord p : points)
 		{
-			p.setNormal(parent.getVertexNormalFinder(), facet, parent);
-			p.setLightIntensity(parent.getLightIntensityFinder(ls), !facet.isFrontFace(), parent);
+			Vector n = parent.getVertexNormalFinder().getVertexNormal(parent, p, facet);
+			pointLight.put(p.getTransformed(), parent.getLightIntensityFinder().getLightIntensity(ls, parent, p, n, !facet.isFrontFace()));
 		}
+
 		this.facet = facet;
 		curScanline = null;
 		startIntensity = null;
@@ -42,15 +54,20 @@ public class GoraudShader implements IShader{
 	}
 
 	@Override
-	public Color getColour(ScanLine scanLine, int x, int y, double percentDistCovered) {
-		if (facet == null || scanLine == null) return new Color(255,255,255);
+	public Color getColour(ScanLine scanLine, int x, int y) {
+		if (facet == null || scanLine == null) return colour;
 		
 		if (scanLine != this.curScanline){
 			startIntensity = this.getIntensities(x, scanLine.startY, scanLine.startLine);
 			endIntensity = this.getIntensities(x, scanLine.endY, scanLine.endLine);
 			curScanline = scanLine;
+			lineLength = Math.ceil(scanLine.endY) - Math.floor(scanLine.startY);
 		}
+		
+		if (lineLength == 0) return colour;
 
+		double percentDistCovered = (y - Math.floor(scanLine.startY)) / lineLength;
+		
 		double redIntensity = startIntensity.getRed() + ((endIntensity.getRed() - startIntensity.getRed()) * percentDistCovered);
 		if (redIntensity < facet.getBaseIntensity()) redIntensity = facet.getBaseIntensity();
 		double greenIntensity = startIntensity.getGreen() + ((endIntensity.getGreen() - startIntensity.getGreen()) * percentDistCovered);
@@ -71,8 +88,8 @@ public class GoraudShader implements IShader{
 		double len = Math.sqrt((dx*dx)+(dy*dy));
 		
 		double percentLength = len / line.getLength();
-		IntensityComponents startComponents = line.getStart().getLightIntensity();
-		IntensityComponents endComponents = line.getEnd().getLightIntensity();
+		IntensityComponents startComponents = pointLight.get(line.getStart());
+		IntensityComponents endComponents = pointLight.get(line.getEnd());
 		
 		IntensityComponents pointComponents = new IntensityComponents();
 		
@@ -84,9 +101,14 @@ public class GoraudShader implements IShader{
 	}
 	
 	@Override
-	public void setLightsources(List<LightSource> ls) {
+	public void setLightsources(Set<LightSource> ls) {
 		this.ls = ls;
 		
+	}
+
+	@Override
+	public Set<LightSource> getLightsources() {
+		return ls;
 	}
 
 }

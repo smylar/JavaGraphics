@@ -1,5 +1,11 @@
 package com.graphics.lib;
 
+/**
+ * Representation of a line using the equation y = mx + c
+ * 
+ * @author Paul Brandon
+ *
+ */
 public class LineEquation {
 	private Double x;
 	private Double y;
@@ -7,11 +13,15 @@ public class LineEquation {
 	private Double m;
 	private Point start;
 	private Point end;
+	private Point worldStart;
+	private Point worldEnd;
 	
-	public LineEquation (Point start, Point end)
+	public LineEquation (WorldCoord worldStart, WorldCoord worldEnd)
 	{
-		this.start = start;
-		this.end = end;
+		this.worldEnd = worldEnd;
+		this.worldStart = worldStart;
+		this.start = worldStart.getTransformed();
+		this.end = worldEnd.getTransformed();
 		double dx = end.x - start.x;
 		if (dx == 0){
 			x = start.x;
@@ -77,5 +87,13 @@ public class LineEquation {
 	public Point getEnd() {
 		return end;
 	}
+
+	public Point getWorldStart() {
+		return worldStart;
+	}
+
+	public Point getWorldEnd() {
+		return worldEnd;
+	}	
 	
 }

@@ -3,6 +3,8 @@ package com.graphics.lib;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+import com.graphics.lib.canvas.OrientableCanvasObject;
+import com.graphics.lib.orientation.SimpleOrientation;
 import com.graphics.lib.transform.MovementTransform;
 import com.graphics.lib.transform.RepeatingTransform;
 import com.graphics.lib.transform.Rotation;
@@ -96,7 +98,7 @@ public class ObjectControls implements KeyListener{
 
 		else if (!this.panRightKeyDown && (key.getKeyChar() == 'd' || key.getKeyChar() == 'D'))
 		{
-			Rotation<?> r = new Rotation<YRotation>(YRotation.class, 5)
+			Rotation<?> r = new Rotation<YRotation>(YRotation.class, 4)
 			{
 				@Override
 				public void beforeTransform(){
@@ -117,7 +119,7 @@ public class ObjectControls implements KeyListener{
 		}
 		else if (!this.panLeftKeyDown && (key.getKeyChar() == 'a' || key.getKeyChar() == 'A'))
 		{
-			Rotation<?> r = new Rotation<YRotation>(YRotation.class, -5)
+			Rotation<?> r = new Rotation<YRotation>(YRotation.class, -4)
 			{
 				@Override
 				public void beforeTransform(){
@@ -138,7 +140,7 @@ public class ObjectControls implements KeyListener{
 		}
 		else if (!this.panDownKeyDown && (key.getKeyChar() == 'w' || key.getKeyChar() == 'W'))
 		{
-			Rotation<?> r = new Rotation<XRotation>(XRotation.class, -5)
+			Rotation<?> r = new Rotation<XRotation>(XRotation.class, -4)
 			{
 				@Override
 				public void beforeTransform(){
@@ -159,7 +161,7 @@ public class ObjectControls implements KeyListener{
 		}
 		else if (!this.panUpKeyDown && (key.getKeyChar() == 's' || key.getKeyChar() == 'S'))
 		{
-			Rotation<?> r = new Rotation<XRotation>(XRotation.class, 5)
+			Rotation<?> r = new Rotation<XRotation>(XRotation.class, 4)
 			{
 				@Override
 				public void beforeTransform(){
@@ -180,7 +182,7 @@ public class ObjectControls implements KeyListener{
 		}
 		else if (!this.rollRightKeyDown && (key.getKeyChar() == 'e' || key.getKeyChar() == 'E'))
 		{
-			Rotation<?> r = new Rotation<ZRotation>(ZRotation.class, 5)
+			Rotation<?> r = new Rotation<ZRotation>(ZRotation.class, 4)
 			{
 				@Override
 				public void beforeTransform(){
@@ -201,7 +203,7 @@ public class ObjectControls implements KeyListener{
 		}
 		else if (!this.rollLeftKeyDown && (key.getKeyChar() == 'q' || key.getKeyChar() == 'Q'))
 		{
-			Rotation<?> r = new Rotation<ZRotation>(ZRotation.class, -5)
+			Rotation<?> r = new Rotation<ZRotation>(ZRotation.class, -4)
 			{
 				@Override
 				public void beforeTransform(){
@@ -222,28 +224,28 @@ public class ObjectControls implements KeyListener{
 		}
 		else if (!this.upKeyDown && key.getKeyCode() == 38)
 		{
-			Transform move = new MovementTransform(() -> obj.getOrientation().getUp(), 5);
+			Transform move = new MovementTransform(() -> obj.getOrientation().getUp(), 4);
 			move.setName(UP);
 			this.obj.addTransform(move);
 			this.upKeyDown = true;
 		}
 		else if (!this.rightKeyDown && key.getKeyCode() == 39)
 		{
-			Transform move = new MovementTransform(() -> obj.getOrientation().getRight(), 5);
+			Transform move = new MovementTransform(() -> obj.getOrientation().getRight(), 4);
 			move.setName(RIGHT);
 			this.obj.addTransform(move);
 			this.rightKeyDown = true;
 		}
 		else if (!this.downKeyDown && key.getKeyCode() == 40)
 		{
-			Transform move = new MovementTransform(() -> obj.getOrientation().getDown(), 5);
+			Transform move = new MovementTransform(() -> obj.getOrientation().getDown(), 4);
 			move.setName(DOWN);
 			this.obj.addTransform(move);
 			this.downKeyDown = true;
 		}
 		else if (!this.leftKeyDown && key.getKeyCode() == 37)
 		{
-			Transform move = new MovementTransform(() -> obj.getOrientation().getLeft(), 5);
+			Transform move = new MovementTransform(() -> obj.getOrientation().getLeft(), 4);
 			move.setName(LEFT);
 			this.obj.addTransform(move);
 			this.leftKeyDown = true;

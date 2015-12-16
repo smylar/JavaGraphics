@@ -1,9 +1,9 @@
 package com.graphics.shapes;
 
-import com.graphics.lib.CanvasObject;
 import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
 import com.graphics.lib.WorldCoord;
+import com.graphics.lib.canvas.CanvasObject;
 
 public class Ovoid extends CanvasObject{
 	private double radius = 0;

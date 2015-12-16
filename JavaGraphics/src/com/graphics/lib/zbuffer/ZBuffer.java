@@ -1,17 +1,23 @@
-package com.graphics.lib;
+package com.graphics.lib.zbuffer;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.graphics.lib.Facet;
+import com.graphics.lib.LineEquation;
+import com.graphics.lib.Vector;
+import com.graphics.lib.WorldCoord;
+import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.interfaces.IZBuffer;
 import com.graphics.lib.shader.IShader;
 
 public class ZBuffer implements IZBuffer{
-	private Map<Integer, HashMap<Integer,ZBufferItem>> zBuffer = new HashMap<Integer, HashMap<Integer,ZBufferItem>>();
+	private Map<Integer, HashMap<Integer,ZBufferItem>> zBuffer;
 	private int dispWidth;
 	private int dispHeight;
 
@@ -23,10 +29,11 @@ public class ZBuffer implements IZBuffer{
 	@Override
 	public void Add(Facet facet, CanvasObject parent, IShader shader)
 	{
+		if (zBuffer == null) return;
 		List<LineEquation> lines = new ArrayList<LineEquation>();
-		lines.add(new LineEquation(facet.point1.getTransformed(), facet.point2.getTransformed()));
-		lines.add(new LineEquation(facet.point2.getTransformed(), facet.point3.getTransformed()));
-		lines.add(new LineEquation(facet.point3.getTransformed(), facet.point1.getTransformed()));
+		lines.add(new LineEquation(facet.point1, facet.point2));
+		lines.add(new LineEquation(facet.point2, facet.point3));
+		lines.add(new LineEquation(facet.point3, facet.point1));
 		List<WorldCoord> points = new ArrayList<WorldCoord>();
 		points.add(facet.point1);
 		points.add(facet.point2);
@@ -50,16 +57,25 @@ public class ZBuffer implements IZBuffer{
 		if (minX < 0) minX = 0;
 		if (maxX > this.dispWidth) maxX = this.dispWidth;			
 		
-		if (shader != null) shader.init(parent, facet);
+		IShader localShader = null;
+		if (shader != null){
+			try {
+				localShader = shader.getClass().newInstance();
+				localShader.setLightsources(shader.getLightsources());
+			} catch (Exception e) {
+				//e.printStackTrace();
+			} 
+			localShader.init(parent, facet);
+		}
 		
 		for (int x = (int)Math.floor(minX) ; x <= Math.ceil(maxX) ; x++)
 		{
 			ScanLine scanLine = this.getScanline(x, lines);
 			if (scanLine == null) continue;
 			
-			double scanLineLength = Math.ceil(scanLine.endY) - Math.floor(scanLine.startY);
+			double scanLineLength = Math.floor(scanLine.endY) - Math.floor(scanLine.startY);
 			double percentDistCovered = 0;
-			for (int y = (int)Math.floor(scanLine.startY < 0 ? 0 : scanLine.startY) ; y < Math.ceil(scanLine.endY > this.dispHeight ? this.dispHeight : scanLine.endY) ; y++)
+			for (int y = (int)Math.floor(scanLine.startY < 0 ? 0 : scanLine.startY) ; y < Math.floor(scanLine.endY > this.dispHeight ? this.dispHeight : scanLine.endY ) ; y++)
 			{
 				if (scanLineLength != 0)
 				{
@@ -68,7 +84,7 @@ public class ZBuffer implements IZBuffer{
 				
 				double z = scanLine.startZ + ((scanLine.endZ - scanLine.startZ) * percentDistCovered);
 				
-				Color colour = shader == null ? (facet.getColour() == null ? parent.getColour() : facet.getColour()) : shader.getColour(scanLine, x, y, percentDistCovered);
+				Color colour = localShader == null ? (facet.getColour() == null ? parent.getColour() : facet.getColour()) : localShader.getColour(scanLine, x, y);
 
 				this.addToBuffer(x, y, z, colour);
 			}
@@ -80,24 +96,15 @@ public class ZBuffer implements IZBuffer{
 		return zBuffer;
 	}
 
-	@Override
-	public void setDispWidth(int dispWidth) {
-		this.dispWidth = dispWidth;
-	}
-
-	@Override
-	public void setDispHeight(int dispHeight) {
-		this.dispHeight = dispHeight;
-	}
-
-	private synchronized void addToBuffer(Integer x, Integer y, double z, Color colour)
+	private void addToBuffer(Integer x, Integer y, double z, Color colour)
+	//private synchronized void addToBuffer(Integer x, Integer y, double z, Color colour)
 	{	
 		if (z < 0) return;
 		
-		if (!this.zBuffer.containsKey(x))
+		/*if (!this.zBuffer.containsKey(x))
 		{
 			this.zBuffer.put(x, new HashMap<Integer, ZBufferItem>());
-		}
+		}*/
 		
 		ZBufferItem bufferItem = this.zBuffer.get(x).get(y);
 		
@@ -106,7 +113,7 @@ public class ZBuffer implements IZBuffer{
 			this.zBuffer.get(x).put(y, bufferItem);
 		}
 		
-		bufferItem.add((int)Math.round(z), colour);	
+		bufferItem.add(z, colour);
 	}
 		
 
@@ -183,5 +190,27 @@ public class ZBuffer implements IZBuffer{
 		double endZ = line.getEnd().z;
 		
 		return startZ + ((endZ - startZ) * percentLength);
+	}
+
+
+	@Override
+	public void setDimensions(Dimension dimension) {
+		//setting up all zbuffer item objects does slow it down, a bit but should mean it doesn't slowly slow down as items are added, performance should stay constant
+		//except for the actual drawing of pixels
+		//Also means we don't have the possibility of 2 threads trying to add the same item
+		if (this.dispHeight != dimension.height || this.dispWidth != dimension.width)
+		{
+			this.dispHeight = dimension.height;
+			this.dispWidth = dimension.width;
+			zBuffer = new HashMap<Integer, HashMap<Integer,ZBufferItem>>();
+			
+			for (int x = 0 ; x < dimension.width + 1 ; x++){
+				HashMap<Integer,ZBufferItem> map = new HashMap<Integer,ZBufferItem>();
+				zBuffer.put(x, map);
+				for (int y = 0 ; y < dimension.height + 1 ; y++){
+					map.put(y, new ZBufferItem(x, y));
+				}
+			}
+		}
 	}
 }

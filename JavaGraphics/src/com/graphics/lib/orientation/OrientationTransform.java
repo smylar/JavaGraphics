@@ -1,5 +1,8 @@
-package com.graphics.lib;
+package com.graphics.lib.orientation;
 
+import com.graphics.lib.Vector;
+import com.graphics.lib.WorldCoord;
+import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.interfaces.IOrientation;
 import com.graphics.lib.transform.Rotation;
 import com.graphics.lib.transform.XRotation;

@@ -1,19 +1,25 @@
-package com.graphics.lib;
+package com.graphics.lib.canvas;
 
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collector;
 
+import com.graphics.lib.Facet;
+import com.graphics.lib.Point;
+import com.graphics.lib.Utils;
+import com.graphics.lib.Vector;
+import com.graphics.lib.WorldCoord;
 import com.graphics.lib.interfaces.ILightIntensityFinder;
 import com.graphics.lib.interfaces.IPointFinder;
 import com.graphics.lib.interfaces.IVertexNormalFinder;
-import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.transform.Transform;
 import com.graphics.lib.transform.Translation;
 
@@ -40,6 +46,7 @@ public class CanvasObject extends Observable implements Observer{
 	
 	private BaseData data;
 	private int objectId = nextId++;
+	private Set<String> flags = new HashSet<String>();
 	
 	/**
 	 * Get this object as the given class as long as that class is found in the wrapped object hierarchy
@@ -49,11 +56,11 @@ public class CanvasObject extends Observable implements Observer{
 	 */
 	public <C extends CanvasObject> C getObjectAs(Class<C> cl)
 	{		
-		if (this.getClass().isAssignableFrom(cl)){
+		if (cl.isAssignableFrom(this.getClass())){
 			return cl.cast(this);
 		}else{
 			CanvasObject wrapped = getWrappedObject();
-			if (wrapped == this) return null;
+			if (wrapped == null) return null;
 			return wrapped.getObjectAs(cl);
 		}
 	}
@@ -67,19 +74,17 @@ public class CanvasObject extends Observable implements Observer{
 	 */
 	protected CanvasObject getWrappedObject()
 	{
-		return this;
+		return null;
 	}
 	
 	/**
 	 * Get the wrapped object at the root of the hierarchy, or this object if it isn't wrapped
-	 * <br/>
-	 * Wrapper objects must override this method so as not to return itself
 	 * 
 	 * @return The root canvas object wrapped by this wrapper
 	 */
 	protected CanvasObject getBaseObject()
 	{
-		return this;
+		return getWrappedObject() == null ? this : getWrappedObject().getBaseObject();
 	}
 	
 	/**
@@ -91,7 +96,7 @@ public class CanvasObject extends Observable implements Observer{
 	 * 
 	 * @return The data for the root canvas object
 	 */
-	protected BaseData getData()
+	protected final BaseData getData()
 	{
 		if (data == null)
 			data = new BaseData();
@@ -103,74 +108,88 @@ public class CanvasObject extends Observable implements Observer{
 	 * 
 	 * @param data - BaseData object containing the data for this object
 	 */
-	protected void setData(BaseData data)
+	protected final void setData(BaseData data)
 	{
 		this.data = data;
 	}
 	
-	public List<CanvasObject> getChildren() {
-		getData().children.removeIf(c -> c.isDeleted());
+	public final void addFlag(String flag)
+	{
+		this.flags.add(flag);
+	}
+	
+	public final void removeFlag(String flag)
+	{
+		this.flags.remove(flag);
+	}
+	
+	public final boolean hasFlag(String flag)
+	{
+		return this.flags.contains(flag);
+	}
+	
+	public final List<CanvasObject> getChildren() {
 		return getData().children;
 	}
 
-	public boolean isVisible() {
+	public final boolean isVisible() {
 		return getData().isVisible;
 	}
 
-	public void setVisible(boolean isVisible) {
+	public final void setVisible(boolean isVisible) {
 		this.setChanged();
 		this.notifyObservers();
 		getData().isVisible = isVisible;
 	}
 
-	public boolean isDeleted() {
+	public final boolean isDeleted() {
 		return getData().isDeleted;
 	}
 
-	public void setDeleted(boolean isDeleted) {
+	public final void setDeleted(boolean isDeleted) {
 		getData().isDeleted = isDeleted;
 		this.setChanged();
 		this.notifyObservers();
 	}
 
-	public Color getColour() {
+	public final Color getColour() {
 		return getData().colour;
 	}
 
-	public void setColour(Color colour) {
+	public final void setColour(Color colour) {
 		getData().colour = colour;
 	}
 	
-	public List<WorldCoord> getVertexList() {
+	public final List<WorldCoord> getVertexList() {
 		return getData().vertexList;
 	}
 
-	public void setVertexList(List<WorldCoord> vertexList) {
+	public final void setVertexList(List<WorldCoord> vertexList) {
 		getData().vertexList = vertexList;
 	}
 
-	public List<Facet> getFacetList() {
+	public final List<Facet> getFacetList() {
 		return getData().facetList;
 	}
 
-	public void setFacetList(List<Facet> facetList) {
+	public final void setFacetList(List<Facet> facetList) {
 		getData().facetList = facetList;
 	}
 	
-	public boolean isProcessBackfaces() {
+	public final boolean isProcessBackfaces() {
 		return getData().processBackfaces;
 	}
 
-	public void setProcessBackfaces(boolean processBackfaces) {
+	public final void setProcessBackfaces(boolean processBackfaces) {
 		getData().processBackfaces = processBackfaces;
 	}
 
-	public synchronized void cancelTransforms()
+	public final void cancelTransforms()
 	{
 		getData().transforms.forEach(t -> t.cancel());
 	}
 	
-	public Map<Point, ArrayList<Facet>> getVertexFacetMap() {
+	public final Map<Point, ArrayList<Facet>> getVertexFacetMap() {
 		return getData().vertexFacetMap;
 	}
 
@@ -182,7 +201,7 @@ public class CanvasObject extends Observable implements Observer{
 	 * @param type - Class type of the transforms to retrieve
 	 * @return List of transforms found
 	 */
-	public <T> List<T> getTransformsOfType(Class<T> type)
+	public final <T> List<T> getTransformsOfType(Class<T> type)
 	{
 
 		List<T> mTrans = getData().transforms.stream().filter(t -> t.getClass() == type).collect(Collector.of(
@@ -195,9 +214,10 @@ public class CanvasObject extends Observable implements Observer{
 		return mTrans;
 	}
 	
-	public synchronized void addTransform(Transform transform)
+	public final void addTransform(Transform transform)
 	{
-		getData().transforms.add(transform);
+		//getData().transforms.add(transform);
+		getData().transformsToAdd.add(transform);
 	}
 	
 	/**
@@ -205,7 +225,7 @@ public class CanvasObject extends Observable implements Observer{
 	 * 
 	 * @param transform
 	 */
-	public void applyCameraTransform(Transform transform)
+	public final void applyCameraTransform(Transform transform)
 	{
 		transform.doTransform(getData().vertexList.stream().collect(Collector.of(
 				ArrayList::new,
@@ -216,7 +236,7 @@ public class CanvasObject extends Observable implements Observer{
 		);
 	}
 	
-	public boolean hasTransforms()
+	public final boolean hasTransforms()
 	{
 		return getData().transforms.size() > 0;
 	}
@@ -227,7 +247,7 @@ public class CanvasObject extends Observable implements Observer{
 	 * @param key - Name of the transform
 	 * @return The transform found or null
 	 */
-	public Transform getTransform(String key) {
+	public final Transform getTransform(String key) {
 		Optional<Transform> tr = getData().transforms.stream().filter(t -> t.getName() == key).findFirst();
 		if (tr.isPresent()) return tr.get();
 		return null;
@@ -240,9 +260,10 @@ public class CanvasObject extends Observable implements Observer{
 	 * 
 	 * @param t - Transform to apply
 	 */
-	public synchronized void applyTransform(Transform t)
+	public final void applyTransform(Transform t)
 	{
-		//can be called directly for singular ad-hoc adjustments, without adding to the transform list
+		//can be called directly for singular ad-hoc adjustments, without adding to the transform list, 
+		//this should generally only be done on objects that haven't been registered to a canvas yet
 		t.doTransform(getData().vertexList);
 		this.setChanged();
 		this.notifyObservers(t);
@@ -254,9 +275,15 @@ public class CanvasObject extends Observable implements Observer{
 	 * Any transform that is complete will be removed from the list at this point
 	 * 
 	 */
-	public synchronized void applyTransforms()
+	public final void applyTransforms()
 	{
 		if (getData().vertexList == null || getData().vertexList.size() == 0 || getData().isDeleted) return;
+		
+		if (getData().transformsToAdd.size() > 0){
+			getData().transforms.addAll(getData().transformsToAdd);
+			getData().transformsToAdd.clear();
+		}
+		
 		getData().transforms.stream().filter(t -> !t.isCancelled()).forEach(t ->
 		{
 			applyTransform(t);
@@ -398,12 +425,13 @@ public class CanvasObject extends Observable implements Observer{
 	 * This method will be executed once all draw operations (across all objects) are complete
 	 */
 	public void onDrawComplete(){
+		getData().children.removeIf(c -> c.isDeleted());
 		if (this.getBaseObject() != this) this.getBaseObject().onDrawComplete();
 	}
 	
-	public ILightIntensityFinder getLightIntensityFinder(List<LightSource> ls)
+	public ILightIntensityFinder getLightIntensityFinder()
 	{
-		return Utils.getLightIntensityFinder(ls, getData().liFinder);
+		return Utils.getLightIntensityFinder(getData().liFinder);
 	}
 	
 	/**
@@ -514,6 +542,7 @@ public class CanvasObject extends Observable implements Observer{
 		protected List<Facet> facetList = new ArrayList<Facet>();
 		protected Color colour = new Color(255, 0, 0);
 		protected List<Transform> transforms = new ArrayList<Transform>();
+		protected List<Transform> transformsToAdd = new ArrayList<Transform>();
 		protected List<CanvasObject> children = new ArrayList<CanvasObject>();
 		protected Map<Point, ArrayList<Facet>> vertexFacetMap;
 		protected boolean processBackfaces = false;
@@ -522,6 +551,7 @@ public class CanvasObject extends Observable implements Observer{
 		//TODO - is solid or phased when invisible?
 		protected boolean deleteAfterTransforms = false;
 		public Utils.LightIntensityFinderEnum liFinder = Utils.LightIntensityFinderEnum.DEFAULT;
-		public Utils.VertexNormalFinderEnum vnFinder = Utils.VertexNormalFinderEnum.DEFAULT; //TODO this class as POJO
+		public Utils.VertexNormalFinderEnum vnFinder = Utils.VertexNormalFinderEnum.DEFAULT; 
+		//TODO this class as POJO
 	}
 }
