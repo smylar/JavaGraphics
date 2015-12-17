@@ -84,7 +84,7 @@ public class ZBuffer implements IZBuffer{
 				
 				double z = scanLine.startZ + ((scanLine.endZ - scanLine.startZ) * percentDistCovered);
 				
-				Color colour = localShader == null ? (facet.getColour() == null ? parent.getColour() : facet.getColour()) : localShader.getColour(scanLine, x, y);
+				Color colour = localShader == null ? (facet.getColour() == null ? parent.getColour() : facet.getColour()) : localShader.getColour(scanLine, x, y,z);
 
 				this.addToBuffer(x, y, z, colour);
 			}
@@ -108,10 +108,10 @@ public class ZBuffer implements IZBuffer{
 		
 		ZBufferItem bufferItem = this.zBuffer.get(x).get(y);
 		
-		if (bufferItem == null){
+		/*if (bufferItem == null){
 			bufferItem = new ZBufferItem(x, y);
 			this.zBuffer.get(x).put(y, bufferItem);
-		}
+		}*/
 		
 		bufferItem.add(z, colour);
 	}

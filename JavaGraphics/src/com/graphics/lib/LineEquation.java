@@ -13,8 +13,8 @@ public class LineEquation {
 	private Double m;
 	private Point start;
 	private Point end;
-	private Point worldStart;
-	private Point worldEnd;
+	private WorldCoord worldStart;
+	private WorldCoord worldEnd;
 	
 	public LineEquation (WorldCoord worldStart, WorldCoord worldEnd)
 	{
@@ -88,11 +88,11 @@ public class LineEquation {
 		return end;
 	}
 
-	public Point getWorldStart() {
+	public WorldCoord getWorldStart() {
 		return worldStart;
 	}
 
-	public Point getWorldEnd() {
+	public WorldCoord getWorldEnd() {
 		return worldEnd;
 	}	
 	

@@ -26,6 +26,8 @@ public class GoraudShader implements IShader{
 	private ScanLine curScanline;
 	private IntensityComponents startIntensity;
 	private IntensityComponents endIntensity;
+	private Point startTexture;
+	private Point endTexture;
 	private double lineLength = 0;
 	private Set<LightSource> ls = new HashSet<LightSource>();
 	private Map<Point, IntensityComponents> pointLight = new HashMap<Point, IntensityComponents>();
@@ -51,15 +53,21 @@ public class GoraudShader implements IShader{
 		curScanline = null;
 		startIntensity = null;
 		endIntensity = null;
+		startTexture = null;
+		endTexture = null;
 	}
 
 	@Override
-	public Color getColour(ScanLine scanLine, int x, int y) {
+	public Color getColour(ScanLine scanLine, int x, int y, double z) {
 		if (facet == null || scanLine == null) return colour;
 		
 		if (scanLine != this.curScanline){
 			startIntensity = this.getIntensities(x, scanLine.startY, scanLine.startLine);
 			endIntensity = this.getIntensities(x, scanLine.endY, scanLine.endLine);
+			if (facet.getTexture() != null){
+				startTexture = this.getTexturePosition(x, scanLine.startY, scanLine.startLine, z);
+				endTexture = this.getTexturePosition(x, scanLine.endY, scanLine.endLine, z);
+			}
 			curScanline = scanLine;
 			lineLength = Math.ceil(scanLine.endY) - Math.floor(scanLine.startY);
 		}
@@ -67,6 +75,14 @@ public class GoraudShader implements IShader{
 		if (lineLength == 0) return colour;
 
 		double percentDistCovered = (y - Math.floor(scanLine.startY)) / lineLength;
+		
+		if (facet.getTexture() != null){
+	
+			int tx = (int)Math.round(startTexture.x + ((endTexture.x - startTexture.x) * percentDistCovered));
+			int ty = (int)Math.round(startTexture.y + ((endTexture.y - startTexture.y) * percentDistCovered));
+			Color c = facet.getTexture().getColour(tx, ty);
+			if (c != null) return c;
+		}
 		
 		double redIntensity = startIntensity.getRed() + ((endIntensity.getRed() - startIntensity.getRed()) * percentDistCovered);
 		if (redIntensity < facet.getBaseIntensity()) redIntensity = facet.getBaseIntensity();
@@ -98,6 +114,20 @@ public class GoraudShader implements IShader{
 		pointComponents.setBlue(startComponents.getBlue() + ((endComponents.getBlue() - startComponents.getBlue()) * percentLength));
 		
 		return pointComponents;
+	}
+	
+	private Point getTexturePosition(double xVal, double yVal, LineEquation line, double z)
+	{
+		double dx = xVal - line.getStart().x;
+		double dy = yVal - line.getStart().y;
+		double len = Math.sqrt((dx*dx)+(dy*dy));
+		
+		double percentLength = len / line.getLength();
+		
+		double x = line.getWorldStart().getTextureX() + ((line.getWorldEnd().getTextureX() - line.getWorldStart().getTextureX() ) * percentLength);
+		double y = line.getWorldStart().getTextureY() + ((line.getWorldEnd().getTextureY() - line.getWorldStart().getTextureY() ) * percentLength);
+	
+		return new Point (x, y, 0);
 	}
 	
 	@Override

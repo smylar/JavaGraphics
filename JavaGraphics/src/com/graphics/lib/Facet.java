@@ -2,6 +2,8 @@ package com.graphics.lib;
 
 import java.awt.Color;
 
+import com.graphics.lib.texture.Texture;
+
 public class Facet {
 	public WorldCoord point1;
 	public WorldCoord point2;
@@ -9,6 +11,7 @@ public class Facet {
 	private Color colour;
 	private double baseIntensity = 0.15;
 	private boolean isFrontFace = true;
+	private Texture texture;
 	
 	public Facet(WorldCoord p1, WorldCoord p2, WorldCoord p3)
 	{
@@ -41,6 +44,14 @@ public class Facet {
 
 	public void setFrontFace(boolean isFrontFace) {
 		this.isFrontFace = isFrontFace;
+	}
+
+	public Texture getTexture() {
+		return texture;
+	}
+
+	public void setTexture(Texture texture) {
+		this.texture = texture;
 	}
 
 	public Vector getTransformedNormal()

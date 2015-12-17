@@ -1,6 +1,5 @@
 package com.graphics.shapes;
 
-
 import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
 import com.graphics.lib.WorldCoord;

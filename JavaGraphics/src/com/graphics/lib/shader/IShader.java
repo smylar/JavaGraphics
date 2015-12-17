@@ -26,7 +26,7 @@ public interface IShader {
 	 * @param y		Y coordinate of the pixel
 	 * @return		The colour of the pixel
 	 */
-	public Color getColour (ScanLine sl, int x, int y);
+	public Color getColour (ScanLine sl, int x, int y, double z);
 	
 	/**
 	 * Shaders will usually need to be aware of light sources, this method will set them

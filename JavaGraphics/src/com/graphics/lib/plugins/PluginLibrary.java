@@ -162,8 +162,13 @@ public class PluginLibrary {
 	public static IPlugin<PlugableCanvasObject<?>, Void> bounce(PlugableCanvasObject<?> impactee)
 	{
 		return (obj) -> {
-			Optional<WorldCoord> impactPoint = obj.getVertexList().stream().filter(p -> impactee.isPointInside(p)).findAny();
-			if (!impactPoint.isPresent()) return null;
+			//find impacted points and use the one that was nearest the impactee before hitting it, then find the facet it hit and reflect
+			//the movement vector using the normal of that facet.
+			//It's not entirely perfect, because we don't have infinite normals, you can see this if you hit a sphere dead on with another sphere,
+			//it won't come straight back as it would in reality, as we don't necessarily have a normal that is pointing straight back to use
+			
+			Set<WorldCoord> impactPoints = obj.getVertexList().stream().filter(p -> impactee.isPointInside(p)).collect(Collectors.toSet());
+			if (impactPoints.size() == 0) return null;
 			
 			List<MovementTransform> mTrans = obj.getTransformsOfType(MovementTransform.class);
 			if (mTrans.size() == 0) return null;
@@ -171,25 +176,28 @@ public class PluginLibrary {
 			Vector move = mTrans.get(0).getVector(); //just getting the first one for now (if there is more than one) 
 
 			double velocity = mTrans.get(0).getVelocity(); 
-			Point prevPoint = new Point(impactPoint.get().x - (move.x * velocity), impactPoint.get().y - (move.y * velocity), impactPoint.get().z - (move.z * velocity));
+			
 			Facet curFacet = null;
 			double curDist = -1;
-			for(Facet f : impactee.getFacetList().stream().filter(f -> f.getDistanceFromFacetPlane(impactPoint.get()) < velocity + 1).collect(Collectors.toList()))
-			{
-				Point intersect = f.getIntersectionPointWithFacetPlane(prevPoint, move);
+			
+			for(WorldCoord impactPoint : impactPoints){
+				Point prevPoint = new Point(impactPoint.x - (move.x * velocity), impactPoint.y - (move.y * velocity), impactPoint.z - (move.z * velocity));
 
-				//if intersected with plane of facet check we are within the bounds of the facet
-				if (intersect != null && (prevPoint.distanceTo(intersect) < curDist || curDist == -1 ) && f.isPointWithin(intersect)){
-					curFacet = f;
-					curDist = prevPoint.distanceTo(intersect);
+				for(Facet f : impactee.getFacetList().stream().filter(f -> f.getDistanceFromFacetPlane(impactPoint) < velocity + 1).collect(Collectors.toList()))
+				{
+					Point intersect = f.getIntersectionPointWithFacetPlane(prevPoint, move);
+	
+					//if intersected with plane of facet check we are within the bounds of the facet
+					if (intersect != null && (prevPoint.distanceTo(intersect) < curDist || curDist == -1 ) && f.isPointWithin(intersect)){
+						curFacet = f;
+						curDist = prevPoint.distanceTo(intersect);
+					}
 				}
 			}
-			
 			if (curFacet == null) return null;
 			Vector impactedNormal = curFacet.getNormal();
 			
 			//I know r=d-2(d.n)n is reflection vector in 2 dimension (hopefully it'll work on 3)
-
 			double multiplier = move.dotProduct(impactedNormal) * -2;
 			move.x += (impactedNormal.x * multiplier);
 			move.y += (impactedNormal.y * multiplier);

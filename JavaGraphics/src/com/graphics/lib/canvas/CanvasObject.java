@@ -184,7 +184,7 @@ public class CanvasObject extends Observable implements Observer{
 		getData().processBackfaces = processBackfaces;
 	}
 
-	public final void cancelTransforms()
+	public final synchronized void cancelTransforms()
 	{
 		getData().transforms.forEach(t -> t.cancel());
 	}
@@ -214,10 +214,9 @@ public class CanvasObject extends Observable implements Observer{
 		return mTrans;
 	}
 	
-	public final void addTransform(Transform transform)
+	public final synchronized void addTransform(Transform transform)
 	{
-		//getData().transforms.add(transform);
-		getData().transformsToAdd.add(transform);
+		getData().transforms.add(transform);
 	}
 	
 	/**
@@ -260,7 +259,7 @@ public class CanvasObject extends Observable implements Observer{
 	 * 
 	 * @param t - Transform to apply
 	 */
-	public final void applyTransform(Transform t)
+	public final synchronized void applyTransform(Transform t)
 	{
 		//can be called directly for singular ad-hoc adjustments, without adding to the transform list, 
 		//this should generally only be done on objects that haven't been registered to a canvas yet
@@ -275,14 +274,9 @@ public class CanvasObject extends Observable implements Observer{
 	 * Any transform that is complete will be removed from the list at this point
 	 * 
 	 */
-	public final void applyTransforms()
+	public final synchronized void applyTransforms()
 	{
 		if (getData().vertexList == null || getData().vertexList.size() == 0 || getData().isDeleted) return;
-		
-		if (getData().transformsToAdd.size() > 0){
-			getData().transforms.addAll(getData().transformsToAdd);
-			getData().transformsToAdd.clear();
-		}
 		
 		getData().transforms.stream().filter(t -> !t.isCancelled()).forEach(t ->
 		{
@@ -542,7 +536,6 @@ public class CanvasObject extends Observable implements Observer{
 		protected List<Facet> facetList = new ArrayList<Facet>();
 		protected Color colour = new Color(255, 0, 0);
 		protected List<Transform> transforms = new ArrayList<Transform>();
-		protected List<Transform> transformsToAdd = new ArrayList<Transform>();
 		protected List<CanvasObject> children = new ArrayList<CanvasObject>();
 		protected Map<Point, ArrayList<Facet>> vertexFacetMap;
 		protected boolean processBackfaces = false;

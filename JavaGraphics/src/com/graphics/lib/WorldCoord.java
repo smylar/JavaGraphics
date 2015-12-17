@@ -3,6 +3,12 @@ package com.graphics.lib;
 public class WorldCoord extends Point {
 
 	private Point transformed;
+	private double textureX = 0;
+	private double textureY = 0;
+	
+	public WorldCoord() {
+		this(0,0,0);
+	}
 	
 	public WorldCoord(Point p) {
 		this(p.x, p.y, p.z);
@@ -21,6 +27,23 @@ public class WorldCoord extends Point {
 		transformed = new Point (x, y, z);
 		//transformed.setLightIntensity(this.getLightIntensity());
 	}
+
+	public double getTextureX() {
+		return textureX;
+	}
+
+	public void setTextureX(double textureX) {
+		this.textureX = textureX;
+	}
+
+	public double  getTextureY() {
+		return textureY;
+	}
+
+	public void setTextureY(double textureY) {
+		this.textureY = textureY;
+	}
+	
 	
 	/*@Override
 	public void setLightIntensity(IntensityComponents lightIntensity) {

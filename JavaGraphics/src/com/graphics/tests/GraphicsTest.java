@@ -16,6 +16,7 @@ import com.graphics.lib.ObjectControls;
 import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
 import com.graphics.shapes.Cuboid;
+import com.graphics.shapes.Lantern;
 import com.graphics.shapes.Ovoid;
 import com.graphics.shapes.Sphere;
 import com.graphics.shapes.Whale;
@@ -26,24 +27,13 @@ import com.graphics.lib.canvas.OrientableCanvasObject;
 import com.graphics.lib.canvas.PlugableCanvasObject;
 import com.graphics.lib.canvas.SlaveCanvas3D;
 import com.graphics.lib.lightsource.CameraTiedLightSource;
-import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.lightsource.ObjectTiedLightSource;
 import com.graphics.lib.orientation.SimpleOrientation;
 import com.graphics.lib.plugins.Events;
 import com.graphics.lib.plugins.IPlugin;
 import com.graphics.lib.plugins.PluginLibrary;
 import com.graphics.lib.shader.ShaderFactory;
-import com.graphics.lib.transform.MovementTransform;
-import com.graphics.lib.transform.PanCamera;
-import com.graphics.lib.transform.RepeatingTransform;
-import com.graphics.lib.transform.Rotation;
-import com.graphics.lib.transform.ScaleTransform;
-import com.graphics.lib.transform.SequenceTransform;
-import com.graphics.lib.transform.Transform;
-import com.graphics.lib.transform.Translation;
-import com.graphics.lib.transform.XRotation;
-import com.graphics.lib.transform.YRotation;
-import com.graphics.lib.transform.ZRotation;
+import com.graphics.lib.transform.*;
 import com.graphics.shapes.Torus;
 
 public class GraphicsTest extends JFrame {
@@ -82,15 +72,30 @@ public class GraphicsTest extends JFrame {
 		
 		cnv.addDrawOperation(Utils.showMarkers());
 		
-		LightSource l1 = new LightSource(0,0,-500);
+		ObjectTiedLightSource l1 = new ObjectTiedLightSource(0,0,-500);
 		l1.setColour(new Color(255, 0, 0));
 		cnv.addLightSource(l1);
-		LightSource l2 = new LightSource(600,500,-100);
+		CanvasObject lantern1 = new Lantern();
+		lantern1.setColour(l1.getColour());
+		cnv.registerObject(lantern1, new Point(0,0,-500), false, ShaderFactory.GetShader(ShaderFactory.ShaderEnum.NONE));
+		l1.tieTo(lantern1);
+		
+		ObjectTiedLightSource l2 = new ObjectTiedLightSource(600,500,-100);
 		l2.setColour(new Color(0, 255, 0));
 		cnv.addLightSource(l2);
-		LightSource l3 = new LightSource(400,100,100);
+		CanvasObject lantern2 = new Lantern();
+		lantern2.setColour(l2.getColour());
+		cnv.registerObject(lantern2, new Point(600,500,-100), false, ShaderFactory.GetShader(ShaderFactory.ShaderEnum.NONE));
+		l2.tieTo(lantern2);
+		
+		
+		ObjectTiedLightSource l3 = new ObjectTiedLightSource(400,100,100);
 		l3.setColour(new Color(0, 0, 255));
 		cnv.addLightSource(l3);
+		CanvasObject lantern3 = new Lantern();
+		lantern3.setColour(l3.getColour());
+		cnv.registerObject(lantern3, new Point(400,100,100), false, ShaderFactory.GetShader(ShaderFactory.ShaderEnum.NONE));
+		l3.tieTo(lantern3);
 		
 
 		this.add(cnv, BorderLayout.CENTER);
@@ -135,7 +140,7 @@ public class GraphicsTest extends JFrame {
 		torus.addFlag(Events.EXPLODE_PERSIST);
 		
 		
-		PlugableCanvasObject<Cuboid> cube = new PlugableCanvasObject<Cuboid>(new Cuboid(200,200,200));
+		PlugableCanvasObject<TexturedCuboid> cube = new PlugableCanvasObject<TexturedCuboid>(new TexturedCuboid(200,200,200));
 		cnv.registerObject(cube, new Point(500,500,450), false, ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
 		Transform cubet2 = new RepeatingTransform<Rotation<?>>(new Rotation<ZRotation>(ZRotation.class, 3), 30);
 		cube.addTransformAboutCentre(cubet2);
@@ -359,7 +364,7 @@ public class GraphicsTest extends JFrame {
 			
 			sleep = 50 - (new Date().getTime() - cycleStart);
 		}
-		
+		System.gc();
 		System.exit(0);
 	}
 	
