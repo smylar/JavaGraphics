@@ -65,8 +65,8 @@ public class GoraudShader implements IShader{
 			startIntensity = this.getIntensities(x, scanLine.startY, scanLine.startLine);
 			endIntensity = this.getIntensities(x, scanLine.endY, scanLine.endLine);
 			if (facet.getTexture() != null){
-				startTexture = this.getTexturePosition(x, scanLine.startY, scanLine.startLine, z);
-				endTexture = this.getTexturePosition(x, scanLine.endY, scanLine.endLine, z);
+				startTexture = this.getTexturePosition(x, scanLine.startY, scanLine.startLine);
+				endTexture = this.getTexturePosition(x, scanLine.endY, scanLine.endLine);
 			}
 			curScanline = scanLine;
 			lineLength = Math.ceil(scanLine.endY) - Math.floor(scanLine.startY);
@@ -77,10 +77,16 @@ public class GoraudShader implements IShader{
 		double percentDistCovered = (y - Math.floor(scanLine.startY)) / lineLength;
 		
 		if (facet.getTexture() != null){
-	
-			int tx = (int)Math.round(startTexture.x + ((endTexture.x - startTexture.x) * percentDistCovered));
-			int ty = (int)Math.round(startTexture.y + ((endTexture.y - startTexture.y) * percentDistCovered));
+			
+			double ux = (1 - percentDistCovered) * (startTexture.x/startTexture.z) + (percentDistCovered * (endTexture.x/endTexture.z));
+			double uy = (1 - percentDistCovered) * (startTexture.y/startTexture.z) + (percentDistCovered * (endTexture.y/endTexture.z));
+			double r = (1 - percentDistCovered) * (1/startTexture.z) + (percentDistCovered * (1/endTexture.z));
+			
+			int tx = (int)Math.round(ux/r);
+			int ty = (int)Math.round(uy/r);
+			
 			Color c = facet.getTexture().getColour(tx, ty);
+
 			if (c != null) return c;
 		}
 		
@@ -116,7 +122,7 @@ public class GoraudShader implements IShader{
 		return pointComponents;
 	}
 	
-	private Point getTexturePosition(double xVal, double yVal, LineEquation line, double z)
+	private Point getTexturePosition(double xVal, double yVal, LineEquation line)
 	{
 		double dx = xVal - line.getStart().x;
 		double dy = yVal - line.getStart().y;
@@ -124,10 +130,17 @@ public class GoraudShader implements IShader{
 		
 		double percentLength = len / line.getLength();
 		
-		double x = line.getWorldStart().getTextureX() + ((line.getWorldEnd().getTextureX() - line.getWorldStart().getTextureX() ) * percentLength);
-		double y = line.getWorldStart().getTextureY() + ((line.getWorldEnd().getTextureY() - line.getWorldStart().getTextureY() ) * percentLength);
+		////ua = (1-a)(u0/z0) + a(u1/z1) / (1-a)(1/z0) + a(1/z1)
+		
+		double x = (1 - percentLength) * (line.getWorldStart().getTextureX()/line.getStart().z) + (percentLength * (line.getWorldEnd().getTextureX()/line.getEnd().z));
+		double y = (1 - percentLength) * (line.getWorldStart().getTextureY()/line.getStart().z) + (percentLength * (line.getWorldEnd().getTextureY()/line.getEnd().z));
+		double r = (1 - percentLength) * (1/line.getStart().z) + (percentLength * (1/line.getEnd().z));
+		x = x/r;
+		y = y/r;
+		
+		double z = line.getStart().z + ((line.getEnd().z - line.getStart().z ) * percentLength);
 	
-		return new Point (x, y, 0);
+		return new Point (x, y, z);
 	}
 	
 	@Override

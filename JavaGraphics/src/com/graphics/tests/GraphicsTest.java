@@ -253,7 +253,7 @@ public class GraphicsTest extends JFrame {
 					MovementTransform move = new MovementTransform(new Vector(cam.getOrientation().getForward().x, cam.getOrientation().getForward().y, cam.getOrientation().getForward().z), speed){
 						@Override
 						public void onComplete(){
-							proj.executePlugin(Events.EXPLODE); //TODO may need a life on exploded fragments with projectiles
+							proj.executePlugin(Events.EXPLODE);
 						}
 					};
 					move.moveUntil(t -> t.getDistanceMoved() >= 1200);
@@ -364,7 +364,9 @@ public class GraphicsTest extends JFrame {
 			
 			sleep = 50 - (new Date().getTime() - cycleStart);
 		}
+		System.out.println("GC");
 		System.gc();
+		System.out.println("Bye bye");
 		System.exit(0);
 	}
 	
@@ -372,6 +374,7 @@ public class GraphicsTest extends JFrame {
 	public void dispose(){
 		super.dispose();
 		slave.dispose();
+		System.out.println("Disposing");
 		go = false;	
 	}
 }
