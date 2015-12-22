@@ -1,6 +1,8 @@
 package com.graphics.lib;
 
 public class Vector {
+
+	private Integer hashCode = null;
 	public double x = 0;
 	public double y = 0;
 	public double z = 0;
@@ -58,11 +60,21 @@ public class Vector {
 		 return normal;
 	}
 	
+	/**
+	 * Get a vector the exact opposite of this one
+	 * 
+	 * @return Reverse Vector
+	 */
 	public Vector getReverseVector()
 	{
 		return new Vector(-this.x, -this.y, -this.z);
 	}
 	
+	/**
+	 * Combine two vectors to given their resultant vector
+	 * 
+	 * @param v2 Vector to combine with this one
+	 */
 	public void addVector(Vector v2)
 	{
 		this.x += v2.x;
@@ -78,15 +90,23 @@ public class Vector {
 	@Override
 	public int hashCode() {
 		//TODO will need to change these, as vector is altered it will change the hash code which is not good
+		// it means the system would no longer be able to find the item in a hash map or similar
+		// as such we'll generate a code once and store it
+		
+		if (hashCode != null) return hashCode;
+		
 		final int prime = 31;
 		int result = 1;
 		long temp;
+		
 		temp = Double.doubleToLongBits(x);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
 		temp = Double.doubleToLongBits(y);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
 		temp = Double.doubleToLongBits(z);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
+		
+		hashCode = result;
 		return result;
 	}
 

@@ -178,6 +178,11 @@ public abstract class Camera extends Observable implements IOrientable, Observer
 		
 	}
 	
+	/**
+	 * Must be implemented to provide the screen coordinates for the scene, i.e. Set the transformed coordinate for the vertices in the given object
+	 * 
+	 * @param obj - Canvas Object to generate coordinates for
+	 */
 	public abstract void getViewSpecific(CanvasObject obj);
 	
 }

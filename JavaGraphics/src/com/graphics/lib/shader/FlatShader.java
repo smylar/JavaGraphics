@@ -32,7 +32,7 @@ public class FlatShader implements IShader{
 	}
 
 	@Override
-	public Color getColour(ScanLine sl, int x, int y, double z) {
+	public Color getColour(ScanLine sl, int x, int y) {
 		return this.colour;
 	}
 

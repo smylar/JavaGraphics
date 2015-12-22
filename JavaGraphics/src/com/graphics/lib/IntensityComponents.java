@@ -1,5 +1,7 @@
 package com.graphics.lib;
 
+import java.awt.Color;
+
 public class IntensityComponents {
 	private double red = 0;
 	private double green = 0;
@@ -30,5 +32,10 @@ public class IntensityComponents {
 		else this.blue = blue;
 	}
 	
-	
+	public Color applyIntensities(Color colour){
+		return new Color((int)((double)colour.getRed() * red), 
+				(int)((double)colour.getGreen() * green), 
+				(int)((double)colour.getBlue() * blue),
+				colour.getAlpha());
+	}
 }

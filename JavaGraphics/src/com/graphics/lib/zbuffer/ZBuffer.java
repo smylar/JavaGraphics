@@ -20,6 +20,16 @@ public class ZBuffer implements IZBuffer{
 	private Map<Integer, HashMap<Integer,ZBufferItem>> zBuffer;
 	private int dispWidth;
 	private int dispHeight;
+	private int skip = 1; //controls how often we do a colour calculation, a value of 1 checks all lines, whereas 3 calculates every 3rd line and intervening points use the same as the last calculated point
+
+	
+	public int getSkip() {
+		return skip;
+	}
+
+	public void setSkip(int skip) {
+		this.skip = skip;
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -68,6 +78,7 @@ public class ZBuffer implements IZBuffer{
 			localShader.init(parent, facet);
 		}
 		
+		
 		for (int x = (int)Math.floor(minX) ; x <= Math.ceil(maxX) ; x++)
 		{
 			ScanLine scanLine = this.getScanline(x, lines);
@@ -75,8 +86,10 @@ public class ZBuffer implements IZBuffer{
 			
 			double scanLineLength = Math.floor(scanLine.endY) - Math.floor(scanLine.startY);
 			double percentDistCovered = 0;
+			Color colour = null;
 			for (int y = (int)Math.floor(scanLine.startY < 0 ? 0 : scanLine.startY) ; y < Math.floor(scanLine.endY > this.dispHeight ? this.dispHeight : scanLine.endY ) ; y++)
 			{
+				
 				if (scanLineLength != 0)
 				{
 					percentDistCovered = (y - Math.floor(scanLine.startY)) / scanLineLength;
@@ -84,8 +97,9 @@ public class ZBuffer implements IZBuffer{
 				
 				double z = scanLine.startZ + ((scanLine.endZ - scanLine.startZ) * percentDistCovered);
 				
-				Color colour = localShader == null ? (facet.getColour() == null ? parent.getColour() : facet.getColour()) : localShader.getColour(scanLine, x, y,z);
-
+				if (skip == 1 || y % skip == 0 || colour == null){	
+					colour = localShader == null ? (facet.getColour() == null ? parent.getColour() : facet.getColour()) : localShader.getColour(scanLine, x, y);
+				}
 				this.addToBuffer(x, y, z, colour);
 			}
 		}

@@ -4,6 +4,12 @@ import com.graphics.lib.Point;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.interfaces.IOrientation;
 
+/**
+ * Camera that takes a view angle to work out the screen coordinates of everything that is to be displayed.
+ * 
+ * @author Paul Brandon
+ *
+ */
 public class ViewAngleCamera extends Camera {
 	
 	public ViewAngleCamera(IOrientation orientation) {

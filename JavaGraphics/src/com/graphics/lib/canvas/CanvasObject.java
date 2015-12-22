@@ -2,6 +2,7 @@ package com.graphics.lib.canvas;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -137,9 +138,9 @@ public class CanvasObject extends Observable implements Observer{
 	}
 
 	public final void setVisible(boolean isVisible) {
+		getData().isVisible = isVisible;
 		this.setChanged();
 		this.notifyObservers();
-		getData().isVisible = isVisible;
 	}
 
 	public final boolean isDeleted() {
@@ -148,10 +149,18 @@ public class CanvasObject extends Observable implements Observer{
 
 	public final void setDeleted(boolean isDeleted) {
 		getData().isDeleted = isDeleted;
+		if (getData().observing != null){
+			getData().observing.deleteObserver(this); 
+			getData().observing = null;
+		}
 		this.setChanged();
 		this.notifyObservers();
 	}
 
+	public final boolean isObserving(){
+		return getData().observing != null;
+	}
+	
 	public final Color getColour() {
 		return getData().colour;
 	}
@@ -390,9 +399,15 @@ public class CanvasObject extends Observable implements Observer{
 	/**
 	 * Sets a flag indicating if this object should be set as deleted once all its Transforms are complete
 	 */
-	public void deleteAfterTransforms()
+	public final void deleteAfterTransforms()
 	{
 		getData().deleteAfterTransforms = true;
+	}
+	
+	public final void observe (CanvasObject o){
+		getData().observing = o;
+		o.addObserver(this);
+		o.getChildren().add(this);
 	}
 	
 	/**
@@ -473,7 +488,7 @@ public class CanvasObject extends Observable implements Observer{
 	}
 
 	@Override
-	public void update(Observable arg0, Object arg1) {
+	public synchronized void update(Observable arg0, Object arg1) {
 		if (this != arg0 && arg1 instanceof Transform)
 		{
 			getData().vertexList.stream().forEach(p -> {
@@ -536,13 +551,14 @@ public class CanvasObject extends Observable implements Observer{
 		protected List<Facet> facetList = new ArrayList<Facet>();
 		protected Color colour = new Color(255, 0, 0);
 		protected List<Transform> transforms = new ArrayList<Transform>();
-		protected List<CanvasObject> children = new ArrayList<CanvasObject>();
+		protected List<CanvasObject> children = Collections.synchronizedList(new ArrayList<CanvasObject>());
 		protected Map<Point, ArrayList<Facet>> vertexFacetMap;
 		protected boolean processBackfaces = false;
 		protected boolean isVisible = true;
 		protected boolean isDeleted = false;
 		//TODO - is solid or phased when invisible?
 		protected boolean deleteAfterTransforms = false;
+		protected CanvasObject observing = null;
 		public Utils.LightIntensityFinderEnum liFinder = Utils.LightIntensityFinderEnum.DEFAULT;
 		public Utils.VertexNormalFinderEnum vnFinder = Utils.VertexNormalFinderEnum.DEFAULT; 
 		//TODO this class as POJO

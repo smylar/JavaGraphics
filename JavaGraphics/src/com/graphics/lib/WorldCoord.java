@@ -1,10 +1,26 @@
 package com.graphics.lib;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import com.graphics.lib.texture.Texture;
+
+/**
+ * A world coordinate is the representation of a point within the context of the world, and not as the camera might see it.
+ * <br/>
+ * This class extends Point in that allows a transformed point (camera coordinate) and a set of texture coordinates to be associated with it
+ * 
+ * @see Point
+ * @see Texture
+ * 
+ * @author Paul Brandon
+ *
+ */
 public class WorldCoord extends Point {
 
 	private Point transformed;
-	private double textureX = 0;
-	private double textureY = 0;
+	private Map<Texture, Double> textureX = new HashMap<Texture, Double>();
+	private Map<Texture, Double> textureY = new HashMap<Texture, Double>();
 	
 	public WorldCoord() {
 		this(0,0,0);
@@ -25,36 +41,23 @@ public class WorldCoord extends Point {
 
 	public void resetTransformed() {
 		transformed = new Point (x, y, z);
-		//transformed.setLightIntensity(this.getLightIntensity());
 	}
 
-	public double getTextureX() {
-		return textureX;
+	public double getTextureX(Texture t) {
+		return (textureX.containsKey(t)) ? textureX.get(t) : 0;
 	}
 
-	public void setTextureX(double textureX) {
-		this.textureX = textureX;
+	public void setTextureX(Texture t, double textureX) {
+		this.textureX.put(t, textureX);
 	}
 
-	public double  getTextureY() {
-		return textureY;
+	public double  getTextureY(Texture t) {
+		return (textureY.containsKey(t)) ? textureY.get(t) : 0;
 	}
 
-	public void setTextureY(double textureY) {
-		this.textureY = textureY;
+	public void setTextureY(Texture t, double textureY) {
+		this.textureY.put(t, textureY);
 	}
 	
-	
-	/*@Override
-	public void setLightIntensity(IntensityComponents lightIntensity) {
-		super.setLightIntensity(lightIntensity);
-		if (transformed != null) transformed.setLightIntensity(lightIntensity);
-	}*/
-	
-	/*@Override
-	public void setLightIntensity(ILightIntensityFinder liFinder, boolean isPartOfBacface, CanvasObject obj, Vector v) {
-		super.setLightIntensity(liFinder, isPartOfBacface, obj, v);
-		if (transformed != null) transformed.setLightIntensity(this.getLightIntensity());
-	}*/
 	
 }

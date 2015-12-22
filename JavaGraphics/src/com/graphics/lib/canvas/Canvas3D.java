@@ -171,10 +171,10 @@ public class Canvas3D extends JPanel{
 		
 		Set<CanvasObject> processShapes = this.getShapes();
 		
-		processShapes.parallelStream().forEach(s -> {
+		processShapes.parallelStream().filter(s -> !s.isObserving()).forEach(s -> {
 			this.processShape(s, this.zBuffer, getShader(s));
 		});
-
+		
 		this.setOkToPaint(true);
 		this.repaint(); 
 		

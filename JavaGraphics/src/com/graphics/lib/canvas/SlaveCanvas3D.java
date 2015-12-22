@@ -37,7 +37,7 @@ public class SlaveCanvas3D extends Canvas3D implements ICanvasUpdateListener {
 
 		this.getzBuffer().setDimensions(new Dimension(this.getWidth(), this.getHeight()));
 
-		parent.getShapes().parallelStream().forEach(s -> {
+		parent.getShapes().parallelStream().filter(s -> !s.isObserving()).forEach(s -> {
 			this.processShape(s, this.getzBuffer(), parent.getShader(s));
 		});
 		this.setOkToPaint(true);

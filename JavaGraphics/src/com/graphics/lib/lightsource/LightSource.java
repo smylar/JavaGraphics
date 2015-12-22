@@ -100,8 +100,6 @@ public class LightSource{
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((colour == null) ? 0 : colour.hashCode());
-		result = prime * result
-				+ ((position == null) ? 0 : position.hashCode());
 		long temp;
 		temp = Double.doubleToLongBits(range);
 		result = prime * result + (int) (temp ^ (temp >>> 32));

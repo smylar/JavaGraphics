@@ -8,9 +8,7 @@ package com.graphics.lib;
  */
 public class Point {
 	
-	private static int nextId = 0;
-	
-	private int objectId = nextId++;
+	private Integer hashCode = null;
 	public double x = 0;
 	public double y = 0;
 	public double z = 0;
@@ -30,38 +28,28 @@ public class Point {
 		this.z = z;
 	}
 	
+	/**
+	 * Get the tag for this point
+	 * 
+	 * @see #setTag(String)
+	 * @return Tag
+	 */
 	public String getTag() {
 		return tag;
 	}
 
+	/**
+	 * Setting a tag on a point implicitly means the point is special and not intrinsically part of the object model, 
+	 * but need to be treated as if they are part of the model
+	 * <br/>
+	 * For example an object may have an orientation model added to it.
+	 * <br/>
+	 * The tagged points are still transformed with the rest, it just allows other systems to identify the points it needs to deal with and handle them separately,
+	 * or for the object itself to ignore them in certain calculations e.g. Centre point calculation
+	 */
 	public void setTag(String tag) {
 		this.tag = tag;
 	}
-
-	/*public Vector getNormal() {
-		return normal;
-	}*/
-
-	/*public void setNormal(IVertexNormalFinder vnFinder, Facet f, CanvasObject obj) {
-		this.normal = vnFinder.getVertexNormal(obj, this, f);
-	}*/
-	
-	/*public void setNormal(Vector normal) {
-		this.normal = normal;
-	}*/
-	
-	/*public IntensityComponents getLightIntensity() {
-		if (this.lightIntensity == null) return new IntensityComponents();
-		return this.lightIntensity;
-	}*/
-
-	/*public void setLightIntensity(IntensityComponents lightIntensity) {
-		this.lightIntensity = lightIntensity;
-	}*/
-	
-	/*public void setLightIntensity(ILightIntensityFinder liFinder, boolean isPartOfBackface, CanvasObject obj, Vector v) {
-		this.lightIntensity = liFinder.getLightIntensity(obj, this, v, isPartOfBackface);
-	}*/
 	
 	/**
 	 * Calculates the (positive) unit distance from this point to another given point
@@ -99,33 +87,35 @@ public class Point {
 
 	@Override
 	public int hashCode() {
+		if (hashCode != null) return hashCode;
+		
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + this.getClass().getName().hashCode();
-		result = prime * result + objectId;
 		result = prime * result + ((tag == null) ? 0 : tag.hashCode());
+		long temp;
+		temp = Double.doubleToLongBits(x);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(y);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(z);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		
+		hashCode = result;
 		return result;
 	}
+	
+	
 
 	@Override
 	public boolean equals(Object obj) {
+		//checks if two points occupy the same coordinate
 		if (this == obj)
 			return true;
 		if (obj == null)
 			return false;
-		if (getClass() != obj.getClass())
+		if (!(obj instanceof Point))
 			return false;
 		Point other = (Point) obj;
-		/*if (normal == null) {
-			if (other.normal != null)
-				return false;
-		} else if (!normal.equals(other.normal))
-			return false;*/
-		if (tag == null) {
-			if (other.tag != null)
-				return false;
-		} else if (!tag.equals(other.tag))
-			return false;
 		if (Double.doubleToLongBits(x) != Double.doubleToLongBits(other.x))
 			return false;
 		if (Double.doubleToLongBits(y) != Double.doubleToLongBits(other.y))

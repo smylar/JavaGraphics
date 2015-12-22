@@ -8,6 +8,14 @@ import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.zbuffer.ScanLine;
 
+/**
+ * A shader is used by the Z Buffer to generate the colour of each pixel
+ * <br/>
+ * If facets are processed in parallel, this assumes the z buffer creates a new instance of the shader to process a facet 
+ * 
+ * @author Paul Brandon
+ *
+ */
 public interface IShader {
 	/**
 	 * The initialisation method called before processing Scan Lines in a facet
@@ -18,7 +26,8 @@ public interface IShader {
 	public void init(CanvasObject obj, Facet f);
 	
 	/**
-	 * Gets the colour for a pixel (x,y) on the given scan line
+	 * Gets the colour for a pixel (x,y) on the given scan line, 
+	 * which is associated with the facet given in init()
 	 * @see ScanLine
 	 * 
 	 * @param sl	The scanline object
@@ -26,7 +35,7 @@ public interface IShader {
 	 * @param y		Y coordinate of the pixel
 	 * @return		The colour of the pixel
 	 */
-	public Color getColour (ScanLine sl, int x, int y, double z);
+	public Color getColour (ScanLine sl, int x, int y);
 	
 	/**
 	 * Shaders will usually need to be aware of light sources, this method will set them

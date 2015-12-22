@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.util.function.BiConsumer;
 
+import com.graphics.lib.camera.ViewAngleCamera;
 import com.graphics.lib.canvas.Canvas3D;
 
 public class Utils {
@@ -56,6 +57,10 @@ public class Utils {
 			//System.out.println(middleWidth + ":" + middleHeight);
 			g.drawLine(middleWidth - 5, middleHeight, middleWidth + 5, middleHeight);
 			g.drawLine(middleWidth, middleHeight - 5, middleWidth, middleHeight + 5);
+			
+			if (c.getCamera() instanceof ViewAngleCamera){	
+				g.drawString(""+((ViewAngleCamera)c.getCamera()).getViewAngle() , c.getWidth() - 30, c.getHeight() - 10);
+			}
 		};
 	}
 	

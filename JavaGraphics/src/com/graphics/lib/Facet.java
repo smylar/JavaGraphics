@@ -1,9 +1,18 @@
 package com.graphics.lib;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.graphics.lib.texture.Texture;
 
+/**
+ * A facet generally links 3 vertices of an object to form a triangle.
+ * A series of these facets will make up how the whole object looks
+ * 
+ * @author Paul Brandon
+ *
+ */
 public class Facet {
 	public WorldCoord point1;
 	public WorldCoord point2;
@@ -11,7 +20,7 @@ public class Facet {
 	private Color colour;
 	private double baseIntensity = 0.15;
 	private boolean isFrontFace = true;
-	private Texture texture;
+	private List<Texture> texture = new ArrayList<Texture>();
 	
 	public Facet(WorldCoord p1, WorldCoord p2, WorldCoord p3)
 	{
@@ -46,23 +55,32 @@ public class Facet {
 		this.isFrontFace = isFrontFace;
 	}
 
-	public Texture getTexture() {
+	public List<Texture> getTexture() {
 		return texture;
 	}
 
-	public void setTexture(Texture texture) {
-		this.texture = texture;
+	public void addTexture(Texture texture) {
+		this.texture.add(texture);
 	}
 
-	public Vector getTransformedNormal()
-	 {
+	/**
+	 * Gets the normal vector in relation to how the camera sees it
+	 * 
+	 * @return Normal Vector
+	 */
+	public Vector getTransformedNormal(){
 		 Vector vector1 = new Vector(point2.getTransformed().x - point1.getTransformed().x, point2.getTransformed().y - point1.getTransformed().y, point1.getTransformed().z - point1.getTransformed().z);
 		 Vector vector2 = new Vector(point3.getTransformed().x - point1.getTransformed().x, point3.getTransformed().y - point1.getTransformed().y, point3.getTransformed().z - point1.getTransformed().z);
 		 
 		 Vector normal = vector1.crossProduct(vector2);
 		 return normal.getUnitVector();
-	 }
+	}
 	 
+	/**
+	 * Gets a Vector that is perpendicular to the plane formed by the points of the facet with a magnitude of 1 (the normal vector)
+	 * 
+	 * @return Normal Vector
+	 */
 	public Vector getNormal()
 	{
 		Vector vector1 = new Vector(point2.x - point1.x, point2.y - point1.y, point2.z - point1.z);

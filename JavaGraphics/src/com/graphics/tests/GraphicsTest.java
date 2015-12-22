@@ -34,6 +34,7 @@ import com.graphics.lib.plugins.IPlugin;
 import com.graphics.lib.plugins.PluginLibrary;
 import com.graphics.lib.shader.ShaderFactory;
 import com.graphics.lib.transform.*;
+import com.graphics.lib.zbuffer.ZBuffer;
 import com.graphics.shapes.Torus;
 
 public class GraphicsTest extends JFrame {
@@ -69,6 +70,9 @@ public class GraphicsTest extends JFrame {
 		//FocusPointCamera cam = new FocusPointCamera();
 		//cam.setFocusPoint(new Point(300, 300, 1000));
 		Canvas3D cnv = new Canvas3D(cam);
+		ZBuffer zBuf = new ZBuffer();
+		zBuf.setSkip(3);
+		cnv.setzBuffer(zBuf);
 		
 		cnv.addDrawOperation(Utils.showMarkers());
 		
@@ -197,7 +201,10 @@ public class GraphicsTest extends JFrame {
 			public Void execute(PlugableCanvasObject<?> obj) {	
 				PlugableCanvasObject<?> impactee = PluginLibrary.hasCollided(getObjects,null, null).execute(obj);
 				if (impactee != null){
-					if (impactee.hasFlag(Events.STICKY)) PluginLibrary.stop2().execute(obj);
+					if (impactee.hasFlag(Events.STICKY)){ 
+						PluginLibrary.stop2().execute(obj);
+						obj.observe(impactee);
+					}
 					else PluginLibrary.bounce(impactee).execute(obj);
 				}
 				return null;
@@ -235,14 +242,14 @@ public class GraphicsTest extends JFrame {
 					proj.applyTransform(new Rotation<XRotation>(XRotation.class, -90));
 					proj.getObjectAs(OrientableCanvasObject.class).setOrientation(new SimpleOrientation());
 					proj.setBaseIntensity(1);
-					proj.setColour(new Color(0, 255, 0, 80));
+					proj.setColour(new Color(255, 0, 0, 80));
 					
 					proj.registerPlugin(Events.EXPLODE, explode, false);
 					for (int i = 0; i < proj.getFacetList().size() ; i++)
 					{
 						if (i % (proj.getObjectAs(Ovoid.class).getPointsPerCircle()/3) == 1 || i % (proj.getObjectAs(Ovoid.class).getPointsPerCircle()/3) == 0)
 						{
-							proj.getFacetList().get(i).setColour(new Color(0,225,100));
+							proj.getFacetList().get(i).setColour(new Color(225,0,0));
 						}
 					}
 					cam.addCameraRotation(proj);				
@@ -292,7 +299,7 @@ public class GraphicsTest extends JFrame {
 					cnv.registerObject(proj, pos, false);
 					ObjectTiedLightSource l5 = new ObjectTiedLightSource(pos.x, pos.y, pos.z);
 					l5.tieTo(proj);
-					l5.setColour(new Color(0, 255, 0));
+					l5.setColour(proj.getColour());
 					l5.setRange(400);
 					cnv.addLightSource(l5);
 				}
@@ -332,6 +339,29 @@ public class GraphicsTest extends JFrame {
 					l5.setRange(400);
 					cnv.addLightSource(l5);
 				}
+				
+				if (key.getKeyChar() == 'z'){
+					double viewAngle = cam.getViewAngle() - 5;
+					cam.setViewAngle(viewAngle < 10 ? 10 : viewAngle);
+				}
+				
+				if (key.getKeyChar() == 'x'){
+					double viewAngle = cam.getViewAngle() + 5;
+					cam.setViewAngle(viewAngle > 170 ? 170 : viewAngle);
+				}
+				
+				if (key.getKeyChar() == '1'){
+					l1.toggle();
+					lantern1.setColour(l1.isOn() ? l1.getColour() : Color.black);
+				}
+				if (key.getKeyChar() == '2'){
+					l2.toggle();
+					lantern2.setColour(l2.isOn() ? l2.getColour() : Color.black);
+				}
+				if (key.getKeyChar() == '3'){
+					l3.toggle();
+					lantern3.setColour(l3.isOn() ? l3.getColour() : Color.black);
+				}
 			}
 			
 		});
@@ -364,17 +394,16 @@ public class GraphicsTest extends JFrame {
 			
 			sleep = 50 - (new Date().getTime() - cycleStart);
 		}
-		System.out.println("GC");
-		System.gc();
+
 		System.out.println("Bye bye");
 		System.exit(0);
 	}
 	
 	@Override
 	public void dispose(){
-		super.dispose();
-		slave.dispose();
-		System.out.println("Disposing");
 		go = false;	
+		//super.dispose();
+		//slave.dispose();
+		//System.out.println("Disposing");
 	}
 }
