@@ -149,10 +149,7 @@ public class CanvasObject extends Observable implements Observer{
 
 	public final void setDeleted(boolean isDeleted) {
 		getData().isDeleted = isDeleted;
-		if (getData().observing != null){
-			getData().observing.deleteObserver(this); 
-			getData().observing = null;
-		}
+		this.stopObserving();
 		this.setChanged();
 		this.notifyObservers();
 	}
@@ -404,10 +401,25 @@ public class CanvasObject extends Observable implements Observer{
 		getData().deleteAfterTransforms = true;
 	}
 	
-	public final void observe (CanvasObject o){
+	/**
+	 * Observe another object and match its movements, observed item will call update in this item via the Observer/Observable interface when it changes
+	 * <br/>
+	 * Note this object will be made a child of that it is observing so that it is always processed after the observed item
+	 * 
+	 * @param o
+	 */
+	public final void observeAndMatch (CanvasObject o){
 		getData().observing = o;
 		o.addObserver(this);
 		o.getChildren().add(this);
+	}
+	
+	public final void stopObserving(){
+		if (getData().observing != null){
+			getData().observing.deleteObserver(this);
+			getData().observing.getChildren().remove(this);
+			getData().observing = null;
+		}
 	}
 	
 	/**

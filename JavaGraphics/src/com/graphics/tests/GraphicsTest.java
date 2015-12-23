@@ -26,7 +26,8 @@ import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.OrientableCanvasObject;
 import com.graphics.lib.canvas.PlugableCanvasObject;
 import com.graphics.lib.canvas.SlaveCanvas3D;
-import com.graphics.lib.lightsource.CameraTiedLightSource;
+//import com.graphics.lib.lightsource.CameraTiedLightSource;
+import com.graphics.lib.lightsource.DirectionalLightSource;
 import com.graphics.lib.lightsource.ObjectTiedLightSource;
 import com.graphics.lib.orientation.SimpleOrientation;
 import com.graphics.lib.plugins.Events;
@@ -71,7 +72,7 @@ public class GraphicsTest extends JFrame {
 		//cam.setFocusPoint(new Point(300, 300, 1000));
 		Canvas3D cnv = new Canvas3D(cam);
 		ZBuffer zBuf = new ZBuffer();
-		zBuf.setSkip(3);
+		//zBuf.setSkip(3);
 		cnv.setzBuffer(zBuf);
 		
 		cnv.addDrawOperation(Utils.showMarkers());
@@ -203,7 +204,7 @@ public class GraphicsTest extends JFrame {
 				if (impactee != null){
 					if (impactee.hasFlag(Events.STICKY)){ 
 						PluginLibrary.stop2().execute(obj);
-						obj.observe(impactee);
+						obj.observeAndMatch(impactee);
 					}
 					else PluginLibrary.bounce(impactee).execute(obj);
 				}
@@ -223,8 +224,12 @@ public class GraphicsTest extends JFrame {
 			
 		sphere.addTransformAboutCentre(spheret);
 		
-		CameraTiedLightSource l4 = new CameraTiedLightSource(cam.getPosition().x, cam.getPosition().y, cam.getPosition().z);
-		l4.tieTo(cam);
+		//CameraTiedLightSource l4 = new CameraTiedLightSource(cam.getPosition().x, cam.getPosition().y, cam.getPosition().z);
+		//l4.tieTo(cam);
+		DirectionalLightSource l4 = new DirectionalLightSource();
+		l4.setPosition(() -> {return cam.getPosition();});
+		l4.setDirection(() -> {return cam.getOrientation().getForward().getUnitVector();});
+		l4.setLightConeAngle(45);
 		l4.setColour(new Color(255, 255, 255));
 		cnv.addLightSource(l4);
 		

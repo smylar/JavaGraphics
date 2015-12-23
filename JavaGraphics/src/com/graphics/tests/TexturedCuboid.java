@@ -1,5 +1,7 @@
 package com.graphics.tests;
 
+import java.awt.Color;
+
 import com.graphics.lib.texture.BmpTexture;
 import com.graphics.lib.texture.TestTexture;
 import com.graphics.lib.texture.Texture;
@@ -10,7 +12,7 @@ public class TexturedCuboid extends Cuboid {
 	public TexturedCuboid(int height, int width, int depth) {
 		super(height, width, depth);
 		Texture texture = new TestTexture();
-		BmpTexture bmptexture = new BmpTexture("texture1", true);
+		BmpTexture bmptexture = new BmpTexture("texture1", Color.white);
 		bmptexture.setApplyLighting(false);
 
 		this.getVertexList().get(1).setTextureY(bmptexture, bmptexture.getHeight());

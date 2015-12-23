@@ -30,9 +30,7 @@ public class Canvas3D extends JPanel{
 
 	private static final long serialVersionUID = 1L;
 	
-	//private List<CanvasObject> shapes = new ArrayList<CanvasObject>();
-	private Map<CanvasObject, IShader> shapes = new HashMap<CanvasObject, IShader>();
-	private Map<CanvasObject, IShader> shapesToAdd = Collections.synchronizedMap(new HashMap<CanvasObject, IShader>());
+	private Map<CanvasObject, IShader> shapes = Collections.synchronizedMap(new HashMap<CanvasObject, IShader>());
 	
 	private Set<LightSource> lightSources = new HashSet<LightSource>(); 
 	private Set<LightSource> lightSourcesToAdd = Collections.synchronizedSet(new HashSet<LightSource>()); 
@@ -126,10 +124,10 @@ public class Canvas3D extends JPanel{
 	
 	public void registerObject(CanvasObject obj, Point position, boolean drawNow, IShader shader)
 	{
-		if (this.shapes.containsKey(obj) || this.shapesToAdd.containsKey(obj)) return;
+		if (this.shapes.containsKey(obj)) return;
 
 		obj.applyTransform(new Translation(position));
-		this.shapesToAdd.put(obj, shader);
+		this.shapes.put(obj, shader);
 		
 		if (drawNow)
 		{
@@ -139,11 +137,6 @@ public class Canvas3D extends JPanel{
 	
 	public void doDraw()
 	{
-		if (shapesToAdd.size() > 0){
-			shapes.putAll(shapesToAdd);
-			shapesToAdd.clear();
-		}
-		
 		if (lightSourcesToAdd.size() > 0){
 			lightSources.addAll(lightSourcesToAdd);
 			lightSourcesToAdd.clear();
@@ -163,15 +156,13 @@ public class Canvas3D extends JPanel{
 		
 		this.lightSources.removeIf(l -> l.isDeleted());
 		
-		//this.shapes.removeIf(s -> s.isDeleted());
-		Set<CanvasObject> temp = new HashSet<CanvasObject>(this.getShapes());
-		temp.stream().filter(s -> s.isDeleted()).forEach(s -> this.shapes.remove(s));
+		Set<CanvasObject> processShapes = new HashSet<CanvasObject>(this.getShapes());
+		processShapes.stream().filter(s -> s.isDeleted()).forEach(s -> this.shapes.remove(s));
+		processShapes.removeIf(s -> s.isDeleted() || s.isObserving());
 		
 		this.camera.doTransforms();
 		
-		Set<CanvasObject> processShapes = this.getShapes();
-		
-		processShapes.parallelStream().filter(s -> !s.isObserving()).forEach(s -> {
+		processShapes.parallelStream().forEach(s -> {
 			this.processShape(s, this.zBuffer, getShader(s));
 		});
 		
@@ -201,7 +192,8 @@ public class Canvas3D extends JPanel{
 				zBuf.Add(f, obj, shader);
 			});
 		}
-		for (CanvasObject child : obj.getChildren())
+		
+		for (CanvasObject child : new ArrayList<CanvasObject>(obj.getChildren()))
 		{
 			this.processShape(child, zBuf, shader);
 		};

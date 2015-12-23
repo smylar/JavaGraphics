@@ -1,6 +1,9 @@
 package com.graphics.lib.canvas;
 
 import java.awt.Dimension;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import com.graphics.lib.Facet;
@@ -37,7 +40,10 @@ public class SlaveCanvas3D extends Canvas3D implements ICanvasUpdateListener {
 
 		this.getzBuffer().setDimensions(new Dimension(this.getWidth(), this.getHeight()));
 
-		parent.getShapes().parallelStream().filter(s -> !s.isObserving()).forEach(s -> {
+		Set<CanvasObject> processShapes = new HashSet<CanvasObject>(parent.getShapes());
+		processShapes.removeIf(s -> s.isDeleted() || s.isObserving());
+		
+		processShapes.parallelStream().forEach(s -> {
 			this.processShape(s, this.getzBuffer(), parent.getShader(s));
 		});
 		this.setOkToPaint(true);
@@ -60,7 +66,7 @@ public class SlaveCanvas3D extends Canvas3D implements ICanvasUpdateListener {
 				zBuf.Add(f, obj, shader);
 			});
 		}
-		for (CanvasObject child : obj.getChildren())
+		for (CanvasObject child : new ArrayList<CanvasObject>(obj.getChildren()))
 		{
 			this.processShape(child, zBuf, shader);
 		};

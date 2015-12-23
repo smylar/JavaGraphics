@@ -5,6 +5,7 @@ import java.util.List;
 import com.graphics.lib.interfaces.ILightIntensityFinder;
 import com.graphics.lib.interfaces.IVertexNormalFinder;
 import com.graphics.lib.interfaces.IZBuffer;
+import com.graphics.lib.lightsource.DirectionalLightSource;
 import com.graphics.lib.zbuffer.ZBuffer;
 
 
@@ -42,9 +43,15 @@ public class Utils {
 				double percent = 0;
 				Vector lightVector = l.getPosition().vectorToPoint(p).getUnitVector();
 				
+				if (l instanceof DirectionalLightSource){
+					double angleRad = ((DirectionalLightSource) l).getDirection().dotProduct(lightVector);
+					if (Math.toDegrees(Math.acos(angleRad)) > ((DirectionalLightSource) l).getLightConeAngle()) return;
+				}
+				
 				double answer = v.dotProduct(lightVector);
 				
 				double deg = Math.toDegrees(Math.acos(answer));
+				
 				if (deg > 90 && !bf)
 				{			
 					percent = (deg-90) / 90;

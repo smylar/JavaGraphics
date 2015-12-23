@@ -19,6 +19,10 @@ import com.graphics.lib.transform.YRotation;
 
 public class Ship extends PlugableCanvasObject<Ship> {
 	
+	private Facet wingFlashLeft;
+	private Facet wingFlashRight;
+	private int cnt = 0;
+	
 	public Ship(int width, int depth, int height)
 	{
 		super();
@@ -30,6 +34,12 @@ public class Ship extends PlugableCanvasObject<Ship> {
 		
 		this.getVertexList().add(new WorldCoord(0, 0, depth/2)); //centre point
 		
+		this.getVertexList().add(new WorldCoord(width/2, 5, depth - 5));
+		this.getVertexList().add(new WorldCoord(width/2, -5, depth - 5)); //wing flash left
+		
+		this.getVertexList().add(new WorldCoord(-width/2, 5, depth - 5));
+		this.getVertexList().add(new WorldCoord(-width/2, -5, depth - 5)); //wing flash left
+		
 		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(1), this.getVertexList().get(4)));
 		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(3), this.getVertexList().get(1)));
 		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(4), this.getVertexList().get(2)));
@@ -37,6 +47,16 @@ public class Ship extends PlugableCanvasObject<Ship> {
 		
 		this.getFacetList().add(new Facet(this.getVertexList().get(1), this.getVertexList().get(3), this.getVertexList().get(4)));
 		this.getFacetList().add(new Facet(this.getVertexList().get(2), this.getVertexList().get(4), this.getVertexList().get(3)));
+		
+		wingFlashLeft = new Facet(this.getVertexList().get(1), this.getVertexList().get(7), this.getVertexList().get(6));
+		wingFlashLeft.setColour(Color.MAGENTA);
+		wingFlashLeft.setBaseIntensity(1);
+		this.getFacetList().add(wingFlashLeft);
+		
+		wingFlashRight = new Facet(this.getVertexList().get(2), this.getVertexList().get(8), this.getVertexList().get(9));
+		wingFlashRight.setColour(Color.MAGENTA);
+		wingFlashRight.setBaseIntensity(1);
+		this.getFacetList().add(wingFlashRight);
 		
 		this.getFacetList().get(4).setColour(Color.YELLOW);
 		this.getFacetList().get(5).setColour(Color.YELLOW);
@@ -88,7 +108,21 @@ public class Ship extends PlugableCanvasObject<Ship> {
 	
 	@Override
 	public Point getCentre(){
-		//System.out.println(this.getVertexList().get(5).toString());
 		return this.getVertexList().get(5);
+	}
+	
+	@Override
+	public void onDrawComplete(){
+		super.onDrawComplete();
+		if (++cnt > 10){
+			cnt = 0;
+			if (wingFlashRight.getColour().equals(Color.MAGENTA)){
+				wingFlashRight.setColour(Color.GREEN);
+				wingFlashLeft.setColour(Color.GREEN);
+			}else{
+				wingFlashRight.setColour(Color.MAGENTA);
+				wingFlashLeft.setColour(Color.MAGENTA);
+			}
+		}
 	}
 }

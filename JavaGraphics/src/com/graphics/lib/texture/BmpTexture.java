@@ -13,12 +13,12 @@ import javax.imageio.ImageIO;
 public class BmpTexture implements Texture{
 	
 	private BufferedImage bmpImage;
-	private boolean whiteIsTransparent = true;
+	private Color transparentColour = null;
 	private Map<Integer, Color> colourMap = new HashMap<Integer, Color>(); //so we don't get a tonne of colour objects to clear up
 	private boolean applyLighting = true;
 	
-	public BmpTexture(String bmpFileResource, boolean whiteIsTransparent){
-		this.whiteIsTransparent = whiteIsTransparent;
+	public BmpTexture(String bmpFileResource, Color transparentColour){
+		this.transparentColour = transparentColour;
 		try {
 			bmpImage = ImageIO.read(getClass().getResource(bmpFileResource + ".bmp"));
 		} catch (IOException e) {}
@@ -26,13 +26,13 @@ public class BmpTexture implements Texture{
 	
 	@Override
 	public Color getColour(int x, int y){
-		if (x < 0 || y < 0) return null;
+		if (x < 0 || y < 0 || bmpImage == null) return null;
 		x = x % getWidth();
 		y = y % getHeight();
 		
 		int rgb = bmpImage.getRGB(x, y);
 		
-		if (whiteIsTransparent && rgb == Color.WHITE.getRGB()) return null;
+		if (transparentColour != null && rgb == transparentColour.getRGB()) return null;
 		
 		Color c = null;
 		if (colourMap.containsKey(rgb)){
