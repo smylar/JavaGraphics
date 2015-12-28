@@ -1,6 +1,5 @@
 package com.graphics.lib.canvas;
 
-import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -38,7 +37,7 @@ public class SlaveCanvas3D extends Canvas3D implements ICanvasUpdateListener {
 		if (this.getzBuffer() == null)
 			this.setzBuffer(Utils.getDefaultZBuffer());
 
-		this.getzBuffer().setDimensions(new Dimension(this.getWidth(), this.getHeight()));
+		this.getzBuffer().setDimensions(this.getWidth(), this.getHeight());
 
 		Set<CanvasObject> processShapes = new HashSet<CanvasObject>(parent.getShapes());
 		processShapes.removeIf(s -> s.isDeleted() || s.isObserving());

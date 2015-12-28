@@ -185,4 +185,9 @@ public abstract class Camera extends Observable implements IOrientable, Observer
 	 */
 	public abstract void getViewSpecific(CanvasObject obj);
 	
+	/**
+	 * Called before a every new draw cycle, for setting up anything that applies to the whole cycle but may have changed between cycles
+	 */
+	//public abstract void init();
+	
 }

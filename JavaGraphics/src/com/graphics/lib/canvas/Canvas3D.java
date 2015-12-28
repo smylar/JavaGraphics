@@ -1,6 +1,5 @@
 package com.graphics.lib.canvas;
 
-import java.awt.Dimension;
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -151,7 +150,7 @@ public class Canvas3D extends JPanel{
 		if (this.zBuffer == null)
 			this.zBuffer = Utils.getDefaultZBuffer();
 		
-		this.zBuffer.setDimensions(new Dimension(this.getWidth(), this.getHeight()));
+		this.zBuffer.setDimensions(this.getWidth(), this.getHeight());
 		this.camera.setViewport(this.getWidth(), this.getHeight());
 		
 		this.lightSources.removeIf(l -> l.isDeleted());

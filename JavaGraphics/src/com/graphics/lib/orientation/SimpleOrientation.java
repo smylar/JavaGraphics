@@ -83,7 +83,7 @@ public class SimpleOrientation implements IOrientation {
 	
 	private Vector moveToOriginInverted(Vector v)
 	{
-		Point anchor = orientation.getVertexList().get(3);
+		Point anchor = getAnchor();
 		v.x += anchor.x;
 		v.y += anchor.y;
 		v.z += anchor.z;
@@ -97,9 +97,7 @@ public class SimpleOrientation implements IOrientation {
 		CanvasObject dest = copy.getRepresentation();
 		for (int i = 0 ; i < 4 ; i++)
 		{
-			dest.getVertexList().get(i).x = source.getVertexList().get(i).x;
-			dest.getVertexList().get(i).y = source.getVertexList().get(i).y;
-			dest.getVertexList().get(i).z = source.getVertexList().get(i).z;
+			dest.getVertexList().get(i).copyFrom(source.getVertexList().get(i));
 		}
 		return copy;
 	}

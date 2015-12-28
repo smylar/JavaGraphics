@@ -80,6 +80,24 @@ public class Point {
 		return new Vector(p2.x - this.x, p2.y - this.y, p2.z - this.z);
 	}
 	
+	public void add(Point p){
+		x += p.x;
+		y += p.y;
+		z += p.z;
+	}
+	
+	public void subtract(Point p){
+		x -= p.x;
+		y -= p.y;
+		z -= p.z;
+	}
+	
+	public void copyFrom(Point p){
+		x = p.x;
+		y = p.y;
+		z = p.z;
+	}
+	
 	@Override
 	public String toString(){
 		return this.x + "," + this.y + "," + this.z;

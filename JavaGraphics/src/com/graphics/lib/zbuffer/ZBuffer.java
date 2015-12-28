@@ -1,7 +1,6 @@
 package com.graphics.lib.zbuffer;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -208,20 +207,20 @@ public class ZBuffer implements IZBuffer{
 
 
 	@Override
-	public void setDimensions(Dimension dimension) {
+	public void setDimensions(int width, int height) {
 		//setting up all zbuffer item objects does slow it down, a bit but should mean it doesn't slowly slow down as items are added, performance should stay constant
 		//except for the actual drawing of pixels
 		//Also means we don't have the possibility of 2 threads trying to add the same item
-		if (this.dispHeight != dimension.height || this.dispWidth != dimension.width)
+		if (this.dispHeight != height || this.dispWidth != width)
 		{
-			this.dispHeight = dimension.height;
-			this.dispWidth = dimension.width;
+			this.dispHeight = height;
+			this.dispWidth = width;
 			zBuffer = new HashMap<Integer, HashMap<Integer,ZBufferItem>>();
 			
-			for (int x = 0 ; x < dimension.width + 1 ; x++){
+			for (int x = 0 ; x < width + 1 ; x++){
 				HashMap<Integer,ZBufferItem> map = new HashMap<Integer,ZBufferItem>();
 				zBuffer.put(x, map);
-				for (int y = 0 ; y < dimension.height + 1 ; y++){
+				for (int y = 0 ; y < height + 1 ; y++){
 					map.put(y, new ZBufferItem(x, y));
 				}
 			}

@@ -19,8 +19,8 @@ import com.graphics.lib.texture.Texture;
 public class WorldCoord extends Point {
 
 	private Point transformed;
-	private Map<Texture, Double> textureX = new HashMap<Texture, Double>();
-	private Map<Texture, Double> textureY = new HashMap<Texture, Double>();
+	private Map<Texture, Double> textureX;
+	private Map<Texture, Double> textureY;
 	
 	public WorldCoord() {
 		this(0,0,0);
@@ -32,7 +32,7 @@ public class WorldCoord extends Point {
 	
 	public WorldCoord(double x, double y, double z) {
 		super(x, y, z);
-		this.resetTransformed();
+		transformed = new Point(x,y,z);
 	}
 	
 	public Point getTransformed() {
@@ -40,22 +40,26 @@ public class WorldCoord extends Point {
 	}
 
 	public void resetTransformed() {
-		transformed = new Point (x, y, z);
+		transformed.x = x;
+		transformed.y = y;
+		transformed.z = z;
 	}
 
 	public double getTextureX(Texture t) {
-		return (textureX.containsKey(t)) ? textureX.get(t) : 0;
+		return (textureX != null && textureX.containsKey(t)) ? textureX.get(t) : 0;
 	}
 
 	public void setTextureX(Texture t, double textureX) {
+		if (this.textureX == null) this.textureX = new HashMap<Texture, Double>();
 		this.textureX.put(t, textureX);
 	}
 
 	public double  getTextureY(Texture t) {
-		return (textureY.containsKey(t)) ? textureY.get(t) : 0;
+		return (textureY != null && textureY.containsKey(t)) ? textureY.get(t) : 0;
 	}
 
 	public void setTextureY(Texture t, double textureY) {
+		if (this.textureY == null) this.textureY = new HashMap<Texture, Double>();
 		this.textureY.put(t, textureY);
 	}
 	

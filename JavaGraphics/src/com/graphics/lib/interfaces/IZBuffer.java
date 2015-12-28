@@ -1,6 +1,5 @@
 package com.graphics.lib.interfaces;
 
-import java.awt.Dimension;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,7 +39,8 @@ public interface IZBuffer {
 	
 	/**
 	 * Set the width of the buffer in pixels
-	 * @param dispWidth
+	 * @param width
+	 * @param height
 	 */
-	public void setDimensions(Dimension dimension);
+	public void setDimensions(int width, int height);
 }

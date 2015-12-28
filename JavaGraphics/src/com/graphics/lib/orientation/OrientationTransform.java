@@ -9,23 +9,49 @@ import com.graphics.lib.transform.XRotation;
 import com.graphics.lib.transform.YRotation;
 import com.graphics.lib.transform.ZRotation;
 
+/**
+ * Contains information on the transforms to be applied to match an orientation
+ * 
+ * @author Paul Brandon
+ *
+ */
 public class OrientationTransform {
 	private double xRot = 0;
 	private double yRot = 0;
 	private double zRot = 0;
 	
+	/**
+	 * Gets the angle in degrees to rotate by around the X axis
+	 * 
+	 * @return X Rotation angle
+	 */
 	public double getxRot() {
 		return xRot;
 	}
 
+	/**
+	 * Gets the angle in degrees to rotate by around the Y axis
+	 * 
+	 * @return Y Rotation angle
+	 */
 	public double getyRot() {
 		return yRot;
 	}
 
+	/**
+	 * Gets the angle in degrees to rotate by around the Z axis
+	 * 
+	 * @return Z Rotation angle
+	 */
 	public double getzRot() {
 		return zRot;
 	}
 
+	/**
+	 * Generates and stores the rotations needed to match the given orientation from a starting point Forward(0,0,1), Right(1,0,0), Up(0,-1,0)
+	 * 
+	 * @param orientation
+	 */
 	public void saveCurrentTransforms(IOrientation orientation)
 	{
 		Vector forwardv = orientation.getForward();
@@ -77,6 +103,11 @@ public class OrientationTransform {
 		
 	}
 	
+	/**
+	 * Apply the stored rotations to a given object
+	 * 
+	 * @param obj
+	 */
 	public void addRotation(CanvasObject obj)
 	{
 		obj.applyTransform(new Rotation<ZRotation>(ZRotation.class, zRot));
@@ -84,6 +115,11 @@ public class OrientationTransform {
 		obj.applyTransform(new Rotation<YRotation>(YRotation.class, yRot));
 	}
 	
+	/**
+	 * Remove the stored rotation from a given object
+	 * 
+	 * @param obj
+	 */
 	public void removeRotation(CanvasObject obj)
 	{	
 		obj.applyTransform(new Rotation<YRotation>(YRotation.class, -yRot));

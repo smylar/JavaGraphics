@@ -11,12 +11,14 @@ import com.graphics.lib.interfaces.IOrientation;
  *
  */
 public class ViewAngleCamera extends Camera {
+
+	private static final double cos45 = Math.cos(Math.toRadians(45));
+	private double viewAngle = 45;
+	private double tanViewAngle = Math.tan(Math.toRadians(45));
 	
 	public ViewAngleCamera(IOrientation orientation) {
 		super(orientation);
 	}
-
-	private double viewAngle = 90;
 	
 	@Override
 	public void getViewSpecific(CanvasObject obj) {
@@ -70,13 +72,14 @@ public class ViewAngleCamera extends Camera {
 
 	public void setViewAngle(double viewAngle) {
 		if (viewAngle <= 0) return;
-		if (viewAngle >= 180) viewAngle = 179;
+		if (viewAngle >= 90) viewAngle = 89;
 		this.viewAngle = viewAngle;
+		this.tanViewAngle = Math.tan(Math.toRadians(this.viewAngle));
 	}
 	
 	private ViewPort getViewport(double z){
-		double radius = Math.tan(Math.toRadians(this.viewAngle/2)) * z;
-		double boxWidth = (Math.cos(Math.toRadians(45)) * radius) * 2;
+		double radius = this.tanViewAngle * z;
+		double boxWidth = (cos45 * radius) * 2;
 		double boxHeight = boxWidth;
 		if (this.dispwidth > this.dispheight){
 			boxHeight = boxHeight * (this.dispheight / this.dispwidth);

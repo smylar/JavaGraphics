@@ -106,6 +106,7 @@ public class GraphicsTest extends JFrame {
 		this.add(cnv, BorderLayout.CENTER);
 		
 		slave = new JFrame("Slave");
+		slave.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		slave.setLayout(new BorderLayout());
 		slave.setSize(300, 300);
 		slave.setLocation(750, 50);
@@ -347,12 +348,22 @@ public class GraphicsTest extends JFrame {
 				
 				if (key.getKeyChar() == 'z'){
 					double viewAngle = cam.getViewAngle() - 5;
-					cam.setViewAngle(viewAngle < 10 ? 10 : viewAngle);
+					cam.setViewAngle(viewAngle < 5 ? 5 : viewAngle);
 				}
 				
 				if (key.getKeyChar() == 'x'){
 					double viewAngle = cam.getViewAngle() + 5;
-					cam.setViewAngle(viewAngle > 170 ? 170 : viewAngle);
+					cam.setViewAngle(viewAngle > 85 ? 85 : viewAngle);
+				}
+				
+				if (key.getKeyChar() == 'c'){
+					double angle = l4.getLightConeAngle() - 5;
+					l4.setLightConeAngle(angle < 5 ? 5 : angle);
+				}
+				
+				if (key.getKeyChar() == 'v'){
+					double angle = l4.getLightConeAngle() + 5;
+					l4.setLightConeAngle(angle > 85 ? 85 : angle);
 				}
 				
 				if (key.getKeyChar() == '1'){
