@@ -82,10 +82,4 @@ public class Ovoid extends CanvasObject{
 	{
 		return this.getVertexList().get(this.getVertexList().size() - 1);
 	}
-	
-	@Override
-	public boolean isPointInside(Point p)
-	{
-		return this.getCentre().distanceTo(p) < this.radius;
-	}
 }

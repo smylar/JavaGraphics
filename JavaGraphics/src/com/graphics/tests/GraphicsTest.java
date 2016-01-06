@@ -12,9 +12,12 @@ import java.util.Set;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+import com.graphics.lib.Facet;
 import com.graphics.lib.ObjectControls;
 import com.graphics.lib.Point;
+import com.graphics.lib.Utils;
 import com.graphics.lib.Vector;
+import com.graphics.lib.WorldCoord;
 import com.graphics.shapes.Cuboid;
 import com.graphics.shapes.Lantern;
 import com.graphics.shapes.Ovoid;
@@ -75,22 +78,26 @@ public class GraphicsTest extends JFrame {
 		//zBuf.setSkip(3);
 		cnv.setzBuffer(zBuf);
 		
-		cnv.addDrawOperation(Utils.showMarkers());
+		cnv.addDrawOperation(TestUtils.showMarkers());
+		
+		Facet floor = new Facet(new WorldCoord(0,650,0), new WorldCoord(700,650,0), new WorldCoord(0,650,700));
+		cnv.setFloor(floor);
+		//cnv.setDrawShadows(true);
 		
 		ObjectTiedLightSource l1 = new ObjectTiedLightSource(0,0,-500);
 		l1.setColour(new Color(255, 0, 0));
 		cnv.addLightSource(l1);
 		CanvasObject lantern1 = new Lantern();
 		lantern1.setColour(l1.getColour());
-		cnv.registerObject(lantern1, new Point(0,0,-500), false, ShaderFactory.GetShader(ShaderFactory.ShaderEnum.NONE));
+		cnv.registerObject(lantern1, new Point(0,0,-500), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.NONE));
 		l1.tieTo(lantern1);
 		
-		ObjectTiedLightSource l2 = new ObjectTiedLightSource(600,500,-100);
+		ObjectTiedLightSource l2 = new ObjectTiedLightSource(500,200,-100);
 		l2.setColour(new Color(0, 255, 0));
 		cnv.addLightSource(l2);
 		CanvasObject lantern2 = new Lantern();
 		lantern2.setColour(l2.getColour());
-		cnv.registerObject(lantern2, new Point(600,500,-100), false, ShaderFactory.GetShader(ShaderFactory.ShaderEnum.NONE));
+		cnv.registerObject(lantern2, new Point(500,200,-100), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.NONE));
 		l2.tieTo(lantern2);
 		
 		
@@ -99,7 +106,7 @@ public class GraphicsTest extends JFrame {
 		cnv.addLightSource(l3);
 		CanvasObject lantern3 = new Lantern();
 		lantern3.setColour(l3.getColour());
-		cnv.registerObject(lantern3, new Point(400,100,100), false, ShaderFactory.GetShader(ShaderFactory.ShaderEnum.NONE));
+		cnv.registerObject(lantern3, new Point(400,100,100), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.NONE));
 		l3.tieTo(lantern3);
 		
 
@@ -112,12 +119,12 @@ public class GraphicsTest extends JFrame {
 		slave.setLocation(750, 50);
 		
 		CanvasObject camcube = new Cuboid(20,20,20);
-		cnv.registerObject(camcube, new Point(1515, 300, 400), false, ShaderFactory.GetShader(ShaderFactory.ShaderEnum.FLAT));
+		cnv.registerObject(camcube, new Point(1515, 300, 400), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.FLAT));
 		
 		OrientableCanvasObject<Whale> whale = new Whale();
 		whale.setColour(Color.cyan);
 		
-		cnv.registerObject(whale, new Point(1515, 300, 400), false, ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
+		cnv.registerObject(whale, new Point(1515, 300, 400), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
 		
 		ViewAngleCamera slaveCam = new ViewAngleCamera(new SimpleOrientation(OrientableCanvasObject.ORIENTATION_TAG));
 		slaveCam.setPosition(new Point(1500, 300, 400));
@@ -132,11 +139,12 @@ public class GraphicsTest extends JFrame {
 		ship.setColour(new Color(50, 50, 50));
 		ship.applyTransform(new Rotation<YRotation>(YRotation.class, 180));
 		ship.setOrientation(new SimpleOrientation(OrientableCanvasObject.ORIENTATION_TAG));
-		cnv.registerObject(ship, new Point(350, 350, -50), false, ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
+		cnv.registerObject(ship, new Point(350, 350, -50), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
 		
 		PlugableCanvasObject<Torus> torus = new PlugableCanvasObject<Torus>(new Torus(50,50,20));
 		torus.setColour(new Color(250, 250, 250));
-		cnv.registerObject(torus, new Point(200,200,400), false, ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
+		//torus.setLightIntensityFinder(Utils.getShadowLightIntensityFinder(() -> { return cnv.getShapes();}));
+		cnv.registerObject(torus, new Point(200,200,400), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
 		Transform torust1 = new RepeatingTransform<Rotation<?>>(new Rotation<YRotation>(YRotation.class, 3), 60);
 		Transform torust2 = new RepeatingTransform<Rotation<?>>(new Rotation<XRotation>(XRotation.class, 3), 60);
 		SequenceTransform torust = new SequenceTransform();
@@ -147,7 +155,7 @@ public class GraphicsTest extends JFrame {
 		
 		
 		PlugableCanvasObject<TexturedCuboid> cube = new PlugableCanvasObject<TexturedCuboid>(new TexturedCuboid(200,200,200));
-		cnv.registerObject(cube, new Point(500,500,450), false, ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
+		cnv.registerObject(cube, new Point(500,500,450), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
 		Transform cubet2 = new RepeatingTransform<Rotation<?>>(new Rotation<ZRotation>(ZRotation.class, 3), 30);
 		cube.addTransformAboutCentre(cubet2);
 		cube.addFlag(Events.STICKY);
@@ -161,7 +169,7 @@ public class GraphicsTest extends JFrame {
 		PlugableCanvasObject<Sphere> sphere = new PlugableCanvasObject<Sphere>(new Sphere(100,15));
 		sphere.setColour(new Color(255, 255, 0));
 		sphere.addFlag(Events.EXPLODE_PERSIST);
-		cnv.registerObject(sphere, new Point(500,200,400), false, ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
+		cnv.registerObject(sphere, new Point(500,200,400), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
 		
 		for (int i = 0; i < sphere.getFacetList().size() ; i++)
 		{
@@ -170,6 +178,12 @@ public class GraphicsTest extends JFrame {
 				sphere.getFacetList().get(i).setColour(new Color(150,0,150));
 			}
 		}
+		
+		Wall wall = new Wall(40,40);
+		wall.setColour(new Color(240, 240, 240));
+		wall.setLightIntensityFinder(Utils.getShadowLightIntensityFinder(() -> { return cnv.getShapes();}));
+		wall.setVisible(false);
+		cnv.registerObject(wall, new Point(300,0,700), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
 		
 		IPlugin<Void,Set<PlugableCanvasObject<?>>> getObjects = new IPlugin<Void,Set<PlugableCanvasObject<?>>>(){
 			@Override
@@ -249,7 +263,7 @@ public class GraphicsTest extends JFrame {
 					proj.getObjectAs(OrientableCanvasObject.class).setOrientation(new SimpleOrientation());
 					proj.setBaseIntensity(1);
 					proj.setColour(new Color(255, 0, 0, 80));
-					
+					proj.setCastsShadow(false);
 					proj.registerPlugin(Events.EXPLODE, explode, false);
 					for (int i = 0; i < proj.getFacetList().size() ; i++)
 					{
@@ -302,7 +316,7 @@ public class GraphicsTest extends JFrame {
 					pos.x += right.x * 25;
 					pos.y += right.y * 25;
 					pos.z += right.z * 25;
-					cnv.registerObject(proj, pos, false);
+					cnv.registerObject(proj, pos);
 					ObjectTiedLightSource l5 = new ObjectTiedLightSource(pos.x, pos.y, pos.z);
 					l5.tieTo(proj);
 					l5.setColour(proj.getColour());
@@ -314,7 +328,7 @@ public class GraphicsTest extends JFrame {
 					PlugableCanvasObject<Sphere> proj = new PlugableCanvasObject<Sphere>(new Sphere(18,20));
 					proj.setBaseIntensity(1);
 					proj.setColour(new Color(0, 255, 255, 80));
-					
+					proj.setCastsShadow(false);
 					proj.deleteAfterTransforms();
 					proj.setProcessBackfaces(true);
 					Optional<MovementTransform> shipMove = ship.getTransformsOfType(MovementTransform.class)
@@ -338,7 +352,7 @@ public class GraphicsTest extends JFrame {
 					pos.x -= right.x * 25;
 					pos.y -= right.y * 25;
 					pos.z -= right.z * 25;
-					cnv.registerObject(proj, pos, false);
+					cnv.registerObject(proj, pos);
 					ObjectTiedLightSource l5 = new ObjectTiedLightSource(pos.x, pos.y, pos.z);
 					l5.tieTo(proj);
 					l5.setColour(new Color(0, 255, 255));
@@ -366,17 +380,35 @@ public class GraphicsTest extends JFrame {
 					l4.setLightConeAngle(angle > 85 ? 85 : angle);
 				}
 				
+				if (key.getKeyChar() == 'n'){
+					wall.setVisible(!wall.isVisible());
+				}
+				
+				if (key.getKeyChar() == 'm'){
+					cnv.setDrawShadows(!cnv.isDrawShadows());
+				}
+				
+				if (key.getKeyChar() == '.' && l3.getIntensity() <= 0.9 && l3.isOn()){
+					l3.setIntensity(l3.getIntensity() + 0.1);
+					lantern3.setColour(l3.getActualColour());
+				}
+				
+				if (key.getKeyChar() == ',' && l3.getIntensity() >= 0.1 && l3.isOn()){
+					l3.setIntensity(l3.getIntensity() - 0.1);
+					lantern3.setColour(l3.getActualColour());
+				}
+				
 				if (key.getKeyChar() == '1'){
 					l1.toggle();
-					lantern1.setColour(l1.isOn() ? l1.getColour() : Color.black);
+					lantern1.setColour(l1.getActualColour());
 				}
 				if (key.getKeyChar() == '2'){
 					l2.toggle();
-					lantern2.setColour(l2.isOn() ? l2.getColour() : Color.black);
+					lantern2.setColour(l2.getActualColour());
 				}
 				if (key.getKeyChar() == '3'){
 					l3.toggle();
-					lantern3.setColour(l3.isOn() ? l3.getColour() : Color.black);
+					lantern3.setColour(l3.getActualColour());
 				}
 			}
 			

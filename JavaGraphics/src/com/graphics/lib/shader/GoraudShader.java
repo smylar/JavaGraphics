@@ -20,6 +20,12 @@ import com.graphics.lib.plugins.Events;
 import com.graphics.lib.texture.Texture;
 import com.graphics.lib.zbuffer.ScanLine;
 
+/**
+ * A shader that works out the colour at each vertex and then interpolates the colours for the pixels in between
+ * 
+ * @author Paul Brandon
+ *
+ */
 public class GoraudShader implements IShader{
 
 	private Color colour;
@@ -33,28 +39,7 @@ public class GoraudShader implements IShader{
 	private double lineLength = 0;
 	private Set<LightSource> ls = new HashSet<LightSource>();
 	private Map<Point, IntensityComponents> pointLight = new HashMap<Point, IntensityComponents>();
-	private boolean drawTextures = true;
 	
-	
-	public boolean isDrawTextures() {
-		return drawTextures;
-	}
-
-	public void setDrawTextures(boolean drawTextures) {
-		this.drawTextures = drawTextures;
-	}
-	
-	@Override
-	public void setLightsources(Set<LightSource> ls) {
-		this.ls = ls;
-		
-	}
-
-	@Override
-	public Set<LightSource> getLightsources() {
-		return ls;
-	}
-
 	@Override
 	public void init(CanvasObject parent, Facet facet) {
 		colour = facet.getColour() == null ? parent.getColour() : facet.getColour();
@@ -97,25 +82,23 @@ public class GoraudShader implements IShader{
 		
 		Color pointColour = colour;
 		
-		if (this.isDrawTextures()){
-			for (Texture t : facet.getTexture()){		
-				startTexture = this.getTexturePosition(x, scanLine.startY, scanLine.startLine, t);
-				endTexture = this.getTexturePosition(x, scanLine.endY, scanLine.endLine, t);
-				double ux = (1 - percentDistCovered) * (startTexture.x/startTexture.z) + (percentDistCovered * (endTexture.x/endTexture.z));
-				double uy = (1 - percentDistCovered) * (startTexture.y/startTexture.z) + (percentDistCovered * (endTexture.y/endTexture.z));
-				double r = (1 - percentDistCovered) * (1/startTexture.z) + (percentDistCovered * (1/endTexture.z));
-				
-				int tx = (int)Math.round(ux/r);
-				int ty = (int)Math.round(uy/r);
-				
-				Color c = t.getColour(tx, ty);
-	
-				if (c != null){
-					if (!t.applyLighting()) return c;
-						
-					pointColour = c;
-					break;
-				}
+		for (Texture t : facet.getTexture()){
+			startTexture = this.getTexturePosition(x, scanLine.startY, scanLine.startLine, t);
+			endTexture = this.getTexturePosition(x, scanLine.endY, scanLine.endLine, t);
+			double ux = (1 - percentDistCovered) * (startTexture.x/startTexture.z) + (percentDistCovered * (endTexture.x/endTexture.z));
+			double uy = (1 - percentDistCovered) * (startTexture.y/startTexture.z) + (percentDistCovered * (endTexture.y/endTexture.z));
+			double r = (1 - percentDistCovered) * (1/startTexture.z) + (percentDistCovered * (1/endTexture.z));
+			
+			int tx = (int)Math.round(ux/r);
+			int ty = (int)Math.round(uy/r);
+			
+			Color c = t.getColour(tx, ty);
+
+			if (c != null){
+				if (!t.applyLighting()) return c;
+					
+				pointColour = c;
+				break;
 			}
 		}
 		
@@ -168,4 +151,16 @@ public class GoraudShader implements IShader{
 	
 		return new Point (x, y, z);
 	}
+	
+	@Override
+	public void setLightsources(Set<LightSource> ls) {
+		this.ls = ls;
+		
+	}
+
+	@Override
+	public Set<LightSource> getLightsources() {
+		return ls;
+	}
+
 }

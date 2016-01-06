@@ -83,7 +83,7 @@ public class CanvasObject extends Observable implements Observer{
 	 * 
 	 * @return The root canvas object wrapped by this wrapper
 	 */
-	protected CanvasObject getBaseObject()
+	public CanvasObject getBaseObject()
 	{
 		return getWrappedObject() == null ? this : getWrappedObject().getBaseObject();
 	}
@@ -113,7 +113,7 @@ public class CanvasObject extends Observable implements Observer{
 	{
 		this.data = data;
 	}
-	
+
 	public final void addFlag(String flag)
 	{
 		this.flags.add(flag);
@@ -156,6 +156,14 @@ public class CanvasObject extends Observable implements Observer{
 
 	public final boolean isObserving(){
 		return getData().observing != null;
+	}
+	
+	public final boolean getCastsShadow() {
+		return getData().castsShadow;
+	}
+
+	public final void setCastsShadow(boolean castsShadow) {
+		getData().castsShadow = castsShadow;
 	}
 	
 	public final Color getColour() {
@@ -442,6 +450,11 @@ public class CanvasObject extends Observable implements Observer{
 		//Sub shapes???
 	}
 	
+	public boolean vectorIntersects(Point start, Vector v){
+		if (this.getBaseObject() != this) return this.getBaseObject().vectorIntersects(start, v);
+		return false; //TODO (have an easy calculation for sphere so testing there first)
+	}
+	
 	/**
 	 * This method will be executed once all draw operations (across all objects) are complete
 	 */
@@ -452,7 +465,12 @@ public class CanvasObject extends Observable implements Observer{
 	
 	public ILightIntensityFinder getLightIntensityFinder()
 	{
-		return Utils.getLightIntensityFinder(getData().liFinder);
+		return getData().liFinder;
+	}
+	
+	public void setLightIntensityFinder(ILightIntensityFinder liFinder)
+	{
+		getData().liFinder = liFinder;
 	}
 	
 	/**
@@ -568,10 +586,13 @@ public class CanvasObject extends Observable implements Observer{
 		protected boolean processBackfaces = false;
 		protected boolean isVisible = true;
 		protected boolean isDeleted = false;
+		protected boolean castsShadow = true;
 		//TODO - is solid or phased when invisible?
 		protected boolean deleteAfterTransforms = false;
 		protected CanvasObject observing = null;
-		public Utils.LightIntensityFinderEnum liFinder = Utils.LightIntensityFinderEnum.DEFAULT;
+		//public Utils.LightIntensityFinderEnum liFinder = Utils.LightIntensityFinderEnum.DEFAULT;
+		public ILightIntensityFinder liFinder = Utils.getLightIntensityFinder(Utils.LightIntensityFinderEnum.DEFAULT);
+		
 		public Utils.VertexNormalFinderEnum vnFinder = Utils.VertexNormalFinderEnum.DEFAULT; 
 		//TODO this class as POJO
 	}

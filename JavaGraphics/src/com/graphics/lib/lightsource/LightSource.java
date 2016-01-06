@@ -10,6 +10,7 @@ public class LightSource{
 	private Point position;
 	private double intensity = 1;
 	private Color colour = new Color(255, 255, 255);
+	private Color actualColour = new Color(255, 255, 255);
 	private boolean on = true;
 	private double range = 5000;
 	private boolean deleted = false;
@@ -53,6 +54,7 @@ public class LightSource{
 
 	public void setIntensity(double intensity) {
 		this.intensity = intensity;
+		this.setActualColour();
 	}
 	
 	public double getIntensity() {
@@ -62,9 +64,23 @@ public class LightSource{
 	public Color getColour() {
 		return colour;
 	}
+	
+	public Color getActualColour(){
+		return (isOn() ? actualColour : Color.black);
+	}
+	
+	protected void setActualColour() {
+		actualColour = new Color(
+					(int)Math.round(colour.getRed() * intensity),
+					(int)Math.round(colour.getGreen() * intensity),
+					(int)Math.round(colour.getBlue() * intensity),
+					colour.getAlpha()
+					);
+	}
 
 	public void setColour(Color colour) {
 		this.colour = colour;
+		this.setActualColour();
 	}
 	
 	public void turnOn()
@@ -86,6 +102,12 @@ public class LightSource{
 		return on;
 	}
 
+	/**
+	 * Get the amount of each colour component of the light illuminating the given point from this light source
+	 * 
+	 * @param p
+	 * @return
+	 */
 	public IntensityComponents getIntensityComponents(Point p)
 	{
 		IntensityComponents components = new IntensityComponents();

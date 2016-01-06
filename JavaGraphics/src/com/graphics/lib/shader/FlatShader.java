@@ -11,6 +11,12 @@ import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.zbuffer.ScanLine;
 
+/**
+ * A shader that takes the light intensity at the average of the 3 vertices and applies that colour across the whole facet
+ * 
+ * @author Paul Brandon
+ *
+ */
 public class FlatShader implements IShader{
 
 	private Color colour = new Color(255,255,255);

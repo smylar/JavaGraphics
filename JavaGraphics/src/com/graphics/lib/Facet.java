@@ -102,7 +102,8 @@ public class Facet {
 		Vector v = vec.getUnitVector();
 		double t = (normal.x * v.x) + (normal.y * v.y) + (normal.z * v.z);
 		double tmod = (normal.x*p.x) + (normal.y*p.y) + (normal.z*p.z);
-		if (t == 0) return null;
+		//if (t == 0) return null;
+		if (t >= 0) return null;
 		double tval = ((normal.x* point1.x) + (normal.y* point1.y) + (normal.z* point1.z) - tmod) / t;
 		return new Point(p.x + (v.x*tval), p.y + (v.y*tval), p.z + (v.z*tval));
 	}

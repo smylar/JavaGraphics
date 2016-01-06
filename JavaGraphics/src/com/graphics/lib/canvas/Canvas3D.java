@@ -1,5 +1,6 @@
 package com.graphics.lib.canvas;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,6 +18,8 @@ import com.graphics.lib.Facet;
 import com.graphics.lib.GeneralPredicates;
 import com.graphics.lib.Point;
 import com.graphics.lib.Utils;
+import com.graphics.lib.Vector;
+import com.graphics.lib.WorldCoord;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasUpdateListener;
 import com.graphics.lib.interfaces.IZBuffer;
@@ -25,6 +28,12 @@ import com.graphics.lib.shader.IShader;
 import com.graphics.lib.transform.Translation;
 import com.graphics.lib.zbuffer.ZBufferItem;
 
+/**
+ * Responsible for output to the screen
+ * 
+ * @author Paul Brandon
+ *
+ */
 public class Canvas3D extends JPanel{
 
 	private static final long serialVersionUID = 1L;
@@ -38,6 +47,8 @@ public class Canvas3D extends JPanel{
 	private double horizon = 8000;
 	private Set<ICanvasUpdateListener> slaves = new HashSet<ICanvasUpdateListener>();
 	private List<BiConsumer<Canvas3D,Graphics>> drawPlugins = new ArrayList<BiConsumer<Canvas3D,Graphics>>();
+	private boolean drawShadows = false;
+	private Facet floor = null;
 	private boolean okToPaint = false;
 
 	public Canvas3D(Camera camera)
@@ -45,6 +56,11 @@ public class Canvas3D extends JPanel{
 		this.camera = camera;	
 	}
 	
+	/**
+	 * Allows anonymous functions to be registered in order the customise the display
+	 * 
+	 * @param operation A paint operation
+	 */
 	public void addDrawOperation(BiConsumer<Canvas3D,Graphics> operation){
 		drawPlugins.add(operation);
 	}
@@ -56,14 +72,25 @@ public class Canvas3D extends JPanel{
 	public void setHorizon(double horizon) {
 		this.horizon = horizon;
 	}
+	
+	public boolean isDrawShadows() {
+		return drawShadows;
+	}
+
+	public void setDrawShadows(boolean drawShadows) {
+		this.drawShadows = drawShadows;
+	}
+	
+	public Facet getFloor() {
+		return floor;
+	}
+
+	public void setFloor(Facet floor) {
+		this.floor = floor;
+	}
 
 	public void addLightSource(LightSource lightSource) {
 		this.lightSourcesToAdd.add(lightSource);
-	}
-
-	public void registerObject(CanvasObject obj, Point position)
-	{
-		this.registerObject(obj, position, false);
 	}
 	
 	public Set<CanvasObject> getShapes() {
@@ -117,23 +144,34 @@ public class Canvas3D extends JPanel{
 		this.camera.setViewport(this.getWidth(), this.getHeight());
 	}
 
-	public void registerObject(CanvasObject obj, Point position, boolean drawNow){
-		this.registerObject(obj, position, drawNow, null);
+	/**
+	 * Register an object with this canvas so that it will draw it at a specified (world) location with a default shader
+	 * 
+	 * @param obj		Object to register
+	 * @param position	Position to draw it at (translates object in relation to the point 0,0,0 to the given point)
+	 */
+	public void registerObject(CanvasObject obj, Point position){
+		this.registerObject(obj, position, null);
 	}
 	
-	public void registerObject(CanvasObject obj, Point position, boolean drawNow, IShader shader)
+	/**
+	 * Register an object with this canvas so that it will draw it at a specified (world) location
+	 * 
+	 * @param obj		Object to register
+	 * @param position	Position to draw it at (translates object in relation to the point 0,0,0 to the given point)
+	 * @param shader	Shader to draw the object with
+	 */
+	public void registerObject(CanvasObject obj, Point position, IShader shader)
 	{
 		if (this.shapes.containsKey(obj)) return;
 
 		obj.applyTransform(new Translation(position));
 		this.shapes.put(obj, shader);
-		
-		if (drawNow)
-		{
-			this.doDraw();
-		}
 	}
 	
+	/**
+	 * Trigger a draw cycle
+	 */
 	public void doDraw()
 	{
 		if (lightSourcesToAdd.size() > 0){
@@ -142,6 +180,7 @@ public class Canvas3D extends JPanel{
 		}
 		
 		while(this.zBuffer != null && this.isOkToPaint()){
+			//while isOkToPaint() is true then repaint has not yet happened since the last draw cycle
 			try {
 				Thread.sleep(1);
 			} catch (InterruptedException e) {}
@@ -159,6 +198,14 @@ public class Canvas3D extends JPanel{
 		processShapes.stream().filter(s -> s.isDeleted()).forEach(s -> this.shapes.remove(s));
 		processShapes.removeIf(s -> s.isDeleted() || s.isObserving());
 		
+		if (this.drawShadows && this.floor != null){
+			Set<CanvasObject> shadows = Collections.synchronizedSet(new HashSet<CanvasObject>()); 
+			processShapes.parallelStream().forEach(s -> {
+				shadows.addAll(getShadowOnFloor(s));
+			});
+			processShapes.addAll(shadows);
+		}
+		
 		this.camera.doTransforms();
 		
 		processShapes.parallelStream().forEach(s -> {
@@ -175,6 +222,13 @@ public class Canvas3D extends JPanel{
 		});
 	}
 	
+	/**
+	 * Process a shape into z buffer entries using the given shader
+	 * 
+	 * @param obj	Object to process
+	 * @param zBuf	Z Buffer to update
+	 * @param shader	Shader to draw pixels with
+	 */
 	private void processShape(CanvasObject obj, IZBuffer zBuf, IShader shader)
 	{
 		obj.applyTransforms();
@@ -196,6 +250,63 @@ public class Canvas3D extends JPanel{
 		{
 			this.processShape(child, zBuf, shader);
 		};
+	}
+	
+	/**
+	 * EXPERIMENTAL - Used to project shadows on to a plane (in this case a floor plane - though it could be any plane)
+	 * <br/>
+	 * It generates a temporary canvas object that describes how the shadow is drawn, just like any other canvas object
+	 * <br/>
+	 * At the moment, it will just colour shadow areas in grey and does not take account of other light sources, that might mean there should be some lighting in a shaded area 
+	 * 
+	 * @param obj	Object to project a shadow for
+	 * @return		Set of generated shadow objects
+	 */
+	private Set<CanvasObject> getShadowOnFloor(CanvasObject obj){	
+		Set<CanvasObject> shadows = new HashSet<CanvasObject>();
+		if (floor == null || !obj.getCastsShadow()) return shadows;
+		
+		for (LightSource ls : lightSources){
+			if (!ls.isOn()) continue;
+			
+			CanvasObject shadow = new CanvasObject();
+			shadow.setColour(new Color(50,50,50));
+			shadow.setProcessBackfaces(true);
+			shadow.setVisible(true);
+			for (Facet f : obj.getFacetList()){
+				//TODO this will work out the intersection for a point several times depending on the facets and creates more points than necessary, will want rewrite for better efficiency
+				if (!obj.isVisible() || !GeneralPredicates.isFrontface(ls).test(f)) continue;
+				
+				WorldCoord p1 = getShadowPoint(ls.getPosition(), f.point1);
+				if (p1 == null) continue;
+				WorldCoord p2 = getShadowPoint(ls.getPosition(), f.point2);
+				if (p2 == null) continue;
+				WorldCoord p3 = getShadowPoint(ls.getPosition(), f.point3);
+				if (p3 == null) continue;
+				shadow.getVertexList().add(p1);
+				shadow.getVertexList().add(p2);
+				shadow.getVertexList().add(p3);
+				shadow.getFacetList().add(new Facet(p1,p2,p3));
+			}
+			if (shadow.getFacetList().size() > 0) shadows.add(shadow);
+		}
+		return shadows;
+	}
+	
+	/**
+	 * Gets the point on the floor (shadow plane) for the line described by the two given points
+	 * 
+	 * @param start
+	 * @param end
+	 * @return World coordinate of intersection with the floor
+	 */
+	private WorldCoord getShadowPoint(Point start, Point end){
+		Vector lightVector = start.vectorToPoint(end).getUnitVector();
+		Point intersect = floor.getIntersectionPointWithFacetPlane(end, lightVector);
+		if (intersect == null) return null;
+		
+		WorldCoord planePoint = new WorldCoord(intersect);
+		return planePoint;
 	}
 	
 	@Override

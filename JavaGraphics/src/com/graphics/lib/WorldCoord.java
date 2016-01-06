@@ -8,7 +8,7 @@ import com.graphics.lib.texture.Texture;
 /**
  * A world coordinate is the representation of a point within the context of the world, and not as the camera might see it.
  * <br/>
- * This class extends Point in that allows a transformed point (camera coordinate) and a set of texture coordinates to be associated with it
+ * This class extends Point in that it allows a transformed point (camera coordinate) and a set of texture coordinates to be associated with it
  * 
  * @see Point
  * @see Texture

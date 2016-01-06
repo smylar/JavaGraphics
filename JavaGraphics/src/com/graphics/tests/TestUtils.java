@@ -7,7 +7,7 @@ import java.util.function.BiConsumer;
 import com.graphics.lib.camera.ViewAngleCamera;
 import com.graphics.lib.canvas.Canvas3D;
 
-public class Utils {
+public class TestUtils {
 	
 	
 	public static BiConsumer<Canvas3D,Graphics> showMarkers(){
