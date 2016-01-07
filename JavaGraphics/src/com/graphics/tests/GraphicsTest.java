@@ -40,15 +40,18 @@ import com.graphics.lib.shader.ShaderFactory;
 import com.graphics.lib.transform.*;
 import com.graphics.lib.zbuffer.ZBuffer;
 import com.graphics.shapes.Torus;
+import com.sound.ClipLibrary;
 
 public class GraphicsTest extends JFrame {
 
 	private static final long serialVersionUID = 1L;
+	private static final String SILENT_EXPLODE = "sexpl";
 	
 	private boolean go = true;
 	private JFrame slave;
 	private Canvas3D canvas;
 	private static GraphicsTest gt;
+	private ClipLibrary clipLibrary = new ClipLibrary();
 
 	public static void main (String[] args){
 		try {
@@ -206,6 +209,7 @@ public class GraphicsTest extends JFrame {
 					cnv.replaceShader(obj, ShaderFactory.GetShader(ShaderFactory.ShaderEnum.FLAT));
 					p.registerPlugin("STOP", PluginLibrary.stop(), false);
 					p.registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollided(getObjects, "STOP", null), true);
+					if (!obj.hasFlag(SILENT_EXPLODE)) clipLibrary.playSound("EXPLODE", -20f);
 				});
 				obj.registerSingleAfterDrawPlugin(Events.FLASH, PluginLibrary.flash(cnv.getLightSources()));
 				return null;
@@ -221,7 +225,10 @@ public class GraphicsTest extends JFrame {
 						PluginLibrary.stop2().execute(obj);
 						obj.observeAndMatch(impactee);
 					}
-					else PluginLibrary.bounce(impactee).execute(obj);
+					else {
+						PluginLibrary.bounce(impactee).execute(obj);
+						clipLibrary.playSound("BOUNCE", -20f);
+					}
 				}
 				return null;
 			}			
@@ -265,6 +272,7 @@ public class GraphicsTest extends JFrame {
 					proj.setColour(new Color(255, 0, 0, 80));
 					proj.setCastsShadow(false);
 					proj.registerPlugin(Events.EXPLODE, explode, false);
+					proj.addFlag(SILENT_EXPLODE);
 					for (int i = 0; i < proj.getFacetList().size() ; i++)
 					{
 						if (i % (proj.getObjectAs(Ovoid.class).getPointsPerCircle()/3) == 1 || i % (proj.getObjectAs(Ovoid.class).getPointsPerCircle()/3) == 0)
@@ -442,16 +450,20 @@ public class GraphicsTest extends JFrame {
 			
 			sleep = 50 - (new Date().getTime() - cycleStart);
 		}
-
+		try {
+			clipLibrary.close();
+		} catch (Exception e) {}
 		System.out.println("Bye bye");
 		System.exit(0);
 	}
 	
 	@Override
 	public void dispose(){
-		go = false;	
-		//super.dispose();
-		//slave.dispose();
-		//System.out.println("Disposing");
+		if (go){
+			go = false;
+		}else{
+			super.dispose();
+			slave.dispose();
+		}
 	}
 }
