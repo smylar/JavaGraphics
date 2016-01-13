@@ -18,6 +18,7 @@ import com.graphics.lib.Point;
 import com.graphics.lib.Utils;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
+import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ILightIntensityFinder;
 import com.graphics.lib.interfaces.IPointFinder;
 import com.graphics.lib.interfaces.IVertexNormalFinder;
@@ -32,9 +33,9 @@ import com.graphics.lib.transform.Translation;
  * <br/>
  *  e.g. We can add plugin and orientation functionality to a Sphere object without the Sphere having to provide that functionality
  *  <br>
- *  This would be done as follows:
+ *  This would be done as follows (though it looks a little horrid especially if we start adding more):
  *  <br/>
- *  <code>PlugableCanvasObject<OrientableCanvasObject<?>> obj = new PlugableCanvasObject<OrientableCanvasObject<?>>(new OrientableCanvasObject<Ovoid>(new Sphere(20,30)));</code>
+ *  <code>PlugableCanvasObject<?> obj = new PlugableCanvasObject<CanvasObject>(new OrientableCanvasObject<Ovoid>(new Sphere(20,30)));</code>
  *  <br/>
  *  <br/>
  *  However, we can still extend in the normal way so that Sphere could include this functionality
@@ -238,11 +239,11 @@ public class CanvasObject extends Observable implements Observer{
 	 * 
 	 * @param transform
 	 */
-	public final void applyCameraTransform(Transform transform)
+	public final void applyCameraTransform(Transform transform, Camera c)
 	{
 		transform.doTransform(getData().vertexList.stream().collect(Collector.of(
 				ArrayList::new,
-				(trans, world) -> trans.add(world.getTransformed()),
+				(trans, world) -> trans.add(world.getTransformed(c)),
 				(left, right) -> {left.addAll(right); return left;},
 				Collector.Characteristics.CONCURRENT
 				))
@@ -439,7 +440,7 @@ public class CanvasObject extends Observable implements Observer{
 	public boolean isPointInside(Point p)
 	{
 		if (this.getBaseObject() != this) return this.getBaseObject().isPointInside(p);
-		//should do for most simple objects - can override it for something shape specific
+		//should do for most simple objects - can override it for something shape specific - e.g. it doesn't work for the whale, and shapes such as spheres can can work this out much quicker
 		for (Facet f : getData().facetList)
 		{
 			Vector vecPointToFacet = p.vectorToPoint(f.point1).getUnitVector();

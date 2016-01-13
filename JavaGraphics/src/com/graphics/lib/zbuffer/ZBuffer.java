@@ -11,6 +11,7 @@ import com.graphics.lib.Facet;
 import com.graphics.lib.LineEquation;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
+import com.graphics.lib.camera.Camera;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.interfaces.IZBuffer;
 import com.graphics.lib.shader.IShader;
@@ -30,37 +31,47 @@ public class ZBuffer implements IZBuffer{
 		this.skip = skip;
 	}
 
+	@Override
+	public ZBufferItem getItemAt(int x, int y){
+		if (zBuffer == null) return null;
+		
+		HashMap<Integer,ZBufferItem> xCol = zBuffer.get(x);
+		if (xCol == null) return null;
+		
+		return xCol.get(y);
+	}
+	
 	/**
 	 * {@inheritDoc}
 	 * <br/>
 	 * Override notes: A null shader here will mean that the facets specified colour will be used
 	 */
 	@Override
-	public void Add(Facet facet, CanvasObject parent, IShader shader)
+	public void Add(Facet facet, CanvasObject parent, IShader shader, Camera c)
 	{
 		if (zBuffer == null) return;
 		List<LineEquation> lines = new ArrayList<LineEquation>();
-		lines.add(new LineEquation(facet.point1, facet.point2));
-		lines.add(new LineEquation(facet.point2, facet.point3));
-		lines.add(new LineEquation(facet.point3, facet.point1));
+		lines.add(new LineEquation(facet.point1, facet.point2, c));
+		lines.add(new LineEquation(facet.point2, facet.point3, c));
+		lines.add(new LineEquation(facet.point3, facet.point1, c));
 		List<WorldCoord> points = new ArrayList<WorldCoord>();
 		points.add(facet.point1);
 		points.add(facet.point2);
 		points.add(facet.point3);
 		
-		Vector normal = facet.getTransformedNormal();
+		Vector normal = facet.getTransformedNormal(c);
 		
 		if (normal.z == 0) return;
 		
 		Comparator<WorldCoord> xComp = new Comparator<WorldCoord>(){
 			@Override
 			public int compare(WorldCoord o1, WorldCoord o2) {
-				return (int)(o1.getTransformed().x - o2.getTransformed().x);
+				return (int)(o1.getTransformed(c).x - o2.getTransformed(c).x);
 			}		
 		};
 
-		double minX = points.stream().min(xComp).get().getTransformed().x;
-		double maxX = points.stream().max(xComp).get().getTransformed().x;
+		double minX = points.stream().min(xComp).get().getTransformed(c).x;
+		double maxX = points.stream().max(xComp).get().getTransformed(c).x;
 
 		
 		if (minX < 0) minX = 0;
@@ -74,7 +85,7 @@ public class ZBuffer implements IZBuffer{
 			} catch (Exception e) {
 				//e.printStackTrace();
 			} 
-			localShader.init(parent, facet);
+			localShader.init(parent, facet, c);
 		}
 		
 		
@@ -99,7 +110,7 @@ public class ZBuffer implements IZBuffer{
 				if (skip == 1 || y % skip == 0 || colour == null){	
 					colour = localShader == null ? (facet.getColour() == null ? parent.getColour() : facet.getColour()) : localShader.getColour(scanLine, x, y);
 				}
-				this.addToBuffer(x, y, z, colour);
+				this.addToBuffer(parent, x, y, z, colour);
 			}
 		}
 	}
@@ -109,7 +120,7 @@ public class ZBuffer implements IZBuffer{
 		return zBuffer;
 	}
 
-	private void addToBuffer(Integer x, Integer y, double z, Color colour)
+	private void addToBuffer(CanvasObject parent, Integer x, Integer y, double z, Color colour)
 	//private synchronized void addToBuffer(Integer x, Integer y, double z, Color colour)
 	{	
 		if (z < 0) return;
@@ -126,7 +137,7 @@ public class ZBuffer implements IZBuffer{
 			this.zBuffer.get(x).put(y, bufferItem);
 		}*/
 		
-		bufferItem.add(z, colour);
+		bufferItem.add(parent, z, colour);
 	}
 		
 
@@ -225,5 +236,15 @@ public class ZBuffer implements IZBuffer{
 				}
 			}
 		}
+	}
+
+	@Override
+	public void clear() {
+		this.zBuffer.values().stream().forEach(m -> {
+			for (ZBufferItem item : m.values()){
+				if (item.isActive()) item.clear();
+			}
+		});
+		
 	}
 }

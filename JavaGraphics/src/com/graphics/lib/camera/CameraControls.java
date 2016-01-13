@@ -51,7 +51,7 @@ public class CameraControls implements KeyListener{
 			CameraTransform transform = this.camera.getTransform(BACKWARD);
 			if (transform != null && transform instanceof CameraMovementTransform){
 				CameraMovementTransform cTransform = (CameraMovementTransform)transform;
-				if (cTransform.getVelocity() > 4) cTransform.setVelocity(cTransform.getVelocity() - 4);
+				if (cTransform.getSpeed() > 4) cTransform.setSpeed(cTransform.getSpeed() - 4);
 				else this.camera.removeTransform(BACKWARD);
 				return;
 			}
@@ -59,7 +59,7 @@ public class CameraControls implements KeyListener{
 			transform = this.camera.getTransform(FORWARD);
 			if (transform != null && transform instanceof CameraMovementTransform){
 				CameraMovementTransform cTransform = (CameraMovementTransform)transform;
-				if (cTransform.getVelocity() < 50) cTransform.setVelocity(cTransform.getVelocity() + 4);
+				if (cTransform.getSpeed() < 50) cTransform.setSpeed(cTransform.getSpeed() + 4);
 			}
 			else{
 				this.camera.addTransform(FORWARD, new CameraMovementTransform(() -> camera.getOrientation().getForward(), 4));
@@ -70,7 +70,7 @@ public class CameraControls implements KeyListener{
 			CameraTransform transform = this.camera.getTransform(FORWARD);
 			if (transform != null && transform instanceof CameraMovementTransform){
 				CameraMovementTransform cTransform = (CameraMovementTransform)transform;
-				if (cTransform.getVelocity() > 4) cTransform.setVelocity(cTransform.getVelocity() - 4);
+				if (cTransform.getSpeed() > 4) cTransform.setSpeed(cTransform.getSpeed() - 4);
 				else this.camera.removeTransform(FORWARD);
 				return;
 			}			
@@ -78,7 +78,7 @@ public class CameraControls implements KeyListener{
 			transform = this.camera.getTransform(BACKWARD);
 			if (transform != null && transform instanceof CameraMovementTransform){
 				CameraMovementTransform cTransform = (CameraMovementTransform)transform;
-				if (cTransform.getVelocity() < 50) cTransform.setVelocity(cTransform.getVelocity() + 4);
+				if (cTransform.getSpeed() < 50) cTransform.setSpeed(cTransform.getSpeed() + 4);
 			}
 			else{
 				this.camera.addTransform(BACKWARD, new CameraMovementTransform(() -> camera.getOrientation().getBack(), 4));

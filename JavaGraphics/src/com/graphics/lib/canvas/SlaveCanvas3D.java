@@ -62,7 +62,7 @@ public class SlaveCanvas3D extends Canvas3D implements ICanvasUpdateListener {
 			}
 			facetStream.filter(GeneralPredicates.isOverHorizon(this.getCamera(), this.getHorizon()).negate()).forEach(f ->{
 				f.setFrontFace(GeneralPredicates.isFrontface(this.getCamera()).test(f));
-				zBuf.Add(f, obj, shader);
+				zBuf.Add(f, obj, shader, this.getCamera());
 			});
 		}
 		for (CanvasObject child : new ArrayList<CanvasObject>(obj.getChildren()))

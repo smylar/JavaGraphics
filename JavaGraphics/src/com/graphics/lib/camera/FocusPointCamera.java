@@ -16,13 +16,13 @@ public class FocusPointCamera extends Camera {
 	public void getViewSpecific(CanvasObject obj) {
 
 		obj.getVertexList().stream().forEach(p -> {
-			p.resetTransformed();
+			p.resetTransformed(this);
 			double percent = p.z / focusPoint.z;
 			
 			double dx = p.x - focusPoint.x;
 			double dy = p.y - focusPoint.y;
-			p.getTransformed().x -= dx * percent;
-			p.getTransformed().y -= dy * percent;
+			p.getTransformed(this).x -= dx * percent;
+			p.getTransformed(this).y -= dy * percent;
 		});
 	}
 

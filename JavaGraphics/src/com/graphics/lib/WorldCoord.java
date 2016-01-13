@@ -3,6 +3,7 @@ package com.graphics.lib;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.graphics.lib.camera.Camera;
 import com.graphics.lib.texture.Texture;
 
 /**
@@ -18,7 +19,8 @@ import com.graphics.lib.texture.Texture;
  */
 public class WorldCoord extends Point {
 
-	private Point transformed;
+	//private Point transformed;
+	private Map<Camera, Point> transformed = new HashMap<Camera, Point>();
 	private Map<Texture, Double> textureX;
 	private Map<Texture, Double> textureY;
 	
@@ -32,17 +34,20 @@ public class WorldCoord extends Point {
 	
 	public WorldCoord(double x, double y, double z) {
 		super(x, y, z);
-		transformed = new Point(x,y,z);
 	}
 	
-	public Point getTransformed() {
-		return transformed;
+	public Point getTransformed(Camera c) {
+		if (!transformed.containsKey(c)){
+			transformed.put(c, new Point(x,y,z));
+		}
+		return transformed.get(c);
 	}
 
-	public void resetTransformed() {
-		transformed.x = x;
-		transformed.y = y;
-		transformed.z = z;
+	public void resetTransformed(Camera c) {
+			Point tr = getTransformed(c);
+			tr.x = x;
+			tr.y = y;
+			tr.z = z;
 	}
 
 	public double getTextureX(Texture t) {

@@ -3,6 +3,8 @@ package com.graphics.lib.zbuffer;
 import java.awt.Color;
 import java.util.TreeMap;
 
+import com.graphics.lib.canvas.CanvasObject;
+
 /**
  * Stores information about Z values and colour for a screen coordinate this item represents
  * 
@@ -12,9 +14,10 @@ import java.util.TreeMap;
 public class ZBufferItem
 {
 	private TreeMap<Double, Color> items = new TreeMap<Double, Color>();
+	private CanvasObject topMostObject = null;
 	private int x = 0;
 	private int y = 0;
-	public boolean active = false;
+	private boolean active = false;
 	
 	public ZBufferItem(int x, int y){
 		this.x = x;
@@ -27,6 +30,14 @@ public class ZBufferItem
 
 	public int getY() {
 		return y;
+	}
+
+	public CanvasObject getTopMostObject() {
+		return topMostObject;
+	}
+	
+	public boolean isActive() {
+		return active;
 	}
 
 	/**
@@ -54,8 +65,6 @@ public class ZBufferItem
 		if (green > 255) green = 255;
 		if (blue > 255) blue = 255;
 		
-		this.clear(); //assumption here is that getColour will only be called once per draw cycle
-		
 		return new Color(red, green, blue, alpha);
 	}
 	
@@ -65,8 +74,11 @@ public class ZBufferItem
 	 * @param z
 	 * @param colour
 	 */
-	public synchronized void add(double z, Color colour)
-	{
+	public synchronized void add(CanvasObject obj, double z, Color colour)
+	{	
+		if (items.isEmpty() || z < items.firstKey()){
+			topMostObject = obj;
+		}
 		items.put(z, colour);
 		active = true;
 	}
@@ -74,6 +86,7 @@ public class ZBufferItem
 	public void clear(){
 		active = false;
 		items.clear();
+		topMostObject = null;
 	}
 
 	@Override

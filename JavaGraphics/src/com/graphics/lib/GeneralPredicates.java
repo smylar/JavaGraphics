@@ -11,10 +11,10 @@ public class GeneralPredicates {
 	{
 		return f -> {
 			
-			if (f.point1.getTransformed().z < 1 && f.point2.getTransformed().z < 1 && f.point3.getTransformed().z < 1) return false;
+			if (f.point1.getTransformed(c).z < 1 && f.point2.getTransformed(c).z < 1 && f.point3.getTransformed(c).z < 1) return false;
 			
 			double camVecZ = c.getOrientation().getForward().z;
-			double facetVecZ = f.getTransformedNormal().z;
+			double facetVecZ = f.getTransformedNormal(c).z;
 			
 			if (camVecZ < 0) camVecZ = camVecZ * -1;
 			

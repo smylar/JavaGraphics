@@ -1,5 +1,7 @@
 package com.graphics.lib;
 
+import com.graphics.lib.camera.Camera;
+
 /**
  * Representation of a line using the equation y = mx + c
  * 
@@ -16,12 +18,12 @@ public class LineEquation {
 	private WorldCoord worldStart;
 	private WorldCoord worldEnd;
 	
-	public LineEquation (WorldCoord worldStart, WorldCoord worldEnd)
+	public LineEquation (WorldCoord worldStart, WorldCoord worldEnd, Camera cam)
 	{
 		this.worldEnd = worldEnd;
 		this.worldStart = worldStart;
-		this.start = worldStart.getTransformed();
-		this.end = worldEnd.getTransformed();
+		this.start = worldStart.getTransformed(cam);
+		this.end = worldEnd.getTransformed(cam);
 		double dx = end.x - start.x;
 		if (dx == 0){
 			x = start.x;

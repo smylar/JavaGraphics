@@ -10,4 +10,5 @@ public class Events {
 	public static final String TRAIL = "trail";
 	public static final String NO_SHADE = "noshade";
 	public static final String EXPLODE_PERSIST = "explode_persist";
+	public static final String STOP = "stop";
 }

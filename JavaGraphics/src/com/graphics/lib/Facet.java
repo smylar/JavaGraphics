@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.graphics.lib.camera.Camera;
 import com.graphics.lib.texture.Texture;
 
 /**
@@ -21,12 +22,27 @@ public class Facet {
 	private double baseIntensity = 0.15;
 	private boolean isFrontFace = true;
 	private List<Texture> texture = new ArrayList<Texture>();
+	private String tag = null;
 	
 	public Facet(WorldCoord p1, WorldCoord p2, WorldCoord p3)
 	{
 		this.point1 = p1;
 		this.point2 = p2;
 		this.point3 = p3;
+	}
+	
+	public Facet(WorldCoord p1, WorldCoord p2, WorldCoord p3, String tag)
+	{
+		this(p1, p2, p3);
+		this.tag = tag;
+	}
+	
+	public String getTag() {
+		return tag;
+	}
+
+	public void setTag(String tag) {
+		this.tag = tag;
 	}
 
 	public double getBaseIntensity() {
@@ -68,9 +84,9 @@ public class Facet {
 	 * 
 	 * @return Normal Vector
 	 */
-	public Vector getTransformedNormal(){
-		 Vector vector1 = new Vector(point2.getTransformed().x - point1.getTransformed().x, point2.getTransformed().y - point1.getTransformed().y, point1.getTransformed().z - point1.getTransformed().z);
-		 Vector vector2 = new Vector(point3.getTransformed().x - point1.getTransformed().x, point3.getTransformed().y - point1.getTransformed().y, point3.getTransformed().z - point1.getTransformed().z);
+	public Vector getTransformedNormal(Camera c){
+		 Vector vector1 = new Vector(point2.getTransformed(c).x - point1.getTransformed(c).x, point2.getTransformed(c).y - point1.getTransformed(c).y, point1.getTransformed(c).z - point1.getTransformed(c).z);
+		 Vector vector2 = new Vector(point3.getTransformed(c).x - point1.getTransformed(c).x, point3.getTransformed(c).y - point1.getTransformed(c).y, point3.getTransformed(c).z - point1.getTransformed(c).z);
 		 
 		 Vector normal = vector1.crossProduct(vector2);
 		 return normal.getUnitVector();

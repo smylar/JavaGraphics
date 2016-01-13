@@ -10,22 +10,22 @@ import com.graphics.lib.interfaces.IVectorFinder;
 public class MovementTransform extends Transform {
 
 	private Vector vector;
-	private double velocity;
+	private double speed;
 	private IVectorFinder vectorFinder;
 	private double distanceMoved = 0;
 	private double acceleration = 0;
 	Predicate<MovementTransform> until;
 	
-	public MovementTransform(IVectorFinder vectorFinder, double velocity)
+	public MovementTransform(IVectorFinder vectorFinder, double speed)
 	{
 		this.vectorFinder = vectorFinder;
-		this.velocity = velocity;
+		this.speed = speed;
 	}
 	
-	public MovementTransform(Vector vector, double velocity)
+	public MovementTransform(Vector vector, double speed)
 	{
 		this.vectorFinder = null;
-		this.velocity = velocity;
+		this.speed = speed;
 		this.vector = vector;
 	}
 	
@@ -42,12 +42,16 @@ public class MovementTransform extends Transform {
 		this.vector = vector.getUnitVector();
 	}
 
-	public double getVelocity() {
-		return velocity;
+	public double getSpeed() {
+		return speed;
+	}
+	
+	public Vector getVelocity(){
+		return new Vector(vector.x * speed, vector.y * speed, vector.z * speed);
 	}
 
-	public void setVelocity(double velocity) {
-		this.velocity = velocity;
+	public void setSpeed(double speed) {
+		this.speed = speed;
 	}
 	
 	public double getDistanceMoved() {
@@ -70,16 +74,16 @@ public class MovementTransform extends Transform {
 	@Override
 	public void afterTransform()
 	{
-		this.distanceMoved += this.velocity;
-		this.velocity += this.acceleration;
+		this.distanceMoved += this.speed;
+		this.speed += this.acceleration;
 	}
 
 	@Override
 	public Consumer<Point> doTransformSpecific() {
 		return (p) -> {
-			p.x += vector.x * velocity;
-			p.y += vector.y * velocity;
-			p.z += vector.z * velocity;
+			p.x += vector.x * speed;
+			p.y += vector.y * speed;
+			p.z += vector.z * speed;
 		};
 	}
 

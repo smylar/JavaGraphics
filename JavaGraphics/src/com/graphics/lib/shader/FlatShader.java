@@ -7,6 +7,7 @@ import java.util.Set;
 import com.graphics.lib.Facet;
 import com.graphics.lib.IntensityComponents;
 import com.graphics.lib.Point;
+import com.graphics.lib.camera.Camera;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.zbuffer.ScanLine;
@@ -23,7 +24,7 @@ public class FlatShader implements IShader{
 	private Set<LightSource> ls = new HashSet<LightSource>();
 	
 	@Override
-	public void init(CanvasObject obj, Facet f) {
+	public void init(CanvasObject obj, Facet f, Camera c) {
 		Color colour = f.getColour() == null ? obj.getColour() : f.getColour();
 		
 		Point p = new Point((f.point1.x + f.point2.x + f.point3.x)/3, (f.point1.y + f.point2.y + f.point3.y)/3, (f.point1.z + f.point2.z + f.point3.z)/3);

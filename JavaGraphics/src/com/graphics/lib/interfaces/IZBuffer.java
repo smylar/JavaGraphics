@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.graphics.lib.Facet;
+import com.graphics.lib.camera.Camera;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.shader.IShader;
 import com.graphics.lib.zbuffer.ZBufferItem;
@@ -25,8 +26,9 @@ public interface IZBuffer {
 	 * @param facet - Facet to process and add to buffer if required
 	 * @param parent - The CanvasObject the facet belongs to
 	 * @param shader - The shader object that will handle colouring of the facet
+	 * @param c		- The camera being processed
 	 */
-	public void Add(Facet facet, CanvasObject parent, IShader shader);
+	public void Add(Facet facet, CanvasObject parent, IShader shader, Camera c);
 	
 	/**
 	 * Get the Z buffer, the form is (in an attempt for some performance when finding a specific entry):
@@ -43,4 +45,15 @@ public interface IZBuffer {
 	 * @param height
 	 */
 	public void setDimensions(int width, int height);
+	
+	/**
+	 * Get the item at the given x, y coordinates
+	 * 
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	public ZBufferItem getItemAt(int x, int y);
+	
+	public void clear();
 }

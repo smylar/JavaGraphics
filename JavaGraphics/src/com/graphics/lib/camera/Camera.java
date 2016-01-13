@@ -144,16 +144,16 @@ public abstract class Camera extends Observable implements IOrientable, Observer
 	
 	public void alignShapeToCamera(CanvasObject obj)
 	{
-		obj.applyCameraTransform(new Translation(-position.x, -position.y, -position.z));
+		obj.applyCameraTransform(new Translation(-position.x, -position.y, -position.z), this);
 		this.matchCameraRotation(obj);
-		obj.applyCameraTransform(new Translation(position.x, position.y, position.z));
+		obj.applyCameraTransform(new Translation(position.x, position.y, position.z), this);
 	}
 	
 	public void matchCameraRotation(CanvasObject obj)
 	{
-		obj.applyCameraTransform(new Rotation<YRotation>(YRotation.class, -ot.getyRot()));
-		obj.applyCameraTransform(new Rotation<XRotation>(XRotation.class, -ot.getxRot()));
-		obj.applyCameraTransform(new Rotation<ZRotation>(ZRotation.class, -ot.getzRot()));
+		obj.applyCameraTransform(new Rotation<YRotation>(YRotation.class, -ot.getyRot()), this);
+		obj.applyCameraTransform(new Rotation<XRotation>(XRotation.class, -ot.getxRot()), this);
+		obj.applyCameraTransform(new Rotation<ZRotation>(ZRotation.class, -ot.getzRot()), this);
 	}
 	
 	public void addCameraRotation(CanvasObject obj)

@@ -34,7 +34,7 @@ public class ClipLibrary implements AutoCloseable {
 		URL soundList = getClass().getResource("sounds.txt");
 		if (soundList == null) return;
 		
-		try (BufferedReader br = new BufferedReader(new FileReader(URLDecoder.decode(soundList.getFile(), "UTF-8"))))
+		try (BufferedReader br = new BufferedReader(new FileReader(URLDecoder.decode(soundList.getFile(),"UTF-8"))))
 		{
 			String line;
 			while ((line = br.readLine()) != null){
@@ -44,7 +44,7 @@ public class ClipLibrary implements AutoCloseable {
 				URL sound = getClass().getResource(split[1].trim());
 				if (sound == null) continue;
 				
-				addSound(split[0].trim(), new File(URLDecoder.decode(sound.getFile(), "UTF-8")));
+				addSound(split[0].trim(), new File(URLDecoder.decode(sound.getFile(),"UTF-8")));
 			}
 		}
 		catch (Exception ex)

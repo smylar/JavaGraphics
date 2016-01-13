@@ -136,6 +136,16 @@ public class Canvas3D extends JPanel{
 	public void setOkToPaint(boolean okToPaint) {
 		this.okToPaint = okToPaint;
 	}
+	
+	public CanvasObject getObjectAt(int x, int y){
+		if (zBuffer == null) return null;
+		
+		ZBufferItem item = zBuffer.getItemAt(x, y);
+		
+		if (item == null) return null;
+		
+		return item.getTopMostObject();
+	}
 
 	@Override
 	public void setVisible(boolean flag)
@@ -242,7 +252,7 @@ public class Canvas3D extends JPanel{
 			}
 			facetStream.filter(GeneralPredicates.isOverHorizon(this.camera, this.horizon).negate()).forEach(f ->{
 				f.setFrontFace(GeneralPredicates.isFrontface(this.camera).test(f));
-				zBuf.Add(f, obj, shader);
+				zBuf.Add(f, obj, shader, this.camera);
 			});
 		}
 		
@@ -324,17 +334,19 @@ public class Canvas3D extends JPanel{
 		
 		this.zBuffer.getBuffer().values().stream().forEach(m -> {
 			for (ZBufferItem item : m.values()){
-				if (item == null || !item.active) continue;
+				if (item == null || !item.isActive()) continue;
 				g.setColor(item.getColour());
 				g.drawLine(item.getX(), item.getY(), item.getX(), item.getY());
 			}
 		});
 		
-		this.setOkToPaint(false);
-		
 		for(BiConsumer<Canvas3D,Graphics> op : drawPlugins){
 			op.accept(this,g);
 		}
+		
+		this.zBuffer.clear();
+		
+		this.setOkToPaint(false);
 	}
 
 }

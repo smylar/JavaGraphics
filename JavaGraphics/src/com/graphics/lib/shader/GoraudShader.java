@@ -14,6 +14,7 @@ import com.graphics.lib.LineEquation;
 import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
+import com.graphics.lib.camera.Camera;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.plugins.Events;
@@ -41,7 +42,7 @@ public class GoraudShader implements IShader{
 	private Map<Point, IntensityComponents> pointLight = new HashMap<Point, IntensityComponents>();
 	
 	@Override
-	public void init(CanvasObject parent, Facet facet) {
+	public void init(CanvasObject parent, Facet facet, Camera c) {
 		colour = facet.getColour() == null ? parent.getColour() : facet.getColour();
 		if (colour == null) colour = new Color(255,255,255);
 		
@@ -54,7 +55,7 @@ public class GoraudShader implements IShader{
 		for (WorldCoord p : points)
 		{
 			Vector n = parent.getVertexNormalFinder().getVertexNormal(parent, p, facet);
-			pointLight.put(p.getTransformed(), parent.getLightIntensityFinder().getLightIntensity(ls, parent, p, n, !facet.isFrontFace()));
+			pointLight.put(p.getTransformed(c), parent.getLightIntensityFinder().getLightIntensity(ls, parent, p, n, !facet.isFrontFace()));
 		}
 
 		this.facet = facet;

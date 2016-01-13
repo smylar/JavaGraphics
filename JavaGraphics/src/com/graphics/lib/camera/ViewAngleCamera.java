@@ -24,13 +24,13 @@ public class ViewAngleCamera extends Camera {
 	public void getViewSpecific(CanvasObject obj) {
 		
 		obj.getVertexList().parallelStream().forEach(p -> {
-			p.resetTransformed();
+			p.resetTransformed(this);
 		});
 		
 		this.alignShapeToCamera(obj);
 		
 		obj.getVertexList().parallelStream().forEach(p -> {
-			this.getCameraCoords(p.getTransformed());
+			this.getCameraCoords(p.getTransformed(this));
 		});
 	}
 	

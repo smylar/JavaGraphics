@@ -58,7 +58,7 @@ public class ObjectControls implements KeyListener{
 			Transform transform = this.obj.getTransform(BACKWARD);
 			if (transform != null && transform instanceof MovementTransform){
 				MovementTransform cTransform = (MovementTransform)transform;
-				if (cTransform.getVelocity() > 4) cTransform.setVelocity(cTransform.getVelocity() - 4);
+				if (cTransform.getSpeed() > 4) cTransform.setSpeed(cTransform.getSpeed() - 4);
 				else transform.cancel();
 				return;
 			}
@@ -66,7 +66,7 @@ public class ObjectControls implements KeyListener{
 			transform = this.obj.getTransform(FORWARD);
 			if (transform != null && transform instanceof MovementTransform){
 				MovementTransform cTransform = (MovementTransform)transform;
-				if (cTransform.getVelocity() < 50) cTransform.setVelocity(cTransform.getVelocity() + 4);
+				if (cTransform.getSpeed() < 50) cTransform.setSpeed(cTransform.getSpeed() + 4);
 			}
 			else{
 				Transform move = new MovementTransform(() -> obj.getOrientation().getForward(), 4);
@@ -79,7 +79,7 @@ public class ObjectControls implements KeyListener{
 			Transform transform = this.obj.getTransform(FORWARD);
 			if (transform != null && transform instanceof MovementTransform){
 				MovementTransform cTransform = (MovementTransform)transform;
-				if (cTransform.getVelocity() > 4) cTransform.setVelocity(cTransform.getVelocity() - 4);
+				if (cTransform.getSpeed() > 4) cTransform.setSpeed(cTransform.getSpeed() - 4);
 				else transform.cancel();
 				return;
 			}			
@@ -87,7 +87,7 @@ public class ObjectControls implements KeyListener{
 			transform = this.obj.getTransform(BACKWARD);
 			if (transform != null && transform instanceof MovementTransform){
 				MovementTransform cTransform = (MovementTransform)transform;
-				if (cTransform.getVelocity() < 50) cTransform.setVelocity(cTransform.getVelocity() + 4);
+				if (cTransform.getSpeed() < 50) cTransform.setSpeed(cTransform.getSpeed() + 4);
 			}
 			else{
 				Transform move = new MovementTransform(() -> obj.getOrientation().getBack(), 4);

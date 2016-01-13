@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.Set;
 
 import com.graphics.lib.Facet;
+import com.graphics.lib.camera.Camera;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.zbuffer.ScanLine;
@@ -22,8 +23,9 @@ public interface IShader {
 	 * 
 	 * @param obj	Canvas Object being processed
 	 * @param f		Facet of canvas object being processed
+	 * @param c		Camera being processed
 	 */
-	public void init(CanvasObject obj, Facet f);
+	public void init(CanvasObject obj, Facet f, Camera c);
 	
 	/**
 	 * Gets the colour for a pixel (x,y) on the given scan line, 

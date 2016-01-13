@@ -1,11 +1,14 @@
 package com.graphics.shapes;
 
 import com.graphics.lib.Facet;
+import com.graphics.lib.Point;
+import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.OrientableCanvasObject;
 import com.graphics.lib.orientation.SimpleOrientation;
 
 public class Whale extends OrientableCanvasObject<Whale> {
+	private static final String FIN_TAG = "fin";
 	
 	private int multiplier = 1;
 	
@@ -127,26 +130,26 @@ public class Whale extends OrientableCanvasObject<Whale> {
 		// tailfin (fluke) -------------------------------------
 		
 			//top
-		this.getFacetList().add(new Facet(this.getVertexList().get(27), this.getVertexList().get(28), this.getVertexList().get(29)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(27), this.getVertexList().get(29), this.getVertexList().get(30)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(32), this.getVertexList().get(26), this.getVertexList().get(30)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(31), this.getVertexList().get(32), this.getVertexList().get(30)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(26), this.getVertexList().get(27), this.getVertexList().get(30)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(27), this.getVertexList().get(28), this.getVertexList().get(29), FIN_TAG));
+		this.getFacetList().add(new Facet(this.getVertexList().get(27), this.getVertexList().get(29), this.getVertexList().get(30), FIN_TAG));
+		this.getFacetList().add(new Facet(this.getVertexList().get(32), this.getVertexList().get(26), this.getVertexList().get(30), FIN_TAG));
+		this.getFacetList().add(new Facet(this.getVertexList().get(31), this.getVertexList().get(32), this.getVertexList().get(30), FIN_TAG));
+		this.getFacetList().add(new Facet(this.getVertexList().get(26), this.getVertexList().get(27), this.getVertexList().get(30), FIN_TAG));
 			//bottom
-		this.getFacetList().add(new Facet(this.getVertexList().get(33), this.getVertexList().get(28), this.getVertexList().get(27)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(33), this.getVertexList().get(29), this.getVertexList().get(28)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(26), this.getVertexList().get(33), this.getVertexList().get(27)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(32), this.getVertexList().get(33), this.getVertexList().get(26)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(31), this.getVertexList().get(33), this.getVertexList().get(32)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(33), this.getVertexList().get(28), this.getVertexList().get(27), FIN_TAG));
+		this.getFacetList().add(new Facet(this.getVertexList().get(33), this.getVertexList().get(29), this.getVertexList().get(28), FIN_TAG));
+		this.getFacetList().add(new Facet(this.getVertexList().get(26), this.getVertexList().get(33), this.getVertexList().get(27), FIN_TAG));
+		this.getFacetList().add(new Facet(this.getVertexList().get(32), this.getVertexList().get(33), this.getVertexList().get(26), FIN_TAG));
+		this.getFacetList().add(new Facet(this.getVertexList().get(31), this.getVertexList().get(33), this.getVertexList().get(32), FIN_TAG));
 			//infill
-		this.getFacetList().add(new Facet(this.getVertexList().get(30), this.getVertexList().get(33), this.getVertexList().get(31)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(30), this.getVertexList().get(29), this.getVertexList().get(33)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(30), this.getVertexList().get(33), this.getVertexList().get(31), FIN_TAG));
+		this.getFacetList().add(new Facet(this.getVertexList().get(30), this.getVertexList().get(29), this.getVertexList().get(33), FIN_TAG));
 		
 		//fins -------------------------------------------------
-		this.getFacetList().add(new Facet(this.getVertexList().get(34), this.getVertexList().get(36), this.getVertexList().get(35)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(34), this.getVertexList().get(35), this.getVertexList().get(36)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(37), this.getVertexList().get(38), this.getVertexList().get(39)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(37), this.getVertexList().get(39), this.getVertexList().get(38)));
+		this.getFacetList().add(new Facet(this.getVertexList().get(34), this.getVertexList().get(36), this.getVertexList().get(35), FIN_TAG));
+		this.getFacetList().add(new Facet(this.getVertexList().get(34), this.getVertexList().get(35), this.getVertexList().get(36), FIN_TAG));
+		this.getFacetList().add(new Facet(this.getVertexList().get(37), this.getVertexList().get(38), this.getVertexList().get(39), FIN_TAG));
+		this.getFacetList().add(new Facet(this.getVertexList().get(37), this.getVertexList().get(39), this.getVertexList().get(38), FIN_TAG));
 		
 		this.UseAveragedNormals(90);
 		this.setOrientation(new SimpleOrientation(ORIENTATION_TAG));
@@ -156,16 +159,36 @@ public class Whale extends OrientableCanvasObject<Whale> {
 	@Override
 	public void onDrawComplete(){
 		///animation effect - TODO only apply when moving?
-		this.toBaseOrientation();
-		double curPosition = this.getVertexList().get(26).y;
-		double maxPosition = this.getVertexList().get(22).y + 20;
-		double minPosition = this.getVertexList().get(25).y + 10;
-		if (curPosition >= maxPosition) multiplier = -1;
-		if (curPosition <= minPosition) multiplier = 1;
-		for (int i = 26 ; i < 34 ; i++){
-			this.getVertexList().get(i).y += (3 * multiplier);
+		if (!isDeleted() && isVisible()){		
+			this.toBaseOrientation();
+			double curPosition = this.getVertexList().get(26).y;
+			double maxPosition = this.getVertexList().get(22).y + 20;
+			double minPosition = this.getVertexList().get(25).y + 10;
+			if (curPosition >= maxPosition) multiplier = -1;
+			if (curPosition <= minPosition) multiplier = 1;
+			for (int i = 26 ; i < 34 ; i++){
+				this.getVertexList().get(i).y += (3 * multiplier);
+			}
+			this.reapplyOrientation();
 		}
-		this.reapplyOrientation();
 		super.onDrawComplete();
+	}
+	
+	@Override
+	public boolean isPointInside(Point p)
+	{
+		//is as overridden method, but we need to ignore the fins and fluke as it messes it up
+		//TODO also there is an issue with this if we hit the whale low down in front of the tail and the tail is in or near the fully down position
+		
+		if (this.getBaseObject() != this) return this.getBaseObject().isPointInside(p);
+		for (Facet f : getFacetList())
+		{
+			if (FIN_TAG.equals(f.getTag())) continue;
+			
+			Vector vecPointToFacet = p.vectorToPoint(f.point1).getUnitVector();
+			double deg = Math.toDegrees(Math.acos(vecPointToFacet.dotProduct(f.getNormal())));
+			if (deg >= 90) return false;
+		}
+		return true;
 	}
 }
