@@ -182,7 +182,7 @@ public class Utils {
 		
 		if (!targetVec.isPresent()) return defaultVector;
 		
-		double cosTheta = proj.getCentre().vectorToPoint(target.getCentre()).getUnitVector().dotProduct(targetVec.get().getVector());
+		double cosTheta = target.getCentre().vectorToPoint(proj.getCentre()).getUnitVector().dotProduct(targetVec.get().getVector());
 		double distStartToTarget = proj.getCentre().distanceTo(target.getCentre());
 		double time = 0;
 		

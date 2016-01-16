@@ -8,9 +8,11 @@ import org.junit.Test;
 
 import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
+import com.graphics.lib.Utils;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
+import com.graphics.lib.transform.MovementTransform;
 import com.graphics.lib.transform.Rotation;
 import com.graphics.lib.transform.XRotation;
 import com.graphics.lib.transform.YRotation;
@@ -101,5 +103,57 @@ public class UnitTests {
 		obj.applyTransform(rot);
 		DecimalFormat round = new DecimalFormat("#.###");
 		assertTrue(round.format(coord.x).equals("1") && round.format(coord.y).equals("-3") && round.format(coord.z).equals("2"));
+	}
+	
+	@Test
+	public void testSameSpeedInterception() {
+		CanvasObject target = new CanvasObject();
+		target.getVertexList().add(new WorldCoord(2,2,0));
+		
+		CanvasObject proj = new CanvasObject();
+		proj.getVertexList().add(new WorldCoord(4,0,0));
+		
+		MovementTransform move = new MovementTransform(new Vector(1,0,0), 1);
+		target.addTransform(move);
+		
+		Vector intercept = Utils.plotDeflectionShot(target, proj, 1);
+		//assertEquals(new Vector(0,1,0),intercept); //damn precision loss!!
+		DecimalFormat roundedFormat = new DecimalFormat("#.####");
+		assertEquals(roundedFormat.format(intercept.x), "0"); 
+		assertEquals(roundedFormat.format(intercept.y), "1"); 
+		assertEquals(roundedFormat.format(intercept.z), "0"); 
+		
+	}
+	
+	@Test
+	public void testDifferentSpeedInterception() {
+		CanvasObject target = new CanvasObject();
+		target.getVertexList().add(new WorldCoord(0,0,0));
+		
+		CanvasObject proj = new CanvasObject();
+		proj.getVertexList().add(new WorldCoord(2,4,0));
+		
+		MovementTransform move = new MovementTransform(new Vector(1,0,0), 1);
+		target.addTransform(move);
+		
+		Vector intercept = Utils.plotDeflectionShot(target, proj, 2);
+		assertEquals(new Vector(0,-1,0),intercept);
+		
+	}
+	
+	@Test
+	public void testCannotIntercept() {
+		CanvasObject target = new CanvasObject();
+		target.getVertexList().add(new WorldCoord(0,0,0));
+		
+		CanvasObject proj = new CanvasObject();
+		proj.getVertexList().add(new WorldCoord(4,0,0));
+		
+		MovementTransform move = new MovementTransform(new Vector(1,0,0), 1);
+		target.addTransform(move);
+		
+		Vector intercept = Utils.plotDeflectionShot(target, proj, 1);
+		assertEquals(new Vector(-1,0,0),intercept);
+		
 	}
 }
