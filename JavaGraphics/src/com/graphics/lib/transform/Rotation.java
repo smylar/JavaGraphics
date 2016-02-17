@@ -11,6 +11,17 @@ public class Rotation<T extends Matrix> extends Transform{
 	private Class<T> matrix;
 	private double totalRotation = 0;
 	
+	public static Rotation<?> getRotation(char direction, double amount){
+		if (direction== 'x'){
+			return new Rotation<XRotation>(XRotation.class, amount);
+		}else if (direction == 'y'){
+			return new Rotation<YRotation>(YRotation.class, amount);
+		}else if (direction == 'z'){
+			return new Rotation<ZRotation>(ZRotation.class, amount);
+		}
+		return null;
+	}
+	
 	public Rotation(Class<T> matrix, double angleProgression){
 		this.matrix = matrix;
 		this.angleProgression = angleProgression;

@@ -1,6 +1,7 @@
 package com.graphics.lib.transform;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -42,7 +43,7 @@ public abstract class Transform {
 		return dependencyList;
 	}
 	
-	public final void doTransform(List<? extends Point> points){
+	public final void doTransform(Collection<? extends Point> points){
 		this.beforeTransform();
 		points.stream().forEach(p -> {
 			this.doTransformSpecific().accept(p);

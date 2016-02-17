@@ -23,6 +23,7 @@ public class WorldCoord extends Point {
 	private Map<Camera, Point> transformed = new HashMap<Camera, Point>();
 	private Map<Texture, Double> textureX;
 	private Map<Texture, Double> textureY;
+	private String group = "";
 	
 	public WorldCoord() {
 		this(0,0,0);
@@ -36,6 +37,19 @@ public class WorldCoord extends Point {
 		super(x, y, z);
 	}
 	
+	public WorldCoord(double x, double y, double z, String group) {
+		super(x, y, z);
+		this.group = group;
+	}
+	
+	public String getGroup() {
+		return group;
+	}
+
+	public void setGroup(String group) {
+		this.group = group;
+	}
+
 	public Point getTransformed(Camera c) {
 		if (!transformed.containsKey(c)){
 			transformed.put(c, new Point(x,y,z));

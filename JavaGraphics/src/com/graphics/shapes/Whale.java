@@ -1,16 +1,24 @@
 package com.graphics.shapes;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
-import com.graphics.lib.canvas.OrientableCanvasObject;
+import com.graphics.lib.canvas.AnimatedCanvasObject;
 import com.graphics.lib.orientation.SimpleOrientation;
+import com.graphics.lib.skeleton.PivotSkeletonNode;
+import com.graphics.lib.skeleton.SkeletonNode;
+import com.graphics.lib.skeleton.PivotDetail;
 
-public class Whale extends OrientableCanvasObject<Whale> {
-	private static final String FIN_TAG = "fin";
+public class Whale extends AnimatedCanvasObject<Whale> {
+	public static final String FIN_TAG = "fin";
+	public static final String FLUKE_TAG = "fluke";
 	
-	private int multiplier = 1;
+	//private int multiplier = 1;
 	
 	public Whale(){
 		this.getVertexList().add(new WorldCoord(62, 40, 0));
@@ -46,16 +54,16 @@ public class Whale extends OrientableCanvasObject<Whale> {
 		this.getVertexList().add(new WorldCoord(158,35, 170));
 		this.getVertexList().add(new WorldCoord(139,10, 170));
 		
-		this.getVertexList().add(new WorldCoord(75, 40, 330));
-		this.getVertexList().add(new WorldCoord(85, 40, 330));
+		this.getVertexList().add(new WorldCoord(75, 40, 330, FLUKE_TAG));
+		this.getVertexList().add(new WorldCoord(85, 40, 330, FLUKE_TAG));
 		
-		this.getVertexList().add(new WorldCoord(150, 40, 350));
-		this.getVertexList().add(new WorldCoord(170, 39, 385));
-		this.getVertexList().add(new WorldCoord(80, 39, 365));
-		this.getVertexList().add(new WorldCoord(-10, 39, 385));
-		this.getVertexList().add(new WorldCoord(10, 40, 350));
+		this.getVertexList().add(new WorldCoord(150, 40, 350, FLUKE_TAG));
+		this.getVertexList().add(new WorldCoord(170, 39, 385, FLUKE_TAG));
+		this.getVertexList().add(new WorldCoord(80, 39, 365, FLUKE_TAG));
+		this.getVertexList().add(new WorldCoord(-10, 39, 385, FLUKE_TAG));
+		this.getVertexList().add(new WorldCoord(10, 40, 350, FLUKE_TAG));
 		
-		this.getVertexList().add(new WorldCoord(80, 41, 365));
+		this.getVertexList().add(new WorldCoord(80, 41, 365, FLUKE_TAG));
 		
 		this.getVertexList().add(new WorldCoord(158, 50, 120));
 		this.getVertexList().add(new WorldCoord(158, 50, 170));
@@ -130,20 +138,20 @@ public class Whale extends OrientableCanvasObject<Whale> {
 		// tailfin (fluke) -------------------------------------
 		
 			//top
-		this.getFacetList().add(new Facet(this.getVertexList().get(27), this.getVertexList().get(28), this.getVertexList().get(29), FIN_TAG));
-		this.getFacetList().add(new Facet(this.getVertexList().get(27), this.getVertexList().get(29), this.getVertexList().get(30), FIN_TAG));
-		this.getFacetList().add(new Facet(this.getVertexList().get(32), this.getVertexList().get(26), this.getVertexList().get(30), FIN_TAG));
-		this.getFacetList().add(new Facet(this.getVertexList().get(31), this.getVertexList().get(32), this.getVertexList().get(30), FIN_TAG));
-		this.getFacetList().add(new Facet(this.getVertexList().get(26), this.getVertexList().get(27), this.getVertexList().get(30), FIN_TAG));
+		this.getFacetList().add(new Facet(this.getVertexList().get(27), this.getVertexList().get(28), this.getVertexList().get(29), FLUKE_TAG));
+		this.getFacetList().add(new Facet(this.getVertexList().get(27), this.getVertexList().get(29), this.getVertexList().get(30), FLUKE_TAG));
+		this.getFacetList().add(new Facet(this.getVertexList().get(32), this.getVertexList().get(26), this.getVertexList().get(30), FLUKE_TAG));
+		this.getFacetList().add(new Facet(this.getVertexList().get(31), this.getVertexList().get(32), this.getVertexList().get(30), FLUKE_TAG));
+		this.getFacetList().add(new Facet(this.getVertexList().get(26), this.getVertexList().get(27), this.getVertexList().get(30), FLUKE_TAG));
 			//bottom
-		this.getFacetList().add(new Facet(this.getVertexList().get(33), this.getVertexList().get(28), this.getVertexList().get(27), FIN_TAG));
-		this.getFacetList().add(new Facet(this.getVertexList().get(33), this.getVertexList().get(29), this.getVertexList().get(28), FIN_TAG));
-		this.getFacetList().add(new Facet(this.getVertexList().get(26), this.getVertexList().get(33), this.getVertexList().get(27), FIN_TAG));
-		this.getFacetList().add(new Facet(this.getVertexList().get(32), this.getVertexList().get(33), this.getVertexList().get(26), FIN_TAG));
-		this.getFacetList().add(new Facet(this.getVertexList().get(31), this.getVertexList().get(33), this.getVertexList().get(32), FIN_TAG));
+		this.getFacetList().add(new Facet(this.getVertexList().get(33), this.getVertexList().get(28), this.getVertexList().get(27), FLUKE_TAG));
+		this.getFacetList().add(new Facet(this.getVertexList().get(33), this.getVertexList().get(29), this.getVertexList().get(28), FLUKE_TAG));
+		this.getFacetList().add(new Facet(this.getVertexList().get(26), this.getVertexList().get(33), this.getVertexList().get(27), FLUKE_TAG));
+		this.getFacetList().add(new Facet(this.getVertexList().get(32), this.getVertexList().get(33), this.getVertexList().get(26), FLUKE_TAG));
+		this.getFacetList().add(new Facet(this.getVertexList().get(31), this.getVertexList().get(33), this.getVertexList().get(32), FLUKE_TAG));
 			//infill
-		this.getFacetList().add(new Facet(this.getVertexList().get(30), this.getVertexList().get(33), this.getVertexList().get(31), FIN_TAG));
-		this.getFacetList().add(new Facet(this.getVertexList().get(30), this.getVertexList().get(29), this.getVertexList().get(33), FIN_TAG));
+		this.getFacetList().add(new Facet(this.getVertexList().get(30), this.getVertexList().get(33), this.getVertexList().get(31), FLUKE_TAG));
+		this.getFacetList().add(new Facet(this.getVertexList().get(30), this.getVertexList().get(29), this.getVertexList().get(33), FLUKE_TAG));
 		
 		//fins -------------------------------------------------
 		this.getFacetList().add(new Facet(this.getVertexList().get(34), this.getVertexList().get(36), this.getVertexList().get(35), FIN_TAG));
@@ -154,11 +162,40 @@ public class Whale extends OrientableCanvasObject<Whale> {
 		this.UseAveragedNormals(90);
 		this.setOrientation(new SimpleOrientation(ORIENTATION_TAG));
 		this.getOrientation().getRepresentation().getVertexList().get(0).z = -1;
+		
+		PivotSkeletonNode rootNode = new PivotSkeletonNode();
+		rootNode.setPosition(new WorldCoord(this.getCentre()));
+		
+		SkeletonNode tailNode = new SkeletonNode();
+		tailNode.setPosition(new WorldCoord(this.getVertexList().get(26)));
+		tailNode.getAttachedMeshCoords().addAll(this.getVertexList().stream().filter(v -> FLUKE_TAG.equals(v.getGroup())).collect(Collectors.toSet()));
+		
+		rootNode.addNode(tailNode);
+		rootNode.setxMax(20);
+		rootNode.setxMin(-10);
+		
+		rootNode.getAnimations().put("TAIL", (n) ->{
+			List<PivotDetail> p = new ArrayList<PivotDetail>();
+			PivotDetail d = new PivotDetail();
+			d.setDirection('x');
+			
+			double amount = n.isxTravelPositive() ? 1 : -1;
+			if (n.getxCur() >= n.getxMax() || n.getxCur() <= n.getxMin())
+			{
+				amount = -amount;
+			}
+			d.setAmount(amount);
+			p.add(d);
+			return p;
+		});
+		
+		this.setSkeletonRootNode(rootNode);
+		this.startAnimation("TAIL");
 	}
 
-	@Override
+	/*@Override
 	public void onDrawComplete(){
-		///animation effect - TODO only apply when moving?
+		///animation effect - TODO only apply when moving? - also will be moving to skeletal model
 		if (!isDeleted() && isVisible()){		
 			this.toBaseOrientation();
 			double curPosition = this.getVertexList().get(26).y;
@@ -172,7 +209,7 @@ public class Whale extends OrientableCanvasObject<Whale> {
 			this.reapplyOrientation();
 		}
 		super.onDrawComplete();
-	}
+	}*/
 	
 	@Override
 	public boolean isPointInside(Point p)
@@ -183,7 +220,7 @@ public class Whale extends OrientableCanvasObject<Whale> {
 		if (this.getBaseObject() != this) return this.getBaseObject().isPointInside(p);
 		for (Facet f : getFacetList())
 		{
-			if (FIN_TAG.equals(f.getTag())) continue;
+			if (FIN_TAG.equals(f.getTag()) || FLUKE_TAG.equals(f.getTag())) continue;
 			
 			Vector vecPointToFacet = p.vectorToPoint(f.point1).getUnitVector();
 			double deg = Math.toDegrees(Math.acos(vecPointToFacet.dotProduct(f.getNormal())));
