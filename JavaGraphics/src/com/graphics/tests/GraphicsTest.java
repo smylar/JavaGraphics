@@ -138,7 +138,7 @@ public class GraphicsTest extends JFrame {
 		//OrientableCanvasObject<Whale> whale = new Whale();
 		PlugableCanvasObject<?> whale = new PlugableCanvasObject<Whale>(new Whale()); 
 		whale.setColour(Color.cyan);
-		
+		//whale.applyTransform(new Rotation<YRotation>(YRotation.class, 45));
 		cnv.registerObject(whale, new Point(1515, 300, 400), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
 		
 		ViewAngleCamera slaveCam = new ViewAngleCamera(new SimpleOrientation(OrientableCanvasObject.ORIENTATION_TAG));

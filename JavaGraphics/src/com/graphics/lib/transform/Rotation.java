@@ -2,6 +2,7 @@ package com.graphics.lib.transform;
 
 import java.util.function.Consumer;
 
+import com.graphics.lib.Axis;
 import com.graphics.lib.Point;
 
 
@@ -11,12 +12,12 @@ public class Rotation<T extends Matrix> extends Transform{
 	private Class<T> matrix;
 	private double totalRotation = 0;
 	
-	public static Rotation<?> getRotation(char direction, double amount){
-		if (direction== 'x'){
+	public static Rotation<?> getRotation(Axis direction, double amount){
+		if (direction == Axis.X){
 			return new Rotation<XRotation>(XRotation.class, amount);
-		}else if (direction == 'y'){
+		}else if (direction == Axis.Y){
 			return new Rotation<YRotation>(YRotation.class, amount);
-		}else if (direction == 'z'){
+		}else if (direction == Axis.Z){
 			return new Rotation<ZRotation>(ZRotation.class, amount);
 		}
 		return null;

@@ -1,9 +1,8 @@
 package com.graphics.shapes;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Collectors;
 
+import com.graphics.lib.Axis;
 import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
@@ -11,8 +10,6 @@ import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.AnimatedCanvasObject;
 import com.graphics.lib.orientation.SimpleOrientation;
 import com.graphics.lib.skeleton.PivotSkeletonNode;
-import com.graphics.lib.skeleton.SkeletonNode;
-import com.graphics.lib.skeleton.PivotDetail;
 
 public class Whale extends AnimatedCanvasObject<Whale> {
 	public static final String FIN_TAG = "fin";
@@ -159,6 +156,8 @@ public class Whale extends AnimatedCanvasObject<Whale> {
 		this.getFacetList().add(new Facet(this.getVertexList().get(37), this.getVertexList().get(38), this.getVertexList().get(39), FIN_TAG));
 		this.getFacetList().add(new Facet(this.getVertexList().get(37), this.getVertexList().get(39), this.getVertexList().get(38), FIN_TAG));
 		
+		//TODO - an interface for building all this?!?!?
+		
 		this.UseAveragedNormals(90);
 		this.setOrientation(new SimpleOrientation(ORIENTATION_TAG));
 		this.getOrientation().getRepresentation().getVertexList().get(0).z = -1;
@@ -166,50 +165,23 @@ public class Whale extends AnimatedCanvasObject<Whale> {
 		PivotSkeletonNode rootNode = new PivotSkeletonNode();
 		rootNode.setPosition(new WorldCoord(this.getCentre()));
 		
-		SkeletonNode tailNode = new SkeletonNode();
+		PivotSkeletonNode tailNode = new PivotSkeletonNode();
 		tailNode.setPosition(new WorldCoord(this.getVertexList().get(26)));
 		tailNode.getAttachedMeshCoords().addAll(this.getVertexList().stream().filter(v -> FLUKE_TAG.equals(v.getGroup())).collect(Collectors.toSet()));
 		
 		rootNode.addNode(tailNode);
-		rootNode.setxMax(20);
-		rootNode.setxMin(-10);
+		rootNode.setMax(Axis.X,20);
+		rootNode.setMin(Axis.X,-10);
 		
-		rootNode.getAnimations().put("TAIL", (n) ->{
-			List<PivotDetail> p = new ArrayList<PivotDetail>();
-			PivotDetail d = new PivotDetail();
-			d.setDirection('x');
-			
-			double amount = n.isxTravelPositive() ? 1 : -1;
-			if (n.getxCur() >= n.getxMax() || n.getxCur() <= n.getxMin())
-			{
-				amount = -amount;
-			}
-			d.setAmount(amount);
-			p.add(d);
-			return p;
-		});
+		rootNode.getAnimations().put("TAIL",  PivotSkeletonNode.getDefaultPivotAction(Axis.X, 1));
+		
+		tailNode.setMax(Axis.Y,10);
+		tailNode.setMin(Axis.Y,-10);
+		tailNode.getAnimations().put("TAIL",  PivotSkeletonNode.getDefaultPivotAction(Axis.Y, 0.5));
 		
 		this.setSkeletonRootNode(rootNode);
 		this.startAnimation("TAIL");
 	}
-
-	/*@Override
-	public void onDrawComplete(){
-		///animation effect - TODO only apply when moving? - also will be moving to skeletal model
-		if (!isDeleted() && isVisible()){		
-			this.toBaseOrientation();
-			double curPosition = this.getVertexList().get(26).y;
-			double maxPosition = this.getVertexList().get(22).y + 20;
-			double minPosition = this.getVertexList().get(25).y + 10;
-			if (curPosition >= maxPosition) multiplier = -1;
-			if (curPosition <= minPosition) multiplier = 1;
-			for (int i = 26 ; i < 34 ; i++){
-				this.getVertexList().get(i).y += (3 * multiplier);
-			}
-			this.reapplyOrientation();
-		}
-		super.onDrawComplete();
-	}*/
 	
 	@Override
 	public boolean isPointInside(Point p)

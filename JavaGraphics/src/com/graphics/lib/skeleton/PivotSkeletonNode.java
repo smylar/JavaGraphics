@@ -1,129 +1,93 @@
 package com.graphics.lib.skeleton;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.graphics.lib.Axis;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.transform.Rotation;
 import com.graphics.lib.transform.Translation;
 
+/**
+ * Represents a movable joint in a skeleton (e.g. a knee joint)
+ * <br/><br/>
+ * Skeleton nodes attached to this node will be moved when this joint is rotated along with mesh vertices attached to this node and those sub nodes
+ * 
+ * @author Paul Brandon
+ *
+ */
 public class PivotSkeletonNode extends SkeletonNode {
-	private double xMax = 0;
-	private double xMin = 0;
-	private double yMax = 0;
-	private double yMin = 0;
-	private double zMax = 0;
-	private double zMin = 0; //rotation limits
-	
-	private double xCur = 0;
-	private double yCur = 0;
-	private double zCur = 0; //current rotations
-	
-	private boolean xTravelPositive = true;
-	private boolean yTravelPositive = true;
-	private boolean zTravelPositive = true; //current direction of rotation
-	
-	//TODO rotation speed limits?
-	
+
 	private Map<String, PivotAction> animations = new HashMap<String, PivotAction>();
 	
+	private Map<Axis, PivotInfo> pivotInfo = new HashMap<Axis, PivotInfo>();
 	
-	public double getxMax() {
-		return xMax;
+	/**
+	 * Gets a default pivot action that pivots back and forth between the pivot limits
+	 * 
+	 * @param direction - Direction of pivot (x, y or z)
+	 * @param amount - Angle in degrees to pivot each draw cycle
+	 * @return	A pivot action
+	 */
+	public static PivotAction getDefaultPivotAction(Axis direction, double amount)
+	{
+		return (n) ->{
+			List<PivotDetail> p = new ArrayList<PivotDetail>();
+			PivotDetail d = new PivotDetail();
+			d.setDirection(direction);
+			
+			double amt = n.isTravelPositive(direction) ? amount : -amount;
+			if (n.getCur(direction) >= n.getMax(direction) || n.getCur(direction) <= n.getMin(direction))
+			{
+				amt = -amt;
+			}
+			d.setAmount(amt);
+			p.add(d);
+			return p;
+		};
+	}
+	
+	public PivotSkeletonNode(){
+		super();
+		for (Axis a : Axis.values()){
+			pivotInfo.put(a, new PivotInfo());
+		}
+	}
+	
+	public double getMax(Axis direction){
+		return this.pivotInfo.get(direction).getMax();
+	}
+	
+	public double getMin(Axis direction){
+		return this.pivotInfo.get(direction).getMin();
+	}
+	
+	public double getCur(Axis direction){
+		return this.pivotInfo.get(direction).getCur();
 	}
 
-	public void setxMax(double xMax) {
-		this.xMax = xMax;
+	public boolean isTravelPositive(Axis direction){
+		return this.pivotInfo.get(direction).isTravelPositive();
 	}
-
-	public double getxMin() {
-		return xMin;
+	
+	public void setMax(Axis direction, double max){
+		this.pivotInfo.get(direction).setMax(max);
 	}
-
-	public void setxMin(double xMin) {
-		this.xMin = xMin;
+	
+	public void setMin(Axis direction, double min){
+		this.pivotInfo.get(direction).setMin(min);
 	}
-
-	public double getyMax() {
-		return yMax;
+	
+	public void setCur(Axis direction, double cur){
+		this.pivotInfo.get(direction).setCur(cur);
 	}
-
-	public void setyMax(double yMax) {
-		this.yMax = yMax;
-	}
-
-	public double getyMin() {
-		return yMin;
-	}
-
-	public void setyMin(double yMin) {
-		this.yMin = yMin;
-	}
-
-	public double getzMax() {
-		return zMax;
-	}
-
-	public void setzMax(double zMax) {
-		this.zMax = zMax;
-	}
-
-	public double getzMin() {
-		return zMin;
-	}
-
-	public void setzMin(double zMin) {
-		this.zMin = zMin;
-	}
-
-	public double getxCur() {
-		return xCur;
-	}
-
-	public void setxCur(double xCur) {
-		this.xCur = xCur;
-	}
-
-	public double getyCur() {
-		return yCur;
-	}
-
-	public void setyCur(double yCur) {
-		this.yCur = yCur;
-	}
-
-	public double getzCur() {
-		return zCur;
-	}
-
-	public void setzCur(double zCur) {
-		this.zCur = zCur;
-	}
-
-	public boolean isxTravelPositive() {
-		return xTravelPositive;
-	}
-
-	public void setxTravelPositive(boolean xTravelPositive) {
-		this.xTravelPositive = xTravelPositive;
-	}
-
-	public boolean isyTravelPositive() {
-		return yTravelPositive;
-	}
-
-	public void setyTravelPositive(boolean yTravelPositive) {
-		this.yTravelPositive = yTravelPositive;
-	}
-
-	public boolean iszTravelPositive() {
-		return zTravelPositive;
-	}
-
-	public void setzTravelPositive(boolean zTravelPositive) {
-		this.zTravelPositive = zTravelPositive;
+	
+	public void setTravelPositive(Axis direction, boolean tp){
+		this.pivotInfo.get(direction).setTravelPositive(tp);
 	}
 
 	public Map<String, PivotAction> getAnimations() {
@@ -136,12 +100,10 @@ public class PivotSkeletonNode extends SkeletonNode {
 	{
 		//Note canvas object will need to realign itself to base first
 		
-		//TODO find matching animation an play it, do I leave it to the animation or propagate the movement down sub nodes here
 		PivotAction action = animations.get(id);
 		if (action != null){
 			Collection<PivotDetail> details = action.get(this);
-			//TODO check movement within constraints
-			
+
 			Set<WorldCoord> coords = this.getAllSubCoords();
 			Translation to = new Translation(-this.getPosition().x, -this.getPosition().y, -this.getPosition().z);
 			Translation away = new Translation(this.getPosition().x, this.getPosition().y, this.getPosition().z);
@@ -149,6 +111,14 @@ public class PivotSkeletonNode extends SkeletonNode {
 			to.doTransform(coords);
 			
 			for(PivotDetail detail : details){
+				Axis direction = detail.getDirection();
+				
+				//keep within pivot limits
+				if (getCur(direction) + detail.getAmount() > getMax(direction)) detail.setAmount(getMax(direction) - getCur(direction));
+				else if (getCur(direction) + detail.getAmount() < getMin(direction)) detail.setAmount(getMin(direction) - getCur(direction));
+				
+				if (detail.getAmount() == 0) continue;
+				
 				Rotation<?> rot = Rotation.getRotation(detail.getDirection(), detail.getAmount());
 				
 				if (rot != null)
@@ -156,21 +126,63 @@ public class PivotSkeletonNode extends SkeletonNode {
 					rot.doTransform(coords);
 				}
 				//update current position etc.
-				if (detail.getDirection() == 'x'){
-					this.xCur += detail.getAmount();
-					this.xTravelPositive = detail.getAmount() >= 0;
-				}else if (detail.getDirection() == 'y'){
-					this.yCur += detail.getAmount();
-					this.yTravelPositive = detail.getAmount() >= 0;
-				}else if (detail.getDirection() == 'z'){
-					this.zCur += detail.getAmount();
-					this.zTravelPositive = detail.getAmount() >= 0;
-				}
+				double curAmount = this.getCur(direction);
+				this.setCur(direction, curAmount + detail.getAmount());
+				this.setTravelPositive(direction, detail.getAmount() >= 0);
 			}
 			
 			away.doTransform(coords);
 		}
 		
 		super.playAnimation(id);
+	}
+	
+	private class PivotInfo
+	{
+		private double max = 0;
+		private double min = 0; //rotation limits in degrees
+		
+		private double cur = 0; //current rotations in degrees
+		
+		private boolean travelPositive = true; //current direction of rotation
+		
+		//TODO rotation speed limits?
+
+		public double getMax() {
+			return max;
+		}
+
+		public void setMax(double max) {
+			this.max = max;
+			if (this.cur > this.max) this.cur = this.max;
+		}
+
+		public double getMin() {
+			return min;
+		}
+
+		public void setMin(double min) {
+			this.min = min;
+			if (this.cur < this.min) this.cur = this.min;
+		}
+
+		public double getCur() {
+			return cur;
+		}
+
+		public void setCur(double cur) {
+			if (cur < min) this.cur = min;
+			else if (cur > max) this.cur = max;
+			else this.cur = cur;
+		}
+
+		public boolean isTravelPositive() {
+			return travelPositive;
+		}
+
+		public void setTravelPositive(boolean travelPositive) {
+			this.travelPositive = travelPositive;
+		}
+		
 	}
 }
