@@ -11,6 +11,16 @@ public class AnimatedCanvasObject<T extends CanvasObject> extends OrientableCanv
 	
 	private List<String> activeAnimations = new ArrayList<String>();
 	
+	public AnimatedCanvasObject()
+	{
+		super();
+	}
+	
+	public AnimatedCanvasObject(T obj)
+	{
+		super(obj);
+	}
+	
 	public SkeletonNode getSkeletonRootNode() {
 		return skeletonRootNode;
 	}

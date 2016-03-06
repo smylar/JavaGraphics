@@ -7,6 +7,7 @@ import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.transform.Translation;
 
 public class Cuboid extends CanvasObject{
+	private WorldCoord centre;
 	
 	public Cuboid (int height, int width, int depth)
 	{
@@ -34,12 +35,13 @@ public class Cuboid extends CanvasObject{
 		
 		this.applyTransform(new Translation(-width/2,-height/2,-depth/2));
 		
-		this.getVertexList().add(new WorldCoord(0, 0, 0));
+		this.centre = new WorldCoord(0,0,0);
+		this.getVertexList().add(centre);
 	}
 	
 	@Override
 	public Point getCentre()
 	{
-		return this.getVertexList().get(this.getVertexList().size() - 1);
+		return this.centre;
 	}
 }

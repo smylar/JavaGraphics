@@ -12,8 +12,10 @@ import java.util.Observer;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import com.graphics.lib.Facet;
+import com.graphics.lib.GeneralPredicates;
 import com.graphics.lib.Point;
 import com.graphics.lib.Utils;
 import com.graphics.lib.Vector;
@@ -35,7 +37,7 @@ import com.graphics.lib.transform.Translation;
  *  <br>
  *  This would be done as follows (though it looks a little horrid especially if we start adding more):
  *  <br/>
- *  <code>PlugableCanvasObject<?> obj = new PlugableCanvasObject<CanvasObject>(new OrientableCanvasObject<Ovoid>(new Sphere(20,30)));</code>
+ *  <code>PlugableCanvasObject&lt;?> obj = new PlugableCanvasObject&lt;CanvasObject>(new OrientableCanvasObject&lt;Ovoid>(new Sphere(20,30)));</code>
  *  <br/>
  *  <br/>
  *  However, we can still extend in the normal way so that Sphere could include this functionality
@@ -334,6 +336,7 @@ public class CanvasObject extends Observable implements Observer{
 	{
 		if (this.getBaseObject() != this) return this.getBaseObject().getCentre();
 		
+		//default, average of all un-tagged points
 		Point pt = getData().vertexList.get(0);
 		double maxX = pt.x;
 		double maxY = pt.y;
@@ -356,12 +359,12 @@ public class CanvasObject extends Observable implements Observer{
 	}
 	
 	
-	public void addTransformAboutCentre(Transform...t)
+	public final void addTransformAboutCentre(Transform...t)
 	{
 		this.addTransformAboutPoint(() -> this.getCentre(), t);
 	}
 	
-	public void addTransformAboutPoint(Point p, Transform...transform)
+	public final void addTransformAboutPoint(Point p, Transform...transform)
 	{
 		this.addTransformAboutPoint(() -> p, transform);
 	}
@@ -372,7 +375,7 @@ public class CanvasObject extends Observable implements Observer{
 	 * @param pFinder - Anonymous method that generates the point to transform about
 	 * @param transform - List of transforms to apply
 	 */
-	public void addTransformAboutPoint(IPointFinder pFinder, Transform...transform)
+	public final void addTransformAboutPoint(IPointFinder pFinder, Transform...transform)
 	{
 		Translation temp = new Translation(){
 			@Override
@@ -451,9 +454,60 @@ public class CanvasObject extends Observable implements Observer{
 		//Sub shapes???
 	}
 	
+	/**
+	 * Check if a vector intersects this object
+	 * 
+	 * @param start - Point vector originates from
+	 * @param v		- The vector
+	 * @return		- <code>True</code> if vector intersects sphere, <code>False</code> otherwise
+	 */
 	public boolean vectorIntersects(Point start, Vector v){
 		if (this.getBaseObject() != this) return this.getBaseObject().vectorIntersects(start, v);
-		return false; //TODO (have an easy calculation for sphere so testing there first)
+		
+		if (!this.getCastsShadow()) return false;
+		
+		//get quick estimate for those that are nowhere near - check if hit sphere centred on centre point with diameter of largest dimension	
+		if (!vectorIntersectsRoughly(start, v)) return false;
+		
+		//the brute force generalised approach, check each front facing (to point) facet for intersection - will be horrible for something with a high facet count
+		for (Facet f : this.getFacetList().stream().filter(GeneralPredicates.isFrontface(start)).collect(Collectors.toList()))
+		{
+			if (f.isPointWithin(f.getIntersectionPointWithFacetPlane(start, v))) return true;	
+		}
+		return false;
+	}
+	
+	/**
+	 * Check if hit sphere centred on centre point with diameter of largest dimension
+	 * 
+	 * @param start - Point vector originates from
+	 * @param v		- The vector
+	 * @return		- <code>True</code> if vector intersects sphere, <code>False</code> otherwise
+	 */
+	public final boolean vectorIntersectsRoughly(Point start, Vector v)
+	{
+		double dCentre = start.distanceTo(getCentre());
+		double angle = Math.atan(this.getMaxExtent()/dCentre);
+		Vector vCentre = start.vectorToPoint(getCentre()).getUnitVector();
+		
+		double vAngle = Math.acos(v.dotProduct(vCentre));
+		
+		if (vAngle >= angle) return false;
+		
+		return true;
+	}
+	
+	/**
+	 * Gets the maximum distance from the centre of an object to a vertex
+	 *	<br/>
+	 * The base implementation will do for most uniform shapes, irregular shapes will need to override this to be accurate
+	 * 
+	 * @return
+	 */
+	public double getMaxExtent()
+	{
+		if (this.getBaseObject() != this) return this.getBaseObject().getMaxExtent();
+		return this.getCentre().distanceTo(this.getVertexList().get(0));
 	}
 	
 	/**
@@ -481,7 +535,7 @@ public class CanvasObject extends Observable implements Observer{
 	 * 
 	 * @param divergenceLimit - If the angle between two facets is larger than this value, than a value will not be mapped
 	 */
-	protected void UseAveragedNormals(int divergenceLimit)
+	public final void UseAveragedNormals(int divergenceLimit)
 	{
 		//create map for getting all the facets attached to a specific vertex
 		getData().vertexFacetMap = new HashMap<Point, ArrayList<Facet>>();

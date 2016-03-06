@@ -18,6 +18,8 @@ import javax.swing.SwingUtilities;
 
 
 
+
+
 import com.graphics.lib.Facet;
 import com.graphics.lib.ObjectControls;
 import com.graphics.lib.Point;
@@ -135,11 +137,14 @@ public class GraphicsTest extends JFrame {
 		CanvasObject camcube = new Cuboid(20,20,20);
 		cnv.registerObject(camcube, new Point(1515, 300, 400), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.FLAT));
 		
-		//OrientableCanvasObject<Whale> whale = new Whale();
 		PlugableCanvasObject<?> whale = new PlugableCanvasObject<Whale>(new Whale()); 
 		whale.setColour(Color.cyan);
 		//whale.applyTransform(new Rotation<YRotation>(YRotation.class, 45));
 		cnv.registerObject(whale, new Point(1515, 300, 400), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
+		
+		FlapTest flap = new FlapTest(); 
+		flap.setColour(Color.ORANGE);
+		cnv.registerObject(flap, new Point(1000, 500, 200), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
 		
 		ViewAngleCamera slaveCam = new ViewAngleCamera(new SimpleOrientation(OrientableCanvasObject.ORIENTATION_TAG));
 		slaveCam.setPosition(new Point(1500, 300, 400));
@@ -167,6 +172,7 @@ public class GraphicsTest extends JFrame {
 		torust.addTransform(torust2);
 		torus.addTransformAboutCentre(torust);
 		torus.addFlag(Events.EXPLODE_PERSIST);
+		//torus.setCastsShadow(false);
 		
 		PlugableCanvasObject<TexturedCuboid> cube = new PlugableCanvasObject<TexturedCuboid>(new TexturedCuboid(200,200,200));
 		cnv.registerObject(cube, new Point(500,500,450), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
@@ -201,7 +207,7 @@ public class GraphicsTest extends JFrame {
 		wall.setVisible(false);
 		cnv.registerObject(wall, new Point(300,0,700), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
 		
-		ICanvasObjectList getObjects = () -> {return cnv.getShapes().stream().filter(s -> s.isVisible() && !s.isDeleted()).collect(Collectors.toList());};
+		ICanvasObjectList getObjects = () -> {return cnv.getShapes().stream().filter(s -> s.isVisible() && !s.isDeleted() && !s.hasFlag("PHASED")).collect(Collectors.toList());};
 		
 		IPlugin<PlugableCanvasObject<?>,Void> explode = new IPlugin<PlugableCanvasObject<?>,Void>(){
 			@Override
@@ -269,6 +275,25 @@ public class GraphicsTest extends JFrame {
 			public void keyTyped(KeyEvent key) {
 				super.keyTyped(key);
 				if (key.getKeyChar() == 'l') l4.toggle();
+				
+				if (key.getKeyChar() == 'r'){
+					Laser laser = new Laser();
+					cam.addCameraRotation(laser);
+					Point pos = new Point(cam.getPosition());
+					Vector down = cam.getOrientation().getDown();
+					pos.x += down.x * 15;
+					pos.y += down.y * 15;
+					pos.z += down.z * 15;
+					cnv.registerObject(laser, pos);
+					
+					laser = new Laser();
+					cam.addCameraRotation(laser);
+					pos = new Point(cam.getPosition());
+					pos.x -= down.x * 15;
+					pos.y -= down.y * 15;
+					pos.z -= down.z * 15;
+					cnv.registerObject(laser, pos);
+				}
 				
 				if (key.getKeyChar() == 'f'){
 					//fire a projectile (that also generates light) that attempts to blow up a target

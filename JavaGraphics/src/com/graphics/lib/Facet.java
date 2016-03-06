@@ -146,7 +146,7 @@ public class Facet {
 	 * @return <code>True</code> if p is within facet footprint, <code>False</code> otherwise
 	 */
 	public boolean isPointWithin(Point p){
-		if (
+		if (p != null &&
 			this.isSameSide(p, this.point1, this.point2, this.point3) &&
 			this.isSameSide(p, this.point2, this.point3, this.point1) &&
 			this.isSameSide(p, this.point3, this.point1, this.point2)

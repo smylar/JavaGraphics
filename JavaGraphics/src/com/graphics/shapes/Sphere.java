@@ -26,13 +26,7 @@ public class Sphere extends Ovoid {
 	
 	@Override
 	public boolean vectorIntersects(Point start, Vector v){
-		double actualRadius = getCentre().distanceTo(this.getVertexList().get(0)); //may have changed in scaling
-		double dCentre = start.distanceTo(getCentre());
-		double angle = Math.atan(actualRadius/dCentre);
-		Vector vCentre = start.vectorToPoint(getCentre()).getUnitVector();
-		
-		double vAngle = Math.acos(v.dotProduct(vCentre));
-		
-		return vAngle < angle; 
+		//as shape is a sphere we can use the rough calculation, which uses a sphere
+		return this.vectorIntersectsRoughly(start, v);
 	}
 }

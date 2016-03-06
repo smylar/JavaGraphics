@@ -41,13 +41,16 @@ public class ViewAngleCamera extends Camera {
 		 
 		 if (zed < 0){
 			 //point behind camera 
+			 //TODO needs fixing - or needs entirely new approach - probably along lines of a clipping plane - which will be fun
+			 //finally did good test of this with laser - big difference in vertices, gets worse as point further behind camera at an angle
+			 //a cheat would be to add intermediate points of a suitable length so this wouldn't show up
 			 Point zAt1 = new Point(p.x,p.y,position.z);
-			 Point invZ = new Point(p.x,p.y,position.z + (zed*-1));
+			 Point invZ = new Point(p.x,p.y,position.z - zed);
 			 getCameraCoords(zAt1);
 			 getCameraCoords(invZ);
 			 p.x = zAt1.x + zAt1.x - invZ.x;
 			 p.y = zAt1.y + zAt1.y - invZ.y;
-			 p.z = zed;
+			 p.z = zed;		 
 		 }
 		 else{
 			 double dx = p.x - position.x;

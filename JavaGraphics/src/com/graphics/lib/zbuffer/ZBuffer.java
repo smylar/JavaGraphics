@@ -105,7 +105,8 @@ public class ZBuffer implements IZBuffer{
 					percentDistCovered = (y - Math.floor(scanLine.startY)) / scanLineLength;
 				}
 				
-				double z = scanLine.startZ + ((scanLine.endZ - scanLine.startZ) * percentDistCovered);
+				double z = this.interpolateZ(scanLine.startZ, scanLine.endZ, percentDistCovered);
+				if (z < 0) continue;
 				
 				if (skip == 1 || y % skip == 0 || colour == null){	
 					colour = localShader == null ? (facet.getColour() == null ? parent.getColour() : facet.getColour()) : localShader.getColour(scanLine, x, y);
@@ -213,10 +214,17 @@ public class ZBuffer implements IZBuffer{
 		double startZ = line.getStart().z;
 		double endZ = line.getEnd().z;
 		
-		return startZ + ((endZ - startZ) * percentLength);
+		return this.interpolateZ(startZ, endZ, percentLength); 
+		//some problems still exist with laser as seen from slave when aimed near it (sphere overlap of laser firing behind slave), so still not getting z properly - may also be a problem in the camera transform algorithm
+		//as it sometimes seems to put the laser the wrong side of the slave camera when laser travels from in front to behind camera - possibly a general problem crossing this line
 	}
 
 
+	private double interpolateZ(double startZ, double endZ, double percentLength)
+	{
+		return 1d / ((1d/startZ) + (percentLength * ((1d/endZ) - (1d/startZ))));
+	}
+	
 	@Override
 	public void setDimensions(int width, int height) {
 		//setting up all zbuffer item objects does slow it down, a bit but should mean it doesn't slowly slow down as items are added, performance should stay constant

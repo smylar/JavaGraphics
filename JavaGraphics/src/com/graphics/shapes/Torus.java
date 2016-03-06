@@ -16,6 +16,7 @@ import com.graphics.lib.transform.YRotation;
 public class Torus extends CanvasObject{
 	private int points = 0;
 	private double tubeRadius;
+	private WorldCoord centre;
 
 	public Torus (double tubeRadius, double holeRadius)
 	{
@@ -107,13 +108,14 @@ public class Torus extends CanvasObject{
 		
 		this.points = points;
 		
-		this.getVertexList().add(new WorldCoord(0,0,0));//centre point
+		this.centre = new WorldCoord(0,0,0);
+		this.getVertexList().add(centre);//centre point
 	}
 	
 	@Override
 	public Point getCentre()
 	{
-		return this.getVertexList().get(this.getVertexList().size() - 1);
+		return this.centre;
 	}
 	
 	@Override

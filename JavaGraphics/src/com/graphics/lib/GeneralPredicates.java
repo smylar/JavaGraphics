@@ -41,6 +41,19 @@ public class GeneralPredicates {
 		};
 	}
 	
+	public static Predicate<Facet> isFrontface(Point p)
+	{
+		return f -> {		
+			Vector vector = p.vectorToPoint(f.point1).getUnitVector();
+			
+			double answer = f.getNormal().dotProduct(vector);
+			
+			double deg = Math.toDegrees(Math.acos(answer));
+			
+			return (deg > 90);
+		};
+	}
+	
 	public static Predicate<Facet> isOverHorizon(Camera c, double horizon)
 	{
 		 return f -> c.getPosition().distanceTo(f.point1) > horizon

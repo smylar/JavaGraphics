@@ -120,7 +120,7 @@ public class PluginLibrary {
 	public static IPlugin<PlugableCanvasObject<?>,CanvasObject> hasCollided(ICanvasObjectList objects, String impactorPlugin, String impacteePlugin)
 	{
 		return (obj) -> {
-			PlugableCanvasObject<?> inCollision = (PlugableCanvasObject<?>)obj.executePlugin("IN_COLLISION"); //may need to be a list - may hit more than one!
+			CanvasObject inCollision = (CanvasObject)obj.executePlugin("IN_COLLISION"); //may need to be a list - may hit more than one!
 			
 			for (CanvasObject impactee : objects.get()){
 				if (impactee == obj) continue;

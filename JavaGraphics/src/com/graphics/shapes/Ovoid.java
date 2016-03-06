@@ -8,6 +8,7 @@ import com.graphics.lib.canvas.CanvasObject;
 public class Ovoid extends CanvasObject{
 	private double radius = 0;
 	private int pointsPerCircle = 0;
+	private WorldCoord centre;
 	
 	public Ovoid(double radius, double radiusMod, int angleProgression)
 	{
@@ -65,7 +66,8 @@ public class Ovoid extends CanvasObject{
 			this.getFacetList().add(new Facet(this.getVertexList().get(++addr), this.getVertexList().get(j+(points*(pointsarc-2))), this.getVertexList().get(i+(points*(pointsarc-2)))));
 		}
 
-		this.getVertexList().add(new WorldCoord(0,0,0));
+		this.centre = new WorldCoord(0,0,0);
+		this.getVertexList().add(centre);//centre point
 		//this.UseAveragedNormals(90); tested as working when not using the CENTRE_TO_POINT vertex finder which is more efficient for this shape
 	}
 	
@@ -80,6 +82,6 @@ public class Ovoid extends CanvasObject{
 	@Override
 	public Point getCentre()
 	{
-		return this.getVertexList().get(this.getVertexList().size() - 1);
+		return this.centre;
 	}
 }

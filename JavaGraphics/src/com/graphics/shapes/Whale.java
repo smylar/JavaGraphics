@@ -173,11 +173,11 @@ public class Whale extends AnimatedCanvasObject<Whale> {
 		rootNode.setMax(Axis.X,20);
 		rootNode.setMin(Axis.X,-10);
 		
-		rootNode.getAnimations().put("TAIL",  PivotSkeletonNode.getDefaultPivotAction(Axis.X, 1));
+		rootNode.getAnimations().put("TAIL",  PivotSkeletonNode.getDefaultPivotAction(Axis.X, 1, 1));
 		
 		tailNode.setMax(Axis.Y,10);
 		tailNode.setMin(Axis.Y,-10);
-		tailNode.getAnimations().put("TAIL",  PivotSkeletonNode.getDefaultPivotAction(Axis.Y, 0.5));
+		tailNode.getAnimations().put("TAIL",  PivotSkeletonNode.getDefaultPivotAction(Axis.Y, 0.5, 0.5));
 		
 		this.setSkeletonRootNode(rootNode);
 		this.startAnimation("TAIL");
