@@ -14,6 +14,7 @@ public class MovementTransform extends Transform {
 	private IVectorFinder vectorFinder;
 	private double distanceMoved = 0;
 	private double acceleration = 0;
+	private double maxSpeed = 0;
 	Predicate<MovementTransform> until;
 	
 	public MovementTransform(IVectorFinder vectorFinder, double speed)
@@ -40,6 +41,14 @@ public class MovementTransform extends Transform {
 
 	public void setVector(Vector vector) {
 		this.vector = vector.getUnitVector();
+	}
+	
+	public double getMaxSpeed() {
+		return maxSpeed;
+	}
+
+	public void setMaxSpeed(double maxSpeed) {
+		this.maxSpeed = maxSpeed;
 	}
 
 	public double getSpeed() {
@@ -75,7 +84,9 @@ public class MovementTransform extends Transform {
 	public void afterTransform()
 	{
 		this.distanceMoved += this.speed;
-		this.speed += this.acceleration;
+		if (this.maxSpeed > 0 && this.speed < this.maxSpeed){
+			this.speed += this.acceleration;
+		}
 	}
 
 	@Override

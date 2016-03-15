@@ -33,11 +33,7 @@ public class GeneralPredicates {
 				if (Math.toDegrees(Math.acos(angleRad)) > ((DirectionalLightSource) l).getLightConeAngle()) return false;
 			}
 			
-			double answer = f.getNormal().dotProduct(lightVector);
-			
-			double deg = Math.toDegrees(Math.acos(answer));
-			
-			return (deg > 90);
+			return f.getNormal().dotProduct(lightVector) < 0;
 		};
 	}
 	
@@ -46,11 +42,7 @@ public class GeneralPredicates {
 		return f -> {		
 			Vector vector = p.vectorToPoint(f.point1).getUnitVector();
 			
-			double answer = f.getNormal().dotProduct(vector);
-			
-			double deg = Math.toDegrees(Math.acos(answer));
-			
-			return (deg > 90);
+			return f.getNormal().dotProduct(vector) < 0;
 		};
 	}
 	

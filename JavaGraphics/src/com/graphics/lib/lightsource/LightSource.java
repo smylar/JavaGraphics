@@ -1,12 +1,17 @@
 package com.graphics.lib.lightsource;
 
 import java.awt.Color;
+import java.util.Observable;
 
 import com.graphics.lib.IntensityComponents;
 import com.graphics.lib.Point;
 
-public class LightSource{
-
+public class LightSource extends Observable{
+	public static final String ONOFFCHANGE = "ONOFF";
+	public static final String POSITIONCHANGE = "POS";
+	public static final String INTENSITYCHANGE = "INT";
+	public static final String COLOURCHANGE = "COLOUR";
+	
 	private Point position;
 	private double intensity = 1;
 	private Color colour = new Color(255, 255, 255);
@@ -42,6 +47,7 @@ public class LightSource{
 
 	public void setPosition(Point position) {
 		this.position = position;
+		this.flagChange(POSITIONCHANGE);
 	}
 
 	public double getIntensity(Point p) {
@@ -55,6 +61,7 @@ public class LightSource{
 	public void setIntensity(double intensity) {
 		this.intensity = intensity;
 		this.setActualColour();
+		this.flagChange(INTENSITYCHANGE);
 	}
 	
 	public double getIntensity() {
@@ -81,27 +88,36 @@ public class LightSource{
 	public void setColour(Color colour) {
 		this.colour = colour;
 		this.setActualColour();
+		this.flagChange(COLOURCHANGE);
 	}
 	
 	public void turnOn()
 	{
 		this.on = true;
+		this.flagChange(ONOFFCHANGE);
 	}
 	
 	public void turnOff()
 	{
 		this.on = false;
+		this.flagChange(ONOFFCHANGE);
 	}
 	
 	public void toggle()
 	{
 		this.on = this.on ? false : true;
+		this.flagChange(ONOFFCHANGE);
 	}
 	
 	public boolean isOn() {
 		return on;
 	}
 
+	protected void flagChange(String change){
+		this.setChanged();
+		this.notifyObservers(change);
+	}
+	
 	/**
 	 * Get the amount of each colour component of the light illuminating the given point from this light source
 	 * 

@@ -206,6 +206,12 @@ public class CanvasObject extends Observable implements Observer{
 		getData().transforms.forEach(t -> t.cancel());
 	}
 	
+	public final synchronized void cancelNamedTransform(String key)
+	{
+		if (key == null) return;
+		getData().transforms.stream().filter(t -> key.equals(t.getName())).forEach(t -> t.cancel());
+	}
+	
 	public final Map<Point, ArrayList<Facet>> getVertexFacetMap() {
 		return getData().vertexFacetMap;
 	}
@@ -255,6 +261,11 @@ public class CanvasObject extends Observable implements Observer{
 	public final boolean hasTransforms()
 	{
 		return getData().transforms.size() > 0;
+	}
+	
+	public final boolean hasNamedTransform(String name){
+		if (name == null) return false;
+		return getData().transforms.stream().anyMatch(t -> name.equals(t.getName()));
 	}
 	
 	/**
@@ -455,6 +466,62 @@ public class CanvasObject extends Observable implements Observer{
 	}
 	
 	/**
+	 * Get the facet that a vector from a given point intersects.
+	 * 
+	 * @param start	- Start point of the vector
+	 * @param v		- The vector
+	 * @param getAny	- True if any intersected facet should be returned, false if the nearest should be returned
+	 * @return		- The intersected facet or null if none is intersected
+	 */
+	public Facet getIntersectedFacet(Point start, Vector v, boolean getAny)
+	{
+		if (this.getBaseObject() != this) return this.getBaseObject().getIntersectedFacet(start, v, getAny);
+		
+		//get quick estimate for those that are nowhere near - check if hit sphere centred on centre point with diameter of largest dimension	
+		if (!vectorIntersectsRoughly(start, v)) return null;
+		
+		Facet closest = null;
+		double closestDist = 0;
+		//the brute force generalised approach, check each front facing (to point) facet for intersection - will be horrible for something with a high facet count
+		for (Facet f : this.getFacetList().stream().filter(GeneralPredicates.isFrontface(start)).collect(Collectors.toList()))
+		{
+			if (f.isPointWithin(f.getIntersectionPointWithFacetPlane(start, v))){
+				if (getAny) return f;
+			
+				double dist = (start.distanceTo(f.point1) + start.distanceTo(f.point2) + start.distanceTo(f.point3)) / 3;
+				if (closest == null || dist < closestDist){
+					closest = f;
+					closestDist = dist;
+				}
+			}
+		}
+		return closest;
+	}
+	
+	/**
+	 * Get list of all intersected facets that a vector from a given point intersects.
+	 * 
+	 * @param start	- Start point of the vector
+	 * @param v		- The vector
+	 * @return		- List of intersected facets
+	 */
+	public List<Facet> getIntersectedFacets(Point start, Vector v)
+	{
+		if (this.getBaseObject() != this) return this.getBaseObject().getIntersectedFacets(start, v);
+		List<Facet> list = new ArrayList<Facet>();
+
+		if (!vectorIntersectsRoughly(start, v)) return list;
+		
+		for (Facet f : this.getFacetList())
+		{
+			if (f.isPointWithin(f.getIntersectionPointWithFacetPlane(start, v, true))){
+				list.add(f);
+			}
+		}
+		return list;
+	}
+	
+	/**
 	 * Check if a vector intersects this object
 	 * 
 	 * @param start - Point vector originates from
@@ -464,17 +531,7 @@ public class CanvasObject extends Observable implements Observer{
 	public boolean vectorIntersects(Point start, Vector v){
 		if (this.getBaseObject() != this) return this.getBaseObject().vectorIntersects(start, v);
 		
-		if (!this.getCastsShadow()) return false;
-		
-		//get quick estimate for those that are nowhere near - check if hit sphere centred on centre point with diameter of largest dimension	
-		if (!vectorIntersectsRoughly(start, v)) return false;
-		
-		//the brute force generalised approach, check each front facing (to point) facet for intersection - will be horrible for something with a high facet count
-		for (Facet f : this.getFacetList().stream().filter(GeneralPredicates.isFrontface(start)).collect(Collectors.toList()))
-		{
-			if (f.isPointWithin(f.getIntersectionPointWithFacetPlane(start, v))) return true;	
-		}
-		return false;
+		return this.getIntersectedFacet(start, v, true) != null;
 	}
 	
 	/**
@@ -535,7 +592,7 @@ public class CanvasObject extends Observable implements Observer{
 	 * 
 	 * @param divergenceLimit - If the angle between two facets is larger than this value, than a value will not be mapped
 	 */
-	public final void UseAveragedNormals(int divergenceLimit)
+	public final void useAveragedNormals(int divergenceLimit)
 	{
 		//create map for getting all the facets attached to a specific vertex
 		getData().vertexFacetMap = new HashMap<Point, ArrayList<Facet>>();

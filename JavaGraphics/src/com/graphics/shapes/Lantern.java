@@ -1,8 +1,12 @@
 package com.graphics.shapes;
 
+import java.util.Observable;
+
 import com.graphics.lib.Facet;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
+import com.graphics.lib.lightsource.LightSource;
+import com.graphics.lib.lightsource.ObjectTiedLightSource;
 
 public class Lantern extends CanvasObject {
 	public Lantern(){
@@ -24,5 +28,20 @@ public class Lantern extends CanvasObject {
 		
 		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(4), this.getVertexList().get(3)));
 		this.getFacetList().add(new Facet(this.getVertexList().get(5), this.getVertexList().get(3), this.getVertexList().get(4)));
+	}
+	
+	public void attachLightsource(ObjectTiedLightSource<?> ls){
+		this.setColour(ls.getLightSource().getColour());
+		this.setCastsShadow(false);
+		ls.tieTo(this);
+		ls.getLightSource().addObserver(this);
+	}
+	
+	@Override
+	public synchronized void update(Observable arg0, Object arg1) {
+		super.update(arg0, arg1);
+		if (arg0 instanceof LightSource){
+			this.setColour(((LightSource)arg0).getActualColour());
+		}
 	}
 }

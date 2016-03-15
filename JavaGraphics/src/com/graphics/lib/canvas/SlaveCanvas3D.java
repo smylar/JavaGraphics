@@ -3,10 +3,6 @@ package com.graphics.lib.canvas;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Stream;
-
-import com.graphics.lib.Facet;
-import com.graphics.lib.GeneralPredicates;
 import com.graphics.lib.Utils;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasUpdateListener;
@@ -55,15 +51,9 @@ public class SlaveCanvas3D extends Canvas3D implements ICanvasUpdateListener {
 		if (obj.isVisible())
 		{
 			this.getCamera().getView(obj);
-			Stream<Facet> facetStream = obj.getFacetList().parallelStream();
 			if (shader != null) shader.setLightsources(parent.getLightSources());
-			if (!obj.isProcessBackfaces()){
-				facetStream = facetStream.filter(GeneralPredicates.isFrontface(this.getCamera()));
-			}
-			facetStream.filter(GeneralPredicates.isOverHorizon(this.getCamera(), this.getHorizon()).negate()).forEach(f ->{
-				f.setFrontFace(GeneralPredicates.isFrontface(this.getCamera()).test(f));
-				zBuf.Add(f, obj, shader, this.getCamera());
-			});
+			
+			zBuf.Add(obj, shader, this.getCamera(), parent.getHorizon());
 		}
 		for (CanvasObject child : new ArrayList<CanvasObject>(obj.getChildren()))
 		{

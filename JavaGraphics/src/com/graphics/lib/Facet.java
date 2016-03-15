@@ -20,6 +20,7 @@ public class Facet {
 	public WorldCoord point3;
 	private Color colour;
 	private double baseIntensity = 0.15;
+	private double maxIntensity = 1;
 	private boolean isFrontFace = true;
 	private List<Texture> texture = new ArrayList<Texture>();
 	private String tag = null;
@@ -37,12 +38,30 @@ public class Facet {
 		this.tag = tag;
 	}
 	
+	public List<WorldCoord> getAsList(){
+		List<WorldCoord> list = new ArrayList<WorldCoord>();
+		list.add(point1);
+		list.add(point2);
+		list.add(point3);
+		return list;
+	}
+	
 	public String getTag() {
 		return tag;
 	}
 
 	public void setTag(String tag) {
 		this.tag = tag;
+	}
+	
+	public double getMaxIntensity() {
+		return maxIntensity;
+	}
+	
+	public void setMaxIntensity(double maxIntensity) {
+		if (maxIntensity < 0) this.maxIntensity = 0;
+		else if (maxIntensity > 1) this.maxIntensity = 1;
+		else this.maxIntensity = maxIntensity;
 	}
 
 	public double getBaseIntensity() {
@@ -53,6 +72,17 @@ public class Facet {
 		if (baseIntensity < 0) this.baseIntensity = 0;
 		else if (baseIntensity > 1) this.baseIntensity = 1;
 		else this.baseIntensity = baseIntensity;
+	}
+	
+	public void checkIntensity(IntensityComponents intensity){
+		if (intensity.getRed() > maxIntensity) intensity.setRed(maxIntensity);
+		else if (intensity.getRed() < baseIntensity) intensity.setRed(baseIntensity);
+		
+		if (intensity.getGreen() > maxIntensity) intensity.setGreen(maxIntensity);
+		else if (intensity.getGreen() < baseIntensity) intensity.setGreen(baseIntensity);
+		
+		if (intensity.getBlue() > maxIntensity) intensity.setBlue(maxIntensity);
+		else if (intensity.getBlue() < baseIntensity) intensity.setBlue(baseIntensity);
 	}
 	
 	public Color getColour() {
@@ -106,20 +136,24 @@ public class Facet {
 		return normal.getUnitVector();
 	}
 	
+	public Point getIntersectionPointWithFacetPlane(Point p, Vector vec){
+		return this.getIntersectionPointWithFacetPlane(p, vec, false);
+	}
 	/**
 	 * Get the point at which a given point will intersect with the plane of this facet
 	 * 
 	 * @param p - Start point
 	 * @param vec - Vector to travel along
+	 * @param includeBackfaces - Indicates if intersection should be generated if facet is back facing (relative to vec)
 	 * @return - Point of intersection, or null if it cannot intersect
 	 */
-	public Point getIntersectionPointWithFacetPlane(Point p, Vector vec){
+	public Point getIntersectionPointWithFacetPlane(Point p, Vector vec, boolean includeBackfaces){
 		Vector normal = this.getNormal();
 		Vector v = vec.getUnitVector();
 		double t = (normal.x * v.x) + (normal.y * v.y) + (normal.z * v.z);
 		double tmod = (normal.x*p.x) + (normal.y*p.y) + (normal.z*p.z);
-		//if (t == 0) return null;
-		if (t >= 0) return null;
+		if (includeBackfaces && t == 0) return null;
+		if (!includeBackfaces && t >= 0) return null;
 		double tval = ((normal.x* point1.x) + (normal.y* point1.y) + (normal.z* point1.z) - tmod) / t;
 		return new Point(p.x + (v.x*tval), p.y + (v.y*tval), p.z + (v.z*tval));
 	}

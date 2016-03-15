@@ -6,8 +6,10 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import com.graphics.lib.Facet;
+import com.graphics.lib.GeneralPredicates;
 import com.graphics.lib.LineEquation;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
@@ -47,17 +49,38 @@ public class ZBuffer implements IZBuffer{
 	 * Override notes: A null shader here will mean that the facets specified colour will be used
 	 */
 	@Override
-	public void Add(Facet facet, CanvasObject parent, IShader shader, Camera c)
+	public void Add(CanvasObject obj, IShader shader, Camera c, double horizon)
+	{
+		Stream<Facet> facetStream = obj.getFacetList().parallelStream();
+		if (!obj.isProcessBackfaces()){
+			facetStream = facetStream.filter(GeneralPredicates.isFrontface(c));
+		}
+		facetStream.filter(GeneralPredicates.isOverHorizon(c, horizon).negate()).forEach(f ->{
+			f.setFrontFace(GeneralPredicates.isFrontface(c).test(f));
+			Add(f, obj, shader, c);
+		});
+	}
+	
+	
+	private void Add(Facet facet, CanvasObject parent, IShader shader, Camera c)
 	{
 		if (zBuffer == null) return;
 		List<LineEquation> lines = new ArrayList<LineEquation>();
 		lines.add(new LineEquation(facet.point1, facet.point2, c));
 		lines.add(new LineEquation(facet.point2, facet.point3, c));
 		lines.add(new LineEquation(facet.point3, facet.point1, c));
-		List<WorldCoord> points = new ArrayList<WorldCoord>();
-		points.add(facet.point1);
-		points.add(facet.point2);
-		points.add(facet.point3);
+		
+		List<WorldCoord> points = facet.getAsList();
+		if (points.stream().allMatch(p -> p.getTransformed(c).z <= 0)) return;
+		
+		//not sure about these though - it is possible to have points out of range either side of the screen so something should be drawn - but performance likely to be better (when significant objects are off screen)
+		//if (points.stream().allMatch(p -> p.getTransformed(c).x < 0 || p.getTransformed(c).x > this.dispWidth)) return;
+		//if (points.stream().allMatch(p -> p.getTransformed(c).y < 0 || p.getTransformed(c).y > this.dispHeight)) return;
+		//do separately? so returns if all points off one side
+		if (points.stream().allMatch(p -> p.getTransformed(c).x < 0)) return;
+		if (points.stream().allMatch(p -> p.getTransformed(c).x > this.dispWidth)) return;
+		if (points.stream().allMatch(p -> p.getTransformed(c).y < 0)) return;
+		if (points.stream().allMatch(p -> p.getTransformed(c).y > this.dispHeight)) return;
 		
 		Vector normal = facet.getTransformedNormal(c);
 		
@@ -106,7 +129,6 @@ public class ZBuffer implements IZBuffer{
 				}
 				
 				double z = this.interpolateZ(scanLine.startZ, scanLine.endZ, percentDistCovered);
-				if (z < 0) continue;
 				
 				if (skip == 1 || y % skip == 0 || colour == null){	
 					colour = localShader == null ? (facet.getColour() == null ? parent.getColour() : facet.getColour()) : localShader.getColour(scanLine, x, y);

@@ -3,7 +3,6 @@ package com.graphics.lib.interfaces;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.graphics.lib.Facet;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.shader.IShader;
@@ -23,12 +22,11 @@ public interface IZBuffer {
 	/**
 	 * Add a facet to the Z Buffer
 	 * 
-	 * @param facet - Facet to process and add to buffer if required
 	 * @param parent - The CanvasObject the facet belongs to
 	 * @param shader - The shader object that will handle colouring of the facet
 	 * @param c		- The camera being processed
 	 */
-	public void Add(Facet facet, CanvasObject parent, IShader shader, Camera c);
+	public void Add(CanvasObject obj, IShader shader, Camera c, double horizon);
 	
 	/**
 	 * Get the Z buffer, the form is (in an attempt for some performance when finding a specific entry):

@@ -64,7 +64,6 @@ public class GoraudShader implements IShader{
 		endIntensity = null;
 		startTexture = null;
 		endTexture = null;
-		pointIntensity = new IntensityComponents();
 	}
 
 	@Override
@@ -103,14 +102,11 @@ public class GoraudShader implements IShader{
 				break;
 			}
 		}
-		
 		//TODO something is off, mesh lines appear brighter
 		pointIntensity.setRed(startIntensity.getRed() + ((endIntensity.getRed() - startIntensity.getRed()) * percentDistCovered));
-		if (pointIntensity.getRed() < facet.getBaseIntensity()) pointIntensity.setRed(facet.getBaseIntensity());
 		pointIntensity.setGreen(startIntensity.getGreen() + ((endIntensity.getGreen() - startIntensity.getGreen()) * percentDistCovered));
-		if (pointIntensity.getGreen() < facet.getBaseIntensity()) pointIntensity.setGreen(facet.getBaseIntensity());
 		pointIntensity.setBlue(startIntensity.getBlue() + ((endIntensity.getBlue() - startIntensity.getBlue()) * percentDistCovered));
-		if (pointIntensity.getBlue() < facet.getBaseIntensity()) pointIntensity.setBlue(facet.getBaseIntensity());
+		facet.checkIntensity(pointIntensity);
 		
 		return pointIntensity.applyIntensities(pointColour);
 	}
@@ -122,7 +118,6 @@ public class GoraudShader implements IShader{
 		double len = Math.sqrt((dx*dx)+(dy*dy));
 		
 		double percentLength = len / line.getLength();
-		if (percentLength > 1 ) percentLength = 1;
 		
 		IntensityComponents startComponents = pointLight.get(line.getStart());
 		IntensityComponents endComponents = pointLight.get(line.getEnd());

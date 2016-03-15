@@ -22,10 +22,14 @@ public class DirectionalLightSource extends LightSource {
 	private IVectorFinder direction;
 	private IPointFinder position;
 	
-	public DirectionalLightSource() {
-		super(0, 0, 0);
+	public DirectionalLightSource(){
+		this(0,0,0);
+	}
+	
+	public DirectionalLightSource(double x, double y, double z) {
+		super(x, y, z);
 		direction = () -> {return new Vector(0,0,1);};
-		position = () -> {return new Point(0,0,0);};
+		position = () -> {return new Point(x,y,z);};
 	}
 
 	public double getLightConeAngle() {

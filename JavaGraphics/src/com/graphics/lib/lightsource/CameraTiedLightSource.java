@@ -7,13 +7,13 @@ import com.graphics.lib.WorldCoord;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.canvas.CanvasObject;
 
-public class CameraTiedLightSource extends TiedLightSource<Camera> {
+public class CameraTiedLightSource<L extends LightSource> extends TiedLightSource<L,Camera> {
 
 	private Point startPosition;
 	private Point startCamPosition;
 	
-	public CameraTiedLightSource(double x, double y, double z) {
-		super(x, y, z);
+	public CameraTiedLightSource(Class<L> ls, double x, double y, double z) {
+		super(ls, x, y, z);
 		this.startPosition = new Point(x, y, z);
 	}
 
@@ -35,7 +35,7 @@ public class CameraTiedLightSource extends TiedLightSource<Camera> {
 		p.z = startPosition.z + (c.getPosition().z - startCamPosition.z);
 		temp.getVertexList().add(p);
 		c.matchCameraRotation(temp);
-		this.setPosition(p);
+		this.getLightSource().setPosition(p);
 	}
 
 }

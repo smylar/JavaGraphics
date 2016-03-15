@@ -1,6 +1,11 @@
 package com.graphics.lib.camera;
 
+import java.util.stream.Collectors;
+
+import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
+import com.graphics.lib.Vector;
+import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.interfaces.IOrientation;
 
@@ -29,43 +34,48 @@ public class ViewAngleCamera extends Camera {
 		
 		this.alignShapeToCamera(obj);
 		
+		Point position = this.getPosition();
+		
+		obj.getVertexList().parallelStream().filter(v -> v.getTransformed(this).z < position.z-1).forEach(p -> {
+			this.doPointBehind(obj, p, p.getTransformed(this), position);
+		});
+		
 		obj.getVertexList().parallelStream().forEach(p -> {
-			this.getCameraCoords(p.getTransformed(this));
+			
+			Point trans = p.getTransformed(this);
+			double zed = trans.z - position.z;
+
+			if (zed < 1 && zed > -1) zed = 1;
+			
+			if (zed<0){
+				getCameraCoords(trans, position);
+			}
+			else doPointInFront(trans, zed);
 		});
 	}
 	
-	private void getCameraCoords(Point p){
-		Point position = this.getPosition();
+	private void getCameraCoords(Point p, Point position){
+		
 		double zed = p.z - position.z;
 		 if (zed < 1 && zed >= 0) zed = 1;
 		 
 		 if (zed < 0){
 			 //point behind camera 
-			 //TODO needs fixing - or needs entirely new approach - probably along lines of a clipping plane - which will be fun
-			 //finally did good test of this with laser - big difference in vertices, gets worse as point further behind camera at an angle
-			 //a cheat would be to add intermediate points of a suitable length so this wouldn't show up
-			 Point zAt1 = new Point(p.x,p.y,position.z);
-			 Point invZ = new Point(p.x,p.y,position.z - zed);
-			 getCameraCoords(zAt1);
-			 getCameraCoords(invZ);
+			 WorldCoord zAt1 = new WorldCoord(p.x,p.y,position.z);
+			 WorldCoord invZ = new WorldCoord(p.x,p.y,position.z - zed);
+			 getCameraCoords(zAt1, position);
+			 getCameraCoords(invZ, position);
 			 p.x = zAt1.x + zAt1.x - invZ.x;
 			 p.y = zAt1.y + zAt1.y - invZ.y;
-			 p.z = zed;		 
-		 }
-		 else{
-			 double dx = p.x - position.x;
-			 double dy = p.y - position.y;
-			 double angletopointx = Math.atan(dx / zed);
-			 double angletopointy = Math.atan(dy / zed);
-			 ViewPort vp = this.getViewport(zed);
-			 double viewPortx = (vp.width/2) + (Math.tan(angletopointx) * zed);
-			 double viewPorty = (vp.height/2) + (Math.tan(angletopointy) * zed);
-			 
-			 double scaling = this.dispwidth / vp.width;
-			 
-			 p.x = viewPortx * scaling;
-			 p.y = viewPorty * scaling;
 			 p.z = zed;
+			 
+			 //now with the clipping plane in place if we reach here the whole facet should be not visible (in theory)
+			 /*p.x = position.x -10000;
+			 p.y = position.y;
+			 p.z = zed;*/
+		}
+		else{
+			doPointInFront(p, zed);
 		 }
 	}
 
@@ -78,6 +88,62 @@ public class ViewAngleCamera extends Camera {
 		if (viewAngle >= 90) viewAngle = 89;
 		this.viewAngle = viewAngle;
 		this.tanViewAngle = Math.tan(Math.toRadians(this.viewAngle));
+	}
+	
+	private void doPointBehind(CanvasObject obj, WorldCoord wc, Point trans, Point position)
+	{
+		//attempt to do camera plane clipping
+		//moves points behind camera towards nearest attached point in front of camera - will not work for everything - weird effects likely (especially passing close by with larger facets - though configuration of laser means its fine)
+		//TODO will squash any texture, would need to update texture coordinates too
+		//if (!(obj instanceof Laser)) return; //for testing initially
+		
+		//if (obj.getObjectAs(Ship.class) != null) return; 
+		//may be something up with the ordering of things, mess up on move forward (squishes the rear of the ship just in front of camera), may be best to not do this for the object you are tied to, your view of it shouldn't change anyway
+		if (obj == this.getTiedTo()) return; 
+		
+		Point nearest = null;
+		double nearestdist = 0;
+		for(Facet f : obj.getFacetList().stream().filter(f -> f.point1 == wc || f.point2 == wc || f.point3 == wc ).collect(Collectors.toList()))
+		{	
+			for (WorldCoord w : f.getAsList()){
+				if (wc == w) continue;
+				Point ptrans = w.getTransformed(this);
+				if (ptrans.z > position.z){
+					double dist = trans.distanceTo(ptrans);
+					if (nearest == null || dist < nearestdist){
+						nearest = ptrans;
+						nearestdist = dist;
+					}
+				}
+			}
+		}
+		if (nearest != null){
+			Vector v = nearest.vectorToPoint(trans);
+			Facet camPlane = new Facet(new WorldCoord(10, 0, position.z), new WorldCoord(10, 10, position.z), new WorldCoord(0, 10, position.z));
+			Point intersect = camPlane.getIntersectionPointWithFacetPlane(nearest, v.getUnitVector());
+			if (intersect != null){
+				trans.x = intersect.x;
+				trans.y = intersect.y;
+				trans.z = position.z - 0.5;
+			}
+		}
+	}
+	
+	private void doPointInFront(Point p, double zed){
+		Point position = this.getPosition();
+		 double dx = p.x - position.x;
+		 double dy = p.y - position.y;
+		 double angletopointx = Math.atan(dx / zed);
+		 double angletopointy = Math.atan(dy / zed);
+		 ViewPort vp = this.getViewport(zed);
+		 double viewPortx = (vp.width/2) + (Math.tan(angletopointx) * zed);
+		 double viewPorty = (vp.height/2) + (Math.tan(angletopointy) * zed);
+		 
+		 double scaling = this.dispwidth / vp.width;
+		 
+		 p.x = viewPortx * scaling;
+		 p.y = viewPorty * scaling;
+		 p.z = zed;
 	}
 	
 	private ViewPort getViewport(double z){

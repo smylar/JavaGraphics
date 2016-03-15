@@ -7,10 +7,10 @@ import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.transform.Transform;
 
 
-public class ObjectTiedLightSource extends TiedLightSource<CanvasObject> {
+public class ObjectTiedLightSource<L extends LightSource> extends TiedLightSource<L, CanvasObject> {
 	
-	public ObjectTiedLightSource(double x, double y, double z) {
-		super(x, y, z);
+	public ObjectTiedLightSource(Class<L> ls, double x, double y, double z) {
+		super(ls, x, y, z);
 	}
 
 	
@@ -20,28 +20,28 @@ public class ObjectTiedLightSource extends TiedLightSource<CanvasObject> {
 		if (trans instanceof Transform)
 		{
 			CanvasObject temp = new CanvasObject();
-			WorldCoord pos = new WorldCoord(this.getPosition());
+			WorldCoord pos = new WorldCoord(this.getLightSource().getPosition());
 			temp.getVertexList().add(pos);
 			
 			temp.getVertexList().forEach(p -> {
 				((Transform) trans).doTransformSpecific().accept(p);
 			});
 			
-			this.setPosition(pos);
+			this.getLightSource().setPosition(pos);
 		}
 		else
 		{
 			if (this.getTiedTo().isDeleted())
 			{
-				this.setDeleted(true);
+				this.getLightSource().setDeleted(true);
 			}
 			else if (!this.getTiedTo().isVisible())
 			{
-				this.turnOff();
+				this.getLightSource().turnOff();
 			}
 			else
 			{
-				this.turnOn();
+				this.getLightSource().turnOn();
 			}
 		}
 

@@ -27,16 +27,6 @@ public class ObjectControls implements KeyListener{
 	public static final String ROLL_LEFT = "ROLL_LEFT";
 	public static final String ROLL_RIGHT = "ROLL_RIGHT";
 
-	private boolean panLeftKeyDown = false;
-	private boolean panRightKeyDown = false;
-	private boolean panUpKeyDown = false;
-	private boolean panDownKeyDown = false;
-	private boolean rollLeftKeyDown = false;
-	private boolean rollRightKeyDown = false;
-	private boolean upKeyDown = false;
-	private boolean downKeyDown = false;
-	private boolean rightKeyDown = false;
-	private boolean leftKeyDown = false;
 
 	private OrientableCanvasObject<?> obj;
 	
@@ -96,7 +86,7 @@ public class ObjectControls implements KeyListener{
 			}
 		}
 
-		else if (!this.panRightKeyDown && (key.getKeyChar() == 'd' || key.getKeyChar() == 'D'))
+		else if (!this.obj.hasNamedTransform(PAN_RIGHT) && (key.getKeyChar() == 'd' || key.getKeyChar() == 'D'))
 		{
 			Rotation<?> r = new Rotation<YRotation>(YRotation.class, 4)
 			{
@@ -115,9 +105,8 @@ public class ObjectControls implements KeyListener{
 			Transform rot = new RepeatingTransform<Rotation<?>>(r, -1);
 			rot.setName(PAN_RIGHT);
 			this.obj.addTransformAboutCentre(rot);
-			this.panRightKeyDown = true;
 		}
-		else if (!this.panLeftKeyDown && (key.getKeyChar() == 'a' || key.getKeyChar() == 'A'))
+		else if (!this.obj.hasNamedTransform(PAN_LEFT) && (key.getKeyChar() == 'a' || key.getKeyChar() == 'A'))
 		{
 			Rotation<?> r = new Rotation<YRotation>(YRotation.class, -4)
 			{
@@ -136,9 +125,8 @@ public class ObjectControls implements KeyListener{
 			Transform rot = new RepeatingTransform<Rotation<?>>(r, -1);
 			rot.setName(PAN_LEFT);
 			this.obj.addTransformAboutCentre(rot);
-			this.panLeftKeyDown = true;
 		}
-		else if (!this.panDownKeyDown && (key.getKeyChar() == 'w' || key.getKeyChar() == 'W'))
+		else if (!this.obj.hasNamedTransform(PAN_DOWN) && (key.getKeyChar() == 'w' || key.getKeyChar() == 'W'))
 		{
 			Rotation<?> r = new Rotation<XRotation>(XRotation.class, -4)
 			{
@@ -157,9 +145,8 @@ public class ObjectControls implements KeyListener{
 			Transform rot = new RepeatingTransform<Rotation<?>>(r, -1);
 			rot.setName(PAN_DOWN);
 			this.obj.addTransformAboutCentre(rot);
-			this.panDownKeyDown = true;
 		}
-		else if (!this.panUpKeyDown && (key.getKeyChar() == 's' || key.getKeyChar() == 'S'))
+		else if (!this.obj.hasNamedTransform(PAN_UP) && (key.getKeyChar() == 's' || key.getKeyChar() == 'S'))
 		{
 			Rotation<?> r = new Rotation<XRotation>(XRotation.class, 4)
 			{
@@ -178,9 +165,8 @@ public class ObjectControls implements KeyListener{
 			Transform rot = new RepeatingTransform<Rotation<?>>(r, -1);
 			rot.setName(PAN_UP);
 			this.obj.addTransformAboutCentre(rot);
-			this.panUpKeyDown = true;
 		}
-		else if (!this.rollRightKeyDown && (key.getKeyChar() == 'e' || key.getKeyChar() == 'E'))
+		else if (!this.obj.hasNamedTransform(ROLL_RIGHT) && (key.getKeyChar() == 'e' || key.getKeyChar() == 'E'))
 		{
 			Rotation<?> r = new Rotation<ZRotation>(ZRotation.class, 4)
 			{
@@ -199,9 +185,8 @@ public class ObjectControls implements KeyListener{
 			Transform rot = new RepeatingTransform<Rotation<?>>(r, -1);
 			rot.setName(ROLL_RIGHT);
 			this.obj.addTransformAboutCentre(rot);
-			this.rollRightKeyDown = true;
 		}
-		else if (!this.rollLeftKeyDown && (key.getKeyChar() == 'q' || key.getKeyChar() == 'Q'))
+		else if (!this.obj.hasNamedTransform(ROLL_LEFT) && (key.getKeyChar() == 'q' || key.getKeyChar() == 'Q'))
 		{
 			Rotation<?> r = new Rotation<ZRotation>(ZRotation.class, -4)
 			{
@@ -220,35 +205,30 @@ public class ObjectControls implements KeyListener{
 			Transform rot = new RepeatingTransform<Rotation<?>>(r, -1);
 			rot.setName(ROLL_LEFT);
 			this.obj.addTransformAboutCentre(rot);
-			this.rollLeftKeyDown = true;
 		}
-		else if (!this.upKeyDown && key.getKeyCode() == 38)
+		else if (!this.obj.hasNamedTransform(UP) && key.getKeyCode() == 38)
 		{
 			Transform move = new MovementTransform(() -> obj.getOrientation().getUp(), 4);
 			move.setName(UP);
 			this.obj.addTransform(move);
-			this.upKeyDown = true;
 		}
-		else if (!this.rightKeyDown && key.getKeyCode() == 39)
+		else if (!this.obj.hasNamedTransform(RIGHT) && key.getKeyCode() == 39)
 		{
 			Transform move = new MovementTransform(() -> obj.getOrientation().getRight(), 4);
 			move.setName(RIGHT);
 			this.obj.addTransform(move);
-			this.rightKeyDown = true;
 		}
-		else if (!this.downKeyDown && key.getKeyCode() == 40)
+		else if (!this.obj.hasNamedTransform(DOWN) && key.getKeyCode() == 40)
 		{
 			Transform move = new MovementTransform(() -> obj.getOrientation().getDown(), 4);
 			move.setName(DOWN);
 			this.obj.addTransform(move);
-			this.downKeyDown = true;
 		}
-		else if (!this.leftKeyDown && key.getKeyCode() == 37)
+		else if (!this.obj.hasNamedTransform(LEFT) && key.getKeyCode() == 37)
 		{
 			Transform move = new MovementTransform(() -> obj.getOrientation().getLeft(), 4);
 			move.setName(LEFT);
 			this.obj.addTransform(move);
-			this.leftKeyDown = true;
 		}
 	}
 
@@ -256,53 +236,43 @@ public class ObjectControls implements KeyListener{
 	public void keyReleased(KeyEvent key) {
 		if (key.getKeyChar() == 'w' || key.getKeyChar() == 'W')
 		{
-			this.obj.getTransform(PAN_DOWN).cancel();
-			this.panDownKeyDown = false;
+			this.obj.cancelNamedTransform(PAN_DOWN);
 		}
 		else if (key.getKeyChar() == 's' || key.getKeyChar() == 'S')
 		{
-			this.obj.getTransform(PAN_UP).cancel();
-			this.panUpKeyDown = false;
+			this.obj.cancelNamedTransform(PAN_UP);
 		}
 		else if (key.getKeyChar() == 'd' || key.getKeyChar() == 'D')
 		{
-			this.obj.getTransform(PAN_RIGHT).cancel();
-			this.panRightKeyDown = false;
+			this.obj.cancelNamedTransform(PAN_RIGHT);
 		}
 		else if (key.getKeyChar() == 'a' || key.getKeyChar() == 'A')
 		{
-			this.obj.getTransform(PAN_LEFT).cancel();
-			this.panLeftKeyDown = false;
+			this.obj.cancelNamedTransform(PAN_LEFT);
 		}
 		else if (key.getKeyChar() == 'e' || key.getKeyChar() == 'E')
 		{
-			this.obj.getTransform(ROLL_RIGHT).cancel();
-			this.rollRightKeyDown = false;
+			this.obj.cancelNamedTransform(ROLL_RIGHT);
 		}
 		else if (key.getKeyChar() == 'q' || key.getKeyChar() == 'Q')
 		{
-			this.obj.getTransform(ROLL_LEFT).cancel();
-			this.rollLeftKeyDown = false;
+			this.obj.cancelNamedTransform(ROLL_LEFT);
 		}
 		else if (key.getKeyCode() == 38)
 		{
-			this.obj.getTransform(UP).cancel();
-			this.upKeyDown = false;
+			this.obj.cancelNamedTransform(UP);
 		}
 		else if (key.getKeyCode() == 39)
 		{
-			this.obj.getTransform(RIGHT).cancel();
-			this.rightKeyDown = false;
+			this.obj.cancelNamedTransform(RIGHT);
 		}
 		else if (key.getKeyCode() == 40)
 		{
-			this.obj.getTransform(DOWN).cancel();
-			this.downKeyDown = false;
+			this.obj.cancelNamedTransform(DOWN);
 		}
 		else if (key.getKeyCode() == 37)
 		{
-			this.obj.getTransform(LEFT).cancel();
-			this.leftKeyDown = false;
+			this.obj.cancelNamedTransform(LEFT);
 		}
 		
 	}

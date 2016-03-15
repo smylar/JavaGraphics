@@ -158,7 +158,7 @@ public class Whale extends AnimatedCanvasObject<Whale> {
 		
 		//TODO - an interface for building all this?!?!?
 		
-		this.UseAveragedNormals(90);
+		this.useAveragedNormals(90);
 		this.setOrientation(new SimpleOrientation(ORIENTATION_TAG));
 		this.getOrientation().getRepresentation().getVertexList().get(0).z = -1;
 		

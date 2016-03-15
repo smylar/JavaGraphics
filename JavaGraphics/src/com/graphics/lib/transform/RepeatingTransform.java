@@ -39,7 +39,7 @@ public class RepeatingTransform<T extends Transform> extends Transform{
 	@Override
 	public void afterTransform() {
 		transform.afterTransform();
-		cnt++;
+		if (repeat > 0) cnt++;
 	}
 	
 	@Override

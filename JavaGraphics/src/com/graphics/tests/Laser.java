@@ -4,7 +4,6 @@ import java.awt.Color;
 
 import com.graphics.lib.Facet;
 import com.graphics.lib.transform.Rotation;
-import com.graphics.lib.transform.Translation;
 import com.graphics.lib.transform.XRotation;
 import com.graphics.shapes.Cylinder;
 
@@ -12,21 +11,18 @@ public class Laser extends Cylinder {
 
 	private int tickLife = 8;
 	private int currentTick = 0;
+	private double length = 1000;
 	private Cylinder subCylinder;
 	
-	public Laser() {
-		super(2, 1000, 36);
+	public Laser(double length) {
+		super(2, length , 36);
+		this.length = length;
 		this.setColour(new Color(255, 0, 255, 100));
-		this.addFlag("PHASED");
 		this.setCastsShadow(false);
 		this.setBaseIntensity(1);
 		this.setProcessBackfaces(true);		
 		
-		subCylinder = new Cylinder(1,1000,36);
-		
-		subCylinder.addFlag("PHASED");
-		subCylinder.setCastsShadow(false);
-		subCylinder.setBaseIntensity(1);
+		subCylinder = new Cylinder(1,length,36);
 		
 		for (Facet f : subCylinder.getFacetList()){
 			f.setColour(new Color(255,255,0, 200));
@@ -37,7 +33,7 @@ public class Laser extends Cylinder {
 		
 		//rotate from upright to forwards
 		this.addTransform(new Rotation<XRotation>(XRotation.class, 90));
-		this.addTransform(new Translation(0,0,1));
+		//this.addTransform(new Translation(0,0,-10));
 		this.applyTransforms();
 	}
 
@@ -62,4 +58,9 @@ public class Laser extends Cylinder {
 		}
 	}
 
+	public double getLength() {
+		return length;
+	}
+
+	
 }

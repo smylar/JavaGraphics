@@ -20,6 +20,7 @@ import javax.swing.SwingUtilities;
 
 
 
+
 import com.graphics.lib.Facet;
 import com.graphics.lib.ObjectControls;
 import com.graphics.lib.Point;
@@ -40,6 +41,7 @@ import com.graphics.lib.canvas.SlaveCanvas3D;
 import com.graphics.lib.interfaces.ICanvasObjectList;
 //import com.graphics.lib.lightsource.CameraTiedLightSource;
 import com.graphics.lib.lightsource.DirectionalLightSource;
+import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.lightsource.ObjectTiedLightSource;
 import com.graphics.lib.orientation.SimpleOrientation;
 import com.graphics.lib.plugins.Events;
@@ -98,33 +100,39 @@ public class GraphicsTest extends JFrame {
 		cnv.setFloor(floor);
 		//cnv.setDrawShadows(true);
 		
-		ObjectTiedLightSource l1 = new ObjectTiedLightSource(0,0,-500);
-		l1.setColour(new Color(255, 0, 0));
-		cnv.addLightSource(l1);
-		CanvasObject lantern1 = new Lantern();
-		lantern1.setColour(l1.getColour());
-		lantern1.setCastsShadow(false);
+		ObjectTiedLightSource<LightSource> l1 = new ObjectTiedLightSource<LightSource>(LightSource.class, 0,0,-500);
+		l1.getLightSource().setColour(new Color(255, 0, 0));
+		cnv.addLightSource(l1.getLightSource());
+		Lantern lantern1 = new Lantern();
+		lantern1.attachLightsource(l1);
 		cnv.registerObject(lantern1, new Point(0,0,-500), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.NONE));
-		l1.tieTo(lantern1);
 		
-		ObjectTiedLightSource l2 = new ObjectTiedLightSource(500,200,-100);
-		l2.setColour(new Color(0, 255, 0));
-		cnv.addLightSource(l2);
-		CanvasObject lantern2 = new Lantern();
-		lantern2.setColour(l2.getColour());
-		lantern2.setCastsShadow(false);
+		ObjectTiedLightSource<LightSource> l2 = new ObjectTiedLightSource<LightSource>(LightSource.class, 500,200,-100);
+		l2.getLightSource().setColour(new Color(0, 255, 0));
+		cnv.addLightSource(l2.getLightSource());
+		Lantern lantern2 = new Lantern();
+		lantern2.attachLightsource(l2);
 		cnv.registerObject(lantern2, new Point(500,200,-100), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.NONE));
-		l2.tieTo(lantern2);
 		
+		/*ObjectTiedLightSource<LightSource> l3 = new ObjectTiedLightSource<LightSource>(LightSource.class, 400,100,100);
+		l3.getLightSource().setColour(new Color(0, 0, 255));
+		cnv.addLightSource(l3.getLightSource());
+		Lantern lantern3 = new Lantern();
+		lantern3.attachLightsource(l3);
+		cnv.registerObject(lantern3, new Point(400,100,100), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.NONE));*/
 		
-		ObjectTiedLightSource l3 = new ObjectTiedLightSource(400,100,100);
-		l3.setColour(new Color(0, 0, 255));
-		cnv.addLightSource(l3);
-		CanvasObject lantern3 = new Lantern();
-		lantern3.setColour(l3.getColour());
-		lantern3.setCastsShadow(false);
-		cnv.registerObject(lantern3, new Point(400,100,100), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.NONE));
-		l3.tieTo(lantern3);
+		ObjectTiedLightSource<DirectionalLightSource> l3 = new ObjectTiedLightSource<DirectionalLightSource>(DirectionalLightSource.class, 400,100,100);
+		l3.getLightSource().setColour(new Color(0, 0, 255));
+		cnv.addLightSource(l3.getLightSource());
+		Lantern lantern3 = new Lantern();
+		lantern3.attachLightsource(l3);
+		OrientableCanvasObject<Lantern> ol3 = new OrientableCanvasObject<Lantern>(lantern3);
+		ol3.setOrientation(new SimpleOrientation(OrientableCanvasObject.ORIENTATION_TAG));
+		cnv.registerObject(ol3, new Point(400,100,100), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.NONE));
+		l3.getLightSource().setDirection(() -> {return ol3.getOrientation().getForward();});
+		l3.getLightSource().setLightConeAngle(40);
+		Transform l3spin = new RepeatingTransform<Rotation<?>>(new Rotation<XRotation>(XRotation.class, 4), 0);
+		ol3.addTransformAboutCentre(l3spin);
 		
 		this.add(cnv, BorderLayout.CENTER);
 		
@@ -277,7 +285,8 @@ public class GraphicsTest extends JFrame {
 				if (key.getKeyChar() == 'l') l4.toggle();
 				
 				if (key.getKeyChar() == 'r'){
-					Laser laser = new Laser();
+					Laser laser = new Laser(1000);
+					laser.addFlag("PHASED");
 					cam.addCameraRotation(laser);
 					Point pos = new Point(cam.getPosition());
 					Vector down = cam.getOrientation().getDown();
@@ -286,13 +295,24 @@ public class GraphicsTest extends JFrame {
 					pos.z += down.z * 15;
 					cnv.registerObject(laser, pos);
 					
-					laser = new Laser();
+					for (CanvasObject obj : getObjects.get()){ //TODO would like an object list for those on screen only here
+						//Facet f = obj.getIntersectedFacet(pos, cam.getOrientation().getForward(), false);
+						for (Facet f : obj.getIntersectedFacets(pos, cam.getOrientation().getForward()))
+						{
+							if (f != null && (f.point1.getTransformed(cam).z + f.point2.getTransformed(cam).z + f.point3.getTransformed(cam).z)/3 < laser.getLength() ){
+								//f.setColour(Color.DARK_GRAY);
+								f.setMaxIntensity(0.15);
+								//as an aspiration - create dynamic texture map for laser 'holes'
+							}
+						}
+					}
+					/*laser = new Laser();
 					cam.addCameraRotation(laser);
 					pos = new Point(cam.getPosition());
 					pos.x -= down.x * 15;
 					pos.y -= down.y * 15;
 					pos.z -= down.z * 15;
-					cnv.registerObject(laser, pos);
+					cnv.registerObject(laser, pos);*/
 				}
 				
 				if (key.getKeyChar() == 'f'){
@@ -357,11 +377,11 @@ public class GraphicsTest extends JFrame {
 					pos.y += right.y * 25;
 					pos.z += right.z * 25;
 					cnv.registerObject(proj, pos);
-					ObjectTiedLightSource l5 = new ObjectTiedLightSource(pos.x, pos.y, pos.z);
+					ObjectTiedLightSource<LightSource> l5 = new ObjectTiedLightSource<LightSource>(LightSource.class, pos.x, pos.y, pos.z);
 					l5.tieTo(proj);
-					l5.setColour(proj.getColour());
-					l5.setRange(400);
-					cnv.addLightSource(l5);
+					l5.getLightSource().setColour(proj.getColour());
+					l5.getLightSource().setRange(400);
+					cnv.addLightSource(l5.getLightSource());
 				}
 				
 				if (key.getKeyChar() == 'b'){
@@ -394,11 +414,11 @@ public class GraphicsTest extends JFrame {
 					pos.y -= right.y * 25;
 					pos.z -= right.z * 25;
 					cnv.registerObject(proj, pos);
-					ObjectTiedLightSource l5 = new ObjectTiedLightSource(pos.x, pos.y, pos.z);
+					ObjectTiedLightSource<LightSource> l5 = new ObjectTiedLightSource<LightSource>(LightSource.class, pos.x, pos.y, pos.z);
 					l5.tieTo(proj);
 					l5.setColour(new Color(0, 255, 255));
-					l5.setRange(400);
-					cnv.addLightSource(l5);
+					l5.getLightSource().setRange(400);
+					cnv.addLightSource(l5.getLightSource());
 				}
 				
 				if (key.getKeyChar() == 't'){
@@ -495,27 +515,24 @@ public class GraphicsTest extends JFrame {
 					cnv.setDrawShadows(!cnv.isDrawShadows());
 				}
 				
-				if (key.getKeyChar() == '.' && l3.getIntensity() <= 0.9 && l3.isOn()){
-					l3.setIntensity(l3.getIntensity() + 0.1);
-					lantern3.setColour(l3.getActualColour());
+				if (key.getKeyChar() == '.' && l3.getLightSource().getIntensity() <= 0.9 && l3.getLightSource().isOn()){
+					l3.getLightSource().setIntensity(l3.getLightSource().getIntensity() + 0.1);
+					lantern3.setColour(l3.getLightSource().getActualColour());
 				}
 				
-				if (key.getKeyChar() == ',' && l3.getIntensity() >= 0.1 && l3.isOn()){
-					l3.setIntensity(l3.getIntensity() - 0.1);
-					lantern3.setColour(l3.getActualColour());
+				if (key.getKeyChar() == ',' && l3.getLightSource().getIntensity() >= 0.1 && l3.getLightSource().isOn()){
+					l3.getLightSource().setIntensity(l3.getLightSource().getIntensity() - 0.1);
+					lantern3.setColour(l3.getLightSource().getActualColour());
 				}
 				
 				if (key.getKeyChar() == '1'){
 					l1.toggle();
-					lantern1.setColour(l1.getActualColour());
 				}
 				if (key.getKeyChar() == '2'){
 					l2.toggle();
-					lantern2.setColour(l2.getActualColour());
 				}
 				if (key.getKeyChar() == '3'){
 					l3.toggle();
-					lantern3.setColour(l3.getActualColour());
 				}
 				
 				checkEngineSound(ship);

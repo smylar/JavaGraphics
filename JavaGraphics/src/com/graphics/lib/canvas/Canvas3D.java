@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
-import java.util.stream.Stream;
 
 import javax.swing.JPanel;
 
@@ -90,7 +89,7 @@ public class Canvas3D extends JPanel{
 	}
 
 	public void addLightSource(LightSource lightSource) {
-		this.lightSourcesToAdd.add(lightSource);
+		if (lightSource != null) this.lightSourcesToAdd.add(lightSource);
 	}
 	
 	public Set<CanvasObject> getShapes() {
@@ -246,14 +245,7 @@ public class Canvas3D extends JPanel{
 		{
 			this.camera.getView(obj);
 			if (shader != null) shader.setLightsources(lightSources);
-			Stream<Facet> facetStream = obj.getFacetList().parallelStream();
-			if (!obj.isProcessBackfaces()){
-				facetStream = facetStream.filter(GeneralPredicates.isFrontface(this.camera));
-			}
-			facetStream.filter(GeneralPredicates.isOverHorizon(this.camera, this.horizon).negate()).forEach(f ->{
-				f.setFrontFace(GeneralPredicates.isFrontface(this.camera).test(f));
-				zBuf.Add(f, obj, shader, this.camera);
-			});
+			zBuf.Add(obj, shader, this.camera, this.horizon);
 		}
 		
 		for (CanvasObject child : new ArrayList<CanvasObject>(obj.getChildren()))
