@@ -29,14 +29,26 @@ public class PluginLibrary {
 	public static IPlugin<PlugableCanvasObject<?>, Void> generateTrailParticles(Color colour, int density, double exhaustVelocity, double particleSize)
 	{
 		return (obj) -> {
-			Optional<MovementTransform> movement = obj.getTransformsOfType(MovementTransform.class).stream().findFirst();
-			if (!movement.isPresent()) return null; //no point if it isn't moving
-			Vector baseVector = movement.get().getVector();
+			//Optional<MovementTransform> movement = obj.getTransformsOfType(MovementTransform.class).stream().findFirst();
+			//if (!movement.isPresent()) return null; //no point if it isn't moving
+			//Vector baseVector = movement.get().getVector();
 			
+			List<MovementTransform> mTrans = obj.getTransformsOfType(MovementTransform.class);
+			if (mTrans.size() == 0) return null;
+			Vector baseVector = new Vector(0,0,0);
+			for (MovementTransform t : mTrans){
+				baseVector.x += t.getVector().x * t.getSpeed();
+				baseVector.y += t.getVector().y * t.getSpeed();
+				baseVector.z += t.getVector().z * t.getSpeed();
+			}
+			double speed = baseVector.getSpeed();
+			baseVector = baseVector.getUnitVector();
+			
+			List<WorldCoord> vertices = obj.getVertexList().stream().filter(v -> v.getTag().equals("")).collect(Collectors.toList());//only get untagged points (tagged points usually hidden and have special purpose)
 			for (int i = 0 ; i < density ; i++)
 			{
-				int index = (int)Math.round(Math.random() * (obj.getVertexList().size() - 1)); //TODO only get untagged points (tagged points usually hidden and have special purpose)
-				Point p = obj.getVertexList().get(index);
+				int index = (int)Math.round(Math.random() * (vertices.size() - 1));
+				Point p = vertices.get(index);
 				CanvasObject fragment = new CanvasObject();
 				fragment.getVertexList().add(new WorldCoord(p.x , p.y, p.z));
 				fragment.getVertexList().add(new WorldCoord(p.x + particleSize , p.y, p.z));
@@ -48,7 +60,7 @@ public class PluginLibrary {
 				double yVector = baseVector.y + (Math.random()/2) - 0.25;
 				double zVector = baseVector.z + (Math.random()/2) - 0.25;
 				Transform rot1 = new RepeatingTransform<Rotation<?>>(new Rotation<YRotation>(YRotation.class, Math.random() * 5), 45);
-				MovementTransform move = new MovementTransform(new Vector(xVector, yVector, zVector), movement.get().getSpeed() - exhaustVelocity);
+				MovementTransform move = new MovementTransform(new Vector(xVector, yVector, zVector), speed - exhaustVelocity);
 				move.moveUntil(t -> rot1.isCompleteSpecific());
 				Transform rot2 = new RepeatingTransform<Rotation<?>>(new Rotation<XRotation>(XRotation.class, Math.random() * 5), t -> rot1.isCompleteSpecific());				
 				fragment.addTransformAboutCentre(rot1, rot2);
@@ -61,13 +73,13 @@ public class PluginLibrary {
 		};
 	}
 	
-	public static IPlugin<PlugableCanvasObject<?>, Set<CanvasObject>> explode(Collection<LightSource> lightSources) 
+	public static IPlugin<PlugableCanvasObject<?>, Set<PlugableCanvasObject<CanvasObject>>> explode(Collection<LightSource> lightSources) 
 	{
 		return (obj) -> {
-		Set<CanvasObject> children = new HashSet<CanvasObject>();
+		Set<PlugableCanvasObject<CanvasObject>> children = new HashSet<PlugableCanvasObject<CanvasObject>>();
 		for (Facet f : obj.getFacetList())
 		{
-			CanvasObject fragment = new CanvasObject();
+			PlugableCanvasObject<CanvasObject> fragment = new PlugableCanvasObject<CanvasObject>(new CanvasObject());
 			fragment.getVertexList().add(new WorldCoord(f.point1.x, f.point1.y, f.point1.z));
 			fragment.getVertexList().add(new WorldCoord(f.point2.x, f.point2.y, f.point2.z));
 			fragment.getVertexList().add(new WorldCoord(f.point3.x, f.point3.y, f.point3.z));
@@ -86,6 +98,7 @@ public class PluginLibrary {
 				fragment.deleteAfterTransforms();
 			}
 			children.add(fragment);
+			obj.getChildren().add(fragment);
 		}
 		
 		obj.setVisible(false);
@@ -124,7 +137,7 @@ public class PluginLibrary {
 			
 			for (CanvasObject impactee : objects.get()){
 				if (impactee == obj) continue;
-				//TODO will need to factor in possibility object was drawn completely on the other side of an object (after moving) and thus not detected as a collision
+			
 				if (obj.getVertexList().stream().anyMatch(p -> impactee.isPointInside(p)))
 				{
 					if (inCollision == impactee) { return null;}
@@ -141,6 +154,58 @@ public class PluginLibrary {
 				}else if (inCollision == impactee){
 					obj.removePlugin("IN_COLLISION");
 				}
+			}
+			return null;
+		};
+	}
+	
+	public static IPlugin<PlugableCanvasObject<?>,CanvasObject> hasCollidedNew(ICanvasObjectList objects, String impactorPlugin, String impacteePlugin)
+	{
+		return (obj) -> {
+			CanvasObject inCollision = (CanvasObject)obj.executePlugin("IN_COLLISION"); //may need to be a list - may hit more than one!
+			
+			List<MovementTransform> mTrans = obj.getTransformsOfType(MovementTransform.class);
+			if (mTrans.size() == 0) return null;
+			
+			Vector baseVector = new Vector(0,0,0);
+			for (MovementTransform t : mTrans){
+				baseVector.x += t.getVector().x * t.getSpeed();
+				baseVector.y += t.getVector().y * t.getSpeed();
+				baseVector.z += t.getVector().z * t.getSpeed();
+			}
+			
+			for (CanvasObject impactee : objects.get()){
+				if (impactee == obj) continue;
+				//Tries to factor in possibility object was drawn completely on the other side of an object (after moving) and thus not detected as a collision by point inside check
+				//TODO would also need to generate explosion at point of impact
+				for(Point p : obj.getVertexList()){
+					Point prevPoint = new Point(p);
+					prevPoint.x -= baseVector.x;
+					prevPoint.y -= baseVector.y;
+					prevPoint.z -= baseVector.z;
+				
+					for(Facet f : impactee.getFacetList())
+					{
+						Point in = f.getIntersectionPointWithFacetPlane(prevPoint, prevPoint.vectorToPoint(p).getUnitVector(), false);
+						if (f.isPointWithin(in) && prevPoint.distanceTo(in) <= prevPoint.distanceTo(p)){
+							if (inCollision == impactee) { return null;}
+							if (impactorPlugin != null) obj.executePlugin(impactorPlugin);
+							if (impacteePlugin != null){
+								PlugableCanvasObject<?> impacteePlugable = impactee.getObjectAs(PlugableCanvasObject.class);
+								if (impacteePlugable != null){
+									impacteePlugable.executePlugin(impacteePlugin);
+								}
+							}
+
+							obj.registerPlugin("IN_COLLISION", (o) -> {return impactee;}, false);
+							return impactee;
+						}
+					}
+				}
+				if (inCollision == impactee){
+					obj.removePlugin("IN_COLLISION");
+				} //is slow if lots of objects using this method, might split so things like explosion fragments use the simpler point is inside method
+				
 			}
 			return null;
 		};
@@ -182,15 +247,15 @@ public class PluginLibrary {
 			
 			Vector move = mTrans.get(0).getVector(); //just getting the first one for now (if there is more than one) 
 
-			double velocity = mTrans.get(0).getSpeed(); 
+			double speed = mTrans.get(0).getSpeed(); 
 			
 			Facet curFacet = null;
 			double curDist = -1;
 			
 			for(WorldCoord impactPoint : impactPoints){
-				Point prevPoint = new Point(impactPoint.x - (move.x * velocity), impactPoint.y - (move.y * velocity), impactPoint.z - (move.z * velocity));
+				Point prevPoint = new Point(impactPoint.x - (move.x * speed), impactPoint.y - (move.y * speed), impactPoint.z - (move.z * speed));
 
-				for(Facet f : impactee.getFacetList().stream().filter(f -> f.getDistanceFromFacetPlane(impactPoint) < velocity + 1).collect(Collectors.toList()))
+				for(Facet f : impactee.getFacetList().stream().filter(f -> f.getDistanceFromFacetPlane(impactPoint) < speed + 1).collect(Collectors.toList()))
 				{
 					Point intersect = f.getIntersectionPointWithFacetPlane(prevPoint, move);
 	
@@ -223,7 +288,7 @@ public class PluginLibrary {
 			Optional<MovementTransform> move = obj.getTransformsOfType(MovementTransform.class).stream().findFirst();
 			if (!move.isPresent()) return null;
 			
-			//TODO future improvement - plot deflection (if target moving) and aim for that
+			//plot deflection (if target moving) and aim for that
 			Vector vTrackee = Utils.plotDeflectionShot(objectToTrack, obj, move.get().getSpeed());
 			/*if (vTrackee == null){
 				System.out.println("NULL");

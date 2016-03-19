@@ -155,7 +155,11 @@ public class Facet {
 		if (includeBackfaces && t == 0) return null;
 		if (!includeBackfaces && t >= 0) return null;
 		double tval = ((normal.x* point1.x) + (normal.y* point1.y) + (normal.z* point1.z) - tmod) / t;
-		return new Point(p.x + (v.x*tval), p.y + (v.y*tval), p.z + (v.z*tval));
+		Point intersect =  new Point(p.x + (v.x*tval), p.y + (v.y*tval), p.z + (v.z*tval));
+		
+		Vector v2 = p.vectorToPoint(intersect).getUnitVector(); //check intersect isn't in opposite direction to vec
+		
+		return v2.dotProduct(v) <= 0 ? null : intersect;
 	}
 	
 	/**
@@ -170,7 +174,8 @@ public class Facet {
 		double planey = normal.y * (p.y - point1.y);
 		double planez = normal.z * (p.z - point1.z);
 		
-		return planex + planey + planez; //should not need to divide by normal length as already normalized (=1)
+		double dist = planex + planey + planez; //should not need to divide by normal length as already normalized (=1)
+		return dist < 0 ? -dist : dist;
 	}
 	
 	/**

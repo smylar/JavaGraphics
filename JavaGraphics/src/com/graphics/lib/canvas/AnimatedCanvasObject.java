@@ -47,7 +47,7 @@ public class AnimatedCanvasObject<T extends CanvasObject> extends OrientableCanv
 	}
 	
 	@Override
-	public void onDrawComplete()
+	public void afterTransforms()
 	{
 		if (activeAnimations.size() > 0 && skeletonRootNode != null && !isDeleted() && isVisible()){		
 			this.toBaseOrientation();
@@ -59,9 +59,9 @@ public class AnimatedCanvasObject<T extends CanvasObject> extends OrientableCanv
 			this.reapplyOrientation();
 		}
 		
-		if (getWrappedObject() != null) getWrappedObject().onDrawComplete();
+		if (getWrappedObject() != null) getWrappedObject().afterTransforms();
 		else 
-			super.onDrawComplete();
+			super.afterTransforms();
 	}
 
 }

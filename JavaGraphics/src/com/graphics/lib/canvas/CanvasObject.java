@@ -227,7 +227,7 @@ public class CanvasObject extends Observable implements Observer{
 	public final <T> List<T> getTransformsOfType(Class<T> type)
 	{
 
-		List<T> mTrans = getData().transforms.stream().filter(t -> t.getClass() == type).collect(Collector.of(
+		List<T> mTrans = getData().transforms.stream().filter(t -> type.isAssignableFrom(t.getClass())).collect(Collector.of(
 				ArrayList::new,
 				(trans, orig) -> trans.add(type.cast(orig)),
 				(left, right) -> {left.addAll(right); return left;},
@@ -306,6 +306,7 @@ public class CanvasObject extends Observable implements Observer{
 	{
 		if (getData().vertexList == null || getData().vertexList.size() == 0 || getData().isDeleted) return;
 		
+		this.beforeTransforms();
 		getData().transforms.stream().filter(t -> !t.isCancelled()).forEach(t ->
 		{
 			applyTransform(t);
@@ -320,9 +321,18 @@ public class CanvasObject extends Observable implements Observer{
 			if (getData().children.size() > 0) this.setVisible(false);
 			else this.setDeleted(true);
 		}
-
+		
+		this.afterTransforms();
 	}
 	
+	
+	public void afterTransforms(){
+		if (this.getBaseObject() != this) this.getBaseObject().afterTransforms(); 
+	}
+	
+	public void beforeTransforms(){
+		if (this.getBaseObject() != this) this.getBaseObject().beforeTransforms(); 
+	}
 	/**
 	 * Describes how to generate a normal vector for a Vertex 
 	 * 
@@ -455,6 +465,7 @@ public class CanvasObject extends Observable implements Observer{
 	{
 		if (this.getBaseObject() != this) return this.getBaseObject().isPointInside(p);
 		//should do for most simple objects - can override it for something shape specific - e.g. it doesn't work for the whale, and shapes such as spheres can can work this out much quicker
+		//checks if all facets appears as backfaces to the tested point
 		for (Facet f : getData().facetList)
 		{
 			Vector vecPointToFacet = p.vectorToPoint(f.point1).getUnitVector();

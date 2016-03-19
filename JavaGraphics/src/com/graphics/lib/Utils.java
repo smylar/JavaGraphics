@@ -2,7 +2,6 @@ package com.graphics.lib;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import com.graphics.lib.canvas.CanvasObject;
@@ -177,32 +176,40 @@ public class Utils {
 		//C is distance travelled by projectile until impact (speed * time)
 		//cos(theta) is also the dot product of the vectors start -> target position and the targets movement vector
 		
-		Optional<MovementTransform> targetVec = target.getTransformsOfType(MovementTransform.class).stream().findFirst(); //ignoring any other at the moment, which could make this completely wrong if the was more than one
 		Vector defaultVector = proj.getCentre().vectorToPoint(target.getCentre()).getUnitVector();
 		
-		if (!targetVec.isPresent()) return defaultVector;
+		List<MovementTransform> mTrans = target.getTransformsOfType(MovementTransform.class);
+		if (mTrans.size() == 0) return defaultVector;
+		Vector targetVec = new Vector(0,0,0);
+		for (MovementTransform t : mTrans){
+			targetVec.x += t.getVector().x * t.getSpeed();
+			targetVec.y += t.getVector().y * t.getSpeed();
+			targetVec.z += t.getVector().z * t.getSpeed();
+		}
+		double speed = targetVec.getSpeed();
+		targetVec = targetVec.getUnitVector();
 		
-		double cosTheta = target.getCentre().vectorToPoint(proj.getCentre()).getUnitVector().dotProduct(targetVec.get().getVector());
+		double cosTheta = target.getCentre().vectorToPoint(proj.getCentre()).getUnitVector().dotProduct(targetVec);
 		double distStartToTarget = proj.getCentre().distanceTo(target.getCentre());
 		double time = 0;
 		
-		if (projSpeed - targetVec.get().getSpeed() == 0){
+		if (projSpeed - speed == 0){
 			//target and projectile will travel the same distance, therefore C = B and equation boils down to A / (2 * cos(theta)) = B 
 			if (cosTheta > 0){
-				time = (distStartToTarget / (2 * cosTheta)) / targetVec.get().getSpeed();
+				time = (distStartToTarget / (2 * cosTheta)) / speed;
 			}else{
 				return defaultVector;
 			}
 		}
 		else{
-			// via many substitutions I won't get into here we end up with the quadratic equation  a*t^2 + b*t + c = 0  or t = [ -b ± Sqrt( b^2 - 4*a*c ) ] / (2*a) - still to remember how you get that!
+			// via many substitutions I won't get into here we end up with the quadratic equation  a*t^2 + b*t + c = 0  or t = [ -b ± Sqrt( b^2 - 4*a*c ) ] / (2*a) by completing the square
 			//where
 			// a = proj speed ^ 2 - target speed ^ 2
 			// b = 2A * target speed * cos(theta)
 			// c = -A^2
 			
-			double a = Math.pow(projSpeed,2) - Math.pow(targetVec.get().getSpeed(),2);
-			double b = 2 * distStartToTarget * targetVec.get().getSpeed() * cosTheta;
+			double a = Math.pow(projSpeed,2) - Math.pow(speed,2);
+			double b = 2 * distStartToTarget * speed * cosTheta;
 			double c = -Math.pow(distStartToTarget,2);
 			double discriminant = Math.pow(b,2) - (4 * a * c); 
 			
@@ -224,9 +231,9 @@ public class Utils {
 		// Start + (Vector of Proj * time) = TargetPos +  (Vector of target * time), which becomes
 		//Vector of Proj = Vector of target + [(TargetPos - Start) / time ]
 		return new Vector (
-				targetVec.get().getVelocity().x + ((target.getCentre().x - proj.getCentre().x) / time),
-				targetVec.get().getVelocity().y + ((target.getCentre().y - proj.getCentre().y) / time),
-				targetVec.get().getVelocity().z + ((target.getCentre().z - proj.getCentre().z) / time)
+				(targetVec.x * speed) + ((target.getCentre().x - proj.getCentre().x) / time),
+				(targetVec.y * speed) + ((target.getCentre().y - proj.getCentre().y) / time),
+				(targetVec.z * speed) + ((target.getCentre().z - proj.getCentre().z) / time)
 				).getUnitVector();
 		
 	}

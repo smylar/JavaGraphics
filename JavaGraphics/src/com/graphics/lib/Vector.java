@@ -33,6 +33,17 @@ public class Vector {
 	}
 	
 	/**
+	 * Get speed of this vector compared to the unit vector
+	 * 
+	 * @return
+	 */
+	public double getSpeed()
+	{
+		double squareadd = (x*x)+(y*y)+(z*z);
+		return Math.sqrt(squareadd);
+	}
+	
+	/**
 	 * The dot product of 2 vectors equals the cosine of the angle between them
 	 * 
 	 * @param v2

@@ -227,6 +227,7 @@ public class Canvas3D extends JPanel{
 		this.slaves.forEach(s -> s.update(this));
 			
 		processShapes.parallelStream().forEach(s -> {
+		//processShapes.stream().forEach(s -> {
 			s.onDrawComplete();
 		});
 	}

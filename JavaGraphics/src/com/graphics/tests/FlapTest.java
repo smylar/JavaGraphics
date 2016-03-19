@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.graphics.lib.Axis;
+import com.graphics.lib.Point;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.AnimatedCanvasObject;
 import com.graphics.lib.orientation.SimpleOrientation;
@@ -127,5 +128,11 @@ public class FlapTest extends AnimatedCanvasObject<Bird> {
 		
 		this.setSkeletonRootNode(rootNode);
 		this.startAnimation("FLAP");
+	}
+	
+	@Override
+	public boolean isPointInside(Point p){
+		//as this is essentially a 2D object this won't work, well it would report true if just underneath the object
+		return false;
 	}
 }

@@ -84,7 +84,7 @@ public class MovementTransform extends Transform {
 	public void afterTransform()
 	{
 		this.distanceMoved += this.speed;
-		if (this.maxSpeed > 0 && this.speed < this.maxSpeed){
+		if (this.maxSpeed == 0 || this.speed < this.maxSpeed){
 			this.speed += this.acceleration;
 		}
 	}

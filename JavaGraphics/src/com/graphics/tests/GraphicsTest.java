@@ -221,11 +221,9 @@ public class GraphicsTest extends JFrame {
 			@Override
 			public Void execute(PlugableCanvasObject<?> obj) {
 				PluginLibrary.explode(cnv.getLightSources()).execute(obj).forEach(c -> {
-					PlugableCanvasObject<?> p = new PlugableCanvasObject<CanvasObject>(c);
-					obj.getChildren().add(p);
 					cnv.replaceShader(obj, ShaderFactory.GetShader(ShaderFactory.ShaderEnum.FLAT));
-					p.registerPlugin(Events.STOP, PluginLibrary.stop(), false);
-					p.registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollided(getObjects, Events.STOP, null), true);
+					c.registerPlugin(Events.STOP, PluginLibrary.stop(), false);
+					c.registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollided(getObjects, Events.STOP, null), true);
 					if (!obj.hasFlag(SILENT_EXPLODE)) clipLibrary.playSound("EXPLODE", -20f);
 				});
 				obj.registerSingleAfterDrawPlugin(Events.FLASH, PluginLibrary.flash(cnv.getLightSources()));
@@ -238,7 +236,8 @@ public class GraphicsTest extends JFrame {
 		IPlugin<PlugableCanvasObject<?>,Void> bounce = new IPlugin<PlugableCanvasObject<?>,Void>(){
 			@Override
 			public Void execute(PlugableCanvasObject<?> obj) {	
-				CanvasObject impactee = PluginLibrary.hasCollided(getObjects,null, null).execute(obj);
+				//CanvasObject impactee = PluginLibrary.hasCollided(getObjects,null, null).execute(obj);
+				CanvasObject impactee = PluginLibrary.hasCollidedNew(getObjects,null, null).execute(obj);
 				if (impactee != null){
 					if (impactee.hasFlag(Events.STICKY)){ 
 						PluginLibrary.stop2().execute(obj);
@@ -346,6 +345,11 @@ public class GraphicsTest extends JFrame {
 					move.moveUntil(t -> t.getDistanceMoved() >= 1200);
 					proj.addTransform(move);
 					
+					MovementTransform gravity = new MovementTransform(new Vector(0,1,0),0);
+					gravity.setAcceleration(0.15);
+					gravity.moveUntil(t -> move.isComplete());
+					proj.addTransform(gravity);
+					
 					Rotation<?> rot = new Rotation<ZRotation>(ZRotation.class, 20)
 					{
 						@Override
@@ -368,7 +372,7 @@ public class GraphicsTest extends JFrame {
 					proj.deleteAfterTransforms();
 					proj.setProcessBackfaces(true);
 					
-					proj.registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollided(getObjects, Events.EXPLODE, Events.EXPLODE), true);
+					proj.registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollidedNew(getObjects, Events.EXPLODE, Events.EXPLODE), true);
 					
 					Point pos = new Point(cam.getPosition());
 					Vector right = cam.getOrientation().getRight();
