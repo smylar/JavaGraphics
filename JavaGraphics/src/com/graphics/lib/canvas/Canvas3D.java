@@ -219,17 +219,20 @@ public class Canvas3D extends JPanel{
 		
 		processShapes.parallelStream().forEach(s -> {
 			this.processShape(s, this.zBuffer, getShader(s));
+			this.slaves.forEach(sl -> sl.update(this, s));
+		});
+		
+		processShapes.parallelStream().forEach(s -> {
+			//processShapes.stream().forEach(s -> {
+				s.onDrawComplete();
 		});
 		
 		this.setOkToPaint(true);
 		this.repaint(); 
 		
-		this.slaves.forEach(s -> s.update(this));
-			
-		processShapes.parallelStream().forEach(s -> {
-		//processShapes.stream().forEach(s -> {
-			s.onDrawComplete();
-		});
+		//this.slaves.forEach(s -> s.update(this));
+		this.slaves.forEach(sl -> sl.update(this, null));		
+		
 	}
 	
 	/**
@@ -325,14 +328,20 @@ public class Canvas3D extends JPanel{
 		if (this.zBuffer == null || !this.isOkToPaint()) return;
 		super.paintComponent(g);
 		
-		this.zBuffer.getBuffer().values().stream().forEach(m -> {
+		/*this.zBuffer.getBuffer().values().stream().forEach(m -> {
 			for (ZBufferItem item : m.values()){
 				if (item == null || !item.isActive()) continue;
 				g.setColor(item.getColour());
 				g.drawLine(item.getX(), item.getY(), item.getX(), item.getY());
 			}
-		});
-		
+		});*/
+		for (List<ZBufferItem> x : this.zBuffer.getBuffer()){
+			x.stream().filter(item -> item != null && item.isActive()).forEach(item -> {
+				g.setColor(item.getColour());
+				g.drawLine(item.getX(), item.getY(), item.getX(), item.getY());
+			});
+		}
+	
 		for(BiConsumer<Canvas3D,Graphics> op : drawPlugins){
 			op.accept(this,g);
 		}

@@ -52,4 +52,9 @@ public class GeneralPredicates {
 		 && c.getPosition().distanceTo(f.point2) > horizon
 		 && c.getPosition().distanceTo(f.point3) > horizon;
 	}
+	
+	public static Predicate<WorldCoord> untagged()
+	{
+		return w -> w.getTag().length() == 0;
+	}
 }

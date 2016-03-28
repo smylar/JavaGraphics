@@ -18,9 +18,6 @@ import javax.swing.SwingUtilities;
 
 
 
-
-
-
 import com.graphics.lib.Facet;
 import com.graphics.lib.ObjectControls;
 import com.graphics.lib.Point;
@@ -39,7 +36,6 @@ import com.graphics.lib.canvas.OrientableCanvasObject;
 import com.graphics.lib.canvas.PlugableCanvasObject;
 import com.graphics.lib.canvas.SlaveCanvas3D;
 import com.graphics.lib.interfaces.ICanvasObjectList;
-//import com.graphics.lib.lightsource.CameraTiedLightSource;
 import com.graphics.lib.lightsource.DirectionalLightSource;
 import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.lightsource.ObjectTiedLightSource;
@@ -158,9 +154,10 @@ public class GraphicsTest extends JFrame {
 		slaveCam.setPosition(new Point(1500, 300, 400));
 		slaveCam.addTransform("INIT", new PanCamera<YRotation>(YRotation.class, -90));
 		slaveCam.doTransforms();
-		SlaveCanvas3D scnv = new SlaveCanvas3D(slaveCam, cnv);
+		SlaveCanvas3D scnv = new SlaveCanvas3D(slaveCam);
 		slave.add(scnv);
 		slave.setVisible(true);
+		cnv.addObserver(scnv);
 		this.setVisible(true);
 		
 		OrientableCanvasObject<Ship> ship = new OrientableCanvasObject<Ship>(new Ship (100, 100, 50));
@@ -345,10 +342,10 @@ public class GraphicsTest extends JFrame {
 					move.moveUntil(t -> t.getDistanceMoved() >= 1200);
 					proj.addTransform(move);
 					
-					MovementTransform gravity = new MovementTransform(new Vector(0,1,0),0);
+					/*MovementTransform gravity = new MovementTransform(new Vector(0,1,0),0);
 					gravity.setAcceleration(0.15);
 					gravity.moveUntil(t -> move.isComplete());
-					proj.addTransform(gravity);
+					proj.addTransform(gravity);*/
 					
 					Rotation<?> rot = new Rotation<ZRotation>(ZRotation.class, 20)
 					{
@@ -591,6 +588,15 @@ public class GraphicsTest extends JFrame {
 			((Graphics2D)g).setStroke(dashed);
 			g.drawRect((int)minX - 4, (int)minY - 4, (int)maxX - (int)minX + 8, (int)maxY - (int)minY + 8);
 		});
+		
+		/*cnv.addDrawOperation((c, g) -> {
+		 	//messing with collectors - puts the count of each object type at the bottom of the screen
+			Map<String, Long> objectCounts = c.getShapes().stream().collect(
+						Collectors.groupingBy(s -> s.getBaseObject().getClass().getSimpleName(), Collectors.counting())
+					);	
+			g.setColor(Color.LIGHT_GRAY);
+			g.drawString(objectCounts.toString(), 40, c.getHeight()-5);
+		});*/
 		
 		
 		cam.setTiedTo(ship, (o, c) -> {

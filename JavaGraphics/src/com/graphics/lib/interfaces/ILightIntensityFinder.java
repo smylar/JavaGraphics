@@ -10,5 +10,5 @@ import com.graphics.lib.lightsource.LightSource;
 
 @FunctionalInterface
 public interface ILightIntensityFinder {
-	public IntensityComponents getLightIntensity(Collection<LightSource> ls, CanvasObject obj, Point p, Vector normal, boolean isPartOfBacface);
+	public IntensityComponents getLightIntensity(Collection<? extends LightSource> ls, CanvasObject obj, Point p, Vector normal, boolean isPartOfBacface);
 }

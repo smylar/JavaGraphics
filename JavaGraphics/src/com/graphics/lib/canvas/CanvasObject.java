@@ -21,6 +21,7 @@ import com.graphics.lib.Utils;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.camera.Camera;
+import com.graphics.lib.collectors.CentreFinder;
 import com.graphics.lib.interfaces.ILightIntensityFinder;
 import com.graphics.lib.interfaces.IPointFinder;
 import com.graphics.lib.interfaces.IVertexNormalFinder;
@@ -249,13 +250,16 @@ public class CanvasObject extends Observable implements Observer{
 	 */
 	public final void applyCameraTransform(Transform transform, Camera c)
 	{
-		transform.doTransform(getData().vertexList.stream().collect(Collector.of(
+		/*transform.doTransform(getData().vertexList.stream().collect(Collector.of(
 				ArrayList::new,
 				(trans, world) -> trans.add(world.getTransformed(c)),
 				(left, right) -> {left.addAll(right); return left;},
 				Collector.Characteristics.CONCURRENT
 				))
-		);
+		);*/
+		
+		//does the same as above, but simpler!
+		transform.doTransform(getData().vertexList.stream().map(v -> v.getTransformed(c)).collect(Collectors.toList()));
 	}
 	
 	public final boolean hasTransforms()
@@ -358,7 +362,7 @@ public class CanvasObject extends Observable implements Observer{
 		if (this.getBaseObject() != this) return this.getBaseObject().getCentre();
 		
 		//default, average of all un-tagged points
-		Point pt = getData().vertexList.get(0);
+		/*Point pt = getData().vertexList.get(0);
 		double maxX = pt.x;
 		double maxY = pt.y;
 		double maxZ = pt.z;
@@ -376,7 +380,14 @@ public class CanvasObject extends Observable implements Observer{
 			if (p.z < minZ) minZ = p.z;
 		};
 		
-		return new Point(minX + ((maxX - minX)/2), minY + ((maxY - minY)/2), minZ + ((maxZ - minZ)/2));
+		return new Point(minX + ((maxX - minX)/2), minY + ((maxY - minY)/2), minZ + ((maxZ - minZ)/2));*/
+		
+		//playing with collectors
+		CentreFinder centre = getData().vertexList.stream()
+				.filter(GeneralPredicates.untagged())
+				.collect(CentreFinder::new, CentreFinder::accept, CentreFinder::combine);
+		
+		return centre.result();
 	}
 	
 	
@@ -568,14 +579,16 @@ public class CanvasObject extends Observable implements Observer{
 	/**
 	 * Gets the maximum distance from the centre of an object to a vertex
 	 *	<br/>
-	 * The base implementation will do for most uniform shapes, irregular shapes will need to override this to be accurate
+	 * This general implementation will do for most shapes, though specific shapes may want to override to improve speed
 	 * 
 	 * @return
 	 */
 	public double getMaxExtent()
 	{
 		if (this.getBaseObject() != this) return this.getBaseObject().getMaxExtent();
-		return this.getCentre().distanceTo(this.getVertexList().get(0));
+		Point centre = this.getCentre();
+		return this.getVertexList().stream().filter(GeneralPredicates.untagged()).map(v -> v.distanceTo(centre))
+				.reduce(0d, (a,b) -> b > a ? b : a); //playing with reduce, could equally just use max() instead of reduce
 	}
 	
 	/**

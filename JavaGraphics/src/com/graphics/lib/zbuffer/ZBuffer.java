@@ -3,9 +3,7 @@ package com.graphics.lib.zbuffer;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
 import com.graphics.lib.Facet;
@@ -19,7 +17,7 @@ import com.graphics.lib.interfaces.IZBuffer;
 import com.graphics.lib.shader.IShader;
 
 public class ZBuffer implements IZBuffer{
-	private Map<Integer, HashMap<Integer,ZBufferItem>> zBuffer;
+	private List<List<ZBufferItem>> zBuffer;
 	private int dispWidth;
 	private int dispHeight;
 	private int skip = 1; //controls how often we do a colour calculation, a value of 1 checks all lines, whereas 3 calculates every 3rd line and intervening points use the same as the last calculated point
@@ -37,7 +35,8 @@ public class ZBuffer implements IZBuffer{
 	public ZBufferItem getItemAt(int x, int y){
 		if (zBuffer == null) return null;
 		
-		HashMap<Integer,ZBufferItem> xCol = zBuffer.get(x);
+		//HashMap<Integer,ZBufferItem> xCol = zBuffer.get(x);
+		List<ZBufferItem> xCol = zBuffer.get(x);
 		if (xCol == null) return null;
 		
 		return xCol.get(y);
@@ -139,7 +138,8 @@ public class ZBuffer implements IZBuffer{
 	}
 	
 	@Override
-	public Map<Integer, HashMap<Integer, ZBufferItem>> getBuffer() {
+	//public Map<Integer, HashMap<Integer, ZBufferItem>> getBuffer() {
+	public List<List<ZBufferItem>> getBuffer() {
 		return zBuffer;
 	}
 
@@ -256,22 +256,33 @@ public class ZBuffer implements IZBuffer{
 		{
 			this.dispHeight = height;
 			this.dispWidth = width;
-			zBuffer = new HashMap<Integer, HashMap<Integer,ZBufferItem>>();
+			//zBuffer = new HashMap<Integer, HashMap<Integer,ZBufferItem>>();
+			zBuffer = new ArrayList<List<ZBufferItem>>();
 			
 			for (int x = 0 ; x < width + 1 ; x++){
-				HashMap<Integer,ZBufferItem> map = new HashMap<Integer,ZBufferItem>();
-				zBuffer.put(x, map);
+				//HashMap<Integer,ZBufferItem> map = new HashMap<Integer,ZBufferItem>();
+				ArrayList<ZBufferItem> list = new ArrayList<ZBufferItem>();
+				//zBuffer.put(x, map);
+				//for (int y = 0 ; y < height + 1 ; y++){
+				//	map.put(y, new ZBufferItem(x, y));
+				//}
 				for (int y = 0 ; y < height + 1 ; y++){
-					map.put(y, new ZBufferItem(x, y));
+					list.add(new ZBufferItem(x, y));
 				}
+				zBuffer.add(list);
 			}
 		}
 	}
 
 	@Override
 	public void clear() {
-		this.zBuffer.values().stream().forEach(m -> {
+		/*this.zBuffer.values().stream().forEach(m -> {
 			for (ZBufferItem item : m.values()){
+				if (item.isActive()) item.clear();
+			}
+		});*/
+		this.zBuffer.parallelStream().forEach(m -> {
+			for (ZBufferItem item : m){
 				if (item.isActive()) item.clear();
 			}
 		});

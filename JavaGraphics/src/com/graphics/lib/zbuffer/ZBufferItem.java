@@ -107,11 +107,11 @@ public class ZBufferItem
 		if (getClass() != obj.getClass())
 			return false;
 		ZBufferItem other = (ZBufferItem) obj;
-		if (items == null) {
+		/*if (items == null) {
 			if (other.items != null)
 				return false;
 		} else if (!items.equals(other.items))
-			return false;
+			return false;*/
 		if (x != other.x)
 			return false;
 		if (y != other.y)

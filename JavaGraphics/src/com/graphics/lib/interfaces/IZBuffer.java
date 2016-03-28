@@ -1,8 +1,6 @@
 package com.graphics.lib.interfaces;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import java.util.List;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.shader.IShader;
@@ -34,7 +32,8 @@ public interface IZBuffer {
 	 * <code>Map{xValue, Map{yValue, item}}</code>
 	 * @return The Z Buffer map
 	 */
-	public Map<Integer, HashMap<Integer, ZBufferItem>> getBuffer();
+	//public Map<Integer, HashMap<Integer, ZBufferItem>> getBuffer();
+	public List<List<ZBufferItem>> getBuffer();
 	
 	
 	/**

@@ -1,28 +1,26 @@
 package com.graphics.lib.canvas;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+
 import com.graphics.lib.Utils;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasUpdateListener;
-import com.graphics.lib.interfaces.IZBuffer;
 import com.graphics.lib.shader.IShader;
 
 public class SlaveCanvas3D extends Canvas3D implements ICanvasUpdateListener {
 	private static final long serialVersionUID = 1L;
 	
-	Canvas3D parent;
+	//Canvas3D parent;
 	
-	public SlaveCanvas3D(Camera camera, Canvas3D parent)
+	public SlaveCanvas3D(Camera camera)
 	{
 		super(camera);	
-		this.parent = parent;
-		parent.addObserver(this);
+		//this.parent = parent;
+		//parent.addObserver(this);
 	}
 	
-	@Override
-	public void doDraw()
+	/*@Override
+	public void doDraw(CanvasObject obj)
 	{
 		while(this.isOkToPaint()){
 			try {
@@ -43,26 +41,46 @@ public class SlaveCanvas3D extends Canvas3D implements ICanvasUpdateListener {
 		});
 		this.setOkToPaint(true);
 		this.repaint();
-	}
+		
+	}*/
 	
 
-	private void processShape(CanvasObject obj, IZBuffer zBuf, IShader shader)
+	private void processShape(Canvas3D source, CanvasObject obj, IShader shader)
 	{
+		//if (this.isOkToPaint()) return;
+		while(this.isOkToPaint()){
+			//while isOkToPaint() is true then repaint has not yet happened since the last draw cycle
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {}
+		}
+		
+		if (this.getzBuffer() == null)
+			this.setzBuffer(Utils.getDefaultZBuffer());
+
+		this.getzBuffer().setDimensions(this.getWidth(), this.getHeight());
+		
 		if (obj.isVisible())
 		{
 			this.getCamera().getView(obj);
-			if (shader != null) shader.setLightsources(parent.getLightSources());
+			if (shader != null) shader.setLightsources(source.getLightSources());
 			
-			zBuf.Add(obj, shader, this.getCamera(), parent.getHorizon());
+			this.getzBuffer().Add(obj, shader, this.getCamera(), source.getHorizon());
 		}
 		for (CanvasObject child : new ArrayList<CanvasObject>(obj.getChildren()))
 		{
-			this.processShape(child, zBuf, shader);
+			this.processShape(source, child, shader);
 		};
 	}
 
 	@Override
-	public void update(Canvas3D source) {
-		this.doDraw();
+	public void update(Canvas3D source, CanvasObject obj) {
+		if (obj == null){
+			this.setOkToPaint(true);
+			this.repaint();
+		}
+		else{
+			this.processShape(source, obj, source.getShader(obj));
+		}
 	}
 }
