@@ -2,14 +2,16 @@ package com.graphics.lib.shader;
 
 import java.awt.Color;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.graphics.lib.Facet;
 import com.graphics.lib.IntensityComponents;
 import com.graphics.lib.Point;
+import com.graphics.lib.WorldCoord;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.canvas.CanvasObject;
-import com.graphics.lib.lightsource.LightSource;
+import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.zbuffer.ScanLine;
 
 /**
@@ -21,13 +23,16 @@ import com.graphics.lib.zbuffer.ScanLine;
 public class FlatShader implements IShader{
 
 	private Color colour = new Color(255,255,255);
-	private Set<LightSource> ls = new HashSet<LightSource>();
+	private Set<ILightSource> ls = new HashSet<ILightSource>();
 	
 	@Override
 	public void init(CanvasObject obj, Facet f, Camera c) {
 		Color colour = f.getColour() == null ? obj.getColour() : f.getColour();
 		
-		Point p = new Point((f.point1.x + f.point2.x + f.point3.x)/3, (f.point1.y + f.point2.y + f.point3.y)/3, (f.point1.z + f.point2.z + f.point3.z)/3);
+		List<WorldCoord> points = f.getAsList();
+		Point p = new Point((points.get(0).x + points.get(1).x + points.get(2).x)/3, 
+				(points.get(0).y + points.get(1).y + points.get(2).y)/3, 
+				(points.get(0).z + points.get(1).z + points.get(2).z)/3);
 		
 		IntensityComponents pointLight = obj.getLightIntensityFinder().getLightIntensity(ls, obj, p, f.getNormal(), !f.isFrontFace());
 		
@@ -44,13 +49,13 @@ public class FlatShader implements IShader{
 	}
 
 	@Override
-	public void setLightsources(Set<LightSource> ls) {
+	public void setLightsources(Set<ILightSource> ls) {
 		this.ls = ls;
 		
 	}
 
 	@Override
-	public Set<LightSource> getLightsources() {
+	public Set<ILightSource> getLightsources() {
 		return ls;
 	}
 

@@ -9,7 +9,6 @@ import com.graphics.lib.interfaces.ICanvasObjectList;
 import com.graphics.lib.interfaces.ILightIntensityFinder;
 import com.graphics.lib.interfaces.IVertexNormalFinder;
 import com.graphics.lib.interfaces.IZBuffer;
-import com.graphics.lib.lightsource.DirectionalLightSource;
 import com.graphics.lib.transform.MovementTransform;
 import com.graphics.lib.zbuffer.ZBuffer;
 
@@ -46,13 +45,11 @@ public class Utils {
 			
 			ls.stream().filter(l -> l.isOn()).forEach(l ->
 			{
+				IntensityComponents intComps = l.getIntensityComponents(p);
+				if (intComps.hasNoIntensity()) return;
+				
 				double percent = 0;
 				Vector lightVector = l.getPosition().vectorToPoint(p).getUnitVector();
-				
-				if (l instanceof DirectionalLightSource){
-					double angleRad = ((DirectionalLightSource) l).getDirection().dotProduct(lightVector);
-					if (Math.toDegrees(Math.acos(angleRad)) > ((DirectionalLightSource) l).getLightConeAngle()) return;
-				}
 				
 				double answer = v.dotProduct(lightVector);
 				
@@ -68,11 +65,11 @@ public class Utils {
 					percent = (90-deg) / 90;
 				}
 				
-				double intensity = l.getIntensityComponents(p).getRed() * percent;
+				double intensity = intComps.getRed() * percent;
 				if (intensity > maxIntensity.getRed()) maxIntensity.setRed(intensity);
-				intensity = l.getIntensityComponents(p).getGreen() * percent;
+				intensity = intComps.getGreen() * percent;
 				if (intensity > maxIntensity.getGreen()) maxIntensity.setGreen(intensity);
-				intensity = l.getIntensityComponents(p).getBlue() * percent;
+				intensity = intComps.getBlue() * percent;
 				if (intensity > maxIntensity.getBlue()) maxIntensity.setBlue(intensity);
 			});
 			return maxIntensity;
@@ -86,6 +83,8 @@ public class Utils {
 			
 			ls.stream().filter(l -> l.isOn()).forEach(l ->
 			{
+				IntensityComponents intComps = l.getIntensityComponents(p);
+				if (intComps.hasNoIntensity()) return;
 				
 				Vector lightVector = l.getPosition().vectorToPoint(p).getUnitVector();
 				Set<CanvasObject> checkList = new HashSet<CanvasObject>(objectsToCheck.get());
@@ -101,11 +100,6 @@ public class Utils {
 				
 				double percent = 0;
 				
-				if (l instanceof DirectionalLightSource){
-					double angleRad = ((DirectionalLightSource) l).getDirection().dotProduct(lightVector);
-					if (Math.toDegrees(Math.acos(angleRad)) > ((DirectionalLightSource) l).getLightConeAngle()) return;
-				}
-				
 				double answer = v.dotProduct(lightVector);
 				
 				double deg = Math.toDegrees(Math.acos(answer));
@@ -120,11 +114,11 @@ public class Utils {
 					percent = (90-deg) / 90;
 				}
 				
-				double intensity = l.getIntensityComponents(p).getRed() * percent;
+				double intensity = intComps.getRed() * percent;
 				if (intensity > maxIntensity.getRed()) maxIntensity.setRed(intensity);
-				intensity = l.getIntensityComponents(p).getGreen() * percent;
+				intensity = intComps.getGreen() * percent;
 				if (intensity > maxIntensity.getGreen()) maxIntensity.setGreen(intensity);
-				intensity = l.getIntensityComponents(p).getBlue() * percent;
+				intensity = intComps.getBlue() * percent;
 				if (intensity > maxIntensity.getBlue()) maxIntensity.setBlue(intensity);
 			});
 			return maxIntensity;

@@ -19,10 +19,7 @@ import com.graphics.lib.texture.Texture;
  */
 public class WorldCoord extends Point {
 
-	//private Point transformed;
 	private Map<Camera, Point> transformed = new HashMap<Camera, Point>();
-	private Map<Texture, Double> textureX;
-	private Map<Texture, Double> textureY;
 	private String group = "";
 	
 	public WorldCoord() {
@@ -63,24 +60,5 @@ public class WorldCoord extends Point {
 			tr.y = y;
 			tr.z = z;
 	}
-
-	public double getTextureX(Texture t) {
-		return (textureX != null && textureX.containsKey(t)) ? textureX.get(t) : 0;
-	}
-
-	public void setTextureX(Texture t, double textureX) {
-		if (this.textureX == null) this.textureX = new HashMap<Texture, Double>();
-		this.textureX.put(t, textureX);
-	}
-
-	public double  getTextureY(Texture t) {
-		return (textureY != null && textureY.containsKey(t)) ? textureY.get(t) : 0;
-	}
-
-	public void setTextureY(Texture t, double textureY) {
-		if (this.textureY == null) this.textureY = new HashMap<Texture, Double>();
-		this.textureY.put(t, textureY);
-	}
-	
 	
 }

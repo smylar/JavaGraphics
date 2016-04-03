@@ -64,10 +64,6 @@ public class ZBuffer implements IZBuffer{
 	private void Add(Facet facet, CanvasObject parent, IShader shader, Camera c)
 	{
 		if (zBuffer == null) return;
-		List<LineEquation> lines = new ArrayList<LineEquation>();
-		lines.add(new LineEquation(facet.point1, facet.point2, c));
-		lines.add(new LineEquation(facet.point2, facet.point3, c));
-		lines.add(new LineEquation(facet.point3, facet.point1, c));
 		
 		List<WorldCoord> points = facet.getAsList();
 		if (points.stream().allMatch(p -> p.getTransformed(c).z <= 0)) return;
@@ -110,6 +106,11 @@ public class ZBuffer implements IZBuffer{
 			localShader.init(parent, facet, c);
 		}
 		
+		List<LineEquation> lines = new ArrayList<LineEquation>();
+		
+		lines.add(new LineEquation(points.get(0), points.get(1), c));
+		lines.add(new LineEquation(points.get(1), points.get(2), c));
+		lines.add(new LineEquation(points.get(2), points.get(0), c));
 		
 		for (int x = (int)Math.floor(minX) ; x <= Math.ceil(maxX) ; x++)
 		{
@@ -237,8 +238,6 @@ public class ZBuffer implements IZBuffer{
 		double endZ = line.getEnd().z;
 		
 		return this.interpolateZ(startZ, endZ, percentLength); 
-		//some problems still exist with laser as seen from slave when aimed near it (sphere overlap of laser firing behind slave), so still not getting z properly - may also be a problem in the camera transform algorithm
-		//as it sometimes seems to put the laser the wrong side of the slave camera when laser travels from in front to behind camera - possibly a general problem crossing this line
 	}
 
 

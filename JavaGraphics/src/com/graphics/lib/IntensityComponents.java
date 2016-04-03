@@ -32,6 +32,10 @@ public class IntensityComponents {
 		else this.blue = blue;
 	}
 	
+	public boolean hasNoIntensity(){
+		return red == 0 && blue == 0 && green == 0;
+	}
+	
 	public Color applyIntensities(Color colour){
 		return new Color((int)((double)colour.getRed() * red), 
 				(int)((double)colour.getGreen() * green), 

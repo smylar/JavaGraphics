@@ -22,6 +22,7 @@ import com.graphics.lib.WorldCoord;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasUpdateListener;
 import com.graphics.lib.interfaces.IZBuffer;
+import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.shader.IShader;
 import com.graphics.lib.transform.Translation;
@@ -39,8 +40,8 @@ public class Canvas3D extends JPanel{
 	
 	private Map<CanvasObject, IShader> shapes = Collections.synchronizedMap(new HashMap<CanvasObject, IShader>());
 	
-	private Set<LightSource> lightSources = new HashSet<LightSource>(); 
-	private Set<LightSource> lightSourcesToAdd = Collections.synchronizedSet(new HashSet<LightSource>()); 
+	private Set<ILightSource> lightSources = new HashSet<ILightSource>(); 
+	private Set<ILightSource> lightSourcesToAdd = Collections.synchronizedSet(new HashSet<ILightSource>()); 
 	private Camera camera;
 	private IZBuffer zBuffer;
 	private double horizon = 8000;
@@ -104,7 +105,7 @@ public class Canvas3D extends JPanel{
 		this.shapes.replace(obj, shader);
 	}
 
-	public Set<LightSource> getLightSources() {
+	public Set<ILightSource> getLightSources() {
 		return lightSources;
 	}
 
@@ -272,7 +273,7 @@ public class Canvas3D extends JPanel{
 		Set<CanvasObject> shadows = new HashSet<CanvasObject>();
 		if (floor == null || !obj.getCastsShadow()) return shadows;
 		
-		for (LightSource ls : lightSources){
+		for (ILightSource ls : lightSources){
 			if (!ls.isOn()) continue;
 			
 			CanvasObject shadow = new CanvasObject();
@@ -281,14 +282,17 @@ public class Canvas3D extends JPanel{
 			shadow.setVisible(true);
 			for (Facet f : obj.getFacetList()){
 				//TODO this will work out the intersection for a point several times depending on the facets and creates more points than necessary, will want rewrite for better efficiency
-				if (!obj.isVisible() || !GeneralPredicates.isFrontface(ls).test(f)) continue;
+				if (!obj.isVisible() || !GeneralPredicates.isLit(ls).test(f)) continue;
 				
-				WorldCoord p1 = getShadowPoint(ls.getPosition(), f.point1);
+				List<WorldCoord> points = f.getAsList();
+				
+				WorldCoord p1 = getShadowPoint(ls.getPosition(), points.get(0));
 				if (p1 == null) continue;
-				WorldCoord p2 = getShadowPoint(ls.getPosition(), f.point2);
+				WorldCoord p2 = getShadowPoint(ls.getPosition(), points.get(1));
 				if (p2 == null) continue;
-				WorldCoord p3 = getShadowPoint(ls.getPosition(), f.point3);
+				WorldCoord p3 = getShadowPoint(ls.getPosition(), points.get(2));
 				if (p3 == null) continue;
+				
 				shadow.getVertexList().add(p1);
 				shadow.getVertexList().add(p2);
 				shadow.getVertexList().add(p3);

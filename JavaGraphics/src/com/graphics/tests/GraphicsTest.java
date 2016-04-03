@@ -180,7 +180,7 @@ public class GraphicsTest extends JFrame {
 		//torus.setCastsShadow(false);
 		
 		PlugableCanvasObject<TexturedCuboid> cube = new PlugableCanvasObject<TexturedCuboid>(new TexturedCuboid(200,200,200));
-		cnv.registerObject(cube, new Point(500,500,450), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
+		cnv.registerObject(cube, new Point(500,500,450), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.TEXGORAUD));
 		Transform cubet2 = new RepeatingTransform<Rotation<?>>(new Rotation<ZRotation>(ZRotation.class, 3), 30);
 		cube.addTransformAboutCentre(cubet2);
 		cube.addFlag(Events.STICKY);
@@ -295,7 +295,9 @@ public class GraphicsTest extends JFrame {
 						//Facet f = obj.getIntersectedFacet(pos, cam.getOrientation().getForward(), false);
 						for (Facet f : obj.getIntersectedFacets(pos, cam.getOrientation().getForward()))
 						{
-							if (f != null && (f.point1.getTransformed(cam).z + f.point2.getTransformed(cam).z + f.point3.getTransformed(cam).z)/3 < laser.getLength() ){
+							//if (f != null && (f.point1.getTransformed(cam).z + f.point2.getTransformed(cam).z + f.point3.getTransformed(cam).z)/3 < laser.getLength() ){
+							if (f != null && f.getAsList().stream().mapToDouble(p -> p.getTransformed(cam).z).average().getAsDouble() < laser.getLength() ){
+		
 								//f.setColour(Color.DARK_GRAY);
 								f.setMaxIntensity(0.15);
 								//as an aspiration - create dynamic texture map for laser 'holes'

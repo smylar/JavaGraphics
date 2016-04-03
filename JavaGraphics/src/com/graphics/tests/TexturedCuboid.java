@@ -1,7 +1,7 @@
 package com.graphics.tests;
 
 import java.awt.Color;
-
+import com.graphics.lib.TexturedWorldCoord;
 import com.graphics.lib.texture.BmpTexture;
 import com.graphics.lib.texture.TestTexture;
 import com.graphics.lib.texture.Texture;
@@ -9,27 +9,41 @@ import com.graphics.shapes.Cuboid;
 
 public class TexturedCuboid extends Cuboid {
 
+	private Texture texture;
+	private BmpTexture bmptexture;
+	
 	public TexturedCuboid(int height, int width, int depth) {
 		super(height, width, depth);
-		Texture texture = new TestTexture();
-		BmpTexture bmptexture = new BmpTexture("texture1", Color.white);
 		bmptexture.setApplyLighting(false);
-
-		this.getVertexList().get(1).setTextureY(bmptexture, bmptexture.getHeight());
-		this.getVertexList().get(2).setTextureY(bmptexture, bmptexture.getHeight());
-		this.getVertexList().get(2).setTextureX(bmptexture, bmptexture.getWidth());
-		this.getVertexList().get(3).setTextureX(bmptexture, bmptexture.getWidth());
+		bmptexture.setOrder(1);
+	}
+	
+	@Override
+	protected void generateVertexList(int height, int width, int depth){
+		bmptexture = new BmpTexture("texture1", Color.white);
+		texture = new TestTexture();
+		super.generateVertexList(height, width, depth);
+		TexturedWorldCoord tCoord = new TexturedWorldCoord(this.getVertexList().get(0));
+		tCoord.setTextureY(bmptexture, 0);
+		tCoord.setTextureY(texture, 0);
+		this.getVertexList().set(0, tCoord);
 		
-		this.getVertexList().get(1).setTextureY(texture, texture.getHeight());
-		this.getVertexList().get(2).setTextureY(texture, texture.getHeight());
-		this.getVertexList().get(2).setTextureX(texture, texture.getWidth());
-		this.getVertexList().get(3).setTextureX(texture, texture.getWidth());
+		tCoord = new TexturedWorldCoord(this.getVertexList().get(1));
+		tCoord.setTextureY(bmptexture, bmptexture.getHeight());
+		tCoord.setTextureY(texture, texture.getHeight());
+		this.getVertexList().set(1, tCoord);
 		
-		this.getFacetList().get(0).addTexture(bmptexture);
-		this.getFacetList().get(1).addTexture(bmptexture);
+		tCoord = new TexturedWorldCoord(this.getVertexList().get(2));
+		tCoord.setTextureY(bmptexture, bmptexture.getHeight());
+		tCoord.setTextureX(bmptexture, bmptexture.getWidth());
+		tCoord.setTextureY(texture, texture.getHeight());
+		tCoord.setTextureX(texture, texture.getWidth());
+		this.getVertexList().set(2, tCoord);
 		
-		this.getFacetList().get(0).addTexture(texture);
-		this.getFacetList().get(1).addTexture(texture);
+		tCoord = new TexturedWorldCoord(this.getVertexList().get(3));
+		tCoord.setTextureX(bmptexture, bmptexture.getWidth());
+		tCoord.setTextureX(texture, texture.getWidth());
+		this.getVertexList().set(3, tCoord);
 	}
 
 }

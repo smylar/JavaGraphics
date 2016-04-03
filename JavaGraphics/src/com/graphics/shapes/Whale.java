@@ -194,7 +194,7 @@ public class Whale extends AnimatedCanvasObject<Whale> {
 		{
 			if (FIN_TAG.equals(f.getTag()) || FLUKE_TAG.equals(f.getTag())) continue;
 			
-			Vector vecPointToFacet = p.vectorToPoint(f.point1).getUnitVector();
+			Vector vecPointToFacet = p.vectorToPoint( f.getAsList().get(0)).getUnitVector();
 			double deg = Math.toDegrees(Math.acos(vecPointToFacet.dotProduct(f.getNormal())));
 			if (deg >= 90) return false;
 		}

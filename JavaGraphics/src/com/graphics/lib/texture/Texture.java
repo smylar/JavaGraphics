@@ -44,4 +44,6 @@ public interface Texture {
 	 * @return
 	 */
 	public boolean applyLighting();
+	
+	public int getOrder();
 }

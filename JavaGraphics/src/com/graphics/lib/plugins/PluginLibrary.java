@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.graphics.lib.Facet;
+import com.graphics.lib.GeneralPredicates;
 import com.graphics.lib.Point;
 import com.graphics.lib.Utils;
 import com.graphics.lib.Vector;
@@ -16,6 +17,7 @@ import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.PlugableCanvasObject;
 import com.graphics.lib.interfaces.ICanvasObjectList;
+import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.transform.MovementTransform;
 import com.graphics.lib.transform.RepeatingTransform;
@@ -44,7 +46,7 @@ public class PluginLibrary {
 			double speed = baseVector.getSpeed();
 			baseVector = baseVector.getUnitVector();
 			
-			List<WorldCoord> vertices = obj.getVertexList().stream().filter(v -> v.getTag().equals("")).collect(Collectors.toList());//only get untagged points (tagged points usually hidden and have special purpose)
+			List<WorldCoord> vertices = obj.getVertexList().stream().filter(GeneralPredicates.untagged()).collect(Collectors.toList());//only get untagged points (tagged points usually hidden and have special purpose)
 			for (int i = 0 ; i < density ; i++)
 			{
 				int index = (int)Math.round(Math.random() * (vertices.size() - 1));
@@ -73,16 +75,16 @@ public class PluginLibrary {
 		};
 	}
 	
-	public static IPlugin<PlugableCanvasObject<?>, Set<PlugableCanvasObject<CanvasObject>>> explode(Collection<LightSource> lightSources) 
+	public static IPlugin<PlugableCanvasObject<?>, Set<PlugableCanvasObject<CanvasObject>>> explode(Collection<ILightSource> lightSources) 
 	{
 		return (obj) -> {
 		Set<PlugableCanvasObject<CanvasObject>> children = new HashSet<PlugableCanvasObject<CanvasObject>>();
 		for (Facet f : obj.getFacetList())
 		{
 			PlugableCanvasObject<CanvasObject> fragment = new PlugableCanvasObject<CanvasObject>(new CanvasObject());
-			fragment.getVertexList().add(new WorldCoord(f.point1.x, f.point1.y, f.point1.z));
-			fragment.getVertexList().add(new WorldCoord(f.point2.x, f.point2.y, f.point2.z));
-			fragment.getVertexList().add(new WorldCoord(f.point3.x, f.point3.y, f.point3.z));
+			for (WorldCoord p : f.getAsList()){
+				fragment.getVertexList().add(new WorldCoord(p.x, p.y, p.z));
+			}
 			fragment.getFacetList().add(new Facet(fragment.getVertexList().get(0), fragment.getVertexList().get(1), fragment.getVertexList().get(2)));
 			fragment.setProcessBackfaces(true);
 			fragment.setColour(f.getColour() != null ? f.getColour() : obj.getColour());
@@ -109,7 +111,7 @@ public class PluginLibrary {
 		};
 	}
 	
-	public static IPlugin<PlugableCanvasObject<?>,Void> flash(Collection<LightSource> lightSources)
+	public static IPlugin<PlugableCanvasObject<?>,Void> flash(Collection<ILightSource> lightSources)
 	{
 		return (obj)-> {
 			LightSource flash = new LightSource(obj.getCentre().x,  obj.getCentre().y, obj.getCentre().z);

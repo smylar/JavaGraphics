@@ -103,7 +103,7 @@ public class ViewAngleCamera extends Camera {
 		
 		Point nearest = null;
 		double nearestdist = 0;
-		for(Facet f : obj.getFacetList().stream().filter(f -> f.point1 == wc || f.point2 == wc || f.point3 == wc ).collect(Collectors.toList()))
+		for(Facet f : obj.getFacetList().stream().filter(f -> f.contains(wc) ).collect(Collectors.toList()))
 		{	
 			for (WorldCoord w : f.getAsList()){
 				if (wc == w) continue;

@@ -16,6 +16,7 @@ public class BmpTexture implements Texture{
 	private Color transparentColour = null;
 	private Map<Integer, Color> colourMap = new HashMap<Integer, Color>(); //so we don't get a tonne of colour objects to clear up
 	private boolean applyLighting = true;
+	private int order = 0;
 	
 	public BmpTexture(String bmpFileResource, Color transparentColour){
 		this.transparentColour = transparentColour;
@@ -61,6 +62,15 @@ public class BmpTexture implements Texture{
 
 	public void setApplyLighting(boolean applyLighting) {
 		this.applyLighting = applyLighting;
+	}
+
+	@Override
+	public int getOrder() {
+		return order;
+	}
+
+	public void setOrder(int order) {
+		this.order = order;
 	}
 	
 }

@@ -11,6 +11,24 @@ public class Cuboid extends CanvasObject{
 	
 	public Cuboid (int height, int width, int depth)
 	{
+		this.generateVertexList(height, width, depth);
+		
+		this.generateFacetList();
+		
+		this.applyTransform(new Translation(-width/2,-height/2,-depth/2));
+		
+		this.centre = new WorldCoord(0,0,0);
+		this.getVertexList().add(centre);
+	}
+	
+	@Override
+	public Point getCentre()
+	{
+		return this.centre;
+	}
+	
+	protected void generateVertexList(int height, int width, int depth)
+	{
 		this.getVertexList().add(new WorldCoord(0, 0, 0));
 		this.getVertexList().add(new WorldCoord(0, height, 0));
 		this.getVertexList().add(new WorldCoord(width, height, 0));
@@ -19,7 +37,10 @@ public class Cuboid extends CanvasObject{
 		this.getVertexList().add(new WorldCoord(0, height, depth));
 		this.getVertexList().add(new WorldCoord(width, height, depth));
 		this.getVertexList().add(new WorldCoord(width, 0, depth));
-		
+	}
+	
+	protected void generateFacetList()
+	{
 		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(1), this.getVertexList().get(3)));
 		this.getFacetList().add(new Facet(this.getVertexList().get(1), this.getVertexList().get(2), this.getVertexList().get(3)));
 		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(3), this.getVertexList().get(4)));
@@ -32,16 +53,5 @@ public class Cuboid extends CanvasObject{
 		this.getFacetList().add(new Facet(this.getVertexList().get(2), this.getVertexList().get(6), this.getVertexList().get(7)));
 		this.getFacetList().add(new Facet(this.getVertexList().get(2), this.getVertexList().get(1), this.getVertexList().get(6)));
 		this.getFacetList().add(new Facet(this.getVertexList().get(1), this.getVertexList().get(5), this.getVertexList().get(6)));
-		
-		this.applyTransform(new Translation(-width/2,-height/2,-depth/2));
-		
-		this.centre = new WorldCoord(0,0,0);
-		this.getVertexList().add(centre);
-	}
-	
-	@Override
-	public Point getCentre()
-	{
-		return this.centre;
 	}
 }

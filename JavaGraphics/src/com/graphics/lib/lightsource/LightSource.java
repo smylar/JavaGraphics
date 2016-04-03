@@ -6,7 +6,7 @@ import java.util.Observable;
 import com.graphics.lib.IntensityComponents;
 import com.graphics.lib.Point;
 
-public class LightSource extends Observable{
+public class LightSource extends Observable implements ILightSource{
 	public static final String ONOFFCHANGE = "ONOFF";
 	public static final String POSITIONCHANGE = "POS";
 	public static final String INTENSITYCHANGE = "INT";
@@ -24,6 +24,10 @@ public class LightSource extends Observable{
 		this.position = new Point(x, y, z);
 	}
 		
+	/* (non-Javadoc)
+	 * @see com.graphics.lib.lightsource.ILightSource#isDeleted()
+	 */
+	@Override
 	public boolean isDeleted() {
 		return deleted;
 	}
@@ -41,6 +45,10 @@ public class LightSource extends Observable{
 		this.range = range;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.graphics.lib.lightsource.ILightSource#getPosition()
+	 */
+	@Override
 	public Point getPosition() {
 		return position;
 	}
@@ -48,14 +56,6 @@ public class LightSource extends Observable{
 	public void setPosition(Point position) {
 		this.position = position;
 		this.flagChange(POSITIONCHANGE);
-	}
-
-	public double getIntensity(Point p) {
-		if (!this.on) return 0;
-		if (this.range < 1) return this.intensity;
-		double distanceAway = this.position.distanceTo(p);
-		if (distanceAway > this.range || distanceAway < 0) return 0;
-		return this.intensity - ((intensity/range) * distanceAway);
 	}
 
 	public void setIntensity(double intensity) {
@@ -68,10 +68,18 @@ public class LightSource extends Observable{
 		return this.intensity;
 	}
 
+	/* (non-Javadoc)
+	 * @see com.graphics.lib.lightsource.ILightSource#getColour()
+	 */
+	@Override
 	public Color getColour() {
 		return colour;
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.graphics.lib.lightsource.ILightSource#getActualColour()
+	 */
+	@Override
 	public Color getActualColour(){
 		return (isOn() ? actualColour : Color.black);
 	}
@@ -109,6 +117,10 @@ public class LightSource extends Observable{
 		this.flagChange(ONOFFCHANGE);
 	}
 	
+	/* (non-Javadoc)
+	 * @see com.graphics.lib.lightsource.ILightSource#isOn()
+	 */
+	@Override
 	public boolean isOn() {
 		return on;
 	}
@@ -118,19 +130,25 @@ public class LightSource extends Observable{
 		this.notifyObservers(change);
 	}
 	
-	/**
-	 * Get the amount of each colour component of the light illuminating the given point from this light source
-	 * 
-	 * @param p
-	 * @return
-	 */
+	
+	@Override
 	public IntensityComponents getIntensityComponents(Point p)
 	{
 		IntensityComponents components = new IntensityComponents();
-		components.setRed(((double)this.colour.getRed() / 255) * this.getIntensity(p));
-		components.setGreen(((double)this.colour.getGreen() / 255) * this.getIntensity(p));
-		components.setBlue(((double)this.colour.getBlue() / 255) * this.getIntensity(p));
+		if (this.on){
+			double intensity = this.getIntensity(p);
+			components.setRed(((double)this.colour.getRed() / 255) * intensity);
+			components.setGreen(((double)this.colour.getGreen() / 255) * intensity);
+			components.setBlue(((double)this.colour.getBlue() / 255) * intensity);
+		}
 		return components;
+	}
+	
+	protected double getIntensity(Point p) {
+		if (this.range < 1) return this.intensity;
+		double distanceAway = this.position.distanceTo(p);
+		if (distanceAway > this.range || distanceAway < 0) return 0;
+		return this.intensity - ((intensity/range) * distanceAway);
 	}
 
 	@Override

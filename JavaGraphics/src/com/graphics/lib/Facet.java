@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.graphics.lib.camera.Camera;
-import com.graphics.lib.texture.Texture;
 
 /**
  * A facet generally links 3 vertices of an object to form a triangle.
@@ -15,14 +14,14 @@ import com.graphics.lib.texture.Texture;
  *
  */
 public class Facet {
-	public WorldCoord point1;
-	public WorldCoord point2;
-	public WorldCoord point3;
+	private WorldCoord point1;
+	private WorldCoord point2;
+	private WorldCoord point3;
+	private List<WorldCoord> list = new ArrayList<WorldCoord>();
 	private Color colour;
 	private double baseIntensity = 0.15;
 	private double maxIntensity = 1;
 	private boolean isFrontFace = true;
-	private List<Texture> texture = new ArrayList<Texture>();
 	private String tag = null;
 	
 	public Facet(WorldCoord p1, WorldCoord p2, WorldCoord p3)
@@ -30,6 +29,9 @@ public class Facet {
 		this.point1 = p1;
 		this.point2 = p2;
 		this.point3 = p3;
+		list.add(point1);
+		list.add(point2);
+		list.add(point3);
 	}
 	
 	public Facet(WorldCoord p1, WorldCoord p2, WorldCoord p3, String tag)
@@ -39,10 +41,6 @@ public class Facet {
 	}
 	
 	public List<WorldCoord> getAsList(){
-		List<WorldCoord> list = new ArrayList<WorldCoord>();
-		list.add(point1);
-		list.add(point2);
-		list.add(point3);
 		return list;
 	}
 	
@@ -100,13 +98,9 @@ public class Facet {
 	public void setFrontFace(boolean isFrontFace) {
 		this.isFrontFace = isFrontFace;
 	}
-
-	public List<Texture> getTexture() {
-		return texture;
-	}
-
-	public void addTexture(Texture texture) {
-		this.texture.add(texture);
+	
+	public boolean contains(WorldCoord wc){
+		return point1 == wc || point2 == wc || point3 == wc;
 	}
 
 	/**

@@ -1,17 +1,17 @@
 package com.graphics.lib;
 
+import java.util.List;
 import java.util.function.Predicate;
 
 import com.graphics.lib.camera.Camera;
-import com.graphics.lib.lightsource.DirectionalLightSource;
-import com.graphics.lib.lightsource.LightSource;
+import com.graphics.lib.lightsource.ILightSource;
 
 public class GeneralPredicates {
 	public static Predicate<Facet> isFrontface(Camera c)
 	{
 		return f -> {
-			
-			if (f.point1.getTransformed(c).z < 1 && f.point2.getTransformed(c).z < 1 && f.point3.getTransformed(c).z < 1) return false;
+			List<WorldCoord> points = f.getAsList();
+			if (points.get(0).getTransformed(c).z < 1 && points.get(1).getTransformed(c).z < 1 && points.get(2).getTransformed(c).z < 1) return false;
 			
 			double camVecZ = c.getOrientation().getForward().z;
 			double facetVecZ = f.getTransformedNormal(c).z;
@@ -22,16 +22,15 @@ public class GeneralPredicates {
 		};
 	}
 	
-	public static Predicate<Facet> isFrontface(LightSource l)
+	public static Predicate<Facet> isLit(ILightSource l)
 	{
 		return f -> {		
-			Vector lightVector = l.getPosition().vectorToPoint(f.point1).getUnitVector();
+			List<WorldCoord> points = f.getAsList();
+			//N.B. this will result in whole facet being declared out of the light even if just point1 is not in the light
+			IntensityComponents intComps = l.getIntensityComponents(points.get(0));
+			if (intComps.hasNoIntensity()) return false;
 			
-			if (l instanceof DirectionalLightSource){
-				//N.B. this will result in whole facet being declared out of the light even if just point1 is not in the light
-				double angleRad = ((DirectionalLightSource) l).getDirection().dotProduct(lightVector);
-				if (Math.toDegrees(Math.acos(angleRad)) > ((DirectionalLightSource) l).getLightConeAngle()) return false;
-			}
+			Vector lightVector = l.getPosition().vectorToPoint(points.get(0)).getUnitVector();
 			
 			return f.getNormal().dotProduct(lightVector) < 0;
 		};
@@ -39,8 +38,9 @@ public class GeneralPredicates {
 	
 	public static Predicate<Facet> isFrontface(Point p)
 	{
-		return f -> {		
-			Vector vector = p.vectorToPoint(f.point1).getUnitVector();
+		return f -> {	
+			List<WorldCoord> points = f.getAsList();
+			Vector vector = p.vectorToPoint(points.get(0)).getUnitVector();
 			
 			return f.getNormal().dotProduct(vector) < 0;
 		};
@@ -48,9 +48,11 @@ public class GeneralPredicates {
 	
 	public static Predicate<Facet> isOverHorizon(Camera c, double horizon)
 	{
-		 return f -> c.getPosition().distanceTo(f.point1) > horizon
-		 && c.getPosition().distanceTo(f.point2) > horizon
-		 && c.getPosition().distanceTo(f.point3) > horizon;
+		 return f -> {
+			 List<WorldCoord> points = f.getAsList();
+			 
+			 return points.stream().allMatch(p -> p.distanceTo(c.getPosition()) > horizon);
+		};
 	}
 	
 	public static Predicate<WorldCoord> untagged()

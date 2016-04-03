@@ -479,7 +479,7 @@ public class CanvasObject extends Observable implements Observer{
 		//checks if all facets appears as backfaces to the tested point
 		for (Facet f : getData().facetList)
 		{
-			Vector vecPointToFacet = p.vectorToPoint(f.point1).getUnitVector();
+			Vector vecPointToFacet = p.vectorToPoint(f.getAsList().get(0)).getUnitVector();
 			double deg = Math.toDegrees(Math.acos(vecPointToFacet.dotProduct(f.getNormal())));
 			if (deg >= 90) return false;
 		}
@@ -510,7 +510,8 @@ public class CanvasObject extends Observable implements Observer{
 			if (f.isPointWithin(f.getIntersectionPointWithFacetPlane(start, v))){
 				if (getAny) return f;
 			
-				double dist = (start.distanceTo(f.point1) + start.distanceTo(f.point2) + start.distanceTo(f.point3)) / 3;
+				//double dist = (start.distanceTo(f.point1) + start.distanceTo(f.point2) + start.distanceTo(f.point3)) / 3;
+				double dist = f.getAsList().stream().mapToDouble(p -> start.distanceTo(p)).average().getAsDouble(); 
 				if (closest == null || dist < closestDist){
 					closest = f;
 					closestDist = dist;
@@ -623,9 +624,9 @@ public class CanvasObject extends Observable implements Observer{
 		
 		for (Facet f : getData().facetList)
 		{
-			this.addPointFacetToMap(f.point1, f);
-			this.addPointFacetToMap(f.point2, f);
-			this.addPointFacetToMap(f.point3, f);
+			for (WorldCoord w : f.getAsList()){
+				this.addPointFacetToMap(w, f);
+			}
 		}
 
 	 	//remove anything where the facet group is highly divergent (will then use facet normal when shading)

@@ -8,6 +8,7 @@ public class TestTexture implements Texture {
 	private int repeatx = 8;
 	private int repeaty = 8;
 	private Color colour = new Color(200,0,0);
+	private int order = 0;
 	//private int repeatx = 1;
 	//private int repeaty = 1;
 	
@@ -55,4 +56,12 @@ public class TestTexture implements Texture {
 		return true;
 	}
 
+	@Override
+	public int getOrder() {
+		return order;
+	}
+
+	public void setOrder(int order) {
+		this.order = order;
+	}
 }

@@ -1,5 +1,6 @@
 package com.graphics.lib.lightsource;
 
+import com.graphics.lib.IntensityComponents;
 import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
 import com.graphics.lib.interfaces.IPointFinder;
@@ -60,6 +61,23 @@ public class DirectionalLightSource extends LightSource {
 
 	public void setPosition(IPointFinder position) {
 		this.position = position;
+	}
+	
+	/**
+	 * Get the amount of each colour component of the light illuminating the given point from this light source
+	 * 
+	 * @param p
+	 * @return
+	 */
+	@Override
+	public IntensityComponents getIntensityComponents(Point p)
+	{
+		Vector lightVector = this.getPosition().vectorToPoint(p).getUnitVector();
+		
+		double angleRad = this.getDirection().dotProduct(lightVector);
+		if (Math.toDegrees(Math.acos(angleRad)) > this.getLightConeAngle()) return new IntensityComponents();
+
+		return super.getIntensityComponents(p);
 	}
 
 }

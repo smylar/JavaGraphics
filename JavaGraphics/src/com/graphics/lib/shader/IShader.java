@@ -6,7 +6,7 @@ import java.util.Set;
 import com.graphics.lib.Facet;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.canvas.CanvasObject;
-import com.graphics.lib.lightsource.LightSource;
+import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.zbuffer.ScanLine;
 
 /**
@@ -44,12 +44,12 @@ public interface IShader {
 	 * 
 	 * @param ls
 	 */
-	public void setLightsources(Set<LightSource> ls);
+	public void setLightsources(Set<ILightSource> ls);
 	
 	/**
 	 * Shaders will usually need to be aware of light sources, this method will retrieve them
 	 * 
 	 * @return List of lightsources
 	 */
-	public Set<LightSource> getLightsources();
+	public Set<ILightSource> getLightsources();
 }
