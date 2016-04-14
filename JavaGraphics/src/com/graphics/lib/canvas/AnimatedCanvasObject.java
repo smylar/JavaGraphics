@@ -27,7 +27,7 @@ public class AnimatedCanvasObject<T extends CanvasObject> extends OrientableCanv
 
 	public void setSkeletonRootNode(SkeletonNode skeletonRootNode) {
 		//include skeleton in vertex list so they get transformed along with the object mesh
-		this.getVertexList().removeIf(v -> v.getTag().equals(SkeletonNode.POS_TAG));
+		this.getVertexList().removeIf(v -> v.hasTag(SkeletonNode.POS_TAG));
 		
 		if (skeletonRootNode != null){
 			this.getVertexList().addAll(skeletonRootNode.getAllNodePositions());

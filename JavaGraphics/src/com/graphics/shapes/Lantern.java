@@ -1,6 +1,7 @@
 package com.graphics.shapes;
 
 import java.util.Observable;
+import java.util.Observer;
 
 import com.graphics.lib.Facet;
 import com.graphics.lib.WorldCoord;
@@ -8,7 +9,7 @@ import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.lightsource.ObjectTiedLightSource;
 
-public class Lantern extends CanvasObject {
+public class Lantern extends CanvasObject implements Observer{
 	public Lantern(){
 		this.getVertexList().add(new WorldCoord(0, -10, 0)); //0
 		this.getVertexList().add(new WorldCoord(5, 0, 5)); //1
@@ -39,7 +40,6 @@ public class Lantern extends CanvasObject {
 	
 	@Override
 	public synchronized void update(Observable arg0, Object arg1) {
-		super.update(arg0, arg1);
 		if (arg0 instanceof LightSource){
 			this.setColour(((LightSource)arg0).getActualColour());
 		}

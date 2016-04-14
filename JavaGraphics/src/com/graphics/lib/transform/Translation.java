@@ -13,12 +13,12 @@ public class Translation extends Transform {
 	public Translation()
 	{}
 	
-	public Translation(Point p)
+	/*public Translation(Point p)
 	{
 		this.transX = p.x;
 		this.transY = p.y;
 		this.transZ = p.z;
-	}
+	}*/
 	
 	public Translation(double transX, double transY, double transZ)
 	{

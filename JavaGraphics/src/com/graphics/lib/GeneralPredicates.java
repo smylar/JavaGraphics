@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import com.graphics.lib.camera.Camera;
+import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.lightsource.ILightSource;
 
 public class GeneralPredicates {
@@ -55,8 +56,8 @@ public class GeneralPredicates {
 		};
 	}
 	
-	public static Predicate<WorldCoord> untagged()
+	public static Predicate<WorldCoord> untagged(CanvasObject obj)
 	{
-		return w -> w.getTag().length() == 0;
+		return w -> !w.hasTags() || (w.tagCount() == 1 && w.hasTag(obj.getObjectTag()));
 	}
 }

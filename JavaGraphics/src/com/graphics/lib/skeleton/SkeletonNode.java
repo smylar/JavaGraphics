@@ -19,7 +19,8 @@ public class SkeletonNode {
 	}
 
 	public void setPosition(WorldCoord position) {
-		position.setTag(POS_TAG);
+		//position.setTag(POS_TAG);
+		position.addTag(POS_TAG);
 		this.position = position;
 	}
 

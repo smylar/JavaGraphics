@@ -1,5 +1,8 @@
 package com.graphics.lib;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Representation of a 3D point in space
  * 
@@ -12,7 +15,7 @@ public class Point {
 	public double x = 0;
 	public double y = 0;
 	public double z = 0;
-	private String tag = "";
+	private Set<String> tags = new HashSet<String>();
 	
 	public Point(Point p)
 	{
@@ -29,13 +32,21 @@ public class Point {
 	}
 	
 	/**
-	 * Get the tag for this point
+	 * Does point have the specified tag
 	 * 
 	 * @see #setTag(String)
 	 * @return Tag
 	 */
-	public String getTag() {
-		return tag;
+	public boolean hasTag(String tag) {
+		return tags.contains(tag);
+	}
+	
+	public boolean hasTags(){
+		return !tags.isEmpty();
+	}
+	
+	public int tagCount(){
+		return tags.size();
 	}
 
 	/**
@@ -47,8 +58,12 @@ public class Point {
 	 * The tagged points are still transformed with the rest, it just allows other systems to identify the points it needs to deal with and handle them separately,
 	 * or for the object itself to ignore them in certain calculations e.g. Centre point calculation
 	 */
-	public void setTag(String tag) {
-		this.tag = tag;
+	public void addTag(String tag) {
+		this.tags.add(tag);
+	}
+	
+	public void removeTag(String tag) {
+		this.tags.remove(tag);
 	}
 	
 	/**
@@ -109,7 +124,7 @@ public class Point {
 		
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((tag == null) ? 0 : tag.hashCode());
+		result = prime * result +  tags.hashCode();
 		long temp;
 		temp = Double.doubleToLongBits(x);
 		result = prime * result + (int) (temp ^ (temp >>> 32));

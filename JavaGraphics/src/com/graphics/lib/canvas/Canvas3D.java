@@ -25,7 +25,6 @@ import com.graphics.lib.interfaces.IZBuffer;
 import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.shader.IShader;
-import com.graphics.lib.transform.Translation;
 import com.graphics.lib.zbuffer.ZBufferItem;
 
 /**
@@ -158,7 +157,7 @@ public class Canvas3D extends JPanel{
 	 * Register an object with this canvas so that it will draw it at a specified (world) location with a default shader
 	 * 
 	 * @param obj		Object to register
-	 * @param position	Position to draw it at (translates object in relation to the point 0,0,0 to the given point)
+	 * @param position	Position to draw the centre of the object at
 	 */
 	public void registerObject(CanvasObject obj, Point position){
 		this.registerObject(obj, position, null);
@@ -168,14 +167,13 @@ public class Canvas3D extends JPanel{
 	 * Register an object with this canvas so that it will draw it at a specified (world) location
 	 * 
 	 * @param obj		Object to register
-	 * @param position	Position to draw it at (translates object in relation to the point 0,0,0 to the given point)
+	 * @param position	Position to draw the centre of the object at
 	 * @param shader	Shader to draw the object with
 	 */
 	public void registerObject(CanvasObject obj, Point position, IShader shader)
 	{
 		if (this.shapes.containsKey(obj)) return;
-
-		obj.applyTransform(new Translation(position));
+		Utils.moveTo(obj, position);
 		this.shapes.put(obj, shader);
 	}
 	
@@ -215,7 +213,13 @@ public class Canvas3D extends JPanel{
 			});
 			processShapes.addAll(shadows);
 		}
+		//java.util.Date then = new java.util.Date();
+		processShapes.parallelStream().forEach(s -> {
+			this.processShape(s);
+		});
 		
+		//System.out.println(new java.util.Date().getTime() - then.getTime());
+		//then = new java.util.Date();
 		this.camera.doTransforms();
 		
 		processShapes.parallelStream().forEach(s -> {
@@ -223,15 +227,15 @@ public class Canvas3D extends JPanel{
 			this.slaves.forEach(sl -> sl.update(this, s));
 		});
 		
+		//System.out.println(new java.util.Date().getTime() - then.getTime());
+		//System.out.println("-----");
 		processShapes.parallelStream().forEach(s -> {
-			//processShapes.stream().forEach(s -> {
 				s.onDrawComplete();
 		});
 		
 		this.setOkToPaint(true);
 		this.repaint(); 
-		
-		//this.slaves.forEach(s -> s.update(this));
+
 		this.slaves.forEach(sl -> sl.update(this, null));		
 		
 	}
@@ -245,7 +249,6 @@ public class Canvas3D extends JPanel{
 	 */
 	private void processShape(CanvasObject obj, IZBuffer zBuf, IShader shader)
 	{
-		obj.applyTransforms();
 		if (obj.isVisible())
 		{
 			this.camera.getView(obj);
@@ -255,8 +258,18 @@ public class Canvas3D extends JPanel{
 		
 		for (CanvasObject child : new ArrayList<CanvasObject>(obj.getChildren()))
 		{
-			this.processShape(child, zBuf, shader);
-		};
+			this.processShape(child, zBuf, shapes.containsKey(child) ? getShader(child) : shader);
+		}
+	}
+	
+	private void processShape(CanvasObject obj)
+	{
+		obj.applyTransforms();
+		
+		for (CanvasObject child : new ArrayList<CanvasObject>(obj.getChildren()))
+		{
+			this.processShape(child);
+		}
 	}
 	
 	/**
@@ -331,21 +344,14 @@ public class Canvas3D extends JPanel{
 		//but that takes resources, so trying to remove as many as possible - using an ok to paint flag here
 		if (this.zBuffer == null || !this.isOkToPaint()) return;
 		super.paintComponent(g);
-		
-		/*this.zBuffer.getBuffer().values().stream().forEach(m -> {
-			for (ZBufferItem item : m.values()){
-				if (item == null || !item.isActive()) continue;
-				g.setColor(item.getColour());
-				g.drawLine(item.getX(), item.getY(), item.getX(), item.getY());
-			}
-		});*/
+		//java.util.Date then = new java.util.Date();
 		for (List<ZBufferItem> x : this.zBuffer.getBuffer()){
 			x.stream().filter(item -> item != null && item.isActive()).forEach(item -> {
 				g.setColor(item.getColour());
 				g.drawLine(item.getX(), item.getY(), item.getX(), item.getY());
 			});
 		}
-	
+		//System.out.println(new java.util.Date().getTime() - then.getTime());
 		for(BiConsumer<Canvas3D,Graphics> op : drawPlugins){
 			op.accept(this,g);
 		}

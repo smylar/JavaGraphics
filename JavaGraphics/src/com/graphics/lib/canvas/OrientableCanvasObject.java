@@ -12,28 +12,21 @@ import com.graphics.lib.orientation.OrientationTransform;
  *
  * @param <T> Type of the CanvasObject being wrapped
  */
-public class OrientableCanvasObject<T extends CanvasObject> extends CanvasObject implements IOrientable {
+public class OrientableCanvasObject<T extends CanvasObject> extends CanvasObjectWrapper<T> implements IOrientable {
 	public static final String ORIENTATION_TAG = "Orientation";
-	private T wrappedObject;
 	private IOrientation orientation;
 	private OrientationTransform oTrans = new OrientationTransform();
 	
 	public OrientableCanvasObject()
 	{
-		this.setData(getData());
+		super();
 	}
 	
 	public OrientableCanvasObject(T obj)
 	{
-		wrappedObject = obj;
-		this.setData(obj.getData());
+		super(obj);
 	}
 	
-	@Override
-	protected T getWrappedObject()
-	{
-		return wrappedObject;
-	}
 	
 	@Override
 	public IOrientation getOrientation() {		
@@ -43,7 +36,7 @@ public class OrientableCanvasObject<T extends CanvasObject> extends CanvasObject
 	@Override
 	public void setOrientation(IOrientation orientation) {
 		if (this.orientation != null){
-			this.getVertexList().removeIf(v -> v.getTag().equals(ORIENTATION_TAG));
+			this.getVertexList().removeIf(v -> v.hasTag(ORIENTATION_TAG));
 		}
 		
 		this.orientation = orientation;

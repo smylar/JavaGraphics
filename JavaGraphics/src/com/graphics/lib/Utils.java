@@ -10,6 +10,7 @@ import com.graphics.lib.interfaces.ILightIntensityFinder;
 import com.graphics.lib.interfaces.IVertexNormalFinder;
 import com.graphics.lib.interfaces.IZBuffer;
 import com.graphics.lib.transform.MovementTransform;
+import com.graphics.lib.transform.Translation;
 import com.graphics.lib.zbuffer.ZBuffer;
 
 
@@ -230,5 +231,10 @@ public class Utils {
 				(targetVec.z * speed) + ((target.getCentre().z - proj.getCentre().z) / time)
 				).getUnitVector();
 		
+	}
+	
+	public static void moveTo(CanvasObject obj, Point p){
+		Point anchor = obj.getAnchorPoint();
+		obj.applyTransform(new Translation(p.x - anchor.x, p.y - anchor.y, p.z - anchor.z));
 	}
 }

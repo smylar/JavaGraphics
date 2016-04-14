@@ -18,6 +18,7 @@ import javax.swing.SwingUtilities;
 
 
 
+
 import com.graphics.lib.Facet;
 import com.graphics.lib.ObjectControls;
 import com.graphics.lib.Point;
@@ -139,7 +140,7 @@ public class GraphicsTest extends JFrame {
 		slave.setLocation(750, 50);
 		
 		CanvasObject camcube = new Cuboid(20,20,20);
-		cnv.registerObject(camcube, new Point(1515, 300, 400), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.FLAT));
+		cnv.registerObject(camcube, new Point(1560, 200, 350), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.FLAT));
 		
 		PlugableCanvasObject<?> whale = new PlugableCanvasObject<Whale>(new Whale()); 
 		whale.setColour(Color.cyan);
@@ -151,7 +152,7 @@ public class GraphicsTest extends JFrame {
 		cnv.registerObject(flap, new Point(1000, 500, 200), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
 		
 		ViewAngleCamera slaveCam = new ViewAngleCamera(new SimpleOrientation(OrientableCanvasObject.ORIENTATION_TAG));
-		slaveCam.setPosition(new Point(1500, 300, 400));
+		slaveCam.setPosition(new Point(1550, 200, 350));
 		slaveCam.addTransform("INIT", new PanCamera<YRotation>(YRotation.class, -90));
 		slaveCam.doTransforms();
 		SlaveCanvas3D scnv = new SlaveCanvas3D(slaveCam);
@@ -169,7 +170,7 @@ public class GraphicsTest extends JFrame {
 		PlugableCanvasObject<Torus> torus = new PlugableCanvasObject<Torus>(new Torus(50,50,20));
 		torus.setColour(new Color(250, 250, 250));
 		//torus.setLightIntensityFinder(Utils.getShadowLightIntensityFinder(() -> { return cnv.getShapes();})); //for testing shadows falling on the torus
-		cnv.registerObject(torus, new Point(200,200,400), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
+		cnv.registerObject(torus, new Point(200,200,450), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
 		Transform torust1 = new RepeatingTransform<Rotation<?>>(new Rotation<YRotation>(YRotation.class, 3), 60);
 		Transform torust2 = new RepeatingTransform<Rotation<?>>(new Rotation<XRotation>(XRotation.class, 3), 60);
 		SequenceTransform torust = new SequenceTransform();
@@ -180,7 +181,8 @@ public class GraphicsTest extends JFrame {
 		//torus.setCastsShadow(false);
 		
 		PlugableCanvasObject<TexturedCuboid> cube = new PlugableCanvasObject<TexturedCuboid>(new TexturedCuboid(200,200,200));
-		cnv.registerObject(cube, new Point(500,500,450), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.TEXGORAUD));
+		cnv.registerObject(cube, new Point(500,500,500), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.TEXGORAUD));
+		//cnv.registerObject(cube, new Point(500,500,500), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
 		Transform cubet2 = new RepeatingTransform<Rotation<?>>(new Rotation<ZRotation>(ZRotation.class, 3), 30);
 		cube.addTransformAboutCentre(cubet2);
 		cube.addFlag(Events.STICKY);
@@ -196,7 +198,7 @@ public class GraphicsTest extends JFrame {
 		PlugableCanvasObject<Sphere> sphere = new PlugableCanvasObject<Sphere>(new Sphere(100,15));
 		sphere.setColour(new Color(255, 255, 0));
 		sphere.addFlag(Events.EXPLODE_PERSIST);
-		cnv.registerObject(sphere, new Point(500,200,400), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
+		cnv.registerObject(sphere, new Point(500,200,450), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
 		
 		for (int i = 0; i < sphere.getFacetList().size() ; i++)
 		{
@@ -281,7 +283,7 @@ public class GraphicsTest extends JFrame {
 				if (key.getKeyChar() == 'l') l4.toggle();
 				
 				if (key.getKeyChar() == 'r'){
-					Laser laser = new Laser(1000);
+					PlugableCanvasObject<Laser> laser = new PlugableCanvasObject<Laser>(new Laser(1000));
 					laser.addFlag("PHASED");
 					cam.addCameraRotation(laser);
 					Point pos = new Point(cam.getPosition());
@@ -290,27 +292,30 @@ public class GraphicsTest extends JFrame {
 					pos.y += down.y * 15;
 					pos.z += down.z * 15;
 					cnv.registerObject(laser, pos);
+					laser.observeAndMatch(ship);
 					
-					for (CanvasObject obj : getObjects.get()){ //TODO would like an object list for those on screen only here
-						//Facet f = obj.getIntersectedFacet(pos, cam.getOrientation().getForward(), false);
-						for (Facet f : obj.getIntersectedFacets(pos, cam.getOrientation().getForward()))
-						{
-							//if (f != null && (f.point1.getTransformed(cam).z + f.point2.getTransformed(cam).z + f.point3.getTransformed(cam).z)/3 < laser.getLength() ){
-							if (f != null && f.getAsList().stream().mapToDouble(p -> p.getTransformed(cam).z).average().getAsDouble() < laser.getLength() ){
-		
-								//f.setColour(Color.DARK_GRAY);
-								f.setMaxIntensity(0.15);
-								//as an aspiration - create dynamic texture map for laser 'holes'
-							}
-						}
-					}
-					/*laser = new Laser();
-					cam.addCameraRotation(laser);
-					pos = new Point(cam.getPosition());
-					pos.x -= down.x * 15;
-					pos.y -= down.y * 15;
-					pos.z -= down.z * 15;
-					cnv.registerObject(laser, pos);*/
+					laser.registerPlugin("LASER", 
+							new IPlugin<PlugableCanvasObject<?>, Void>(){
+
+								@Override
+								public Void execute(PlugableCanvasObject<?> obj) {
+									Laser l = obj.getObjectAs(Laser.class);
+									if (l != null){
+										for (CanvasObject screenObjects : getObjects.get()){ //TODO would like an object list for those on screen only here
+											for (Facet f : screenObjects.getIntersectedFacets(l.getAnchorPoint(), cam.getOrientation().getForward()))
+											{
+												if (f != null && f.getAsList().stream().mapToDouble(p -> p.getTransformed(cam).z).average().getAsDouble() < l.getLength() ){
+							
+													//f.setColour(Color.DARK_GRAY);
+													f.setMaxIntensity(f.getMaxIntensity() - 0.15);
+													//as an aspiration - create dynamic texture map for laser 'holes'
+												}
+											}
+										}
+									}
+									return null;
+								}
+					},true);
 				}
 				
 				if (key.getKeyChar() == 'f'){
@@ -574,7 +579,7 @@ public class GraphicsTest extends JFrame {
 			double minY = pt.getTransformed(cam).y;
 			for (WorldCoord p : selectedObject.getVertexList())
 			{
-				if (p.getTag().length() > 0) continue;
+				if (p.hasTags()) continue;
 				if (p.getTransformed(cam).x > maxX) maxX = p.getTransformed(cam).x;
 				if (p.getTransformed(cam).x < minX) minX = p.getTransformed(cam).x;
 				if (p.getTransformed(cam).y > maxY) maxY = p.getTransformed(cam).y;

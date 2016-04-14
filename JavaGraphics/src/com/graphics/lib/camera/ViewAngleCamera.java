@@ -28,30 +28,32 @@ public class ViewAngleCamera extends Camera {
 	@Override
 	public void getViewSpecific(CanvasObject obj) {
 		
-		obj.getVertexList().parallelStream().forEach(p -> {
-			p.resetTransformed(this);
-		});
-		
-		this.alignShapeToCamera(obj);
-		
-		Point position = this.getPosition();
-		
-		obj.getVertexList().parallelStream().filter(v -> v.getTransformed(this).z < position.z-1).forEach(p -> {
-			this.doPointBehind(obj, p, p.getTransformed(this), position);
-		});
-		
-		obj.getVertexList().parallelStream().forEach(p -> {
+		synchronized(obj.getVertexList()){
+			obj.getVertexList().parallelStream().forEach(p -> {
+				p.resetTransformed(this);
+			});
 			
-			Point trans = p.getTransformed(this);
-			double zed = trans.z - position.z;
-
-			if (zed < 1 && zed > -1) zed = 1;
+			this.alignShapeToCamera(obj);
 			
-			if (zed<0){
-				getCameraCoords(trans, position);
-			}
-			else doPointInFront(trans, zed);
-		});
+			Point position = this.getPosition();
+			
+			obj.getVertexList().parallelStream().filter(v -> v.getTransformed(this).z < position.z-1).forEach(p -> {
+				this.doPointBehind(obj, p, p.getTransformed(this), position);
+			});
+			
+			obj.getVertexList().parallelStream().forEach(p -> {
+				
+				Point trans = p.getTransformed(this);
+				double zed = trans.z - position.z;
+	
+				if (zed < 1 && zed > -1) zed = 1;
+				
+				if (zed<0){
+					getCameraCoords(trans, position);
+				}
+				else doPointInFront(trans, zed);
+			});
+		}
 	}
 	
 	private void getCameraCoords(Point p, Point position){

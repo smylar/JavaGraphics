@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Stream;
 
 import com.graphics.lib.Facet;
 import com.graphics.lib.GeneralPredicates;
@@ -50,11 +49,11 @@ public class ZBuffer implements IZBuffer{
 	@Override
 	public void Add(CanvasObject obj, IShader shader, Camera c, double horizon)
 	{
-		Stream<Facet> facetStream = obj.getFacetList().parallelStream();
+		/*Stream<Facet> facetStream = obj.getFacetList().parallelStream();
 		if (!obj.isProcessBackfaces()){
 			facetStream = facetStream.filter(GeneralPredicates.isFrontface(c));
-		}
-		facetStream.filter(GeneralPredicates.isOverHorizon(c, horizon).negate()).forEach(f ->{
+		}*/
+		obj.getFacetList().parallelStream().filter(f -> (obj.isProcessBackfaces() || GeneralPredicates.isFrontface(c).test(f)) && !GeneralPredicates.isOverHorizon(c, horizon).test(f)).forEach(f ->{
 			f.setFrontFace(GeneralPredicates.isFrontface(c).test(f));
 			Add(f, obj, shader, c);
 		});
@@ -66,7 +65,7 @@ public class ZBuffer implements IZBuffer{
 		if (zBuffer == null) return;
 		
 		List<WorldCoord> points = facet.getAsList();
-		if (points.stream().allMatch(p -> p.getTransformed(c).z <= 0)) return;
+		if (points.stream().allMatch(p -> p.getTransformed(c).z <= 1)) return;
 		
 		//not sure about these though - it is possible to have points out of range either side of the screen so something should be drawn - but performance likely to be better (when significant objects are off screen)
 		//if (points.stream().allMatch(p -> p.getTransformed(c).x < 0 || p.getTransformed(c).x > this.dispWidth)) return;
@@ -139,27 +138,15 @@ public class ZBuffer implements IZBuffer{
 	}
 	
 	@Override
-	//public Map<Integer, HashMap<Integer, ZBufferItem>> getBuffer() {
 	public List<List<ZBufferItem>> getBuffer() {
 		return zBuffer;
 	}
 
 	private void addToBuffer(CanvasObject parent, Integer x, Integer y, double z, Color colour)
-	//private synchronized void addToBuffer(Integer x, Integer y, double z, Color colour)
 	{	
 		if (z < 0) return;
 		
-		/*if (!this.zBuffer.containsKey(x))
-		{
-			this.zBuffer.put(x, new HashMap<Integer, ZBufferItem>());
-		}*/
-		
 		ZBufferItem bufferItem = this.zBuffer.get(x).get(y);
-		
-		/*if (bufferItem == null){
-			bufferItem = new ZBufferItem(x, y);
-			this.zBuffer.get(x).put(y, bufferItem);
-		}*/
 		
 		bufferItem.add(parent, z, colour);
 	}
@@ -255,16 +242,11 @@ public class ZBuffer implements IZBuffer{
 		{
 			this.dispHeight = height;
 			this.dispWidth = width;
-			//zBuffer = new HashMap<Integer, HashMap<Integer,ZBufferItem>>();
+
 			zBuffer = new ArrayList<List<ZBufferItem>>();
 			
 			for (int x = 0 ; x < width + 1 ; x++){
-				//HashMap<Integer,ZBufferItem> map = new HashMap<Integer,ZBufferItem>();
 				ArrayList<ZBufferItem> list = new ArrayList<ZBufferItem>();
-				//zBuffer.put(x, map);
-				//for (int y = 0 ; y < height + 1 ; y++){
-				//	map.put(y, new ZBufferItem(x, y));
-				//}
 				for (int y = 0 ; y < height + 1 ; y++){
 					list.add(new ZBufferItem(x, y));
 				}
@@ -275,11 +257,6 @@ public class ZBuffer implements IZBuffer{
 
 	@Override
 	public void clear() {
-		/*this.zBuffer.values().stream().forEach(m -> {
-			for (ZBufferItem item : m.values()){
-				if (item.isActive()) item.clear();
-			}
-		});*/
 		this.zBuffer.parallelStream().forEach(m -> {
 			for (ZBufferItem item : m){
 				if (item.isActive()) item.clear();

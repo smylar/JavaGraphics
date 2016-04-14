@@ -9,7 +9,7 @@ import com.graphics.shapes.Cylinder;
 
 public class Laser extends Cylinder {
 
-	private int tickLife = 8;
+	private int tickLife = 15;
 	private int currentTick = 0;
 	private double length = 1000;
 	private Cylinder subCylinder;
@@ -35,6 +35,7 @@ public class Laser extends Cylinder {
 		this.addTransform(new Rotation<XRotation>(XRotation.class, 90));
 		//this.addTransform(new Translation(0,0,-10));
 		this.applyTransforms();
+		this.setAnchorPoint(this.getVertexList().get(0));
 	}
 
 	public int getTickLife() {

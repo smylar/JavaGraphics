@@ -46,7 +46,7 @@ public class PluginLibrary {
 			double speed = baseVector.getSpeed();
 			baseVector = baseVector.getUnitVector();
 			
-			List<WorldCoord> vertices = obj.getVertexList().stream().filter(GeneralPredicates.untagged()).collect(Collectors.toList());//only get untagged points (tagged points usually hidden and have special purpose)
+			List<WorldCoord> vertices = obj.getVertexList().stream().filter(GeneralPredicates.untagged(obj)).collect(Collectors.toList());//only get untagged points (tagged points usually hidden and have special purpose)
 			for (int i = 0 ; i < density ; i++)
 			{
 				int index = (int)Math.round(Math.random() * (vertices.size() - 1));

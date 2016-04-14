@@ -15,34 +15,23 @@ import com.graphics.lib.plugins.IPlugin;
  *
  * @param <T> Type of the CanvasObject being wrapped
  */
-public class PlugableCanvasObject<T extends CanvasObject> extends CanvasObject {
-	private T wrappedObject;
+public class PlugableCanvasObject<T extends CanvasObject> extends CanvasObjectWrapper<T> {
 	private Map<String,IPlugin<PlugableCanvasObject<?>,?>> plugins = new HashMap<String,IPlugin<PlugableCanvasObject<?>,?>>();
 	private List<String> afterDrawPlugins = new ArrayList<String>();
 	private List<String> singleAfterDrawPlugins = new ArrayList<String>();
 	
-	
-	public PlugableCanvasObject()
-	{
-		this.setData(getData());
+	public PlugableCanvasObject() {
+		super();
 	}
 	
-	public PlugableCanvasObject(T obj)
-	{
-		wrappedObject = obj;
-		this.setData(obj.getData());
+	public PlugableCanvasObject(T obj) {
+		super(obj);
 	}
-	
-	@Override
-	protected T getWrappedObject()
-	{
-		return wrappedObject;
-	}
-	
+
 	@Override
 	public void onDrawComplete()
 	{
-		if (wrappedObject != null) wrappedObject.onDrawComplete();
+		if (this.getWrappedObject() != null) this.getWrappedObject().onDrawComplete();
 		else super.onDrawComplete();
 		
 		List<String> pluginList = new ArrayList<String>(this.afterDrawPlugins);
@@ -57,12 +46,6 @@ public class PlugableCanvasObject<T extends CanvasObject> extends CanvasObject {
 			this.executePlugin(key);
 		}
 		this.singleAfterDrawPlugins.clear();
-		
-		List<CanvasObject> children = new ArrayList<CanvasObject>(this.getChildren());
-		for (CanvasObject child : children)
-		{
-			child.onDrawComplete();
-		}
 	}
 	
 	public void registerSingleAfterDrawPlugin(String key, IPlugin<PlugableCanvasObject<?>,?> plugin)

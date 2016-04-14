@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
-import java.util.Observer;
+
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collector;
@@ -46,12 +46,12 @@ import com.graphics.lib.transform.Translation;
  * @author Paul Brandon
  *
  */
-public class CanvasObject extends Observable implements Observer{
+public class CanvasObject extends Observable{
 	private static int nextId = 0;
 	
 	private BaseData data;
 	private int objectId = nextId++;
-	private Set<String> flags = new HashSet<String>();
+	private String objTag = "obj" + objectId;
 	
 	/**
 	 * Get this object as the given class as long as that class is found in the wrapped object hierarchy
@@ -118,19 +118,32 @@ public class CanvasObject extends Observable implements Observer{
 		this.data = data;
 	}
 
+	public final String getObjectTag(){
+		return getBaseObject().objTag;
+	}
+	
+	public final void setAnchorPoint(Point p)
+	{
+		this.getData().anchorPoint = p;
+	}
+	
+	public Point getAnchorPoint(){
+		return this.getData().anchorPoint == null ? this.getCentre() : this.getData().anchorPoint;
+	}
+	
 	public final void addFlag(String flag)
 	{
-		this.flags.add(flag);
+		getData().flags.add(flag);
 	}
 	
 	public final void removeFlag(String flag)
 	{
-		this.flags.remove(flag);
+		getData().flags.remove(flag);
 	}
 	
 	public final boolean hasFlag(String flag)
 	{
-		return this.flags.contains(flag);
+		return getData().flags.contains(flag);
 	}
 	
 	public final List<CanvasObject> getChildren() {
@@ -160,6 +173,10 @@ public class CanvasObject extends Observable implements Observer{
 
 	public final boolean isObserving(){
 		return getData().observing != null;
+	}
+	
+	public final CanvasObject getObserving(){
+		return getData().observing;
 	}
 	
 	public final boolean getCastsShadow() {
@@ -250,7 +267,7 @@ public class CanvasObject extends Observable implements Observer{
 	 */
 	public final void applyCameraTransform(Transform transform, Camera c)
 	{
-		/*transform.doTransform(getData().vertexList.stream().collect(Collector.of(
+		/*transform.doTransform(getBaseData().vertexList.stream().collect(Collector.of(
 				ArrayList::new,
 				(trans, world) -> trans.add(world.getTransformed(c)),
 				(left, right) -> {left.addAll(right); return left;},
@@ -262,11 +279,23 @@ public class CanvasObject extends Observable implements Observer{
 		transform.doTransform(getData().vertexList.stream().map(v -> v.getTransformed(c)).collect(Collectors.toList()));
 	}
 	
+	/**
+	 * Check if any transforms are present in the objects transform list
+	 * @see Transform
+	 * 
+	 * @return <code>True</code> if transform(s) present, <code>False</code> otherwise
+	 */
 	public final boolean hasTransforms()
 	{
 		return getData().transforms.size() > 0;
 	}
 	
+	/**
+	 * Check if any transforms with a specified name are present in the objects transform list
+	 * @see Transform
+	 * 
+	 * @return <code>True</code> if transform(s) present, <code>False</code> otherwise
+	 */
 	public final boolean hasNamedTransform(String name){
 		if (name == null) return false;
 		return getData().transforms.stream().anyMatch(t -> name.equals(t.getName()));
@@ -362,14 +391,14 @@ public class CanvasObject extends Observable implements Observer{
 		if (this.getBaseObject() != this) return this.getBaseObject().getCentre();
 		
 		//default, average of all un-tagged points
-		/*Point pt = getData().vertexList.get(0);
+		/*Point pt = getBaseData().vertexList.get(0);
 		double maxX = pt.x;
 		double maxY = pt.y;
 		double maxZ = pt.z;
 		double minX = pt.x;
 		double minY = pt.y;
 		double minZ = pt.z;
-		for (Point p : getData().vertexList)
+		for (Point p : getBaseData().vertexList)
 		{
 			if (p.getTag().length() > 0) continue;
 			if (p.x > maxX) maxX = p.x;
@@ -384,7 +413,7 @@ public class CanvasObject extends Observable implements Observer{
 		
 		//playing with collectors
 		CentreFinder centre = getData().vertexList.stream()
-				.filter(GeneralPredicates.untagged())
+				.filter(GeneralPredicates.untagged(this))
 				.collect(CentreFinder::new, CentreFinder::accept, CentreFinder::combine);
 		
 		return centre.result();
@@ -446,22 +475,32 @@ public class CanvasObject extends Observable implements Observer{
 	}
 	
 	/**
-	 * Observe another object and match its movements, observed item will call update in this item via the Observer/Observable interface when it changes
+	 * Observe another object and match its movements, <s>observed item will call update in this item via the Observer/Observable interface when it changes</s>
+	 * <br/>
+	 * Changed to add objects vertex list to the parent, avoids issues such as double counting when reusing a transform
+	 * <br/>
 	 * <br/>
 	 * Note this object will be made a child of that it is observing so that it is always processed after the observed item
 	 * 
 	 * @param o
 	 */
-	public final void observeAndMatch (CanvasObject o){
+	public final synchronized void observeAndMatch (CanvasObject o){
 		getData().observing = o;
-		o.addObserver(this);
-		o.getChildren().add(this);
+		synchronized(o.getVertexList()){
+			o.getChildren().add(this);
+			this.getVertexList().forEach(v -> v.addTag(this.getObjectTag()));
+			o.getVertexList().addAll(this.getVertexList());
+		}
+		
 	}
 	
-	public final void stopObserving(){
+	public final synchronized void stopObserving(){
 		if (getData().observing != null){
-			getData().observing.deleteObserver(this);
 			getData().observing.getChildren().remove(this);
+			synchronized(getData().observing.getVertexList()){
+				getData().observing.getVertexList().removeIf(v -> v.hasTag(this.getObjectTag()));
+				this.getVertexList().forEach(v -> v.removeTag(this.getObjectTag()));
+			}
 			getData().observing = null;
 		}
 	}
@@ -588,7 +627,7 @@ public class CanvasObject extends Observable implements Observer{
 	{
 		if (this.getBaseObject() != this) return this.getBaseObject().getMaxExtent();
 		Point centre = this.getCentre();
-		return this.getVertexList().stream().filter(GeneralPredicates.untagged()).map(v -> v.distanceTo(centre))
+		return this.getVertexList().stream().filter(GeneralPredicates.untagged(this)).map(v -> v.distanceTo(centre))
 				.reduce(0d, (a,b) -> b > a ? b : a); //playing with reduce, could equally just use max() instead of reduce
 	}
 	
@@ -596,8 +635,15 @@ public class CanvasObject extends Observable implements Observer{
 	 * This method will be executed once all draw operations (across all objects) are complete
 	 */
 	public void onDrawComplete(){
-		getData().children.removeIf(c -> c.isDeleted());
+		this.getChildren().removeIf(c -> c.isDeleted());
 		if (this.getBaseObject() != this) this.getBaseObject().onDrawComplete();
+		else{
+			List<CanvasObject> children = new ArrayList<CanvasObject>(this.getChildren());
+			for (CanvasObject child : children)
+			{
+				child.onDrawComplete();
+			}
+		}
 	}
 	
 	public ILightIntensityFinder getLightIntensityFinder()
@@ -653,17 +699,6 @@ public class CanvasObject extends Observable implements Observer{
 		}
 		getData().vertexFacetMap.get(p).add(f);
 	}
-
-	@Override
-	public synchronized void update(Observable arg0, Object arg1) {
-		if (this != arg0 && arg1 instanceof Transform)
-		{
-			getData().vertexList.stream().forEach(p -> {
-				((Transform) arg1).doTransformSpecific().accept(p);
-			});
-		}
-		
-	}
 	
 	public void setBaseIntensity(double intensity)
 	{
@@ -711,26 +746,25 @@ public class CanvasObject extends Observable implements Observer{
 			return false;
 		return true;
 	}
-
+	
 	protected class BaseData
 	{
-		protected List<WorldCoord> vertexList = new ArrayList<WorldCoord>();
-		protected List<Facet> facetList = new ArrayList<Facet>();
-		protected Color colour = new Color(255, 0, 0);
-		protected List<Transform> transforms = new ArrayList<Transform>();
-		protected List<CanvasObject> children = Collections.synchronizedList(new ArrayList<CanvasObject>());
-		protected Map<Point, ArrayList<Facet>> vertexFacetMap;
-		protected boolean processBackfaces = false;
-		protected boolean isVisible = true;
-		protected boolean isDeleted = false;
-		protected boolean castsShadow = true;
+		private List<WorldCoord> vertexList = Collections.synchronizedList(new ArrayList<WorldCoord>());
+		private List<Facet> facetList = new ArrayList<Facet>();
+		private Color colour = new Color(255, 0, 0);
+		private List<Transform> transforms = new ArrayList<Transform>();
+		private List<CanvasObject> children = Collections.synchronizedList(new ArrayList<CanvasObject>());
+		private Map<Point, ArrayList<Facet>> vertexFacetMap;
+		private boolean processBackfaces = false;
+		private boolean isVisible = true;
+		private boolean isDeleted = false;
+		private boolean castsShadow = true;
 		//TODO - is solid or phased when invisible?
-		protected boolean deleteAfterTransforms = false;
-		protected CanvasObject observing = null;
-		//public Utils.LightIntensityFinderEnum liFinder = Utils.LightIntensityFinderEnum.DEFAULT;
-		public ILightIntensityFinder liFinder = Utils.getLightIntensityFinder(Utils.LightIntensityFinderEnum.DEFAULT);
-		
+		private boolean deleteAfterTransforms = false;
+		private CanvasObject observing = null;
+		private Point anchorPoint = null;
+		private Set<String> flags = new HashSet<String>();
+		public ILightIntensityFinder liFinder = Utils.getLightIntensityFinder(Utils.LightIntensityFinderEnum.DEFAULT);	
 		public Utils.VertexNormalFinderEnum vnFinder = Utils.VertexNormalFinderEnum.DEFAULT; 
-		//TODO this class as POJO
 	}
 }
