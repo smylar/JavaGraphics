@@ -45,7 +45,8 @@ public class Vector {
 	
 	/**
 	 * The dot product of 2 vectors equals the cosine of the angle between them
-	 * 
+	 * <br/>
+	 * N.B. Must be unit vectors
 	 * @param v2
 	 * @return Cosine of angle between vectors
 	 */

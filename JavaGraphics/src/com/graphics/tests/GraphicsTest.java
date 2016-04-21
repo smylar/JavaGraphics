@@ -16,9 +16,6 @@ import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 
-
-
-
 import com.graphics.lib.Facet;
 import com.graphics.lib.ObjectControls;
 import com.graphics.lib.Point;
@@ -47,7 +44,6 @@ import com.graphics.lib.plugins.PluginLibrary;
 import com.graphics.lib.shader.ShaderFactory;
 import com.graphics.lib.transform.*;
 import com.graphics.lib.zbuffer.ZBuffer;
-import com.graphics.shapes.Torus;
 import com.sound.ClipLibrary;
 
 public class GraphicsTest extends JFrame {
@@ -144,7 +140,6 @@ public class GraphicsTest extends JFrame {
 		
 		PlugableCanvasObject<?> whale = new PlugableCanvasObject<Whale>(new Whale()); 
 		whale.setColour(Color.cyan);
-		//whale.applyTransform(new Rotation<YRotation>(YRotation.class, 45));
 		cnv.registerObject(whale, new Point(1515, 300, 400), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
 		
 		FlapTest flap = new FlapTest(); 
@@ -167,7 +162,8 @@ public class GraphicsTest extends JFrame {
 		ship.setOrientation(new SimpleOrientation(OrientableCanvasObject.ORIENTATION_TAG));
 		cnv.registerObject(ship, new Point(350, 350, -50), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
 		
-		PlugableCanvasObject<Torus> torus = new PlugableCanvasObject<Torus>(new Torus(50,50,20));
+		//PlugableCanvasObject<Torus> torus = new PlugableCanvasObject<Torus>(new Torus(50,50,20));
+		PlugableCanvasObject<Gate> torus = new PlugableCanvasObject<Gate>(new Gate(50,50,20, () -> {return cam.getPosition();} ));
 		torus.setColour(new Color(250, 250, 250));
 		//torus.setLightIntensityFinder(Utils.getShadowLightIntensityFinder(() -> { return cnv.getShapes();})); //for testing shadows falling on the torus
 		cnv.registerObject(torus, new Point(200,200,450), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
@@ -179,6 +175,11 @@ public class GraphicsTest extends JFrame {
 		torus.addTransformAboutCentre(torust);
 		torus.addFlag(Events.EXPLODE_PERSIST);
 		//torus.setCastsShadow(false);
+		
+		torus.getObjectAs(Gate.class).setPassThroughPlugin((obj) -> {
+			obj.setColour(Color.magenta);
+			return null;
+		});
 		
 		PlugableCanvasObject<TexturedCuboid> cube = new PlugableCanvasObject<TexturedCuboid>(new TexturedCuboid(200,200,200));
 		cnv.registerObject(cube, new Point(500,500,500), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.TEXGORAUD));
@@ -212,7 +213,7 @@ public class GraphicsTest extends JFrame {
 		wall.setColour(new Color(240, 240, 240));
 		wall.setLightIntensityFinder(Utils.getShadowLightIntensityFinder(() -> { return cnv.getShapes();}));
 		wall.setVisible(false);
-		cnv.registerObject(wall, new Point(300,0,700), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
+		cnv.registerObject(wall, new Point(350,350,700), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
 		
 		ICanvasObjectList getObjects = () -> {return cnv.getShapes().stream().filter(s -> s.isVisible() && !s.isDeleted() && !s.hasFlag("PHASED")).collect(Collectors.toList());};
 		
@@ -295,10 +296,7 @@ public class GraphicsTest extends JFrame {
 					laser.observeAndMatch(ship);
 					
 					laser.registerPlugin("LASER", 
-							new IPlugin<PlugableCanvasObject<?>, Void>(){
-
-								@Override
-								public Void execute(PlugableCanvasObject<?> obj) {
+							(obj) -> {
 									Laser l = obj.getObjectAs(Laser.class);
 									if (l != null){
 										for (CanvasObject screenObjects : getObjects.get()){ //TODO would like an object list for those on screen only here
@@ -314,7 +312,6 @@ public class GraphicsTest extends JFrame {
 										}
 									}
 									return null;
-								}
 					},true);
 				}
 				

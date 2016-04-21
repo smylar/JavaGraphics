@@ -27,9 +27,10 @@ public class GeneralPredicates {
 	{
 		return f -> {		
 			List<WorldCoord> points = f.getAsList();
-			//N.B. this will result in whole facet being declared out of the light even if just point1 is not in the light
-			IntensityComponents intComps = l.getIntensityComponents(points.get(0));
-			if (intComps.hasNoIntensity()) return false;
+			
+			//IntensityComponents intComps = l.getIntensityComponents(points.get(0));
+			//if (intComps.hasNoIntensity()) return false;
+			if (points.stream().allMatch(p -> l.getIntensityComponents(p).hasNoIntensity())) return false; 
 			
 			Vector lightVector = l.getPosition().vectorToPoint(points.get(0)).getUnitVector();
 			

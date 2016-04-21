@@ -15,7 +15,6 @@ import com.graphics.lib.transform.YRotation;
 
 public class Torus extends CanvasObject{
 	private int points = 0;
-	private double tubeRadius;
 	private WorldCoord centre;
 
 	public Torus (double tubeRadius, double holeRadius)
@@ -28,7 +27,6 @@ public class Torus extends CanvasObject{
 		List<Point> circle = new ArrayList<Point>();
 		if (360 % arcProgression != 0) arcProgression = 18;
 		int points = 360/arcProgression;
-		this.tubeRadius = tubeRadius;
 		Point circleCentre = new Point(tubeRadius,holeRadius+(tubeRadius*2),tubeRadius);
 		
 		//make an initial circle 2d circle in x-z plane (y doesn't change)
@@ -112,6 +110,30 @@ public class Torus extends CanvasObject{
 		this.getVertexList().add(centre);//centre point
 	}
 	
+	public double getActualTubeRadius(){
+		//scaling transforms may have been applied
+		int index = points * points; //start of tube centre points
+		WorldCoord tc = this.getVertexList().get(index);
+		
+		return tc.distanceTo(this.getVertexList().get(0));
+	}
+	
+	public double getActualHoleRadius(){
+		//scaling transforms may have been applied
+		return this.centre.distanceTo(this.getVertexList().get(0)) - (getActualTubeRadius()*2);
+	}
+	
+	public double getActualRadius(){
+		//scaling transforms may have been applied
+		return this.centre.distanceTo(this.getVertexList().get(0));
+	}
+	
+	public Facet getHolePlane(){
+		int startIndex = points * points;
+		int incr = points / 3;
+		return new Facet(this.getVertexList().get(startIndex), this.getVertexList().get(startIndex+incr), this.getVertexList().get(startIndex+incr+incr));
+	}
+	
 	@Override
 	public Point getCentre()
 	{
@@ -135,12 +157,26 @@ public class Torus extends CanvasObject{
 	@Override
 	public boolean isPointInside(Point p)
 	{
-		for (int i = points*points ; i < this.getVertexList().size() - 1 ; i++)
+		/*for (int i = points*points ; i < this.getVertexList().size() - 1 ; i++)
 		{
-			if (this.getVertexList().get(i).distanceTo(p) < this.tubeRadius) return true;
+			//TODO this isn't quite right - this actually checks bubbles within the tube (centred on the tube centre points) and may not overlap enough
+			if (this.getVertexList().get(i).distanceTo(p) < this.getActualTubeRadius()) return true;
 		}
 		
-		return false;
+		return false;*/
+		
+		double distFromCentre = this.centre.distanceTo(p);
+		if (distFromCentre > this.getActualRadius() || this.centre.distanceTo(p) < this.getActualHoleRadius()) return false;
+		
+		double distFromHolePlane = this.getHolePlane().getDistanceFromFacetPlane(p);
+		if (distFromHolePlane > this.getActualTubeRadius()) return false;
+		
+		//now just to check within the circular area of the tube
+		double pX = Math.sqrt(Math.pow(distFromCentre, 2) - Math.pow(distFromHolePlane, 2));
+		double circleX = this.getActualRadius() - this.getActualTubeRadius();
+		//pY would be distFromHolePlane and circleY = 0
+		
+		return Math.pow(pX - circleX, 2) + Math.pow(distFromHolePlane, 2) < Math.pow(this.getActualTubeRadius(), 2);
 	}
 	
 }

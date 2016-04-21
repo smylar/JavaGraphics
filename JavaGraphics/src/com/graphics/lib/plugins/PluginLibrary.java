@@ -31,10 +31,6 @@ public class PluginLibrary {
 	public static IPlugin<PlugableCanvasObject<?>, Void> generateTrailParticles(Color colour, int density, double exhaustVelocity, double particleSize)
 	{
 		return (obj) -> {
-			//Optional<MovementTransform> movement = obj.getTransformsOfType(MovementTransform.class).stream().findFirst();
-			//if (!movement.isPresent()) return null; //no point if it isn't moving
-			//Vector baseVector = movement.get().getVector();
-			
 			List<MovementTransform> mTrans = obj.getTransformsOfType(MovementTransform.class);
 			if (mTrans.size() == 0) return null;
 			Vector baseVector = new Vector(0,0,0);
@@ -179,7 +175,7 @@ public class PluginLibrary {
 			for (CanvasObject impactee : objects.get()){
 				if (impactee == obj) continue;
 				//Tries to factor in possibility object was drawn completely on the other side of an object (after moving) and thus not detected as a collision by point inside check
-				//TODO would also need to generate explosion at point of impact
+				//TODO would also need to generate explosion at point of impact, factor any movement of the target
 				for(Point p : obj.getVertexList()){
 					Point prevPoint = new Point(p);
 					prevPoint.x -= baseVector.x;

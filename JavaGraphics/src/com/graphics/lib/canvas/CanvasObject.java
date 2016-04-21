@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
-
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collector;
@@ -65,7 +64,7 @@ public class CanvasObject extends Observable{
 			return cl.cast(this);
 		}else{
 			CanvasObject wrapped = getWrappedObject();
-			if (wrapped == null) return null;
+			if (wrapped == null) return null; //may prefer to throw exception?
 			return wrapped.getObjectAs(cl);
 		}
 	}
@@ -749,7 +748,7 @@ public class CanvasObject extends Observable{
 	
 	protected class BaseData
 	{
-		private List<WorldCoord> vertexList = Collections.synchronizedList(new ArrayList<WorldCoord>());
+		private List<WorldCoord> vertexList = new ArrayList<WorldCoord>();
 		private List<Facet> facetList = new ArrayList<Facet>();
 		private Color colour = new Color(255, 0, 0);
 		private List<Transform> transforms = new ArrayList<Transform>();
