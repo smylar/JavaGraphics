@@ -4,43 +4,54 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.BasicStroke;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 
+
+
 import com.graphics.lib.Facet;
-import com.graphics.lib.ObjectControls;
+import com.graphics.lib.KeyConfiguration;
 import com.graphics.lib.Point;
 import com.graphics.lib.Utils;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
 import com.graphics.shapes.Cuboid;
 import com.graphics.shapes.Lantern;
-import com.graphics.shapes.Ovoid;
 import com.graphics.shapes.Sphere;
 import com.graphics.shapes.Whale;
+import com.graphics.tests.shapes.FlapTest;
+import com.graphics.tests.shapes.Gate;
+import com.graphics.tests.shapes.Ship;
+import com.graphics.tests.shapes.TexturedCuboid;
+import com.graphics.tests.shapes.Wall;
+import com.graphics.tests.weapons.BouncyProjectile;
+import com.graphics.tests.weapons.DeflectionProjectile;
+import com.graphics.tests.weapons.ExplodingProjectile;
+import com.graphics.tests.weapons.LaserWeapon;
+import com.graphics.tests.weapons.Projectile;
+import com.graphics.tests.weapons.ProjectileWeapon;
+import com.graphics.tests.weapons.TrackingProjectile;
 import com.graphics.lib.camera.ViewAngleCamera;
 import com.graphics.lib.canvas.Canvas3D;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.OrientableCanvasObject;
 import com.graphics.lib.canvas.PlugableCanvasObject;
 import com.graphics.lib.canvas.SlaveCanvas3D;
-import com.graphics.lib.interfaces.ICanvasObjectList;
+import com.graphics.lib.interfaces.IPointFinder;
 import com.graphics.lib.lightsource.DirectionalLightSource;
 import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.lightsource.ObjectTiedLightSource;
 import com.graphics.lib.orientation.SimpleOrientation;
 import com.graphics.lib.plugins.Events;
 import com.graphics.lib.plugins.IPlugin;
-import com.graphics.lib.plugins.PluginLibrary;
 import com.graphics.lib.shader.ShaderFactory;
 import com.graphics.lib.transform.*;
 import com.graphics.lib.zbuffer.ZBuffer;
@@ -49,13 +60,12 @@ import com.sound.ClipLibrary;
 public class GraphicsTest extends JFrame {
 
 	private static final long serialVersionUID = 1L;
-	private static final String SILENT_EXPLODE = "sexpl";
 	
 	private boolean go = true;
 	private JFrame slave;
 	private Canvas3D canvas;
 	private static GraphicsTest gt;
-	private ClipLibrary clipLibrary = new ClipLibrary();
+	private ClipLibrary clipLibrary = new ClipLibrary("sounds.txt");
 	private CanvasObject selectedObject = null;
 	private MouseEvent select = null;
 
@@ -82,7 +92,7 @@ public class GraphicsTest extends JFrame {
 		cam.setPosition(new Point(350, 280, -200));
 		//FocusPointCamera cam = new FocusPointCamera();
 		//cam.setFocusPoint(new Point(300, 300, 1000));
-		Canvas3D cnv = new Canvas3D(cam);
+		Canvas3D cnv = Canvas3D.get(cam);
 		ZBuffer zBuf = new ZBuffer();
 		//zBuf.setSkip(3);
 		cnv.setzBuffer(zBuf);
@@ -156,11 +166,82 @@ public class GraphicsTest extends JFrame {
 		cnv.addObserver(scnv);
 		this.setVisible(true);
 		
-		OrientableCanvasObject<Ship> ship = new OrientableCanvasObject<Ship>(new Ship (100, 100, 50));
+		IPlugin<PlugableCanvasObject<?>,Void> explode = TestUtils.getExplodePlugin(clipLibrary);
+		
+		IPointFinder leftOffset = () -> {
+			Point pos = new Point(cam.getPosition());
+			Vector right = cam.getOrientation().getRight();
+			pos.x -= right.x * 25;
+			pos.y -= right.y * 25;
+			pos.z -= right.z * 25;
+			return pos;
+		};
+		
+		IPointFinder rightOffset = () -> {
+			Point pos = new Point(cam.getPosition());
+			Vector right = cam.getOrientation().getRight();
+			pos.x += right.x * 25;
+			pos.y += right.y * 25;
+			pos.z += right.z * 25;
+			return pos;
+		};
+		
+		Ship shp = new Ship (100, 100, 50);
+		shp.addWeapon(new LaserWeapon(() -> {
+			Point pos = new Point(cnv.getCamera().getPosition());
+			Vector down = cam.getOrientation().getDown();
+			pos.x += down.x * 15;
+			pos.y += down.y * 15;
+			pos.z += down.z * 15;
+			return pos;
+		},
+		() -> {
+			return cam.getOrientation().getForward();
+		},shp));
+		
+		Projectile bp = new BouncyProjectile();
+		bp.setClipLibary(clipLibrary);
+		shp.addWeapon(new ProjectileWeapon(bp, leftOffset, () -> {
+			return cam.getOrientation().getForward();
+		}, shp));
+		
+		DeflectionProjectile dp = new DeflectionProjectile();
+		dp.setSpeed(20);
+		dp.setRange(8000);
+		dp.setClipLibary(clipLibrary);
+		dp.setTargetFinder(() -> {
+			return this.selectedObject;
+		});
+		shp.addWeapon(new ProjectileWeapon(dp, leftOffset, () -> {
+			return cam.getOrientation().getForward();
+		}, shp));
+		
+		TrackingProjectile tp = new TrackingProjectile();
+		tp.setSpeed(20);
+		tp.setRange(8000);
+		tp.setClipLibary(clipLibrary);
+		tp.setTargetFinder(() -> {
+			return this.selectedObject;
+		});
+		shp.addWeapon(new ProjectileWeapon(tp, leftOffset, () -> {
+			return cam.getOrientation().getForward();
+		}, shp));
+		
+		ExplodingProjectile ep = new ExplodingProjectile();
+		ep.setSpeed(20);
+		ep.setRange(1200);
+		ep.setClipLibary(clipLibrary);
+
+		shp.addWeapon(new ProjectileWeapon(ep, rightOffset, () -> {
+			return cam.getOrientation().getForward();
+		}, shp));
+		
+		OrientableCanvasObject<Ship> ship = new OrientableCanvasObject<Ship>(shp);
 		ship.setColour(new Color(50, 50, 50));
 		ship.applyTransform(new Rotation<YRotation>(YRotation.class, 180));
 		ship.setOrientation(new SimpleOrientation(OrientableCanvasObject.ORIENTATION_TAG));
 		cnv.registerObject(ship, new Point(350, 350, -50), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
+				
 		
 		//PlugableCanvasObject<Torus> torus = new PlugableCanvasObject<Torus>(new Torus(50,50,20));
 		PlugableCanvasObject<Gate> torus = new PlugableCanvasObject<Gate>(new Gate(50,50,20, () -> {return cam.getPosition();} ));
@@ -213,45 +294,9 @@ public class GraphicsTest extends JFrame {
 		wall.setColour(new Color(240, 240, 240));
 		wall.setLightIntensityFinder(Utils.getShadowLightIntensityFinder(() -> { return cnv.getShapes();}));
 		wall.setVisible(false);
-		cnv.registerObject(wall, new Point(350,350,700), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
-		
-		ICanvasObjectList getObjects = () -> {return cnv.getShapes().stream().filter(s -> s.isVisible() && !s.isDeleted() && !s.hasFlag("PHASED")).collect(Collectors.toList());};
-		
-		IPlugin<PlugableCanvasObject<?>,Void> explode = new IPlugin<PlugableCanvasObject<?>,Void>(){
-			@Override
-			public Void execute(PlugableCanvasObject<?> obj) {
-				PluginLibrary.explode(cnv.getLightSources()).execute(obj).forEach(c -> {
-					cnv.replaceShader(obj, ShaderFactory.GetShader(ShaderFactory.ShaderEnum.FLAT));
-					c.registerPlugin(Events.STOP, PluginLibrary.stop(), false);
-					c.registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollided(getObjects, Events.STOP, null), true);
-					if (!obj.hasFlag(SILENT_EXPLODE)) clipLibrary.playSound("EXPLODE", -20f);
-				});
-				obj.registerSingleAfterDrawPlugin(Events.FLASH, PluginLibrary.flash(cnv.getLightSources()));
-				return null;
-			}			
-		};
+		cnv.registerObject(wall, new Point(350,350,700), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));		
 		
 		whale.registerPlugin(Events.EXPLODE, explode, false);
-		
-		IPlugin<PlugableCanvasObject<?>,Void> bounce = new IPlugin<PlugableCanvasObject<?>,Void>(){
-			@Override
-			public Void execute(PlugableCanvasObject<?> obj) {	
-				//CanvasObject impactee = PluginLibrary.hasCollided(getObjects,null, null).execute(obj);
-				CanvasObject impactee = PluginLibrary.hasCollidedNew(getObjects,null, null).execute(obj);
-				if (impactee != null){
-					if (impactee.hasFlag(Events.STICKY)){ 
-						PluginLibrary.stop2().execute(obj);
-						obj.observeAndMatch(impactee);
-						clipLibrary.playSound("STICK", -20f);
-					}
-					else {
-						PluginLibrary.bounce(impactee).execute(obj);
-						clipLibrary.playSound("BOUNCE", -20f);
-					}
-				}
-				return null;
-			}			
-		};
 		
 		ScaleTransform st = new ScaleTransform(0.95);
 		RepeatingTransform<ScaleTransform> rpt = new RepeatingTransform<ScaleTransform>(st,15){
@@ -277,182 +322,19 @@ public class GraphicsTest extends JFrame {
 		sphere.registerPlugin(Events.EXPLODE, explode, false);
 		torus.registerPlugin(Events.EXPLODE, explode, false);
 		
-		this.addKeyListener(new ObjectControls(ship){
+		try {
+			this.addKeyListener(new ShipControls(ship, cnv, new KeyConfiguration(this.getClass().getResourceAsStream("ShipControls.txt"))));
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		this.addKeyListener(new KeyListener(){
 			@Override
 			public void keyTyped(KeyEvent key) {
-				super.keyTyped(key);
 				if (key.getKeyChar() == 'l') l4.toggle();
 				
-				if (key.getKeyChar() == 'r'){
-					PlugableCanvasObject<Laser> laser = new PlugableCanvasObject<Laser>(new Laser(1000));
-					laser.addFlag("PHASED");
-					cam.addCameraRotation(laser);
-					Point pos = new Point(cam.getPosition());
-					Vector down = cam.getOrientation().getDown();
-					pos.x += down.x * 15;
-					pos.y += down.y * 15;
-					pos.z += down.z * 15;
-					cnv.registerObject(laser, pos);
-					laser.observeAndMatch(ship);
-					
-					laser.registerPlugin("LASER", 
-							(obj) -> {
-									Laser l = obj.getObjectAs(Laser.class);
-									if (l != null){
-										for (CanvasObject screenObjects : getObjects.get()){ //TODO would like an object list for those on screen only here
-											for (Facet f : screenObjects.getIntersectedFacets(l.getAnchorPoint(), cam.getOrientation().getForward()))
-											{
-												if (f != null && f.getAsList().stream().mapToDouble(p -> p.getTransformed(cam).z).average().getAsDouble() < l.getLength() ){
-							
-													//f.setColour(Color.DARK_GRAY);
-													f.setMaxIntensity(f.getMaxIntensity() - 0.15);
-													//as an aspiration - create dynamic texture map for laser 'holes'
-												}
-											}
-										}
-									}
-									return null;
-					},true);
-				}
-				
-				if (key.getKeyChar() == 'f'){
-					//fire a projectile (that also generates light) that attempts to blow up a target
-					PlugableCanvasObject<?> proj = new PlugableCanvasObject<CanvasObject>(new OrientableCanvasObject<Ovoid>(new Ovoid(20,0.3,30)));
-					proj.applyTransform(new Rotation<XRotation>(XRotation.class, -90));
-					proj.getObjectAs(OrientableCanvasObject.class).setOrientation(new SimpleOrientation());
-					proj.setBaseIntensity(1);
-					proj.setColour(new Color(255, 0, 0, 80));
-					proj.setCastsShadow(false);
-					proj.registerPlugin(Events.EXPLODE, explode, false);
-					proj.addFlag(SILENT_EXPLODE);
-					for (int i = 0; i < proj.getFacetList().size() ; i++)
-					{
-						if (i % (proj.getObjectAs(Ovoid.class).getPointsPerCircle()/3) == 1 || i % (proj.getObjectAs(Ovoid.class).getPointsPerCircle()/3) == 0)
-						{
-							proj.getFacetList().get(i).setColour(new Color(225,0,0));
-						}
-					}
-					cam.addCameraRotation(proj);				
-
-					Optional<MovementTransform> shipMove = ship.getTransformsOfType(MovementTransform.class).stream().filter(m -> m.getName().equals(ObjectControls.FORWARD) || m.getName().equals(ObjectControls.BACKWARD) ).findFirst();
-					double speed = 18;
-					if (shipMove.isPresent()) speed += shipMove.get().getName().equals(ObjectControls.FORWARD) ? shipMove.get().getSpeed() : -shipMove.get().getSpeed();
-					MovementTransform move = new MovementTransform(new Vector(cam.getOrientation().getForward().x, cam.getOrientation().getForward().y, cam.getOrientation().getForward().z), speed){
-						@Override
-						public void onComplete(){
-							proj.executePlugin(Events.EXPLODE);
-						}
-					};
-					move.moveUntil(t -> t.getDistanceMoved() >= 1200);
-					proj.addTransform(move);
-					
-					/*MovementTransform gravity = new MovementTransform(new Vector(0,1,0),0);
-					gravity.setAcceleration(0.15);
-					gravity.moveUntil(t -> move.isComplete());
-					proj.addTransform(gravity);*/
-					
-					Rotation<?> rot = new Rotation<ZRotation>(ZRotation.class, 20)
-					{
-						@Override
-						public void beforeTransform(){
-							super.beforeTransform();
-							proj.getObjectAs(OrientableCanvasObject.class).toBaseOrientation();
-						}
-						
-						@Override
-						public void afterTransform(){
-							super.afterTransform();	
-							proj.getObjectAs(OrientableCanvasObject.class).reapplyOrientation();
-						}
-					}
-					;
-					
-					Transform projt = new RepeatingTransform<Rotation<?>>(rot, t -> move.isCompleteSpecific());
-
-					proj.addTransformAboutCentre(projt);
-					proj.deleteAfterTransforms();
-					proj.setProcessBackfaces(true);
-					
-					proj.registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollidedNew(getObjects, Events.EXPLODE, Events.EXPLODE), true);
-					
-					Point pos = new Point(cam.getPosition());
-					Vector right = cam.getOrientation().getRight();
-					//offsets to the right of the camera
-					pos.x += right.x * 25;
-					pos.y += right.y * 25;
-					pos.z += right.z * 25;
-					cnv.registerObject(proj, pos);
-					ObjectTiedLightSource<LightSource> l5 = new ObjectTiedLightSource<LightSource>(LightSource.class, pos.x, pos.y, pos.z);
-					l5.tieTo(proj);
-					l5.getLightSource().setColour(proj.getColour());
-					l5.getLightSource().setRange(400);
-					cnv.addLightSource(l5.getLightSource());
-				}
-				
-				if (key.getKeyChar() == 'b'){
-					//fires a ball (that also generates light) that tries to bounce off a target
-					PlugableCanvasObject<Sphere> proj = new PlugableCanvasObject<Sphere>(new Sphere(18,20));
-					proj.setBaseIntensity(1);
-					proj.setColour(new Color(0, 255, 255, 80));
-					proj.setCastsShadow(false);
-					proj.deleteAfterTransforms();
-					proj.setProcessBackfaces(true);
-					Optional<MovementTransform> shipMove = ship.getTransformsOfType(MovementTransform.class)
-							.stream()
-							.filter(m -> m.getName().equals(ObjectControls.FORWARD) || m.getName().equals(ObjectControls.BACKWARD) )
-							.findFirst();
-					
-					double baseSpeed = 0;
-					if (shipMove.isPresent()) baseSpeed = shipMove.get().getName().equals(ObjectControls.FORWARD) ? shipMove.get().getSpeed() : -shipMove.get().getSpeed();
-					MovementTransform move = new MovementTransform(new Vector(cam.getOrientation().getForward().x, cam.getOrientation().getForward().y, cam.getOrientation().getForward().z), 15 + baseSpeed);
-					long delTime = new Date().getTime() + 5000;
-					move.moveUntil(t -> t.getDistanceMoved() > 1000 || (t.getSpeed() == 0 && new Date().getTime() > delTime));
-					proj.addTransform(move);
-
-					proj.registerPlugin(Events.CHECK_COLLISION, bounce, true);
-					proj.registerPlugin("Trail", PluginLibrary.generateTrailParticles(Color.LIGHT_GRAY, 20, 13, 0.66), true);
-					
-					Point pos = new Point(cam.getPosition());
-					Vector right = cam.getOrientation().getRight();
-					//offsets to the left of the camera
-					pos.x -= right.x * 25;
-					pos.y -= right.y * 25;
-					pos.z -= right.z * 25;
-					cnv.registerObject(proj, pos);
-					ObjectTiedLightSource<LightSource> l5 = new ObjectTiedLightSource<LightSource>(LightSource.class, pos.x, pos.y, pos.z);
-					l5.tieTo(proj);
-					l5.setColour(new Color(0, 255, 255));
-					l5.getLightSource().setRange(400);
-					cnv.addLightSource(l5.getLightSource());
-				}
-				
-				if (key.getKeyChar() == 't'){
-					//fires a ball that attempts to track a target and blow it up
-					PlugableCanvasObject<Sphere> proj = new PlugableCanvasObject<Sphere>(new Sphere(18,20));
-					proj.setBaseIntensity(1);
-					proj.setColour(new Color(255, 255, 0, 80));
-					proj.setCastsShadow(false);
-					proj.deleteAfterTransforms();
-					proj.setProcessBackfaces(true);
-
-					MovementTransform move = new MovementTransform(new Vector(cam.getOrientation().getForward().x, cam.getOrientation().getForward().y, cam.getOrientation().getForward().z), 20);
-					move.moveUntil(t -> t.getDistanceMoved() > 2000);
-					proj.addTransform(move);
-
-					proj.registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollided(getObjects, Events.EXPLODE, Events.EXPLODE), true);
-					proj.registerPlugin(Events.EXPLODE, explode, false);
-					proj.registerPlugin("Track", PluginLibrary.track(selectedObject, 1), true); 
-					
-					Point pos = new Point(cam.getPosition());
-					Vector right = cam.getOrientation().getRight();
-					//offsets to the left of the camera
-					pos.x -= right.x * 25;
-					pos.y -= right.y * 25;
-					pos.z -= right.z * 25;
-					cnv.registerObject(proj, pos);
-				}
-				
-				if (key.getKeyChar() == 'y'){
+				else if (key.getKeyChar() == 'y'){
 					PlugableCanvasObject<Cuboid> movingTarget = new PlugableCanvasObject<Cuboid>(new Cuboid(20,20,20));
 					//CanvasObject movingTarget = new Cuboid(20,20,20);
 					MovementTransform move = new MovementTransform(new Vector(1,1,0).getUnitVector(), 4);
@@ -464,79 +346,51 @@ public class GraphicsTest extends JFrame {
 					cnv.registerObject(movingTarget , new Point(0, 0, 0), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.FLAT));
 				}
 				
-				if (key.getKeyChar() == 'u'){
-					//fires a ball on an intercept course to a target and attempts to blow it up
-					if (selectedObject == null) return;
-					
-					PlugableCanvasObject<Sphere> proj = new PlugableCanvasObject<Sphere>(new Sphere(18,20));
-					proj.setBaseIntensity(1);
-					proj.setColour(new Color(255, 0, 255, 80));
-					proj.setCastsShadow(false);
-					proj.deleteAfterTransforms();
-					proj.setProcessBackfaces(true);
-
-					proj.registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollided(getObjects, Events.EXPLODE, Events.EXPLODE), true);
-					proj.registerPlugin(Events.EXPLODE, explode, false);
-					
-					Point pos = new Point(cam.getPosition());
-					Vector right = cam.getOrientation().getRight();
-					//offsets to the left of the camera
-					pos.x -= right.x * 25;
-					pos.y -= right.y * 25;
-					pos.z -= right.z * 25;
-					cnv.registerObject(proj, pos);
-					
-					Vector vTrackee = Utils.plotDeflectionShot(selectedObject, proj, 20);
-					MovementTransform move = new MovementTransform(vTrackee, 20); 
-					move.moveUntil(t -> t.getDistanceMoved() > 10000);
-					proj.addTransform(move);
-				}
-				
-				if (key.getKeyChar() == 'z'){
+				else if (key.getKeyChar() == 'z'){
 					double viewAngle = cam.getViewAngle() - 5;
 					cam.setViewAngle(viewAngle < 5 ? 5 : viewAngle);
 				}
 				
-				if (key.getKeyChar() == 'x'){
+				else if (key.getKeyChar() == 'x'){
 					double viewAngle = cam.getViewAngle() + 5;
 					cam.setViewAngle(viewAngle > 85 ? 85 : viewAngle);
 				}
 				
-				if (key.getKeyChar() == 'c'){
+				else if (key.getKeyChar() == 'c'){
 					double angle = l4.getLightConeAngle() - 5;
 					l4.setLightConeAngle(angle < 5 ? 5 : angle);
 				}
 				
-				if (key.getKeyChar() == 'v'){
+				else if (key.getKeyChar() == 'v'){
 					double angle = l4.getLightConeAngle() + 5;
 					l4.setLightConeAngle(angle > 85 ? 85 : angle);
 				}
 				
-				if (key.getKeyChar() == 'n'){
+				else if (key.getKeyChar() == 'n'){
 					wall.setVisible(!wall.isVisible());
 				}
 				
-				if (key.getKeyChar() == 'm'){
+				else if (key.getKeyChar() == 'm'){
 					cnv.setDrawShadows(!cnv.isDrawShadows());
 				}
 				
-				if (key.getKeyChar() == '.' && l3.getLightSource().getIntensity() <= 0.9 && l3.getLightSource().isOn()){
+				else if (key.getKeyChar() == '.' && l3.getLightSource().getIntensity() <= 0.9 && l3.getLightSource().isOn()){
 					l3.getLightSource().setIntensity(l3.getLightSource().getIntensity() + 0.1);
 					lantern3.setColour(l3.getLightSource().getActualColour());
 				}
 				
-				if (key.getKeyChar() == ',' && l3.getLightSource().getIntensity() >= 0.1 && l3.getLightSource().isOn()){
+				else if (key.getKeyChar() == ',' && l3.getLightSource().getIntensity() >= 0.1 && l3.getLightSource().isOn()){
 					l3.getLightSource().setIntensity(l3.getLightSource().getIntensity() - 0.1);
 					lantern3.setColour(l3.getLightSource().getActualColour());
 				}
 				
-				if (key.getKeyChar() == '1'){
+				else if (key.getKeyChar() == '1'){
 					l1.toggle();
 				}
-				if (key.getKeyChar() == '2'){
+				else if (key.getKeyChar() == '2'){
 					l2.toggle();
 				}
-				if (key.getKeyChar() == '3'){
+				else if (key.getKeyChar() == '3'){
 					l3.toggle();
 				}
 				
@@ -545,13 +399,11 @@ public class GraphicsTest extends JFrame {
 			
 			@Override
 			public void keyPressed(KeyEvent key) {
-				super.keyPressed(key);
 				checkEngineSound(ship);
 			}
 			
 			@Override
 			public void keyReleased(KeyEvent key) {
-				super.keyReleased(key);
 				checkEngineSound(ship);
 			}
 			
@@ -624,7 +476,7 @@ public class GraphicsTest extends JFrame {
 	}
 
 	private void checkEngineSound(CanvasObject source){
-		if (source.getTransformsOfType(MovementTransform.class).stream().filter(t -> !t.isCancelled() && !t.isComplete()).count() > 0){
+		if (source.getTransformsOfType(MovementTransform.class).stream().filter(t -> !t.isCancelled() && !t.isComplete() && t.getAcceleration() != 0).count() > 0){
 			clipLibrary.loopSound("ENGINE", -30f);
 		}else{
 			clipLibrary.stopSound("ENGINE");

@@ -36,6 +36,7 @@ import com.graphics.lib.zbuffer.ZBufferItem;
 public class Canvas3D extends JPanel{
 
 	private static final long serialVersionUID = 1L;
+	private static Canvas3D cnv = null;
 	
 	private Map<CanvasObject, IShader> shapes = Collections.synchronizedMap(new HashMap<CanvasObject, IShader>());
 	
@@ -50,7 +51,17 @@ public class Canvas3D extends JPanel{
 	private Facet floor = null;
 	private boolean okToPaint = false;
 
-	public Canvas3D(Camera camera)
+	public static Canvas3D get(Camera camera){
+		if (cnv == null) cnv = new Canvas3D(camera);
+		else cnv.setCamera(camera);
+		return cnv;
+	}
+	
+	public static Canvas3D get(){
+		return cnv;
+	}
+	
+	protected Canvas3D(Camera camera)
 	{
 		this.camera = camera;	
 	}

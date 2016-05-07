@@ -1,5 +1,8 @@
 package com.graphics.lib.orientation;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
@@ -125,5 +128,45 @@ public class OrientationTransform {
 		obj.applyTransform(new Rotation<YRotation>(YRotation.class, -yRot));
 		obj.applyTransform(new Rotation<XRotation>(XRotation.class, -xRot));
 		obj.applyTransform(new Rotation<ZRotation>(ZRotation.class, -zRot));
+	}
+	
+	public static List<Rotation<?>> getRotationsForVector(Vector v){
+		List<Rotation<?>> rots = new ArrayList<Rotation<?>>();
+		Vector unit = v.getUnitVector();
+		WorldCoord wc = new WorldCoord(unit.x, unit.y, unit.z);
+			
+		CanvasObject temp = new CanvasObject();
+		temp.getVertexList().add(wc);
+
+		double xRot = 0;
+		double yRot = 0;
+		
+		if (wc.z < 0) 
+			yRot = 180;
+		
+		if (wc.z != 0)
+			yRot += Math.toDegrees(Math.atan(wc.x / wc.z));
+		else if (wc.x > 0)
+			yRot = 90;
+		else if (wc.x < 0)
+			yRot = -90;
+			
+		Rotation<?> r = new Rotation<YRotation>(YRotation.class, -yRot);
+		temp.applyTransform(r);
+		
+		Rotation<?> r0 = new Rotation<YRotation>(YRotation.class, yRot);
+		
+		if (wc.z != 0)
+			xRot += Math.toDegrees(Math.atan(wc.y / wc.z)) * -1;
+		else if (wc.y > 0)
+			xRot = -90;
+		else if (wc.y < 0)
+			xRot = 90;
+			
+		Rotation<?> r1 = new Rotation<XRotation>(XRotation.class, xRot);
+		rots.add(r1);
+		rots.add(r0);
+		
+		return rots;
 	}
 }

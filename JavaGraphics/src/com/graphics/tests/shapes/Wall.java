@@ -1,4 +1,4 @@
-package com.graphics.tests;
+package com.graphics.tests.shapes;
 
 import com.graphics.lib.Facet;
 import com.graphics.lib.WorldCoord;

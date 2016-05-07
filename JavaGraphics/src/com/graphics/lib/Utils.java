@@ -163,7 +163,7 @@ public class Utils {
 		};
 	}
 	
-	public static Vector plotDeflectionShot(CanvasObject target, CanvasObject proj, double projSpeed){
+	public static Vector plotDeflectionShot(CanvasObject target, Point startPoint, double projSpeed){
 		//deflection shot based on constant speeds (no acceleration)
 		//The following is based on the Law of Cosines: A*A + B*B - 2*A*B*cos(theta) = C*C
 		//A is distance from shot start point to target 
@@ -171,7 +171,7 @@ public class Utils {
 		//C is distance travelled by projectile until impact (speed * time)
 		//cos(theta) is also the dot product of the vectors start -> target position and the targets movement vector
 		
-		Vector defaultVector = proj.getCentre().vectorToPoint(target.getCentre()).getUnitVector();
+		Vector defaultVector = startPoint.vectorToPoint(target.getCentre()).getUnitVector();
 		
 		List<MovementTransform> mTrans = target.getTransformsOfType(MovementTransform.class);
 		if (mTrans.size() == 0) return defaultVector;
@@ -184,8 +184,8 @@ public class Utils {
 		double speed = targetVec.getSpeed();
 		targetVec = targetVec.getUnitVector();
 		
-		double cosTheta = target.getCentre().vectorToPoint(proj.getCentre()).getUnitVector().dotProduct(targetVec);
-		double distStartToTarget = proj.getCentre().distanceTo(target.getCentre());
+		double cosTheta = target.getCentre().vectorToPoint(startPoint).getUnitVector().dotProduct(targetVec);
+		double distStartToTarget = startPoint.distanceTo(target.getCentre());
 		double time = 0;
 		
 		if (projSpeed - speed == 0){
@@ -226,9 +226,9 @@ public class Utils {
 		// Start + (Vector of Proj * time) = TargetPos +  (Vector of target * time), which becomes
 		//Vector of Proj = Vector of target + [(TargetPos - Start) / time ]
 		return new Vector (
-				(targetVec.x * speed) + ((target.getCentre().x - proj.getCentre().x) / time),
-				(targetVec.y * speed) + ((target.getCentre().y - proj.getCentre().y) / time),
-				(targetVec.z * speed) + ((target.getCentre().z - proj.getCentre().z) / time)
+				(targetVec.x * speed) + ((target.getCentre().x - startPoint.x) / time),
+				(targetVec.y * speed) + ((target.getCentre().y - startPoint.y) / time),
+				(targetVec.z * speed) + ((target.getCentre().z - startPoint.z) / time)
 				).getUnitVector();
 		
 	}

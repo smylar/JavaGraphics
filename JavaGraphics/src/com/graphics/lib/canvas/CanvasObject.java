@@ -608,7 +608,7 @@ public class CanvasObject extends Observable{
 		double angle = Math.atan(this.getMaxExtent()/dCentre);
 		Vector vCentre = start.vectorToPoint(getCentre()).getUnitVector();
 		
-		double vAngle = Math.acos(v.dotProduct(vCentre));
+		double vAngle = Math.acos(v.getUnitVector().dotProduct(vCentre));
 		
 		if (vAngle >= angle) return false;
 		

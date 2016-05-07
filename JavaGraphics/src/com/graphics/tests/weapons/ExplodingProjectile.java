@@ -1,0 +1,84 @@
+package com.graphics.tests.weapons;
+
+import java.awt.Color;
+
+import com.graphics.lib.Vector;
+import com.graphics.lib.canvas.CanvasObject;
+import com.graphics.lib.canvas.OrientableCanvasObject;
+import com.graphics.lib.canvas.PlugableCanvasObject;
+import com.graphics.lib.orientation.OrientationTransform;
+import com.graphics.lib.orientation.SimpleOrientation;
+import com.graphics.lib.plugins.Events;
+import com.graphics.lib.plugins.PluginLibrary;
+import com.graphics.lib.transform.MovementTransform;
+import com.graphics.lib.transform.RepeatingTransform;
+import com.graphics.lib.transform.Rotation;
+import com.graphics.lib.transform.Transform;
+import com.graphics.lib.transform.XRotation;
+import com.graphics.lib.transform.ZRotation;
+import com.graphics.shapes.Ovoid;
+import com.graphics.tests.TestUtils;
+
+public class ExplodingProjectile extends Projectile{
+
+	@Override
+	public CanvasObject get(Vector initialVector, double parentSpeed) {
+		PlugableCanvasObject<?> proj = new PlugableCanvasObject<CanvasObject>(new OrientableCanvasObject<Ovoid>(new Ovoid(20,0.3,30)));
+		proj.applyTransform(new Rotation<XRotation>(XRotation.class, -90));
+		proj.getObjectAs(OrientableCanvasObject.class).setOrientation(new SimpleOrientation());
+		proj.setBaseIntensity(1);
+		proj.setColour(new Color(255, 0, 0, 80));
+		proj.setCastsShadow(false);
+		proj.registerPlugin(Events.EXPLODE, TestUtils.getExplodePlugin(getClipLibrary()), false);
+		proj.addFlag(TestUtils.SILENT_EXPLODE);
+		for (int i = 0; i < proj.getFacetList().size() ; i++)
+		{
+			if (i % (proj.getObjectAs(Ovoid.class).getPointsPerCircle()/3) == 1 || i % (proj.getObjectAs(Ovoid.class).getPointsPerCircle()/3) == 0)
+			{
+				proj.getFacetList().get(i).setColour(new Color(225,0,0));
+			}
+		}
+		
+		for (Rotation<?> r : OrientationTransform.getRotationsForVector(initialVector)){
+			proj.applyTransform(r);
+		}
+
+		MovementTransform move = new MovementTransform(initialVector, this.getSpeed() + parentSpeed){
+			@Override
+			public void onComplete(){
+				proj.executePlugin(Events.EXPLODE);
+			}
+		};
+		
+		//TODO range should be affected by the speed of the projectile
+		move.moveUntil(t -> t.getDistanceMoved() >= this.getRange());
+		proj.addTransform(move);
+		
+		Rotation<?> rot = new Rotation<ZRotation>(ZRotation.class, 20)
+		{
+			@Override
+			public void beforeTransform(){
+				super.beforeTransform();
+				proj.getObjectAs(OrientableCanvasObject.class).toBaseOrientation();
+			}
+			
+			@Override
+			public void afterTransform(){
+				super.afterTransform();	
+				proj.getObjectAs(OrientableCanvasObject.class).reapplyOrientation();
+			}
+		}
+		;
+		
+		Transform projt = new RepeatingTransform<Rotation<?>>(rot, t -> move.isCompleteSpecific());
+
+		proj.addTransformAboutCentre(projt);
+		proj.deleteAfterTransforms();
+		proj.setProcessBackfaces(true);
+		
+		proj.registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollidedNew(TestUtils.getFilteredObjectList(), Events.EXPLODE, Events.EXPLODE), true);
+		
+		return proj;
+	}
+
+}

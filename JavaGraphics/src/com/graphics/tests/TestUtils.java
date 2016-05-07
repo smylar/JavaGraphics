@@ -2,13 +2,23 @@ package com.graphics.tests;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.ArrayList;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 import com.graphics.lib.camera.ViewAngleCamera;
+import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.Canvas3D;
+import com.graphics.lib.canvas.PlugableCanvasObject;
+import com.graphics.lib.interfaces.ICanvasObjectList;
+import com.graphics.lib.plugins.Events;
+import com.graphics.lib.plugins.IPlugin;
+import com.graphics.lib.plugins.PluginLibrary;
+import com.graphics.lib.shader.ShaderFactory;
+import com.sound.ClipLibrary;
 
 public class TestUtils {
-	
+	public static final String SILENT_EXPLODE = "sexpl";
 	
 	public static BiConsumer<Canvas3D,Graphics> showMarkers(){
 		return (c, g) -> {
@@ -61,6 +71,30 @@ public class TestUtils {
 			if (c.getCamera() instanceof ViewAngleCamera){	
 				g.drawString(""+((ViewAngleCamera)c.getCamera()).getViewAngle() , c.getWidth() - 30, c.getHeight() - 10);
 			}
+		};
+	}
+	
+	public static ICanvasObjectList getFilteredObjectList(){
+		return () -> {
+			if (Canvas3D.get() == null) return new ArrayList<CanvasObject>();
+			return Canvas3D.get().getShapes().stream().filter(s -> s.isVisible() && !s.isDeleted() && !s.hasFlag("PHASED")).collect(Collectors.toList());
+			};
+	}
+	
+	public static IPlugin<PlugableCanvasObject<?>,Void> getExplodePlugin(ClipLibrary clipLibrary)
+	{
+		return new IPlugin<PlugableCanvasObject<?>,Void>(){
+			@Override
+			public Void execute(PlugableCanvasObject<?> obj) {
+				PluginLibrary.explode(Canvas3D.get().getLightSources()).execute(obj).forEach(c -> {
+					Canvas3D.get().replaceShader(obj, ShaderFactory.GetShader(ShaderFactory.ShaderEnum.FLAT));
+					c.registerPlugin(Events.STOP, PluginLibrary.stop(), false);
+					c.registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollided(getFilteredObjectList(), Events.STOP, null), true);
+					if (!obj.hasFlag(SILENT_EXPLODE) && clipLibrary != null) clipLibrary.playSound("EXPLODE", -20f);
+				});
+				obj.registerSingleAfterDrawPlugin(Events.FLASH, PluginLibrary.flash(Canvas3D.get().getLightSources()));
+				return null;
+			}			
 		};
 	}
 	

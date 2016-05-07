@@ -1,4 +1,4 @@
-package com.graphics.tests;
+package com.graphics.tests.shapes;
 
 import java.util.ArrayList;
 import java.util.List;

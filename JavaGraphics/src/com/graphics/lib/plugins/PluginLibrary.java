@@ -287,7 +287,7 @@ public class PluginLibrary {
 			if (!move.isPresent()) return null;
 			
 			//plot deflection (if target moving) and aim for that
-			Vector vTrackee = Utils.plotDeflectionShot(objectToTrack, obj, move.get().getSpeed());
+			Vector vTrackee = Utils.plotDeflectionShot(objectToTrack, obj.getCentre(), move.get().getSpeed());
 			/*if (vTrackee == null){
 				System.out.println("NULL");
 				vTrackee = centre.vectorToPoint(trackeeCentre).getUnitVector();

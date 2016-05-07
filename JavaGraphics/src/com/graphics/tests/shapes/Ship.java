@@ -1,6 +1,8 @@
-package com.graphics.tests;
+package com.graphics.tests.shapes;
 
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import com.graphics.lib.Facet;
@@ -9,6 +11,7 @@ import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.PlugableCanvasObject;
+import com.graphics.lib.interfaces.IEffector;
 import com.graphics.lib.plugins.Events;
 import com.graphics.lib.transform.MovementTransform;
 import com.graphics.lib.transform.RepeatingTransform;
@@ -22,6 +25,9 @@ public class Ship extends PlugableCanvasObject<Ship> {
 	private Facet wingFlashLeft;
 	private Facet wingFlashRight;
 	private int cnt = 0;
+	private double acceleration = 0.2;
+	private double panRate = 4;
+	private List<IEffector> weapons = new ArrayList<IEffector>();
 	
 	public Ship(int width, int depth, int height)
 	{
@@ -66,7 +72,7 @@ public class Ship extends PlugableCanvasObject<Ship> {
 
 					(obj) -> {
 						Optional<MovementTransform> movement = obj.getTransformsOfType(MovementTransform.class).stream().findFirst();
-						if (!movement.isPresent()) return null; //no point if it isn't moving
+						if (!movement.isPresent() || movement.get().getAcceleration() == 0) return null; //no point if it isn't moving
 						Vector baseVector = movement.get().getVector();
 						if (baseVector == null) return null; 
 						
@@ -90,7 +96,7 @@ public class Ship extends PlugableCanvasObject<Ship> {
 							double yVector = baseVector.y + (Math.random()/2) - 0.25;
 							double zVector = baseVector.z + (Math.random()/2) - 0.25;
 							Transform rot1 = new RepeatingTransform<Rotation<?>>(new Rotation<YRotation>(YRotation.class, Math.random() * 10), 15);
-							MovementTransform move = new MovementTransform(new Vector(xVector, yVector, zVector), -20);
+							MovementTransform move = new MovementTransform(new Vector(xVector, yVector, zVector), movement.get().getAcceleration() > 0 ? -20 : 20);
 							move.moveUntil(t -> rot1.isCompleteSpecific());
 							Transform rot2 = new RepeatingTransform<Rotation<?>>(new Rotation<XRotation>(XRotation.class, Math.random() * 10), t -> rot1.isCompleteSpecific());				
 							fragment.addTransformAboutCentre(rot1, rot2);
@@ -124,5 +130,29 @@ public class Ship extends PlugableCanvasObject<Ship> {
 				wingFlashLeft.setColour(Color.MAGENTA);
 			}
 		}
+	}
+
+	public double getAcceleration() {
+		return this.acceleration;
+	}
+
+	public void setAcceleration(double acceleration) {
+		this.acceleration = acceleration;
+	}
+
+	public double getPanRate() {
+		return panRate;
+	}
+
+	public void setPanRate(double panRate) {
+		this.panRate = panRate;
+	}
+
+	public List<IEffector> getWeapons() {
+		return weapons;
+	}
+	
+	public void addWeapon(IEffector weapon){
+		weapons.add(weapon);
 	}
 }

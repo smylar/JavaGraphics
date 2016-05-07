@@ -1,4 +1,4 @@
-package com.graphics.tests;
+package com.graphics.tests.shapes;
 
 import com.graphics.lib.interfaces.IPointFinder;
 import com.graphics.lib.plugins.IPlugin;

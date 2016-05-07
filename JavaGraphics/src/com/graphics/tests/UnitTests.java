@@ -116,7 +116,7 @@ public class UnitTests {
 		MovementTransform move = new MovementTransform(new Vector(1,0,0), 1);
 		target.addTransform(move);
 		
-		Vector intercept = Utils.plotDeflectionShot(target, proj, 1);
+		Vector intercept = Utils.plotDeflectionShot(target, proj.getCentre(), 1);
 		//assertEquals(new Vector(0,1,0),intercept); //damn precision loss!!
 		DecimalFormat roundedFormat = new DecimalFormat("#.####");
 		assertEquals(roundedFormat.format(intercept.x), "0"); 
@@ -136,7 +136,7 @@ public class UnitTests {
 		MovementTransform move = new MovementTransform(new Vector(1,0,0), 1);
 		target.addTransform(move);
 		
-		Vector intercept = Utils.plotDeflectionShot(target, proj, 2);
+		Vector intercept = Utils.plotDeflectionShot(target, proj.getCentre(), 2);
 		assertEquals(new Vector(0,-1,0),intercept);
 		
 	}
@@ -152,7 +152,7 @@ public class UnitTests {
 		MovementTransform move = new MovementTransform(new Vector(1,0,0), 1);
 		target.addTransform(move);
 		
-		Vector intercept = Utils.plotDeflectionShot(target, proj, 1);
+		Vector intercept = Utils.plotDeflectionShot(target, proj.getCentre(), 1);
 		assertEquals(new Vector(-1,0,0),intercept);
 		
 	}

@@ -1,4 +1,4 @@
-package com.graphics.tests;
+package com.graphics.tests.weapons;
 
 import java.awt.Color;
 
@@ -7,14 +7,14 @@ import com.graphics.lib.transform.Rotation;
 import com.graphics.lib.transform.XRotation;
 import com.graphics.shapes.Cylinder;
 
-public class Laser extends Cylinder {
+public class LaserEffect extends Cylinder {
 
 	private int tickLife = 15;
 	private int currentTick = 0;
 	private double length = 1000;
 	private Cylinder subCylinder;
 	
-	public Laser(double length) {
+	public LaserEffect(double length) {
 		super(2, length , 36);
 		this.length = length;
 		this.setColour(new Color(255, 0, 255, 100));
@@ -33,7 +33,6 @@ public class Laser extends Cylinder {
 		
 		//rotate from upright to forwards
 		this.addTransform(new Rotation<XRotation>(XRotation.class, 90));
-		//this.addTransform(new Translation(0,0,-10));
 		this.applyTransforms();
 		this.setAnchorPoint(this.getVertexList().get(0));
 	}

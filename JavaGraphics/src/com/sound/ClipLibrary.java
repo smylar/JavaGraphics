@@ -30,8 +30,8 @@ import javax.sound.sampled.Line;
 public class ClipLibrary implements AutoCloseable {
 	private Map<String,Clip> clips = new HashMap<String,Clip>();
 	
-	public ClipLibrary(){
-		URL soundList = getClass().getResource("sounds.txt");
+	public ClipLibrary(String soundFile){
+		URL soundList = getClass().getResource(soundFile);
 		if (soundList == null) return;
 		
 		try (BufferedReader br = new BufferedReader(new FileReader(URLDecoder.decode(soundList.getFile(),"UTF-8"))))

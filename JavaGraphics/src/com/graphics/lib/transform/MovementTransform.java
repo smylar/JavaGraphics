@@ -60,7 +60,8 @@ public class MovementTransform extends Transform {
 	}
 
 	public void setSpeed(double speed) {
-		this.speed = speed;
+		//TODO extra work around negative speeds
+		this.speed = (this.maxSpeed > 0 && speed > maxSpeed) ? maxSpeed : speed;
 	}
 	
 	public double getDistanceMoved() {
