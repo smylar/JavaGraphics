@@ -2,11 +2,11 @@ package com.graphics.lib;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.graphics.lib.canvas.Canvas3D;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.graphics.lib.canvas.CanvasObject;
 
 public abstract class ObjectInputController<T extends CanvasObject> implements KeyListener {
@@ -24,27 +24,28 @@ public abstract class ObjectInputController<T extends CanvasObject> implements K
 	public static final String ROLL_RIGHT = "ROLL_RIGHT";
 	
 	protected T controlledObject;
-	protected Canvas3D cnv;
-	protected Map<Integer,Method> onPressMap = new HashMap<Integer,Method>();
-	protected Map<Integer,Method> onReleaseMap = new HashMap<Integer,Method>();
+
+	protected Map<Integer,KeyConfigurationItem> keyMap = new HashMap<Integer,KeyConfigurationItem>();
 	
-	public ObjectInputController(T controlledObject, Canvas3D cnv, KeyConfiguration config) throws Exception{
+	public ObjectInputController(T controlledObject, String resource) throws Exception{
 		this.controlledObject = controlledObject;
-		this.cnv = cnv;
-		for(KeyConfigurationItem item : config.getKeyList()){
-			Method[] methods = this.getClass().getMethods();
-			for (int i = 0 ; i < methods.length ; i++) //allow for case-less match
-			{
-				if (methods[i].getName().toLowerCase().equals(item.getMethodName().toLowerCase())){
-					if (item.getEventType() == KeyConfigurationItem.EVENT_TYPE.PRESS){
-						onPressMap.put(item.getKeyCode(), methods[i]);
-					}
-					else if (item.getEventType() == KeyConfigurationItem.EVENT_TYPE.RELEASE){
-						onReleaseMap.put(item.getKeyCode(), methods[i]);
-					}
-					break;
-				}
-			}
+		this.readResource(resource);
+	}
+	
+	public ObjectInputController(T controlledObject) throws Exception{
+		this.controlledObject = controlledObject;
+		this.readResource(this.getClass().getSimpleName() + ".kcf");
+	}
+	
+	public void readResource(String resource) throws Exception{
+		ObjectMapper mapper = new ObjectMapper();
+		JsonNode root = mapper.readTree(this.getClass().getResourceAsStream(resource));
+		KeyConfiguration config = mapper.readValue(root.at("/config").toString(), KeyConfiguration.class);
+		
+		for (KeyConfigurationItem item : config.getKeyList()){
+			item.setOnPressMethod(this.getClass());
+			item.setOnReleaseMethod(this.getClass());
+			keyMap.put(item.getKeyCode(), item);
 		}
 	}
 	
@@ -58,27 +59,17 @@ public abstract class ObjectInputController<T extends CanvasObject> implements K
 
 	@Override
 	public void keyPressed(KeyEvent key) {
-		Method m = this.onPressMap.get(key.getExtendedKeyCode());
-		if (m != null){
-			try {
-				m.invoke(this);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		KeyConfigurationItem item = this.keyMap.get(key.getExtendedKeyCode());
+		if (item != null){
+			item.invokePress(this);
 		}
 	}
 	
 	@Override
 	public void keyReleased(KeyEvent key) {
-		Method m = this.onReleaseMap.get(key.getExtendedKeyCode());
-		if (m != null){
-			try {
-				m.invoke(this);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		KeyConfigurationItem item = this.keyMap.get(key.getExtendedKeyCode());
+		if (item != null){
+			item.invokeRelease(this);
 		}
 	}
 	

@@ -18,7 +18,6 @@ import javax.swing.SwingUtilities;
 
 
 import com.graphics.lib.Facet;
-import com.graphics.lib.KeyConfiguration;
 import com.graphics.lib.Point;
 import com.graphics.lib.Utils;
 import com.graphics.lib.Vector;
@@ -236,6 +235,10 @@ public class GraphicsTest extends JFrame {
 			return cam.getOrientation().getForward();
 		}, shp));
 		
+		shp.addWeapon(new ProjectileWeapon(ep, leftOffset, () -> {
+			return cam.getOrientation().getForward();
+		}, shp));
+		
 		OrientableCanvasObject<Ship> ship = new OrientableCanvasObject<Ship>(shp);
 		ship.setColour(new Color(50, 50, 50));
 		ship.applyTransform(new Rotation<YRotation>(YRotation.class, 180));
@@ -323,7 +326,7 @@ public class GraphicsTest extends JFrame {
 		torus.registerPlugin(Events.EXPLODE, explode, false);
 		
 		try {
-			this.addKeyListener(new ShipControls(ship, cnv, new KeyConfiguration(this.getClass().getResourceAsStream("ShipControls.txt"))));
+			this.addKeyListener(new ShipControls(ship));
 		} catch (Exception e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

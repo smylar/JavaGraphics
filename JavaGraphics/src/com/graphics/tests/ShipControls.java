@@ -1,8 +1,8 @@
 package com.graphics.tests;
 
-import com.graphics.lib.KeyConfiguration;
+import java.util.List;
+
 import com.graphics.lib.ObjectInputController;
-import com.graphics.lib.canvas.Canvas3D;
 import com.graphics.lib.canvas.OrientableCanvasObject;
 import com.graphics.lib.transform.MovementTransform;
 import com.graphics.lib.transform.RepeatingTransform;
@@ -12,20 +12,13 @@ import com.graphics.lib.transform.XRotation;
 import com.graphics.lib.transform.YRotation;
 import com.graphics.lib.transform.ZRotation;
 import com.graphics.tests.shapes.Ship;
-import com.graphics.tests.weapons.BouncyProjectile;
-import com.graphics.tests.weapons.DeflectionProjectile;
-import com.graphics.tests.weapons.ExplodingProjectile;
-import com.graphics.tests.weapons.LaserWeapon;
-import com.graphics.tests.weapons.Projectile;
-import com.graphics.tests.weapons.ProjectileWeapon;
-import com.graphics.tests.weapons.TrackingProjectile;
 
 public class ShipControls extends ObjectInputController<OrientableCanvasObject<Ship>> {
 
 	Ship ship;
 	
-	public ShipControls(OrientableCanvasObject<Ship> controlledObject, Canvas3D cnv, KeyConfiguration config) throws Exception {
-		super(controlledObject, cnv, config);
+	public ShipControls(OrientableCanvasObject<Ship> controlledObject) throws Exception {
+		super(controlledObject);
 		ship = controlledObject.getObjectAs(Ship.class);
 	}
 
@@ -255,43 +248,20 @@ public class ShipControls extends ObjectInputController<OrientableCanvasObject<S
 		this.controlledObject.cancelNamedTransform(LEFT);
 	}
 	
-	public void fireLaser()
+	public void stopAll()
 	{
-		ship.getWeapons().forEach(w -> {
-			if (w instanceof LaserWeapon){
-				w.activate();
+		this.controlledObject.cancelTransforms();
+	}
+	
+	public void fireWeapon(List<String> params){
+		if (params == null) return;
+		for (String param : params)
+		{
+			int n = Integer.parseInt(param);
+			if (ship.getWeapons().size() > n && ship.getWeapons().get(n) != null){
+				ship.getWeapons().get(n).activate();
 			}
-		});
-	}
-	
-	public void fireBouncy()
-	{
-		fire(BouncyProjectile.class);
-	}
-	
-	public void fireDeflection()
-	{
-		fire(DeflectionProjectile.class);
-	}
-	
-	public void fireTracking()
-	{
-		fire(TrackingProjectile.class);
-	}
-	
-	public void fireExploding()
-	{
-		fire(ExplodingProjectile.class);
-	}
-	
-	public void fire(Class<? extends Projectile> cl){
-		ship.getWeapons().forEach(w -> {
-			if (w instanceof ProjectileWeapon){
-				if (((ProjectileWeapon)w).getProjectile().getClass().equals(cl) ){
-					w.activate();
-				}
-			}
-		});
+		}
 	}
 	
 	private MovementTransform getMovement(String tag){

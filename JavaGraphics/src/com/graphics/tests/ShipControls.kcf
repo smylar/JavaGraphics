@@ -1,0 +1,24 @@
+{ "config" :
+	{ "keyList" :
+		[
+			{ "keyCode" : "=", "onPress" : "increaseSpeed", "onRelease" : "stopAccelerating" },
+			{ "keyCode" : "-", "onPress" : "decreaseSpeed", "onRelease" : "stopAccelerating" },
+			{ "keyCode" : "0", "onPress" : "stopAll" },
+			{ "keyCode" : "w", "onPress" : "panDown", "onRelease" : "stopPanDown" },
+			{ "keyCode" : "s", "onPress" : "panUp", "onRelease" : "stopPanUp" },
+			{ "keyCode" : "d", "onPress" : "panRight", "onRelease" : "stopPanRight" },
+			{ "keyCode" : "a", "onPress" : "panLeft", "onRelease" : "stopPanLeft" },
+			{ "keyCode" : "q", "onPress" : "rollLeft", "onRelease" : "stopRollLeft" },
+			{ "keyCode" : "e", "onPress" : "rollRight", "onRelease" : "stopRollRight" },
+			{ "keyCode" : "38", "onPress" : "moveUp", "onRelease" : "stopMoveUp" },
+			{ "keyCode" : "39", "onPress" : "moveRight", "onRelease" : "stopMoveRight" },
+			{ "keyCode" : "40", "onPress" : "moveDown", "onRelease" : "stopMoveDown" },
+			{ "keyCode" : "37", "onPress" : "moveLeft", "onRelease" : "stopMoveLeft" },
+			{ "keyCode" : "r", "onPress" : "fireWeapon", "pressParams" : ["0"] },
+			{ "keyCode" : "b", "onPress" : "fireWeapon", "pressParams" : ["1"] },
+			{ "keyCode" : "u", "onPress" : "fireWeapon", "pressParams" : ["2"] },
+			{ "keyCode" : "t", "onPress" : "fireWeapon", "pressParams" : ["3"] },
+			{ "keyCode" : "f", "onPress" : "fireWeapon", "pressParams" : ["4","5"] }
+		]
+	}
+}
