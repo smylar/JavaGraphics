@@ -1,7 +1,8 @@
-package com.graphics.lib;
+package com.graphics.lib.control;
 
 import java.awt.event.KeyEvent;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.util.List;
 
 public class KeyConfigurationItem {
@@ -32,16 +33,8 @@ public class KeyConfigurationItem {
 	     }
 	}
 
-	public String getOnPress() {
-		return onPress;
-	}
-
 	public void setOnPress(String onPress) {
 		this.onPress = onPress;
-	}
-
-	public String getOnRelease() {
-		return onRelease;
 	}
 
 	public void setOnRelease(String onRelease) {
@@ -65,25 +58,20 @@ public class KeyConfigurationItem {
 	}
 	
 	public void invokePress(Object obj){
-		if (this.onPressMethod != null){
-			try {
-				if (this.onPressMethod.getParameterCount() > 0)
-					this.onPressMethod.invoke(obj, this.pressParams);
-				else
-					this.onPressMethod.invoke(obj);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
+		this.invoke(obj, onPressMethod, pressParams);
 	}
 	
 	public void invokeRelease(Object obj){
-		if (this.onReleaseMethod != null){
+		this.invoke(obj, onReleaseMethod, releaseParams);
+	}
+	
+	private void invoke(Object obj, Method method, List<String> params){
+		if (method != null && obj != null){
 			try {
-				if (this.onReleaseMethod.getParameterCount() > 0)
-					this.onReleaseMethod.invoke(obj, this.releaseParams);
-				else
-					this.onReleaseMethod.invoke(obj);
+				if (method.getParameterCount() == 1)
+					method.invoke(obj, params);
+				else if (method.getParameterCount() == 0)
+					method.invoke(obj);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -96,7 +84,9 @@ public class KeyConfigurationItem {
 		Method[] methods = cl.getMethods();
 		for (int i = 0 ; i < methods.length ; i++) //allow for case-less match
 		{
-			if (methods[i].getName().toLowerCase().equals(name.toLowerCase())){
+			if (methods[i].getName().toLowerCase().equals(name.toLowerCase()) && (methods[i].getParameterCount() == 0 ||
+					(methods[i].getParameterCount() == 1 && List.class.isAssignableFrom(methods[i].getParameters()[0].getType())
+							&& methods[i].getGenericParameterTypes().length == 1 && String.class.isAssignableFrom((Class<?>)((ParameterizedType)methods[i].getGenericParameterTypes()[0]).getActualTypeArguments()[0])))){
 				return methods[i];
 			}
 		}

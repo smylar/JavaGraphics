@@ -2,8 +2,7 @@ package com.graphics.tests;
 
 import java.util.List;
 
-import com.graphics.lib.ObjectInputController;
-import com.graphics.lib.canvas.OrientableCanvasObject;
+import com.graphics.lib.control.ObjectInputController;
 import com.graphics.lib.transform.MovementTransform;
 import com.graphics.lib.transform.RepeatingTransform;
 import com.graphics.lib.transform.Rotation;
@@ -13,21 +12,18 @@ import com.graphics.lib.transform.YRotation;
 import com.graphics.lib.transform.ZRotation;
 import com.graphics.tests.shapes.Ship;
 
-public class ShipControls extends ObjectInputController<OrientableCanvasObject<Ship>> {
+public class ShipControls extends ObjectInputController<Ship> {
 
-	Ship ship;
-	
-	public ShipControls(OrientableCanvasObject<Ship> controlledObject) throws Exception {
+	public ShipControls(Ship controlledObject) throws Exception {
 		super(controlledObject);
-		ship = controlledObject.getObjectAs(Ship.class);
 	}
 
 	public void increaseSpeed(){
-		getMovement(FORWARD).setAcceleration(ship.getAcceleration());
+		getMovement(FORWARD).setAcceleration(this.controlledObject.getAcceleration());
 	}
 	
 	public void decreaseSpeed(){
-		getMovement(FORWARD).setAcceleration(-ship.getAcceleration());
+		getMovement(FORWARD).setAcceleration(-this.controlledObject.getAcceleration());
 	}
 	
 	public void stopAccelerating(){
@@ -38,7 +34,7 @@ public class ShipControls extends ObjectInputController<OrientableCanvasObject<S
 	{
 		if (this.controlledObject.hasNamedTransform(PAN_RIGHT)) return;
 		
-		Rotation<?> r = new Rotation<YRotation>(YRotation.class, ship.getPanRate())
+		Rotation<?> r = new Rotation<YRotation>(YRotation.class, this.controlledObject.getPanRate())
 		{
 			@Override
 			public void beforeTransform(){
@@ -60,7 +56,7 @@ public class ShipControls extends ObjectInputController<OrientableCanvasObject<S
 	public void panLeft()
 	{
 		if (this.controlledObject.hasNamedTransform(PAN_LEFT)) return;
-		Rotation<?> r = new Rotation<YRotation>(YRotation.class, -ship.getPanRate())
+		Rotation<?> r = new Rotation<YRotation>(YRotation.class, -this.controlledObject.getPanRate())
 		{
 			@Override
 			public void beforeTransform(){
@@ -82,7 +78,7 @@ public class ShipControls extends ObjectInputController<OrientableCanvasObject<S
 	public void panDown()
 	{
 		if (this.controlledObject.hasNamedTransform(PAN_DOWN)) return;
-		Rotation<?> r = new Rotation<XRotation>(XRotation.class, -ship.getPanRate())
+		Rotation<?> r = new Rotation<XRotation>(XRotation.class, -this.controlledObject.getPanRate())
 		{
 			@Override
 			public void beforeTransform(){
@@ -104,7 +100,7 @@ public class ShipControls extends ObjectInputController<OrientableCanvasObject<S
 	public void panUp()
 	{
 		if (this.controlledObject.hasNamedTransform(PAN_UP)) return;
-		Rotation<?> r = new Rotation<XRotation>(XRotation.class, ship.getPanRate())
+		Rotation<?> r = new Rotation<XRotation>(XRotation.class, this.controlledObject.getPanRate())
 		{
 			@Override
 			public void beforeTransform(){
@@ -258,8 +254,8 @@ public class ShipControls extends ObjectInputController<OrientableCanvasObject<S
 		for (String param : params)
 		{
 			int n = Integer.parseInt(param);
-			if (ship.getWeapons().size() > n && ship.getWeapons().get(n) != null){
-				ship.getWeapons().get(n).activate();
+			if (this.controlledObject.getWeapons().size() > n && this.controlledObject.getWeapons().get(n) != null){
+				this.controlledObject.getWeapons().get(n).activate();
 			}
 		}
 	}

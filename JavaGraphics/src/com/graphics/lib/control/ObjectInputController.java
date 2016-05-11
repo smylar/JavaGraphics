@@ -1,4 +1,4 @@
-package com.graphics.lib;
+package com.graphics.lib.control;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -9,6 +9,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.graphics.lib.canvas.CanvasObject;
 
+/**
+ * Handles input that relates to a given object.
+ * Key configurations are held in a separate file to allow for key re-mapping.
+ * Key mappings detail which method is called within the concrete ObjectInputController object using that file
+ * 
+ * @author Paul Brandon
+ *
+ * @param <T> The object being controlled
+ */
 public abstract class ObjectInputController<T extends CanvasObject> implements KeyListener {
 	public static final String FORWARD = "FORWARD";
 	public static final String BACKWARD = "BACKWARD";
@@ -27,16 +36,36 @@ public abstract class ObjectInputController<T extends CanvasObject> implements K
 
 	protected Map<Integer,KeyConfigurationItem> keyMap = new HashMap<Integer,KeyConfigurationItem>();
 	
+	/**
+	 * Create controller for the controlled object using a given key mappings resource
+	 * 
+	 * @param controlledObject - The object being controlled
+	 * @param resource - Resource containing the key mappings
+	 * @throws Exception
+	 */
 	public ObjectInputController(T controlledObject, String resource) throws Exception{
 		this.controlledObject = controlledObject;
 		this.readResource(resource);
 	}
 	
+	/**
+	 * Create controller for the controlled object using default resource
+	 * (class name of the concrete ObjectInputController).kcf within the same package as that class
+	 * 
+	 * @param controlledObject - The object being controlled
+	 * @throws Exception
+	 */
 	public ObjectInputController(T controlledObject) throws Exception{
 		this.controlledObject = controlledObject;
 		this.readResource(this.getClass().getSimpleName() + ".kcf");
 	}
 	
+	/**
+	 * Read the key configuration resource into internal map
+	 * 
+	 * @param resource - The JSON file resource containing the key mappings
+	 * @throws Exception
+	 */
 	public void readResource(String resource) throws Exception{
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode root = mapper.readTree(this.getClass().getResourceAsStream(resource));
@@ -49,14 +78,16 @@ public abstract class ObjectInputController<T extends CanvasObject> implements K
 		}
 	}
 	
+	/**
+	 * @return The object being controlled by this controller
+	 */
 	public T getControlledObject() {
 		return controlledObject;
 	}
-	
-	public void setControlledObject(T controlledObject) {
-		this.controlledObject = controlledObject;
-	}
 
+	/**
+	 * Retrieve method for the pressed key from the map and invoke it if it exists
+	 */
 	@Override
 	public void keyPressed(KeyEvent key) {
 		KeyConfigurationItem item = this.keyMap.get(key.getExtendedKeyCode());
@@ -65,6 +96,9 @@ public abstract class ObjectInputController<T extends CanvasObject> implements K
 		}
 	}
 	
+	/**
+	 * Retrieve method for the released key from the map and invoke it if it exists
+	 */
 	@Override
 	public void keyReleased(KeyEvent key) {
 		KeyConfigurationItem item = this.keyMap.get(key.getExtendedKeyCode());
@@ -73,6 +107,9 @@ public abstract class ObjectInputController<T extends CanvasObject> implements K
 		}
 	}
 	
+	/**
+	 * Not used
+	 */
 	@Override
 	public void keyTyped(KeyEvent arg0) {}
 

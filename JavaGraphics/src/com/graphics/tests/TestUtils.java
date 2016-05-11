@@ -69,7 +69,7 @@ public class TestUtils {
 			g.drawLine(middleWidth, middleHeight - 5, middleWidth, middleHeight + 5);
 			
 			if (c.getCamera() instanceof ViewAngleCamera){	
-				g.drawString(""+((ViewAngleCamera)c.getCamera()).getViewAngle() , c.getWidth() - 30, c.getHeight() - 10);
+				g.drawString(""+((ViewAngleCamera)c.getCamera()).getViewAngle() , c.getWidth() - 30, c.getHeight() - 5);
 			}
 		};
 	}
@@ -88,11 +88,32 @@ public class TestUtils {
 			public Void execute(PlugableCanvasObject<?> obj) {
 				PluginLibrary.explode(Canvas3D.get().getLightSources()).execute(obj).forEach(c -> {
 					Canvas3D.get().replaceShader(obj, ShaderFactory.GetShader(ShaderFactory.ShaderEnum.FLAT));
-					c.registerPlugin(Events.STOP, PluginLibrary.stop(), false);
-					c.registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollided(getFilteredObjectList(), Events.STOP, null), true);
+					//c.registerPlugin(Events.STOP, PluginLibrary.stop(), false);
+					//c.registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollided(getFilteredObjectList(), Events.STOP, null), true);
+					c.registerPlugin(Events.CHECK_COLLISION, getBouncePlugin(), true);
 					if (!obj.hasFlag(SILENT_EXPLODE) && clipLibrary != null) clipLibrary.playSound("EXPLODE", -20f);
 				});
 				obj.registerSingleAfterDrawPlugin(Events.FLASH, PluginLibrary.flash(Canvas3D.get().getLightSources()));
+				return null;
+			}			
+		};
+	}
+	
+	public static IPlugin<PlugableCanvasObject<?>,Void> getBouncePlugin(){
+		return new IPlugin<PlugableCanvasObject<?>,Void>(){
+			@Override
+			public Void execute(PlugableCanvasObject<?> obj) {	
+				CanvasObject impactee = PluginLibrary.hasCollided(TestUtils.getFilteredObjectList(),null, null).execute(obj);
+				if (impactee != null){
+					if (impactee.hasFlag(Events.STICKY)){ 
+						obj.cancelTransforms();
+						//obj.observeAndMatch(impactee); 
+						//TODO needs to stop being a child of the original object, as observe and match also makes this fragment a child of impactee, get weird artifacts with the double processing
+					}
+					else {
+						PluginLibrary.bounce(impactee).execute(obj);
+					}
+				}
 				return null;
 			}			
 		};

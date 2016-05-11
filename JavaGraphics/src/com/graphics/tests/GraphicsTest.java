@@ -10,12 +10,11 @@ import java.awt.event.MouseEvent;
 import java.awt.BasicStroke;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
-
-
-
 
 import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
@@ -185,8 +184,8 @@ public class GraphicsTest extends JFrame {
 			return pos;
 		};
 		
-		Ship shp = new Ship (100, 100, 50);
-		shp.addWeapon(new LaserWeapon(() -> {
+		Ship ship = new Ship (100, 100, 50);
+		ship.addWeapon(new LaserWeapon(() -> {
 			Point pos = new Point(cnv.getCamera().getPosition());
 			Vector down = cam.getOrientation().getDown();
 			pos.x += down.x * 15;
@@ -196,13 +195,13 @@ public class GraphicsTest extends JFrame {
 		},
 		() -> {
 			return cam.getOrientation().getForward();
-		},shp));
+		},ship));
 		
 		Projectile bp = new BouncyProjectile();
 		bp.setClipLibary(clipLibrary);
-		shp.addWeapon(new ProjectileWeapon(bp, leftOffset, () -> {
+		ship.addWeapon(new ProjectileWeapon(bp, leftOffset, () -> {
 			return cam.getOrientation().getForward();
-		}, shp));
+		}, ship));
 		
 		DeflectionProjectile dp = new DeflectionProjectile();
 		dp.setSpeed(20);
@@ -211,9 +210,9 @@ public class GraphicsTest extends JFrame {
 		dp.setTargetFinder(() -> {
 			return this.selectedObject;
 		});
-		shp.addWeapon(new ProjectileWeapon(dp, leftOffset, () -> {
+		ship.addWeapon(new ProjectileWeapon(dp, leftOffset, () -> {
 			return cam.getOrientation().getForward();
-		}, shp));
+		}, ship));
 		
 		TrackingProjectile tp = new TrackingProjectile();
 		tp.setSpeed(20);
@@ -222,24 +221,23 @@ public class GraphicsTest extends JFrame {
 		tp.setTargetFinder(() -> {
 			return this.selectedObject;
 		});
-		shp.addWeapon(new ProjectileWeapon(tp, leftOffset, () -> {
+		ship.addWeapon(new ProjectileWeapon(tp, leftOffset, () -> {
 			return cam.getOrientation().getForward();
-		}, shp));
+		}, ship));
 		
 		ExplodingProjectile ep = new ExplodingProjectile();
 		ep.setSpeed(20);
 		ep.setRange(1200);
 		ep.setClipLibary(clipLibrary);
 
-		shp.addWeapon(new ProjectileWeapon(ep, rightOffset, () -> {
+		ship.addWeapon(new ProjectileWeapon(ep, rightOffset, () -> {
 			return cam.getOrientation().getForward();
-		}, shp));
+		}, ship));
 		
-		shp.addWeapon(new ProjectileWeapon(ep, leftOffset, () -> {
+		ship.addWeapon(new ProjectileWeapon(ep, leftOffset, () -> {
 			return cam.getOrientation().getForward();
-		}, shp));
+		}, ship));
 		
-		OrientableCanvasObject<Ship> ship = new OrientableCanvasObject<Ship>(shp);
 		ship.setColour(new Color(50, 50, 50));
 		ship.applyTransform(new Rotation<YRotation>(YRotation.class, 180));
 		ship.setOrientation(new SimpleOrientation(OrientableCanvasObject.ORIENTATION_TAG));
@@ -456,6 +454,18 @@ public class GraphicsTest extends JFrame {
 			g.setColor(Color.LIGHT_GRAY);
 			g.drawString(objectCounts.toString(), 40, c.getHeight()-5);
 		});*/
+		cnv.addDrawOperation((c, g) -> {
+			//more messing with collectors for ammo counts
+			Map<String, Integer> ammoCounts = ship.getWeapons().stream().filter(w -> w instanceof ProjectileWeapon)
+					.map(w -> (ProjectileWeapon)w).collect(
+						Collectors.groupingBy(w -> w.getProjectile().getClass().getSimpleName(), 
+								Collectors.summingInt(ProjectileWeapon::getAmmoCount))
+					);	
+			g.setColor(new Color(0,0,0,150));
+			g.fillRect(0, c.getHeight() - 20, c.getWidth(), 20);
+			g.setColor(Color.WHITE);
+			g.drawString(ammoCounts.toString(), 40, c.getHeight()-5);
+		});
 		
 		
 		cam.setTiedTo(ship, (o, c) -> {

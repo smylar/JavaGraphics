@@ -10,6 +10,7 @@ import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
+import com.graphics.lib.canvas.OrientableCanvasObject;
 import com.graphics.lib.canvas.PlugableCanvasObject;
 import com.graphics.lib.interfaces.IEffector;
 import com.graphics.lib.plugins.Events;
@@ -20,7 +21,7 @@ import com.graphics.lib.transform.Transform;
 import com.graphics.lib.transform.XRotation;
 import com.graphics.lib.transform.YRotation;
 
-public class Ship extends PlugableCanvasObject<Ship> {
+public class Ship extends OrientableCanvasObject<PlugableCanvasObject<Ship>> {
 	
 	private Facet wingFlashLeft;
 	private Facet wingFlashRight;
@@ -31,44 +32,45 @@ public class Ship extends PlugableCanvasObject<Ship> {
 	
 	public Ship(int width, int depth, int height)
 	{
-		super();
-		this.getVertexList().add(new WorldCoord(0, 0, 0));
-		this.getVertexList().add(new WorldCoord(width/2, 0, depth));
-		this.getVertexList().add(new WorldCoord(-width/2, 0, depth));
-		this.getVertexList().add(new WorldCoord(0, height/2, depth * 0.8));
-		this.getVertexList().add(new WorldCoord(0, -height/2, depth * 0.8));
+		//super();
+		PlugableCanvasObject<Ship> ship = new PlugableCanvasObject<Ship>();
+		ship.getVertexList().add(new WorldCoord(0, 0, 0));
+		ship.getVertexList().add(new WorldCoord(width/2, 0, depth));
+		ship.getVertexList().add(new WorldCoord(-width/2, 0, depth));
+		ship.getVertexList().add(new WorldCoord(0, height/2, depth * 0.8));
+		ship.getVertexList().add(new WorldCoord(0, -height/2, depth * 0.8));
 		
-		this.getVertexList().add(new WorldCoord(0, 0, depth/2)); //centre point
+		ship.getVertexList().add(new WorldCoord(0, 0, depth/2)); //centre point
 		
-		this.getVertexList().add(new WorldCoord(width/2, 5, depth - 5));
-		this.getVertexList().add(new WorldCoord(width/2, -5, depth - 5)); //wing flash left
+		ship.getVertexList().add(new WorldCoord(width/2, 5, depth - 5));
+		ship.getVertexList().add(new WorldCoord(width/2, -5, depth - 5)); //wing flash left
 		
-		this.getVertexList().add(new WorldCoord(-width/2, 5, depth - 5));
-		this.getVertexList().add(new WorldCoord(-width/2, -5, depth - 5)); //wing flash left
+		ship.getVertexList().add(new WorldCoord(-width/2, 5, depth - 5));
+		ship.getVertexList().add(new WorldCoord(-width/2, -5, depth - 5)); //wing flash left
 		
-		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(1), this.getVertexList().get(4)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(3), this.getVertexList().get(1)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(4), this.getVertexList().get(2)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(2), this.getVertexList().get(3)));
+		ship.getFacetList().add(new Facet(ship.getVertexList().get(0), ship.getVertexList().get(1), ship.getVertexList().get(4)));
+		ship.getFacetList().add(new Facet(ship.getVertexList().get(0), ship.getVertexList().get(3), ship.getVertexList().get(1)));
+		ship.getFacetList().add(new Facet(ship.getVertexList().get(0), ship.getVertexList().get(4), ship.getVertexList().get(2)));
+		ship.getFacetList().add(new Facet(ship.getVertexList().get(0), ship.getVertexList().get(2), ship.getVertexList().get(3)));
 		
-		this.getFacetList().add(new Facet(this.getVertexList().get(1), this.getVertexList().get(3), this.getVertexList().get(4)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(2), this.getVertexList().get(4), this.getVertexList().get(3)));
+		ship.getFacetList().add(new Facet(ship.getVertexList().get(1), ship.getVertexList().get(3), ship.getVertexList().get(4)));
+		ship.getFacetList().add(new Facet(ship.getVertexList().get(2), ship.getVertexList().get(4), ship.getVertexList().get(3)));
 		
-		wingFlashLeft = new Facet(this.getVertexList().get(1), this.getVertexList().get(7), this.getVertexList().get(6));
+		wingFlashLeft = new Facet(ship.getVertexList().get(1), ship.getVertexList().get(7), ship.getVertexList().get(6));
 		wingFlashLeft.setColour(Color.MAGENTA);
 		wingFlashLeft.setBaseIntensity(1);
-		this.getFacetList().add(wingFlashLeft);
+		ship.getFacetList().add(wingFlashLeft);
 		
-		wingFlashRight = new Facet(this.getVertexList().get(2), this.getVertexList().get(8), this.getVertexList().get(9));
+		wingFlashRight = new Facet(ship.getVertexList().get(2), ship.getVertexList().get(8), ship.getVertexList().get(9));
 		wingFlashRight.setColour(Color.MAGENTA);
 		wingFlashRight.setBaseIntensity(1);
-		this.getFacetList().add(wingFlashRight);
+		ship.getFacetList().add(wingFlashRight);
 		
-		this.getFacetList().get(4).setColour(Color.YELLOW);
-		this.getFacetList().get(5).setColour(Color.YELLOW);
+		ship.getFacetList().get(4).setColour(Color.YELLOW);
+		ship.getFacetList().get(5).setColour(Color.YELLOW);
 		
 		//self registering - based on trail plugin from plugin library
-		this.registerPlugin("TRAIL", 
+		ship.registerPlugin("TRAIL", 
 
 					(obj) -> {
 						Optional<MovementTransform> movement = obj.getTransformsOfType(MovementTransform.class).stream().findFirst();
@@ -109,6 +111,7 @@ public class Ship extends PlugableCanvasObject<Ship> {
 					}
 
 				, true);
+		this.setWrappedObject(ship);
 
 	}
 	

@@ -78,9 +78,11 @@ public class ZBufferItem
 	{	
 		if (items.isEmpty() || z < items.firstKey()){
 			topMostObject = obj;
+			items.put(z, colour);
+			active = true;
+		}else if (items.firstEntry().getValue().getAlpha() < 255){
+			items.put(z, colour);
 		}
-		items.put(z, colour);
-		active = true;
 	}
 	
 	public void clear(){

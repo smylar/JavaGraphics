@@ -146,9 +146,14 @@ public class ZBuffer implements IZBuffer{
 	{	
 		if (z < 0) return;
 		
-		ZBufferItem bufferItem = this.zBuffer.get(x).get(y);
-		
-		bufferItem.add(parent, z, colour);
+		try{
+			ZBufferItem bufferItem = this.zBuffer.get(x).get(y);
+			bufferItem.add(parent, z, colour);
+		}catch(Exception e){
+			//e.printStackTrace();
+			//think it sometimes initially sets buffer of wrong size - JComponents taking their time to report their height etc.
+			//is nearly always sorted out in the second cycle though as canvas3d does check if the dimensions have changed
+		}
 	}
 		
 

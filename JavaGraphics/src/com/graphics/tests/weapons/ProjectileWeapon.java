@@ -2,10 +2,10 @@ package com.graphics.tests.weapons;
 
 import java.util.Optional;
 
-import com.graphics.lib.ObjectInputController;
 import com.graphics.lib.Point;
 import com.graphics.lib.canvas.Canvas3D;
 import com.graphics.lib.canvas.CanvasObject;
+import com.graphics.lib.control.ObjectInputController;
 import com.graphics.lib.interfaces.IEffector;
 import com.graphics.lib.interfaces.IPointFinder;
 import com.graphics.lib.interfaces.IVectorFinder;

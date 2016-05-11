@@ -10,14 +10,18 @@ public class CanvasObjectWrapper<T extends CanvasObject> extends CanvasObject {
 	
 	public CanvasObjectWrapper(T obj)
 	{
-		wrappedObject = obj;
-		this.setData(obj.getData());
+		this.setWrappedObject(obj);
 	}
 	
 	@Override
 	protected T getWrappedObject()
 	{
 		return wrappedObject;
+	}
+	
+	protected void setWrappedObject(T obj){
+		wrappedObject = obj;
+		this.setData(obj.getData());
 	}
 
 }

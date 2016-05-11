@@ -1,4 +1,4 @@
-package com.graphics.lib;
+package com.graphics.lib.control;
 
 import java.util.ArrayList;
 import java.util.List;
