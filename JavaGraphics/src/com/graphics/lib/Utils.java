@@ -1,9 +1,13 @@
 package com.graphics.lib;
 
+import java.awt.Color;
+import java.awt.Graphics;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
+import com.graphics.lib.canvas.Canvas3D;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.interfaces.ICanvasObjectList;
 import com.graphics.lib.interfaces.ILightIntensityFinder;
@@ -237,4 +241,37 @@ public class Utils {
 		Point anchor = obj.getAnchorPoint();
 		obj.applyTransform(new Translation(p.x - anchor.x, p.y - anchor.y, p.z - anchor.z));
 	}
+	
+	public static BiConsumer<Canvas3D, Graphics> drawCircle(int x, int y, int radius, Color startColour, Color endColour){
+		//drawing a circle without using drawCircle, just because :)
+		return (c,g) ->{
+			double rs = Math.pow(radius,2);
+			int redDiff = endColour.getRed() - startColour.getRed();
+			int blueDiff = endColour.getBlue() - startColour.getBlue();
+			int greenDiff = endColour.getGreen() - startColour.getGreen();
+			int alphaDiff = endColour.getAlpha() - startColour.getAlpha();
+			for(int i = 0 ; i <= radius ; i++)
+			{
+				int length = (int)Math.round(Math.sqrt(rs - Math.pow(i,2))) ;
+				for (int j = 0 ; j <= length ; j++ ){
+					double pc = Math.sqrt(Math.pow(j, 2) + Math.pow(i, 2)) / (double)radius;
+					if (pc > 1) pc = 1;
+					int cRed = (int)Math.floor(startColour.getRed() + ((double)redDiff * pc));
+					int cGreen = (int)Math.floor(startColour.getGreen() + ((double)greenDiff * pc));
+					int cBlue = (int)Math.floor(startColour.getBlue() + ((double)blueDiff * pc));
+					int cAlpha = (int)Math.floor(startColour.getAlpha() + ((double)alphaDiff * pc));
+			
+					g.setColor(new Color(cRed, cGreen, cBlue, cAlpha));
+			
+					g.drawLine(x+j, y-i, x+j, y-i); 
+					g.drawLine(x+j, y+i, x+j, y+i);
+					g.drawLine(x-j, y-i, x-j, y-i); 
+					g.drawLine(x-j, y+i, x-j, y+i); 
+					//this will form a crosshair when using different alpha values, as we'll be drawing twice in some cases (unless we check for j = 0 etc)
+					//is a nice effect so keeping for now
+				}
+			}
+		};
+	}
+
 }

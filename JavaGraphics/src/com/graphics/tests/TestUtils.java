@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
+import com.graphics.lib.Utils;
 import com.graphics.lib.camera.ViewAngleCamera;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.Canvas3D;
@@ -65,8 +66,9 @@ public class TestUtils {
 			
 			g.setColor(Color.black);
 			//System.out.println(middleWidth + ":" + middleHeight);
-			g.drawLine(middleWidth - 5, middleHeight, middleWidth + 5, middleHeight);
-			g.drawLine(middleWidth, middleHeight - 5, middleWidth, middleHeight + 5);
+			//g.drawLine(middleWidth - 5, middleHeight, middleWidth + 5, middleHeight);
+			//g.drawLine(middleWidth, middleHeight - 5, middleWidth, middleHeight + 5);
+			Utils.drawCircle(middleWidth, middleHeight, 20, new Color(255,0,0), new Color(0,255,0,0)).accept(c, g);
 			
 			if (c.getCamera() instanceof ViewAngleCamera){	
 				g.drawString(""+((ViewAngleCamera)c.getCamera()).getViewAngle() , c.getWidth() - 30, c.getHeight() - 5);
