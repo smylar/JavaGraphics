@@ -48,11 +48,16 @@ public class ZBufferItem
 	 * @return
 	 */
 	public Color getColour() {
+		if (items.isEmpty()) return null;
+		Color first = items.firstEntry().getValue();
+		if (items.size() == 1 || first.getAlpha() == 255) return first;
+		
 		//N.B. TreeMap will automatically order lowest to highest key (natural ordering)
 		int red = 0;
 		int green = 0;
 		int blue = 0;
 		int alpha = 0;
+		
 		for (Color c : items.values()){
 			if (c.getAlpha() > alpha) alpha = c.getAlpha();
 			red += ((double)c.getRed() / 255) * c.getAlpha();
@@ -66,6 +71,9 @@ public class ZBufferItem
 		if (blue > 255) blue = 255;
 		
 		return new Color(red, green, blue, alpha);
+		
+		//have just tried drawing the pixels with transparency on top of each other instead of working out a modified colour
+		//but does cause a bigger performance penalty when a transparent object takes up a significant portion of the screen
 	}
 	
 	/**

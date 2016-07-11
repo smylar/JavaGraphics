@@ -109,7 +109,7 @@ public class Facet {
 	 * @return Normal Vector
 	 */
 	public Vector getTransformedNormal(Camera c){
-		 Vector vector1 = new Vector(point2.getTransformed(c).x - point1.getTransformed(c).x, point2.getTransformed(c).y - point1.getTransformed(c).y, point1.getTransformed(c).z - point1.getTransformed(c).z);
+		 Vector vector1 = new Vector(point2.getTransformed(c).x - point1.getTransformed(c).x, point2.getTransformed(c).y - point1.getTransformed(c).y, point2.getTransformed(c).z - point1.getTransformed(c).z);
 		 Vector vector2 = new Vector(point3.getTransformed(c).x - point1.getTransformed(c).x, point3.getTransformed(c).y - point1.getTransformed(c).y, point3.getTransformed(c).z - point1.getTransformed(c).z);
 		 
 		 Vector normal = vector1.crossProduct(vector2);

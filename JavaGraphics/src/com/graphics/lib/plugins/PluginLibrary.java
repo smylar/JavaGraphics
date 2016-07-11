@@ -235,7 +235,8 @@ public class PluginLibrary {
 			//find impacted points and use the one that was nearest the impactee before hitting it, then find the facet it hit and reflect
 			//the movement vector using the normal of that facet.
 			//It's not entirely perfect, because we don't have infinite normals, you can see this if you hit a sphere dead on with another sphere,
-			//it won't come straight back as it would in reality, as we don't necessarily have a normal that is pointing straight back to use
+			//it won't come straight back as it would in reality, as we don't necessarily have a normal that is pointing straight back to use.
+			//However, we could add another plugin for spheres, the normal is then the vector from centre to impact point
 			
 			Set<WorldCoord> impactPoints = obj.getVertexList().stream().filter(p -> impactee.isPointInside(p)).collect(Collectors.toSet());
 			if (impactPoints.size() == 0) return null;

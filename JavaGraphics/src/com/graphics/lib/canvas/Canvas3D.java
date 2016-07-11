@@ -232,13 +232,15 @@ public class Canvas3D extends JPanel{
 		}
 		
 		processShapes.parallelStream().forEach(s -> {
+			s.onDrawComplete();
+		});
+		
+		processShapes.parallelStream().forEach(s -> {
 			this.processShape(s, this.zBuffer, getShader(s));
 			this.slaves.forEach(sl -> sl.update(this, s));
 		});
 		
-		processShapes.parallelStream().forEach(s -> {
-				s.onDrawComplete();
-		});
+		
 		
 		this.setOkToPaint(true);
 		this.repaint(); 

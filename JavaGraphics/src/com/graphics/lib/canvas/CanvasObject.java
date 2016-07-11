@@ -560,23 +560,24 @@ public class CanvasObject extends Observable{
 	}
 	
 	/**
-	 * Get list of all intersected facets that a vector from a given point intersects.
+	 * Get map of all intersected facets that a vector from a given point intersects, and the point on the facet at which it intersects.
 	 * 
 	 * @param start	- Start point of the vector
 	 * @param v		- The vector
 	 * @return		- List of intersected facets
 	 */
-	public List<Facet> getIntersectedFacets(Point start, Vector v)
+	public Map<Facet, Point> getIntersectedFacets(Point start, Vector v)
 	{
 		if (this.getBaseObject() != this) return this.getBaseObject().getIntersectedFacets(start, v);
-		List<Facet> list = new ArrayList<Facet>();
+		Map<Facet,Point> list = new HashMap<Facet,Point>();
 
 		if (!vectorIntersectsRoughly(start, v)) return list;
 		
 		for (Facet f : this.getFacetList())
 		{
-			if (f.isPointWithin(f.getIntersectionPointWithFacetPlane(start, v, true))){
-				list.add(f);
+			Point intersect = f.getIntersectionPointWithFacetPlane(start, v, true);
+			if (f.isPointWithin(intersect)){
+				list.put(f, intersect);
 			}
 		}
 		return list;

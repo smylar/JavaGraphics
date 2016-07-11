@@ -1,5 +1,7 @@
 package com.graphics.tests.weapons;
 
+import java.util.Map.Entry;
+
 import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
@@ -11,6 +13,7 @@ import com.graphics.lib.interfaces.IPointFinder;
 import com.graphics.lib.interfaces.IVectorFinder;
 import com.graphics.lib.orientation.OrientationTransform;
 import com.graphics.lib.transform.Rotation;
+import com.graphics.lib.collectors.NearestIntersectedFacetFinder;
 import com.graphics.tests.TestUtils;
 
 public class LaserWeapon implements IEffector {
@@ -38,30 +41,39 @@ public class LaserWeapon implements IEffector {
 		laser.addFlag("PHASED");
 		Point pos = origin.find();
 		
-		Vector v = effectVector.getVector();
 		for (Rotation<?> r : OrientationTransform.getRotationsForVector(effectVector.getVector())){
 			lsr.applyTransform(r);
 		}
-
-		Canvas3D.get().registerObject(laser, pos);
-		laser.observeAndMatch(parent);
 		
 		laser.registerPlugin("LASER", 
 				(obj) -> {
+						Vector v = effectVector.getVector();
 						LaserEffect l = obj.getObjectAs(LaserEffect.class);
 						if (l != null){
-							for (CanvasObject screenObjects : TestUtils.getFilteredObjectList().get()){
-								for (Facet f : screenObjects.getIntersectedFacets(l.getAnchorPoint(), v))
+							Entry<Double,Facet> f = TestUtils.getFilteredObjectList().get().stream().collect(new NearestIntersectedFacetFinder<>(v,l.getAnchorPoint(),l.getLength()));
+							if (f != null)
+							{
+								f.getValue().setMaxIntensity(f.getValue().getMaxIntensity() - 0.15);
+								l.setCurLength(f.getKey());
+							}else{
+								l.resetLength();
+							}
+							
+							/*for (CanvasObject screenObjects : TestUtils.getFilteredObjectList().get()){
+								for (Entry<Facet, Point> f : screenObjects.getIntersectedFacets(l.getAnchorPoint(), v).entrySet())
 								{
-									if (f != null && f.getAsList().stream().mapToDouble(p -> p.distanceTo(l.getAnchorPoint())).average().getAsDouble() < l.getLength() ){
-										f.setMaxIntensity(f.getMaxIntensity() - 0.15);
+									if (f != null && f.getValue().distanceTo(l.getAnchorPoint()) < l.getLength() ){
+										f.getKey().setMaxIntensity(f.getKey().getMaxIntensity() - 0.15);
 										//as an aspiration - create dynamic texture map for laser 'holes'
 									}
 								}
-							}
+							}*/
 						}
 						return null;
 		},true);
+		
+		Canvas3D.get().registerObject(laser, pos);
+		laser.observeAndMatch(parent);
 		this.laserEffect = lsr;
 	}
 

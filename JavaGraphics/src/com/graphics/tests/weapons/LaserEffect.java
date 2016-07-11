@@ -1,8 +1,9 @@
 package com.graphics.tests.weapons;
 
 import java.awt.Color;
-
 import com.graphics.lib.Facet;
+import com.graphics.lib.Vector;
+import com.graphics.lib.WorldCoord;
 import com.graphics.lib.transform.Rotation;
 import com.graphics.lib.transform.XRotation;
 import com.graphics.shapes.Cylinder;
@@ -12,11 +13,15 @@ public class LaserEffect extends Cylinder {
 	private int tickLife = 15;
 	private int currentTick = 0;
 	private double length = 1000;
+	private double curLength = 1000;
 	private Cylinder subCylinder;
+	private WorldCoord startPoint;
+	private WorldCoord endPoint;
 	
 	public LaserEffect(double length) {
 		super(2, length , 36);
 		this.length = length;
+		this.curLength = length;
 		this.setColour(new Color(255, 0, 255, 100));
 		this.setCastsShadow(false);
 		this.setBaseIntensity(1);
@@ -29,12 +34,21 @@ public class LaserEffect extends Cylinder {
 		}
 		
 		this.getVertexList().addAll(subCylinder.getVertexList());
+		
 		this.getFacetList().addAll(subCylinder.getFacetList());
 		
 		//rotate from upright to forwards
 		this.addTransform(new Rotation<XRotation>(XRotation.class, 90));
 		this.applyTransforms();
-		this.setAnchorPoint(this.getVertexList().get(0));
+		
+		startPoint = new WorldCoord(0,0,0);
+		startPoint.addTag("laserStartMarker");
+		endPoint = new WorldCoord(0,0,length);
+		endPoint.addTag("laserEndMarker");
+		this.getVertexList().add(startPoint);
+		this.getVertexList().add(endPoint);
+		
+		this.setAnchorPoint(startPoint);
 	}
 
 	public int getTickLife() {
@@ -59,8 +73,28 @@ public class LaserEffect extends Cylinder {
 	}
 
 	public double getLength() {
-		return length;
+		return this.length;
 	}
 
+	public void setCurLength(double length)
+	{
+		this.curLength = length;
+		Vector v = startPoint.vectorToPoint(endPoint).getUnitVector();
+		for(int i = 1 ; i < this.getVertexList().size() ; i+=2)
+		{
+			WorldCoord wc = this.getVertexList().get(i);
+			if (wc.hasTag("laserEndMarker")) continue;
+			
+			WorldCoord wcprev = this.getVertexList().get(i-1);
+			wc.x = wcprev.x + (v.x * length);
+			wc.y = wcprev.y + (v.y * length);
+			wc.z = wcprev.z + (v.z * length);
+		}
+	}
+
+	public void resetLength() {
+		if (curLength != this.length) setCurLength(this.length);
+		
+	}
 	
 }
