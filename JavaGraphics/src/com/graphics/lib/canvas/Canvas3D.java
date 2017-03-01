@@ -16,10 +16,11 @@ import javax.swing.JPanel;
 import com.graphics.lib.Facet;
 import com.graphics.lib.GeneralPredicates;
 import com.graphics.lib.Point;
-import com.graphics.lib.Utils;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
+import com.graphics.lib.ZBufferEnum;
 import com.graphics.lib.camera.Camera;
+import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ICanvasUpdateListener;
 import com.graphics.lib.interfaces.IZBuffer;
 import com.graphics.lib.lightsource.ILightSource;
@@ -38,7 +39,7 @@ public class Canvas3D extends JPanel{
 	private static final long serialVersionUID = 1L;
 	private static Canvas3D cnv = null;
 	
-	private Map<CanvasObject, IShader> shapes = Collections.synchronizedMap(new HashMap<CanvasObject, IShader>());
+	private Map<ICanvasObject, IShader> shapes = Collections.synchronizedMap(new HashMap<ICanvasObject, IShader>());
 	
 	private Set<ILightSource> lightSources = new HashSet<ILightSource>(); 
 	private Set<ILightSource> lightSourcesToAdd = Collections.synchronizedSet(new HashSet<ILightSource>()); 
@@ -103,15 +104,15 @@ public class Canvas3D extends JPanel{
 		if (lightSource != null) this.lightSourcesToAdd.add(lightSource);
 	}
 	
-	public Set<CanvasObject> getShapes() {
+	public Set<ICanvasObject> getShapes() {
 		return shapes.keySet();
 	}
 	
-	public IShader getShader(CanvasObject obj){
+	public IShader getShader(ICanvasObject obj){
 		return shapes.get(obj);
 	}
 	
-	public void replaceShader(CanvasObject obj, IShader shader){
+	public void replaceShader(ICanvasObject obj, IShader shader){
 		this.shapes.replace(obj, shader);
 	}
 
@@ -147,7 +148,7 @@ public class Canvas3D extends JPanel{
 		this.okToPaint = okToPaint;
 	}
 	
-	public CanvasObject getObjectAt(int x, int y){
+	public ICanvasObject getObjectAt(int x, int y){
 		if (zBuffer == null) return null;
 		
 		ZBufferItem item = zBuffer.getItemAt(x, y);
@@ -184,7 +185,7 @@ public class Canvas3D extends JPanel{
 	public void registerObject(CanvasObject obj, Point position, IShader shader)
 	{
 		if (this.shapes.containsKey(obj)) return;
-		Utils.moveTo(obj, position);
+		CanvasObjectFunctions.DEFAULT.get().moveTo(obj, position);
 		this.shapes.put(obj, shader);
 	}
 	
@@ -206,14 +207,14 @@ public class Canvas3D extends JPanel{
 		}
 		
 		if (this.zBuffer == null)
-			this.zBuffer = Utils.getDefaultZBuffer();
+			this.zBuffer = ZBufferEnum.DEFAULT.get();
 		
 		this.zBuffer.setDimensions(this.getWidth(), this.getHeight());
 		this.camera.setViewport(this.getWidth(), this.getHeight());
 		
 		this.lightSources.removeIf(l -> l.isDeleted());
 		
-		Set<CanvasObject> processShapes = new HashSet<CanvasObject>(this.getShapes());
+		Set<ICanvasObject> processShapes = new HashSet<>(this.getShapes());
 		processShapes.stream().filter(s -> s.isDeleted()).forEach(s -> this.shapes.remove(s));
 		processShapes.removeIf(s -> s.isDeleted() || s.isObserving());
 
@@ -256,7 +257,7 @@ public class Canvas3D extends JPanel{
 	 * @param zBuf	Z Buffer to update
 	 * @param shader	Shader to draw pixels with
 	 */
-	private void processShape(CanvasObject obj, IZBuffer zBuf, IShader shader)
+	private void processShape(ICanvasObject obj, IZBuffer zBuf, IShader shader)
 	{
 		if (obj.isVisible() && !obj.isDeleted())
 		{
@@ -265,17 +266,17 @@ public class Canvas3D extends JPanel{
 			zBuf.Add(obj, shader, this.camera, this.horizon);
 		}
 		
-		for (CanvasObject child : new ArrayList<CanvasObject>(obj.getChildren()))
+		for (ICanvasObject child : new ArrayList<CanvasObject>(obj.getChildren()))
 		{
 			this.processShape(child, zBuf, shapes.containsKey(child) ? getShader(child) : shader);
 		}
 	}
 	
-	private void processShape(CanvasObject obj)
+	private void processShape(ICanvasObject obj)
 	{
 		obj.applyTransforms();
 		
-		for (CanvasObject child : new ArrayList<CanvasObject>(obj.getChildren()))
+		for (ICanvasObject child : new ArrayList<CanvasObject>(obj.getChildren()))
 		{
 			this.processShape(child);
 		}
@@ -291,7 +292,7 @@ public class Canvas3D extends JPanel{
 	 * @param obj	Object to project a shadow for
 	 * @return		Set of generated shadow objects
 	 */
-	private Set<CanvasObject> getShadowOnFloor(CanvasObject obj){	
+	private Set<CanvasObject> getShadowOnFloor(ICanvasObject obj){	
 		Set<CanvasObject> shadows = new HashSet<CanvasObject>();
 		if (floor == null || !obj.getCastsShadow()) return shadows;
 		

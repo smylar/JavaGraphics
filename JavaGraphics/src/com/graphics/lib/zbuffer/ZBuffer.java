@@ -11,7 +11,7 @@ import com.graphics.lib.LineEquation;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.camera.Camera;
-import com.graphics.lib.canvas.CanvasObject;
+import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IZBuffer;
 import com.graphics.lib.shader.IShader;
 
@@ -19,7 +19,7 @@ public class ZBuffer implements IZBuffer{
 	private List<List<ZBufferItem>> zBuffer;
 	private int dispWidth;
 	private int dispHeight;
-	private int skip = 1; //controls how often we do a colour calculation, a value of 1 checks all lines, whereas 3 calculates every 3rd line and intervening points use the same as the last calculated point
+	private int skip = 2; //controls how often we do a colour calculation, a value of 1 checks all lines, whereas 3 calculates every 3rd line and intervening points use the same as the last calculated point
 
 	
 	public int getSkip() {
@@ -34,7 +34,6 @@ public class ZBuffer implements IZBuffer{
 	public ZBufferItem getItemAt(int x, int y){
 		if (zBuffer == null) return null;
 		
-		//HashMap<Integer,ZBufferItem> xCol = zBuffer.get(x);
 		List<ZBufferItem> xCol = zBuffer.get(x);
 		if (xCol == null) return null;
 		
@@ -47,7 +46,7 @@ public class ZBuffer implements IZBuffer{
 	 * Override notes: A null shader here will mean that the facets specified colour will be used
 	 */
 	@Override
-	public void Add(CanvasObject obj, IShader shader, Camera c, double horizon)
+	public void Add(ICanvasObject obj, IShader shader, Camera c, double horizon)
 	{
 		/*Stream<Facet> facetStream = obj.getFacetList().parallelStream();
 		if (!obj.isProcessBackfaces()){
@@ -60,7 +59,7 @@ public class ZBuffer implements IZBuffer{
 	}
 	
 	
-	private void Add(Facet facet, CanvasObject parent, IShader shader, Camera c)
+	private void Add(Facet facet, ICanvasObject parent, IShader shader, Camera c)
 	{
 		if (zBuffer == null) return;
 		
@@ -142,7 +141,7 @@ public class ZBuffer implements IZBuffer{
 		return zBuffer;
 	}
 
-	private void addToBuffer(CanvasObject parent, Integer x, Integer y, double z, Color colour)
+	private void addToBuffer(ICanvasObject parent, Integer x, Integer y, double z, Color colour)
 	{	
 		if (z < 0) return;
 		
@@ -160,7 +159,7 @@ public class ZBuffer implements IZBuffer{
 	private ScanLine getScanline(int xVal, List<LineEquation> lines)
 	{
 		ScanLine scanLine = new ScanLine();
-		List<LineEquation> activeLines = new ArrayList<LineEquation>();
+		List<LineEquation> activeLines = new ArrayList<>();
 		for(LineEquation line : lines)
 		{
 			if (xVal >= line.getMinX() && xVal <= line.getMaxX())
@@ -248,10 +247,10 @@ public class ZBuffer implements IZBuffer{
 			this.dispHeight = height;
 			this.dispWidth = width;
 
-			zBuffer = new ArrayList<List<ZBufferItem>>();
+			zBuffer = new ArrayList<>();
 			
 			for (int x = 0 ; x < width + 1 ; x++){
-				ArrayList<ZBufferItem> list = new ArrayList<ZBufferItem>();
+				ArrayList<ZBufferItem> list = new ArrayList<>();
 				for (int y = 0 ; y < height + 1 ; y++){
 					list.add(new ZBufferItem(x, y));
 				}

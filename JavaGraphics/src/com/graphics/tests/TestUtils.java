@@ -8,10 +8,10 @@ import java.util.stream.Collectors;
 
 import com.graphics.lib.Utils;
 import com.graphics.lib.camera.ViewAngleCamera;
-import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.Canvas3D;
-import com.graphics.lib.canvas.PlugableCanvasObject;
+import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ICanvasObjectList;
+import com.graphics.lib.interfaces.IPlugable;
 import com.graphics.lib.plugins.Events;
 import com.graphics.lib.plugins.IPlugin;
 import com.graphics.lib.plugins.PluginLibrary;
@@ -78,16 +78,16 @@ public class TestUtils {
 	
 	public static ICanvasObjectList getFilteredObjectList(){
 		return () -> {
-			if (Canvas3D.get() == null) return new ArrayList<CanvasObject>();
+			if (Canvas3D.get() == null) return new ArrayList<ICanvasObject>();
 			return Canvas3D.get().getShapes().stream().filter(s -> s.isVisible() && !s.isDeleted() && !s.hasFlag("PHASED")).collect(Collectors.toList());
 			};
 	}
 	
-	public static IPlugin<PlugableCanvasObject<?>,Void> getExplodePlugin(ClipLibrary clipLibrary)
+	public static IPlugin<IPlugable,Void> getExplodePlugin(ClipLibrary clipLibrary)
 	{
-		return new IPlugin<PlugableCanvasObject<?>,Void>(){
+		return new IPlugin<IPlugable,Void>(){
 			@Override
-			public Void execute(PlugableCanvasObject<?> obj) {
+			public Void execute(IPlugable obj) {
 				PluginLibrary.explode(Canvas3D.get().getLightSources()).execute(obj).forEach(c -> {
 					Canvas3D.get().replaceShader(obj, ShaderFactory.GetShader(ShaderFactory.ShaderEnum.FLAT));
 					//c.registerPlugin(Events.STOP, PluginLibrary.stop(), false);
@@ -101,11 +101,11 @@ public class TestUtils {
 		};
 	}
 	
-	public static IPlugin<PlugableCanvasObject<?>,Void> getBouncePlugin(){
-		return new IPlugin<PlugableCanvasObject<?>,Void>(){
+	public static IPlugin<IPlugable,Void> getBouncePlugin(){
+		return new IPlugin<IPlugable,Void>(){
 			@Override
-			public Void execute(PlugableCanvasObject<?> obj) {	
-				CanvasObject impactee = PluginLibrary.hasCollided(TestUtils.getFilteredObjectList(),null, null).execute(obj);
+			public Void execute(IPlugable obj) {	
+				ICanvasObject impactee = PluginLibrary.hasCollided(TestUtils.getFilteredObjectList(),null, null).execute(obj);
 				if (impactee != null){
 					if (impactee.hasFlag(Events.STICKY)){ 
 						obj.cancelTransforms();

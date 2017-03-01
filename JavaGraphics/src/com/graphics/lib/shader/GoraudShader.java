@@ -13,7 +13,7 @@ import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.camera.Camera;
-import com.graphics.lib.canvas.CanvasObject;
+import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.plugins.Events;
 import com.graphics.lib.zbuffer.ScanLine;
@@ -39,7 +39,7 @@ public class GoraudShader implements IShader{
 	protected Map<Point, IntensityComponents> pointLight = new HashMap<Point, IntensityComponents>();
 	
 	@Override
-	public void init(CanvasObject parent, Facet facet, Camera c) {
+	public void init(ICanvasObject parent, Facet facet, Camera c) {
 		colour = facet.getColour() == null ? parent.getColour() : facet.getColour();
 		if (colour == null) colour = new Color(255,255,255);
 		

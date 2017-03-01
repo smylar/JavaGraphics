@@ -48,7 +48,7 @@ public class CameraControls implements KeyListener{
 		
 		if (key.getKeyChar() == '+' || key.getKeyChar() == '=')
 		{
-			CameraTransform transform = this.camera.getTransform(BACKWARD);
+			CameraTransform transform = this.camera.getCameraTransform(BACKWARD);
 			if (transform != null && transform instanceof CameraMovementTransform){
 				CameraMovementTransform cTransform = (CameraMovementTransform)transform;
 				if (cTransform.getSpeed() > 4) cTransform.setSpeed(cTransform.getSpeed() - 4);
@@ -56,7 +56,7 @@ public class CameraControls implements KeyListener{
 				return;
 			}
 			
-			transform = this.camera.getTransform(FORWARD);
+			transform = this.camera.getCameraTransform(FORWARD);
 			if (transform != null && transform instanceof CameraMovementTransform){
 				CameraMovementTransform cTransform = (CameraMovementTransform)transform;
 				if (cTransform.getSpeed() < 50) cTransform.setSpeed(cTransform.getSpeed() + 4);
@@ -67,7 +67,7 @@ public class CameraControls implements KeyListener{
 		}
 		else if (key.getKeyChar() == '-' || key.getKeyChar() == '_')
 		{
-			CameraTransform transform = this.camera.getTransform(FORWARD);
+			CameraTransform transform = this.camera.getCameraTransform(FORWARD);
 			if (transform != null && transform instanceof CameraMovementTransform){
 				CameraMovementTransform cTransform = (CameraMovementTransform)transform;
 				if (cTransform.getSpeed() > 4) cTransform.setSpeed(cTransform.getSpeed() - 4);
@@ -75,7 +75,7 @@ public class CameraControls implements KeyListener{
 				return;
 			}			
 			
-			transform = this.camera.getTransform(BACKWARD);
+			transform = this.camera.getCameraTransform(BACKWARD);
 			if (transform != null && transform instanceof CameraMovementTransform){
 				CameraMovementTransform cTransform = (CameraMovementTransform)transform;
 				if (cTransform.getSpeed() < 50) cTransform.setSpeed(cTransform.getSpeed() + 4);

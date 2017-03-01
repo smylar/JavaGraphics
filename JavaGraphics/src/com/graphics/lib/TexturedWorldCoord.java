@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.graphics.lib.texture.Texture;
 
+@Deprecated
 public class TexturedWorldCoord extends WorldCoord {
 	private Map<Texture, Double> textureX;
 	private Map<Texture, Double> textureY;

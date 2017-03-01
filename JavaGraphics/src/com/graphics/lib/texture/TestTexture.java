@@ -1,6 +1,7 @@
 package com.graphics.lib.texture;
 
 import java.awt.Color;
+import java.util.Optional;
 
 public class TestTexture implements Texture {
 
@@ -14,11 +15,11 @@ public class TestTexture implements Texture {
 	
 	public TestTexture(){
 		map = new int[5][5];
-		map[0] = new int[] {0,0,1,0,0};
-		map[1] = new int[] {0,0,1,0,0};
-		map[2] = new int[] {1,1,0,1,1};
-		map[3] = new int[] {0,0,1,0,0};
-		map[4] = new int[] {0,0,1,0,0};
+		map[0] = new int[] {0,0,0,0,1};
+		map[1] = new int[] {0,0,0,0,1};
+		map[2] = new int[] {0,0,0,0,1};
+		map[3] = new int[] {0,0,0,0,1};
+		map[4] = new int[] {1,1,1,1,0};
 		
 		/*map = new int[7][8];
 		map[0] = new int[] {0,0,0,0,0,0,0,0,0};
@@ -31,14 +32,14 @@ public class TestTexture implements Texture {
 	}
 	
 	@Override
-	public Color getColour(int x, int y) {
-		if (x < 0 || y < 0) return null;
+	public Optional<Color> getColour(int x, int y) {
+		if (x < 0 || y < 0) return Optional.empty();
 		
 		if (map[x % 5][y % 5] == 1){
 		//if (map[x][y] == 1){
-			return colour;
+			return Optional.of(colour);
 		}
-		return null;
+		return Optional.empty();
 	}
 
 	@Override
@@ -63,5 +64,10 @@ public class TestTexture implements Texture {
 
 	public void setOrder(int order) {
 		this.order = order;
+	}
+
+	@Override
+	public void setColour(int x, int y, Color colour) {
+		//not implemented for now
 	}
 }

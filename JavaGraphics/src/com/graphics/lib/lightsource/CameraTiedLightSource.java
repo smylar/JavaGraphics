@@ -6,6 +6,7 @@ import com.graphics.lib.Point;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.canvas.CanvasObject;
+import com.graphics.lib.interfaces.ICanvasObject;
 
 public class CameraTiedLightSource<L extends LightSource> extends TiedLightSource<L,Camera> {
 
@@ -27,7 +28,7 @@ public class CameraTiedLightSource<L extends LightSource> extends TiedLightSourc
 		if (startCamPosition == null || !arg.toString().equals(Camera.CAMERA_MOVED)) return;
 		
 		Camera c = this.getTiedTo();
-		CanvasObject temp = new CanvasObject();
+		ICanvasObject temp = new CanvasObject();
 		WorldCoord p = new WorldCoord(this.startPosition);
 		
 		p.x = startPosition.x + (c.getPosition().x - startCamPosition.x);

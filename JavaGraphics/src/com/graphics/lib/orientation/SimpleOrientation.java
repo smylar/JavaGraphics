@@ -7,11 +7,12 @@ import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
+import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IOrientation;
 
 public class SimpleOrientation implements IOrientation {
 
-	private CanvasObject orientation;
+	private ICanvasObject orientation;
 	
 	public SimpleOrientation(){
 		this("");
@@ -73,7 +74,7 @@ public class SimpleOrientation implements IOrientation {
 	}
 
 	@Override
-	public CanvasObject getRepresentation() {
+	public ICanvasObject getRepresentation() {
 		return orientation;
 	}
 	
@@ -103,8 +104,8 @@ public class SimpleOrientation implements IOrientation {
 	@Override
 	public IOrientation copy() {
 		SimpleOrientation copy = new SimpleOrientation();
-		CanvasObject source = this.getRepresentation();
-		CanvasObject dest = copy.getRepresentation();
+		ICanvasObject source = this.getRepresentation();
+		ICanvasObject dest = copy.getRepresentation();
 		for (int i = 0 ; i < 4 ; i++)
 		{
 			dest.getVertexList().get(i).copyFrom(source.getVertexList().get(i));

@@ -15,12 +15,14 @@ import java.util.stream.Collectors;
 
 import com.graphics.lib.Facet;
 import com.graphics.lib.GeneralPredicates;
+import com.graphics.lib.LightIntensityFinderEnum;
 import com.graphics.lib.Point;
-import com.graphics.lib.Utils;
 import com.graphics.lib.Vector;
+import com.graphics.lib.VertexNormalFinderEnum;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.collectors.CentreFinder;
+import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ILightIntensityFinder;
 import com.graphics.lib.interfaces.IPointFinder;
 import com.graphics.lib.interfaces.IVertexNormalFinder;
@@ -45,7 +47,7 @@ import com.graphics.lib.transform.Translation;
  * @author Paul Brandon
  *
  */
-public class CanvasObject extends Observable{
+public class CanvasObject extends Observable implements ICanvasObject{
 	private static int nextId = 0;
 	
 	private BaseData data;
@@ -58,13 +60,14 @@ public class CanvasObject extends Observable{
 	 * @param cl - The class to look for
 	 * @return A canvas object as the given type or null if it cannot be found
 	 */
-	public <C extends CanvasObject> C getObjectAs(Class<C> cl)
+	@Override
+	public <C extends ICanvasObject> Optional<C> getObjectAs(Class<C> cl)
 	{		
 		if (cl.isAssignableFrom(this.getClass())){
-			return cl.cast(this);
+			return Optional.of(cl.cast(this));
 		}else{
 			CanvasObject wrapped = getWrappedObject();
-			if (wrapped == null) return null; //may prefer to throw exception?
+			if (wrapped == null) return Optional.empty(); //may prefer to throw exception?
 			return wrapped.getObjectAs(cl);
 		}
 	}
@@ -86,9 +89,19 @@ public class CanvasObject extends Observable{
 	 * 
 	 * @return The root canvas object wrapped by this wrapper
 	 */
+	@Override
 	public CanvasObject getBaseObject()
 	{
 		return getWrappedObject() == null ? this : getWrappedObject().getBaseObject();
+	}
+	
+	protected final void setFunctions(CanvasObjectFunctionsImpl functions) {
+		this.getData().functions = functions;
+	}
+	
+	@Override
+	public final CanvasObjectFunctionsImpl getFunctions() {
+		return this.getData().functions;
 	}
 	
 	/**
@@ -117,15 +130,18 @@ public class CanvasObject extends Observable{
 		this.data = data;
 	}
 
+	@Override
 	public final String getObjectTag(){
 		return getBaseObject().objTag;
 	}
 	
+	@Override
 	public final void setAnchorPoint(Point p)
 	{
 		this.getData().anchorPoint = p;
 	}
 	
+	@Override
 	public Point getAnchorPoint(){
 		return this.getData().anchorPoint == null ? this.getCentre() : this.getData().anchorPoint;
 	}
@@ -140,29 +156,35 @@ public class CanvasObject extends Observable{
 		getData().flags.remove(flag);
 	}
 	
+	@Override
 	public final boolean hasFlag(String flag)
 	{
 		return getData().flags.contains(flag);
 	}
 	
+	@Override
 	public final List<CanvasObject> getChildren() {
 		return getData().children;
 	}
 
+	@Override
 	public final boolean isVisible() {
 		return getData().isVisible;
 	}
 
+	@Override
 	public final void setVisible(boolean isVisible) {
 		getData().isVisible = isVisible;
 		this.setChanged();
 		this.notifyObservers();
 	}
 
+	@Override
 	public final boolean isDeleted() {
 		return getData().isDeleted;
 	}
 
+	@Override
 	public final void setDeleted(boolean isDeleted) {
 		getData().isDeleted = isDeleted;
 		this.stopObserving();
@@ -170,14 +192,17 @@ public class CanvasObject extends Observable{
 		this.notifyObservers();
 	}
 
+	@Override
 	public final boolean isObserving(){
 		return getData().observing != null;
 	}
 	
-	public final CanvasObject getObserving(){
+	@Override
+	public final com.graphics.lib.interfaces.ICanvasObject getObserving(){
 		return getData().observing;
 	}
 	
+	@Override
 	public final boolean getCastsShadow() {
 		return getData().castsShadow;
 	}
@@ -186,49 +211,60 @@ public class CanvasObject extends Observable{
 		getData().castsShadow = castsShadow;
 	}
 	
+	@Override
 	public final Color getColour() {
 		return getData().colour;
 	}
 
+	@Override
 	public final void setColour(Color colour) {
 		getData().colour = colour;
 	}
 	
+	@Override
 	public final List<WorldCoord> getVertexList() {
 		return getData().vertexList;
 	}
 
+	@Override
 	public final void setVertexList(List<WorldCoord> vertexList) {
 		getData().vertexList = vertexList;
 	}
 
+	@Override
 	public final List<Facet> getFacetList() {
 		return getData().facetList;
 	}
 
+	@Override
 	public final void setFacetList(List<Facet> facetList) {
 		getData().facetList = facetList;
 	}
 	
+	@Override
 	public final boolean isProcessBackfaces() {
 		return getData().processBackfaces;
 	}
 
+	@Override
 	public final void setProcessBackfaces(boolean processBackfaces) {
 		getData().processBackfaces = processBackfaces;
 	}
 
+	@Override
 	public final synchronized void cancelTransforms()
 	{
 		getData().transforms.forEach(t -> t.cancel());
 	}
 	
+	@Override
 	public final synchronized void cancelNamedTransform(String key)
 	{
 		if (key == null) return;
 		getData().transforms.stream().filter(t -> key.equals(t.getName())).forEach(t -> t.cancel());
 	}
 	
+	@Override
 	public final Map<Point, ArrayList<Facet>> getVertexFacetMap() {
 		return getData().vertexFacetMap;
 	}
@@ -241,6 +277,7 @@ public class CanvasObject extends Observable{
 	 * @param type - Class type of the transforms to retrieve
 	 * @return List of transforms found
 	 */
+	@Override
 	public final <T> List<T> getTransformsOfType(Class<T> type)
 	{
 
@@ -254,6 +291,7 @@ public class CanvasObject extends Observable{
 		return mTrans;
 	}
 	
+	@Override
 	public final synchronized void addTransform(Transform transform)
 	{
 		getData().transforms.add(transform);
@@ -264,6 +302,7 @@ public class CanvasObject extends Observable{
 	 * 
 	 * @param transform
 	 */
+	@Override
 	public final void applyCameraTransform(Transform transform, Camera c)
 	{
 		/*transform.doTransform(getBaseData().vertexList.stream().collect(Collector.of(
@@ -284,6 +323,7 @@ public class CanvasObject extends Observable{
 	 * 
 	 * @return <code>True</code> if transform(s) present, <code>False</code> otherwise
 	 */
+	@Override
 	public final boolean hasTransforms()
 	{
 		return getData().transforms.size() > 0;
@@ -295,6 +335,7 @@ public class CanvasObject extends Observable{
 	 * 
 	 * @return <code>True</code> if transform(s) present, <code>False</code> otherwise
 	 */
+	@Override
 	public final boolean hasNamedTransform(String name){
 		if (name == null) return false;
 		return getData().transforms.stream().anyMatch(t -> name.equals(t.getName()));
@@ -306,6 +347,7 @@ public class CanvasObject extends Observable{
 	 * @param key - Name of the transform
 	 * @return The transform found or null
 	 */
+	@Override
 	public final Transform getTransform(String key) {
 		Optional<Transform> tr = getData().transforms.stream().filter(t -> t.getName() == key).findFirst();
 		if (tr.isPresent()) return tr.get();
@@ -319,6 +361,7 @@ public class CanvasObject extends Observable{
 	 * 
 	 * @param t - Transform to apply
 	 */
+	@Override
 	public final synchronized void applyTransform(Transform t)
 	{
 		//can be called directly for singular ad-hoc adjustments, without adding to the transform list, 
@@ -334,6 +377,7 @@ public class CanvasObject extends Observable{
 	 * Any transform that is complete will be removed from the list at this point
 	 * 
 	 */
+	@Override
 	public final synchronized void applyTransforms()
 	{
 		if (getData().vertexList == null || getData().vertexList.size() == 0 || getData().isDeleted) return;
@@ -358,10 +402,12 @@ public class CanvasObject extends Observable{
 	}
 	
 	
+	@Override
 	public void afterTransforms(){
 		if (this.getBaseObject() != this) this.getBaseObject().afterTransforms(); 
 	}
 	
+	@Override
 	public void beforeTransforms(){
 		if (this.getBaseObject() != this) this.getBaseObject().beforeTransforms(); 
 	}
@@ -372,10 +418,11 @@ public class CanvasObject extends Observable{
 	 * 
 	 * @return
 	 */
+	@Override
 	public IVertexNormalFinder getVertexNormalFinder()
 	{
 		if (this.getBaseObject() != this) return this.getBaseObject().getVertexNormalFinder(); //TODO will need to do this with all overridable methods if using wrappers - have only applied to those actually overridden in shapes for now
-		return Utils.getVertexNormalFinder(getData().vnFinder);
+		return getData().vnFinder.get();
 	}
 	
 	/**
@@ -385,6 +432,7 @@ public class CanvasObject extends Observable{
 	 * 
 	 * @return Point representing the centre of this object
 	 */
+	@Override
 	public Point getCentre()
 	{
 		if (this.getBaseObject() != this) return this.getBaseObject().getCentre();
@@ -468,6 +516,7 @@ public class CanvasObject extends Observable{
 	/**
 	 * Sets a flag indicating if this object should be set as deleted once all its Transforms are complete
 	 */
+	@Override
 	public final void deleteAfterTransforms()
 	{
 		getData().deleteAfterTransforms = true;
@@ -483,7 +532,8 @@ public class CanvasObject extends Observable{
 	 * 
 	 * @param o
 	 */
-	public final synchronized void observeAndMatch (CanvasObject o){
+	@Override
+	public final synchronized void observeAndMatch (com.graphics.lib.interfaces.ICanvasObject o){
 		getData().observing = o;
 		synchronized(o.getVertexList()){
 			o.getChildren().add(this);
@@ -493,6 +543,7 @@ public class CanvasObject extends Observable{
 		
 	}
 	
+	@Override
 	public final synchronized void stopObserving(){
 		if (getData().observing != null){
 			getData().observing.getChildren().remove(this);
@@ -510,6 +561,7 @@ public class CanvasObject extends Observable{
 	 * @param p - Point to test
 	 * @return <code>True</code> if point is inside object, <code>False</code> otherwise
 	 */
+	@Override
 	public boolean isPointInside(Point p)
 	{
 		if (this.getBaseObject() != this) return this.getBaseObject().isPointInside(p);
@@ -525,96 +577,6 @@ public class CanvasObject extends Observable{
 		//Sub shapes???
 	}
 	
-	/**
-	 * Get the facet that a vector from a given point intersects.
-	 * 
-	 * @param start	- Start point of the vector
-	 * @param v		- The vector
-	 * @param getAny	- True if any intersected facet should be returned, false if the nearest should be returned
-	 * @return		- The intersected facet or null if none is intersected
-	 */
-	public Facet getIntersectedFacet(Point start, Vector v, boolean getAny)
-	{
-		if (this.getBaseObject() != this) return this.getBaseObject().getIntersectedFacet(start, v, getAny);
-		
-		//get quick estimate for those that are nowhere near - check if hit sphere centred on centre point with diameter of largest dimension	
-		if (!vectorIntersectsRoughly(start, v)) return null;
-		
-		Facet closest = null;
-		double closestDist = 0;
-		//the brute force generalised approach, check each front facing (to point) facet for intersection - will be horrible for something with a high facet count
-		for (Facet f : this.getFacetList().stream().filter(GeneralPredicates.isFrontface(start)).collect(Collectors.toList()))
-		{
-			if (f.isPointWithin(f.getIntersectionPointWithFacetPlane(start, v))){
-				if (getAny) return f;
-			
-				//double dist = (start.distanceTo(f.point1) + start.distanceTo(f.point2) + start.distanceTo(f.point3)) / 3;
-				double dist = f.getAsList().stream().mapToDouble(p -> start.distanceTo(p)).average().getAsDouble(); 
-				if (closest == null || dist < closestDist){
-					closest = f;
-					closestDist = dist;
-				}
-			}
-		}
-		return closest;
-	}
-	
-	/**
-	 * Get map of all intersected facets that a vector from a given point intersects, and the point on the facet at which it intersects.
-	 * 
-	 * @param start	- Start point of the vector
-	 * @param v		- The vector
-	 * @return		- List of intersected facets
-	 */
-	public Map<Facet, Point> getIntersectedFacets(Point start, Vector v)
-	{
-		if (this.getBaseObject() != this) return this.getBaseObject().getIntersectedFacets(start, v);
-		Map<Facet,Point> list = new HashMap<Facet,Point>();
-
-		if (!vectorIntersectsRoughly(start, v)) return list;
-		
-		for (Facet f : this.getFacetList())
-		{
-			Point intersect = f.getIntersectionPointWithFacetPlane(start, v, true);
-			if (f.isPointWithin(intersect)){
-				list.put(f, intersect);
-			}
-		}
-		return list;
-	}
-	
-	/**
-	 * Check if a vector intersects this object
-	 * 
-	 * @param start - Point vector originates from
-	 * @param v		- The vector
-	 * @return		- <code>True</code> if vector intersects sphere, <code>False</code> otherwise
-	 */
-	public boolean vectorIntersects(Point start, Vector v){
-		if (this.getBaseObject() != this) return this.getBaseObject().vectorIntersects(start, v);
-		
-		return this.getIntersectedFacet(start, v, true) != null;
-	}
-	
-	/**
-	 * Check if hit sphere centred on centre point with diameter of largest dimension
-	 * 
-	 * @param start - Point vector originates from
-	 * @param v		- The vector
-	 * @return		- <code>True</code> if vector intersects sphere, <code>False</code> otherwise
-	 */
-	public final boolean vectorIntersectsRoughly(Point start, Vector v)
-	{
-		double dCentre = start.distanceTo(getCentre());
-		double angle = Math.atan(this.getMaxExtent()/dCentre);
-		Vector vCentre = start.vectorToPoint(getCentre()).getUnitVector();
-		
-		double vAngle = Math.acos(v.getUnitVector().dotProduct(vCentre));
-		
-		if (vAngle >= angle) return false;
-		
-		return true;
-	}
 	
 	/**
 	 * Gets the maximum distance from the centre of an object to a vertex
@@ -623,6 +585,7 @@ public class CanvasObject extends Observable{
 	 * 
 	 * @return
 	 */
+	@Override
 	public double getMaxExtent()
 	{
 		if (this.getBaseObject() != this) return this.getBaseObject().getMaxExtent();
@@ -634,23 +597,26 @@ public class CanvasObject extends Observable{
 	/**
 	 * This method will be executed once all draw operations (across all objects) are complete
 	 */
+	@Override
 	public void onDrawComplete(){
 		this.getChildren().removeIf(c -> c.isDeleted());
 		if (this.getBaseObject() != this) this.getBaseObject().onDrawComplete();
 		else{
 			List<CanvasObject> children = new ArrayList<CanvasObject>(this.getChildren());
-			for (CanvasObject child : children)
+			for (com.graphics.lib.interfaces.ICanvasObject child : children)
 			{
 				child.onDrawComplete();
 			}
 		}
 	}
 	
+	@Override
 	public ILightIntensityFinder getLightIntensityFinder()
 	{
 		return getData().liFinder;
 	}
 	
+	@Override
 	public void setLightIntensityFinder(ILightIntensityFinder liFinder)
 	{
 		getData().liFinder = liFinder;
@@ -700,6 +666,7 @@ public class CanvasObject extends Observable{
 		getData().vertexFacetMap.get(p).add(f);
 	}
 	
+	@Override
 	public void setBaseIntensity(double intensity)
 	{
 		getData().facetList.forEach(f -> {
@@ -724,7 +691,7 @@ public class CanvasObject extends Observable{
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		CanvasObject other = (CanvasObject) obj;
+		com.graphics.lib.interfaces.ICanvasObject other = (com.graphics.lib.interfaces.ICanvasObject) obj;
 		if (this.getColour() == null) {
 			if (other.getColour()!= null)
 				return false;
@@ -761,10 +728,11 @@ public class CanvasObject extends Observable{
 		private boolean castsShadow = true;
 		//TODO - is solid or phased when invisible?
 		private boolean deleteAfterTransforms = false;
-		private CanvasObject observing = null;
+		private com.graphics.lib.interfaces.ICanvasObject observing = null;
 		private Point anchorPoint = null;
 		private Set<String> flags = new HashSet<String>();
-		public ILightIntensityFinder liFinder = Utils.getLightIntensityFinder(Utils.LightIntensityFinderEnum.DEFAULT);	
-		public Utils.VertexNormalFinderEnum vnFinder = Utils.VertexNormalFinderEnum.DEFAULT; 
+		private CanvasObjectFunctionsImpl functions = CanvasObjectFunctions.DEFAULT.get();
+		public ILightIntensityFinder liFinder = LightIntensityFinderEnum.DEFAULT.get();	
+		public VertexNormalFinderEnum vnFinder = VertexNormalFinderEnum.DEFAULT; 
 	}
 }

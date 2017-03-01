@@ -48,15 +48,18 @@ public class OrientableCanvasObject<T extends CanvasObject> extends CanvasObject
 	/**
 	 * Revert object to the orientation it started in
 	 */
+	@Override
 	public void toBaseOrientation(){
 		oTrans.saveCurrentTransforms(orientation);
 		oTrans.removeRotation(this);
 	}
 	
+	@Override
 	public void reapplyOrientation(){
 		oTrans.addRotation(this);
 	}
 	
+	@Override
 	public void applyOrientation(OrientationTransform oTrans){
 		oTrans.addRotation(this);
 	}

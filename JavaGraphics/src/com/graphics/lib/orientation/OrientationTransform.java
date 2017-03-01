@@ -6,6 +6,7 @@ import java.util.List;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
+import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IOrientation;
 import com.graphics.lib.transform.Rotation;
 import com.graphics.lib.transform.XRotation;
@@ -64,7 +65,7 @@ public class OrientationTransform {
 		WorldCoord up = new WorldCoord(upv.x, upv.y, upv.z);
 		WorldCoord right = new WorldCoord(rightv.x, rightv.y, rightv.z);
 			
-		CanvasObject temp = new CanvasObject();
+		ICanvasObject temp = new CanvasObject();
 		temp.getVertexList().add(forward);
 		temp.getVertexList().add(up);
 		temp.getVertexList().add(right);
@@ -111,7 +112,7 @@ public class OrientationTransform {
 	 * 
 	 * @param obj
 	 */
-	public void addRotation(CanvasObject obj)
+	public void addRotation(ICanvasObject obj)
 	{
 		obj.applyTransform(new Rotation<ZRotation>(ZRotation.class, zRot));
 		obj.applyTransform(new Rotation<XRotation>(XRotation.class, xRot));
@@ -123,7 +124,7 @@ public class OrientationTransform {
 	 * 
 	 * @param obj
 	 */
-	public void removeRotation(CanvasObject obj)
+	public void removeRotation(ICanvasObject obj)
 	{	
 		obj.applyTransform(new Rotation<YRotation>(YRotation.class, -yRot));
 		obj.applyTransform(new Rotation<XRotation>(XRotation.class, -xRot));
@@ -135,7 +136,7 @@ public class OrientationTransform {
 		Vector unit = v.getUnitVector();
 		WorldCoord wc = new WorldCoord(unit.x, unit.y, unit.z);
 			
-		CanvasObject temp = new CanvasObject();
+		ICanvasObject temp = new CanvasObject();
 		temp.getVertexList().add(wc);
 
 		double xRot = 0;

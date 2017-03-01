@@ -3,7 +3,7 @@ package com.graphics.lib.zbuffer;
 import java.awt.Color;
 import java.util.TreeMap;
 
-import com.graphics.lib.canvas.CanvasObject;
+import com.graphics.lib.interfaces.ICanvasObject;
 
 /**
  * Stores information about Z values and colour for a screen coordinate this item represents
@@ -14,7 +14,7 @@ import com.graphics.lib.canvas.CanvasObject;
 public class ZBufferItem
 {
 	private TreeMap<Double, Color> items = new TreeMap<Double, Color>();
-	private CanvasObject topMostObject = null;
+	private ICanvasObject topMostObject = null;
 	private int x = 0;
 	private int y = 0;
 	private boolean active = false;
@@ -32,7 +32,7 @@ public class ZBufferItem
 		return y;
 	}
 
-	public CanvasObject getTopMostObject() {
+	public ICanvasObject getTopMostObject() {
 		return topMostObject;
 	}
 	
@@ -82,7 +82,7 @@ public class ZBufferItem
 	 * @param z
 	 * @param colour
 	 */
-	public synchronized void add(CanvasObject obj, double z, Color colour)
+	public synchronized void add(ICanvasObject obj, double z, Color colour)
 	{	
 		if (items.isEmpty() || z < items.firstKey()){
 			topMostObject = obj;

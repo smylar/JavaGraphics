@@ -14,9 +14,9 @@ import java.util.stream.Collector;
 import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
-import com.graphics.lib.canvas.CanvasObject;
+import com.graphics.lib.interfaces.ICanvasObject;
 
-public class NearestIntersectedFacetFinder<T extends CanvasObject> implements Collector<T, Map<Double,Facet>, Entry<Double,Facet>>{
+public class NearestIntersectedFacetFinder<T extends ICanvasObject> implements Collector<T, Map<Double, IntersectionData<T>>, Entry<Double, IntersectionData<T>>>{
 
 	private Vector v;
 	private Point p;
@@ -30,15 +30,15 @@ public class NearestIntersectedFacetFinder<T extends CanvasObject> implements Co
 	}
 	
 	@Override
-	public BiConsumer<Map<Double,Facet>, T> accumulator() {
+	public BiConsumer<Map<Double, IntersectionData<T>>, T> accumulator() {
 		return (acc, elem) -> {
-			Map<Facet,Point> mfp = elem.getIntersectedFacets(p, v);
+			Map<Facet,Point> mfp = elem.getFunctions().getIntersectedFacets(elem, p, v);
 			for (Entry<Facet,Point> entry : mfp.entrySet())
 			{
 				double dist = p.distanceTo(entry.getValue());
 				if (dist < maxDist)
 				{
-					acc.put(dist, entry.getKey());
+					acc.put(dist, new IntersectionData<T>(elem, entry.getKey(), entry.getValue()));
 				}
 			}
 			
@@ -51,23 +51,23 @@ public class NearestIntersectedFacetFinder<T extends CanvasObject> implements Co
 	}
 
 	@Override
-	public BinaryOperator<Map<Double,Facet>> combiner() {
+	public BinaryOperator<Map<Double, IntersectionData<T>>> combiner() {
 		return (acc1, acc2) -> {
 		    throw new UnsupportedOperationException(); //fine if we do not use a parallel stream
 		  };
 	}
 
 	@Override
-	public Function<Map<Double,Facet>, Entry<Double,Facet>> finisher() {
+	public Function<Map<Double, IntersectionData<T>>, Entry<Double, IntersectionData<T>>> finisher() {
 		return (acc) -> {
-			TreeMap<Double,Facet> tm = (TreeMap<Double,Facet>)acc;
+			TreeMap<Double, IntersectionData<T>> tm = (TreeMap<Double, IntersectionData<T>>)acc;
 			if (acc.size() > 0) return tm.firstEntry();
 			return null;
 		};
 	}
 
 	@Override
-	public Supplier<Map<Double,Facet>> supplier() {
+	public Supplier<Map<Double, IntersectionData<T>>> supplier() {
 		return TreeMap::new;
 	}
 

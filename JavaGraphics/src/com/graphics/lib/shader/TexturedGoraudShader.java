@@ -2,39 +2,40 @@ package com.graphics.lib.shader;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.graphics.lib.Facet;
 import com.graphics.lib.LineEquation;
 import com.graphics.lib.Point;
-import com.graphics.lib.TexturedWorldCoord;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.camera.Camera;
-import com.graphics.lib.canvas.CanvasObject;
+import com.graphics.lib.interfaces.ICanvasObject;
+import com.graphics.lib.interfaces.ITexturable;
 import com.graphics.lib.texture.Texture;
 import com.graphics.lib.zbuffer.ScanLine;
 
 public class TexturedGoraudShader extends GoraudShader {
 	
-	private List<Texture> textures = new ArrayList<Texture>();
+	private List<Texture> textures = new ArrayList<>();
+	private Optional<ITexturable> texturableParent = Optional.empty();
 	
 	@Override
-	public void init(CanvasObject parent, Facet facet, Camera c) {
+	public void init(ICanvasObject parent, Facet facet, Camera c) {
 		super.init(parent, facet, c);
+		
 		this.textures.clear();
-		Set<Texture> tx = new HashSet<Texture>();
-		if (facet.getAsList().stream().allMatch(p -> p instanceof TexturedWorldCoord)){
-			for (WorldCoord wc : facet.getAsList()){
-				tx.addAll(((TexturedWorldCoord)wc).getTextures());
-			}
-			tx.removeIf(t -> !facet.getAsList().stream().allMatch(p -> ((TexturedWorldCoord)p).getTextures().contains(t)));
-			this.textures = tx.stream().sorted((a,b) -> b.getOrder() - a.getOrder()).collect(Collectors.toList());
+		
+		this.texturableParent = parent.getObjectAs(ITexturable.class);
+		
+		if (this.texturableParent.isPresent()) {
+			this.textures = this.texturableParent.get().getTextures().stream().filter(t ->
+				facet.getAsList().stream().allMatch(v -> texturableParent.get().getTextureCoord(t, v).isPresent())
+			).sorted((a,b) -> b.getOrder() - a.getOrder()).collect(Collectors.toList());
 		}
 	}
-	
+
 	@Override
 	public Color getColour(ScanLine scanLine, int x, int y) {
 		if (textures.size() == 0) return super.getColour(scanLine, x, y);
@@ -63,12 +64,13 @@ public class TexturedGoraudShader extends GoraudShader {
 			int tx = (int)Math.round(ux/r);
 			int ty = (int)Math.round(uy/r);
 			
-			Color c = t.getColour(tx, ty);
+			
+			Optional<Color> c = t.getColour(tx, ty);
 
-			if (c != null){
-				if (!t.applyLighting()) return c;
+			if (c.isPresent()){
+				if (!t.applyLighting()) return c.get();
 					
-				pointColour = c;
+				pointColour = c.get();
 				break;
 			}
 		}
@@ -92,10 +94,12 @@ public class TexturedGoraudShader extends GoraudShader {
 		
 		////ua = (1-a)(u0/z0) + a(u1/z1) / (1-a)(1/z0) + a(1/z1)
 		
-		TexturedWorldCoord start = (TexturedWorldCoord)line.getWorldStart();
-		TexturedWorldCoord end = (TexturedWorldCoord)line.getWorldEnd();
-		double x = (1 - percentLength) * (start.getTextureX(t)/line.getStart().z) + (percentLength * (end.getTextureX(t)/line.getEnd().z));
-		double y = (1 - percentLength) * (start.getTextureY(t)/line.getStart().z) + (percentLength * (end.getTextureY(t)/line.getEnd().z));
+		WorldCoord start = line.getWorldStart();
+		WorldCoord end = line.getWorldEnd();
+		Point startTexture = this.texturableParent.get().getTextureCoord(t, start).get();
+		Point endTexture = this.texturableParent.get().getTextureCoord(t, end).get();
+		double x = (1 - percentLength) * (startTexture.x/line.getStart().z) + (percentLength * (endTexture.x/line.getEnd().z));
+		double y = (1 - percentLength) * (startTexture.y/line.getStart().z) + (percentLength * (endTexture.y/line.getEnd().z));
 		double r = (1 - percentLength) * (1/line.getStart().z) + (percentLength * (1/line.getEnd().z));
 		x = x/r;
 		y = y/r;

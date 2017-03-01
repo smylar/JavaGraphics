@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.graphics.lib.interfaces.IPlugable;
 import com.graphics.lib.plugins.IPlugin;
 
 /**
@@ -15,10 +16,10 @@ import com.graphics.lib.plugins.IPlugin;
  *
  * @param <T> Type of the CanvasObject being wrapped
  */
-public class PlugableCanvasObject<T extends CanvasObject> extends CanvasObjectWrapper<T> {
-	private Map<String,IPlugin<PlugableCanvasObject<?>,?>> plugins = new HashMap<String,IPlugin<PlugableCanvasObject<?>,?>>();
-	private List<String> afterDrawPlugins = new ArrayList<String>();
-	private List<String> singleAfterDrawPlugins = new ArrayList<String>();
+public class PlugableCanvasObject<T extends CanvasObject> extends CanvasObjectWrapper<T> implements IPlugable {
+	private Map<String,IPlugin<IPlugable,?>> plugins = new HashMap<>();
+	private List<String> afterDrawPlugins = new ArrayList<>();
+	private List<String> singleAfterDrawPlugins = new ArrayList<>();
 	
 	public PlugableCanvasObject() {
 		super();
@@ -48,18 +49,21 @@ public class PlugableCanvasObject<T extends CanvasObject> extends CanvasObjectWr
 		this.singleAfterDrawPlugins.clear();
 	}
 	
-	public void registerSingleAfterDrawPlugin(String key, IPlugin<PlugableCanvasObject<?>,?> plugin)
+	@Override
+	public void registerSingleAfterDrawPlugin(String key, IPlugin<IPlugable,?> plugin)
 	{
 		plugins.put(key, plugin);
 		singleAfterDrawPlugins.add(key);
 	}
 	
-	public void registerPlugin(String key, IPlugin<PlugableCanvasObject<?>,?> plugin, boolean doAfterDraw)
+	@Override
+	public void registerPlugin(String key, IPlugin<IPlugable,?> plugin, boolean doAfterDraw)
 	{
 		plugins.put(key, plugin);
 		if (doAfterDraw) afterDrawPlugins.add(key);
 	}
 	
+	@Override
 	public void removePlugin(String key)
 	{
 		this.plugins.remove(key);
@@ -67,6 +71,7 @@ public class PlugableCanvasObject<T extends CanvasObject> extends CanvasObjectWr
 		this.singleAfterDrawPlugins.remove(key);
 	}
 	
+	@Override
 	public void removePlugins()
 	{
 		this.plugins.clear();
@@ -74,6 +79,7 @@ public class PlugableCanvasObject<T extends CanvasObject> extends CanvasObjectWr
 		this.singleAfterDrawPlugins.clear();
 	}
 	
+	@Override
 	public Object executePlugin(String key)
 	{
 		if (this.plugins.containsKey(key) && !this.isDeleted())

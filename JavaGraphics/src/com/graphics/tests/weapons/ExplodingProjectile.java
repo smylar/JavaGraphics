@@ -1,11 +1,13 @@
 package com.graphics.tests.weapons;
 
 import java.awt.Color;
+import java.util.Optional;
 
 import com.graphics.lib.Vector;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.OrientableCanvasObject;
 import com.graphics.lib.canvas.PlugableCanvasObject;
+import com.graphics.lib.interfaces.IOrientable;
 import com.graphics.lib.orientation.OrientationTransform;
 import com.graphics.lib.orientation.SimpleOrientation;
 import com.graphics.lib.plugins.Events;
@@ -25,20 +27,23 @@ public class ExplodingProjectile extends Projectile{
 	public CanvasObject get(Vector initialVector, double parentSpeed) {
 		PlugableCanvasObject<?> proj = new PlugableCanvasObject<CanvasObject>(new OrientableCanvasObject<Ovoid>(new Ovoid(20,0.3,30)));
 		proj.applyTransform(new Rotation<XRotation>(XRotation.class, -90));
-		proj.getObjectAs(OrientableCanvasObject.class).setOrientation(new SimpleOrientation());
+		proj.getObjectAs(IOrientable.class).ifPresent(o -> o.setOrientation(new SimpleOrientation()));
 		proj.setBaseIntensity(1);
 		proj.setColour(new Color(255, 0, 0, 80));
 		proj.setCastsShadow(false);
 		proj.registerPlugin(Events.EXPLODE, TestUtils.getExplodePlugin(getClipLibrary()), false);
 		proj.addFlag(TestUtils.SILENT_EXPLODE);
-		for (int i = 0; i < proj.getFacetList().size() ; i++)
-		{
-			if (i % (proj.getObjectAs(Ovoid.class).getPointsPerCircle()/3) == 1 || i % (proj.getObjectAs(Ovoid.class).getPointsPerCircle()/3) == 0)
+		Optional<Ovoid> ovoid = proj.getObjectAs(Ovoid.class);
+		
+		if (ovoid.isPresent()) {
+			for (int i = 0; i < proj.getFacetList().size() ; i++)
 			{
-				proj.getFacetList().get(i).setColour(new Color(225,0,0));
+				if (i % (ovoid.get().getPointsPerCircle()/3) == 1 || i % (ovoid.get().getPointsPerCircle()/3) == 0)
+				{
+					proj.getFacetList().get(i).setColour(new Color(225,0,0));
+				}
 			}
 		}
-		
 		for (Rotation<?> r : OrientationTransform.getRotationsForVector(initialVector)){
 			proj.applyTransform(r);
 		}
@@ -59,13 +64,13 @@ public class ExplodingProjectile extends Projectile{
 			@Override
 			public void beforeTransform(){
 				super.beforeTransform();
-				proj.getObjectAs(OrientableCanvasObject.class).toBaseOrientation();
+				proj.getObjectAs(IOrientable.class).ifPresent(o -> o.toBaseOrientation());
 			}
 			
 			@Override
 			public void afterTransform(){
 				super.afterTransform();	
-				proj.getObjectAs(OrientableCanvasObject.class).reapplyOrientation();
+				proj.getObjectAs(IOrientable.class).ifPresent(o -> o.reapplyOrientation());
 			}
 		}
 		;

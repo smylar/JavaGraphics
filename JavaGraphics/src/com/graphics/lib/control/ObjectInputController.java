@@ -7,7 +7,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.graphics.lib.canvas.CanvasObject;
+import com.graphics.lib.interfaces.ICanvasObject;
 
 /**
  * Handles input that relates to a given object.
@@ -18,7 +18,7 @@ import com.graphics.lib.canvas.CanvasObject;
  *
  * @param <T> The object being controlled
  */
-public abstract class ObjectInputController<T extends CanvasObject> implements KeyListener {
+public abstract class ObjectInputController<T extends ICanvasObject> implements KeyListener {
 	public static final String FORWARD = "FORWARD";
 	public static final String BACKWARD = "BACKWARD";
 	public static final String UP = "UP";

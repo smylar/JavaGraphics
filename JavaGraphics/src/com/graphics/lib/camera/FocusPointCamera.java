@@ -1,7 +1,7 @@
 package com.graphics.lib.camera;
 
 import com.graphics.lib.Point;
-import com.graphics.lib.canvas.CanvasObject;
+import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IOrientation;
 
 public class FocusPointCamera extends Camera {
@@ -13,7 +13,7 @@ public class FocusPointCamera extends Camera {
 	private Point focusPoint = new Point(0,0,1000);
 	
 	@Override
-	public void getViewSpecific(CanvasObject obj) {
+	public void getViewSpecific(ICanvasObject obj) {
 
 		obj.getVertexList().stream().forEach(p -> {
 			p.resetTransformed(this);

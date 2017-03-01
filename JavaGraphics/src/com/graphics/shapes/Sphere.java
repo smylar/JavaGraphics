@@ -1,8 +1,8 @@
 package com.graphics.shapes;
 
 import com.graphics.lib.Point;
-import com.graphics.lib.Utils;
-import com.graphics.lib.Vector;
+import com.graphics.lib.VertexNormalFinderEnum;
+import com.graphics.lib.canvas.CanvasObjectFunctions;
 
 public class Sphere extends Ovoid {
 	
@@ -14,7 +14,8 @@ public class Sphere extends Ovoid {
 	public Sphere(double radius, int angleProgression)
 	{
 		super(radius, 1, angleProgression);
-		this.getData().vnFinder = Utils.VertexNormalFinderEnum.CENTRE_TO_POINT;
+		this.getData().vnFinder = VertexNormalFinderEnum.CENTRE_TO_POINT;
+		this.setFunctions(CanvasObjectFunctions.SPHERE.get());
 	}
 	
 	@Override
@@ -22,11 +23,5 @@ public class Sphere extends Ovoid {
 	{
 		double actualRadius = getCentre().distanceTo(this.getVertexList().get(0)); //may have changed in scaling
 		return this.getCentre().distanceTo(p) < actualRadius;
-	}
-	
-	@Override
-	public boolean vectorIntersects(Point start, Vector v){
-		//as shape is a sphere we can use the rough calculation, which uses a sphere
-		return this.vectorIntersectsRoughly(start, v);
 	}
 }

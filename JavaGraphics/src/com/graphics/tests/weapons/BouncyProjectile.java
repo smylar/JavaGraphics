@@ -6,6 +6,8 @@ import java.util.Date;
 import com.graphics.lib.Vector;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.PlugableCanvasObject;
+import com.graphics.lib.interfaces.ICanvasObject;
+import com.graphics.lib.interfaces.IPlugable;
 import com.graphics.lib.plugins.Events;
 import com.graphics.lib.plugins.IPlugin;
 import com.graphics.lib.plugins.PluginLibrary;
@@ -35,11 +37,11 @@ public class BouncyProjectile extends Projectile {
 		return proj;
 	}
 	
-	private IPlugin<PlugableCanvasObject<?>,Void> getBouncePlugin(){
-		return new IPlugin<PlugableCanvasObject<?>,Void>(){
+	private IPlugin<IPlugable,Void> getBouncePlugin(){
+		return new IPlugin<IPlugable,Void>(){
 			@Override
-			public Void execute(PlugableCanvasObject<?> obj) {	
-				CanvasObject impactee = PluginLibrary.hasCollidedNew(TestUtils.getFilteredObjectList(),null, null).execute(obj);
+			public Void execute(IPlugable obj) {	
+				ICanvasObject impactee = PluginLibrary.hasCollidedNew(TestUtils.getFilteredObjectList(),null, null).execute(obj);
 				if (impactee != null){
 					if (impactee.hasFlag(Events.STICKY)){ 
 						PluginLibrary.stop2().execute(obj);

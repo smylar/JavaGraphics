@@ -6,7 +6,7 @@ import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
-import com.graphics.lib.canvas.CanvasObject;
+import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IOrientation;
 
 /**
@@ -26,7 +26,7 @@ public class ViewAngleCamera extends Camera {
 	}
 	
 	@Override
-	public void getViewSpecific(CanvasObject obj) {
+	public void getViewSpecific(ICanvasObject obj) {
 		
 		synchronized(obj.getVertexList()){
 			obj.getVertexList().parallelStream().forEach(p -> {
@@ -92,7 +92,7 @@ public class ViewAngleCamera extends Camera {
 		this.tanViewAngle = Math.tan(Math.toRadians(this.viewAngle));
 	}
 	
-	private void doPointBehind(CanvasObject obj, WorldCoord wc, Point trans, Point position)
+	private void doPointBehind(ICanvasObject obj, WorldCoord wc, Point trans, Point position)
 	{
 		//attempt to do camera plane clipping
 		//moves points behind camera towards nearest attached point in front of camera - will not work for everything - weird effects likely (especially passing close by with larger facets - though configuration of laser means its fine)

@@ -3,10 +3,11 @@ package com.graphics.tests.weapons;
 import java.awt.Color;
 
 import com.graphics.lib.Point;
-import com.graphics.lib.Utils;
 import com.graphics.lib.Vector;
 import com.graphics.lib.canvas.CanvasObject;
+import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.canvas.PlugableCanvasObject;
+import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.plugins.Events;
 import com.graphics.lib.plugins.PluginLibrary;
 import com.graphics.lib.transform.MovementTransform;
@@ -27,9 +28,9 @@ public class DeflectionProjectile extends TargetedProjectile {
 		proj.registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollided(TestUtils.getFilteredObjectList(), Events.EXPLODE, Events.EXPLODE), true);
 		proj.registerPlugin(Events.EXPLODE, TestUtils.getExplodePlugin(this.getClipLibrary()), false);
 		
-		CanvasObject target = this.getTargetFinder().find();
+		ICanvasObject target = this.getTargetFinder().find();
 		Point startPoint = this.getStartPoint().find();
-		Vector vTrackee = (target == null || startPoint == null) ? initialVector : Utils.plotDeflectionShot(target, startPoint, this.getSpeed());
+		Vector vTrackee = (target == null || startPoint == null) ? initialVector : CanvasObjectFunctions.DEFAULT.get().plotDeflectionShot(target, startPoint, this.getSpeed());
 		
 		MovementTransform move = new MovementTransform(vTrackee, 20); 
 		move.moveUntil(t -> t.getDistanceMoved() > this.getRange());

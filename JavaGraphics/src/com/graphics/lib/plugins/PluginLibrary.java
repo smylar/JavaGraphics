@@ -11,12 +11,14 @@ import java.util.stream.Collectors;
 import com.graphics.lib.Facet;
 import com.graphics.lib.GeneralPredicates;
 import com.graphics.lib.Point;
-import com.graphics.lib.Utils;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
+import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.canvas.PlugableCanvasObject;
+import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ICanvasObjectList;
+import com.graphics.lib.interfaces.IPlugable;
 import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.transform.MovementTransform;
@@ -28,7 +30,7 @@ import com.graphics.lib.transform.YRotation;
 
 public class PluginLibrary {
 	
-	public static IPlugin<PlugableCanvasObject<?>, Void> generateTrailParticles(Color colour, int density, double exhaustVelocity, double particleSize)
+	public static IPlugin<IPlugable, Void> generateTrailParticles(Color colour, int density, double exhaustVelocity, double particleSize)
 	{
 		return (obj) -> {
 			List<MovementTransform> mTrans = obj.getTransformsOfType(MovementTransform.class);
@@ -71,7 +73,7 @@ public class PluginLibrary {
 		};
 	}
 	
-	public static IPlugin<PlugableCanvasObject<?>, Set<PlugableCanvasObject<CanvasObject>>> explode(Collection<ILightSource> lightSources) 
+	public static IPlugin<IPlugable, Set<PlugableCanvasObject<CanvasObject>>> explode(Collection<ILightSource> lightSources) 
 	{
 		return (obj) -> {
 		Set<PlugableCanvasObject<CanvasObject>> children = new HashSet<PlugableCanvasObject<CanvasObject>>();
@@ -107,7 +109,7 @@ public class PluginLibrary {
 		};
 	}
 	
-	public static IPlugin<PlugableCanvasObject<?>,Void> flash(Collection<ILightSource> lightSources)
+	public static IPlugin<IPlugable,Void> flash(Collection<ILightSource> lightSources)
 	{
 		return (obj)-> {
 			LightSource flash = new LightSource(obj.getCentre().x,  obj.getCentre().y, obj.getCentre().z);
@@ -128,12 +130,12 @@ public class PluginLibrary {
 		};
 	}
 	
-	public static IPlugin<PlugableCanvasObject<?>,CanvasObject> hasCollided(ICanvasObjectList objects, String impactorPlugin, String impacteePlugin)
+	public static IPlugin<IPlugable,ICanvasObject> hasCollided(ICanvasObjectList objects, String impactorPlugin, String impacteePlugin)
 	{
 		return (obj) -> {
-			CanvasObject inCollision = (CanvasObject)obj.executePlugin("IN_COLLISION"); //may need to be a list - may hit more than one!
+			ICanvasObject inCollision = (ICanvasObject)obj.executePlugin("IN_COLLISION"); //may need to be a list - may hit more than one!
 			
-			for (CanvasObject impactee : objects.get()){
+			for (ICanvasObject impactee : objects.get()){
 				if (impactee == obj) continue;
 			
 				if (obj.getVertexList().stream().anyMatch(p -> impactee.isPointInside(p)))
@@ -141,10 +143,7 @@ public class PluginLibrary {
 					if (inCollision == impactee) { return null;}
 					if (impactorPlugin != null) obj.executePlugin(impactorPlugin);
 					if (impacteePlugin != null){
-						PlugableCanvasObject<?> impacteePlugable = impactee.getObjectAs(PlugableCanvasObject.class);
-						if (impacteePlugable != null){
-							impacteePlugable.executePlugin(impacteePlugin);
-						}
+						impactee.getObjectAs(IPlugable.class).ifPresent(impacteePlugable -> impacteePlugable.executePlugin(impacteePlugin));
 					}
 
 					obj.registerPlugin("IN_COLLISION", (o) -> {return impactee;}, false);
@@ -157,10 +156,10 @@ public class PluginLibrary {
 		};
 	}
 	
-	public static IPlugin<PlugableCanvasObject<?>,CanvasObject> hasCollidedNew(ICanvasObjectList objects, String impactorPlugin, String impacteePlugin)
+	public static IPlugin<IPlugable,ICanvasObject> hasCollidedNew(ICanvasObjectList objects, String impactorPlugin, String impacteePlugin)
 	{
 		return (obj) -> {
-			CanvasObject inCollision = (CanvasObject)obj.executePlugin("IN_COLLISION"); //may need to be a list - may hit more than one!
+			ICanvasObject inCollision = (ICanvasObject)obj.executePlugin("IN_COLLISION"); //may need to be a list - may hit more than one!
 			
 			List<MovementTransform> mTrans = obj.getTransformsOfType(MovementTransform.class);
 			if (mTrans.size() == 0) return null;
@@ -172,7 +171,7 @@ public class PluginLibrary {
 				baseVector.z += t.getVector().z * t.getSpeed();
 			}
 			
-			for (CanvasObject impactee : objects.get()){
+			for (ICanvasObject impactee : objects.get()){
 				if (impactee == obj) continue;
 				//Tries to factor in possibility object was drawn completely on the other side of an object (after moving) and thus not detected as a collision by point inside check
 				//TODO would also need to generate explosion at point of impact, factor any movement of the target
@@ -189,10 +188,7 @@ public class PluginLibrary {
 							if (inCollision == impactee) { return null;}
 							if (impactorPlugin != null) obj.executePlugin(impactorPlugin);
 							if (impacteePlugin != null){
-								PlugableCanvasObject<?> impacteePlugable = impactee.getObjectAs(PlugableCanvasObject.class);
-								if (impacteePlugable != null){
-									impacteePlugable.executePlugin(impacteePlugin);
-								}
+								impactee.getObjectAs(IPlugable.class).ifPresent(impacteePlugable -> impacteePlugable.executePlugin(impacteePlugin));
 							}
 
 							obj.registerPlugin("IN_COLLISION", (o) -> {return impactee;}, false);
@@ -209,7 +205,7 @@ public class PluginLibrary {
 		};
 	}
 	
-	public static IPlugin<PlugableCanvasObject<?>, Void> stop()
+	public static IPlugin<IPlugable, Void> stop()
 	{
 		return (obj) -> {
 			obj.cancelTransforms();
@@ -218,7 +214,7 @@ public class PluginLibrary {
 		};
 	}
 	
-	public static IPlugin<PlugableCanvasObject<?>, Void> stop2()
+	public static IPlugin<IPlugable, Void> stop2()
 	{
 		return (obj) -> {
 			for (MovementTransform t : obj.getTransformsOfType(MovementTransform.class)){
@@ -229,7 +225,7 @@ public class PluginLibrary {
 		};
 	}
 	
-	public static IPlugin<PlugableCanvasObject<?>, Void> bounce(CanvasObject impactee)
+	public static IPlugin<IPlugable, Void> bounce(ICanvasObject impactee)
 	{
 		return (obj) -> {
 			//find impacted points and use the one that was nearest the impactee before hitting it, then find the facet it hit and reflect
@@ -279,7 +275,7 @@ public class PluginLibrary {
 	}
 	
 	
-	public static IPlugin<PlugableCanvasObject<?>, Void> track(CanvasObject objectToTrack, double rotationRate){
+	public static IPlugin<IPlugable, Void> track(ICanvasObject objectToTrack, double rotationRate){
 		return (obj) -> {
 			if (objectToTrack == null) return null;
 			//Point centre = obj.getCentre();
@@ -288,7 +284,7 @@ public class PluginLibrary {
 			if (!move.isPresent()) return null;
 			
 			//plot deflection (if target moving) and aim for that
-			Vector vTrackee = Utils.plotDeflectionShot(objectToTrack, obj.getCentre(), move.get().getSpeed());
+			Vector vTrackee = CanvasObjectFunctions.DEFAULT.get().plotDeflectionShot(objectToTrack, obj.getCentre(), move.get().getSpeed());
 			/*if (vTrackee == null){
 				System.out.println("NULL");
 				vTrackee = centre.vectorToPoint(trackeeCentre).getUnitVector();
@@ -300,7 +296,7 @@ public class PluginLibrary {
 			double yAngleDif = Math.toDegrees(Math.acos(vTrackee.x) - Math.acos(vMove.getUnitVector().x));
 			double yAngleMod = yAngleDif > 0 ? -rotationRate : rotationRate;
 			
-			CanvasObject temp = new CanvasObject();
+			ICanvasObject temp = new CanvasObject();
 			WorldCoord tempCoord = new WorldCoord(vMove.x, vMove.y, vMove.z);
 			temp.getVertexList().add(tempCoord);
 			

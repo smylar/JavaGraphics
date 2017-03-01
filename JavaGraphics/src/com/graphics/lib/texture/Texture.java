@@ -1,6 +1,7 @@
 package com.graphics.lib.texture;
 
 import java.awt.Color;
+import java.util.Optional;
 
 /**
  * A texture is a pattern that overlays a facet or set of facets
@@ -24,7 +25,9 @@ public interface Texture {
 	 * @param y - Y value of texture coordinate
 	 * @return Colour of the pixel
 	 */
-	public Color getColour(int x, int y);
+	public Optional<Color> getColour(int x, int y);
+	
+	public void setColour(int x, int y, Color colour);
 	
 	/**
 	 * Get the height of the full texture

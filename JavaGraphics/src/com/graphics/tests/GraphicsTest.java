@@ -43,6 +43,8 @@ import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.OrientableCanvasObject;
 import com.graphics.lib.canvas.PlugableCanvasObject;
 import com.graphics.lib.canvas.SlaveCanvas3D;
+import com.graphics.lib.interfaces.ICanvasObject;
+import com.graphics.lib.interfaces.IPlugable;
 import com.graphics.lib.interfaces.IPointFinder;
 import com.graphics.lib.lightsource.DirectionalLightSource;
 import com.graphics.lib.lightsource.LightSource;
@@ -64,7 +66,7 @@ public class GraphicsTest extends JFrame {
 	private Canvas3D canvas;
 	private static GraphicsTest gt;
 	private ClipLibrary clipLibrary = new ClipLibrary("sounds.txt");
-	private CanvasObject selectedObject = null;
+	private ICanvasObject selectedObject = null;
 	private MouseEvent select = null;
 
 	public static void main (String[] args){
@@ -101,28 +103,28 @@ public class GraphicsTest extends JFrame {
 		cnv.setFloor(floor);
 		//cnv.setDrawShadows(true);
 		
-		ObjectTiedLightSource<LightSource> l1 = new ObjectTiedLightSource<LightSource>(LightSource.class, 0,0,-500);
+		ObjectTiedLightSource<LightSource> l1 = new ObjectTiedLightSource<>(LightSource.class, 0,0,-500);
 		l1.getLightSource().setColour(new Color(255, 0, 0));
 		cnv.addLightSource(l1.getLightSource());
 		Lantern lantern1 = new Lantern();
 		lantern1.attachLightsource(l1);
 		cnv.registerObject(lantern1, new Point(0,0,-500), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.NONE));
 		
-		ObjectTiedLightSource<LightSource> l2 = new ObjectTiedLightSource<LightSource>(LightSource.class, 500,200,-100);
+		ObjectTiedLightSource<LightSource> l2 = new ObjectTiedLightSource<>(LightSource.class, 500,200,-100);
 		l2.getLightSource().setColour(new Color(0, 255, 0));
 		cnv.addLightSource(l2.getLightSource());
 		Lantern lantern2 = new Lantern();
 		lantern2.attachLightsource(l2);
 		cnv.registerObject(lantern2, new Point(500,200,-100), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.NONE));
 		
-		/*ObjectTiedLightSource<LightSource> l3 = new ObjectTiedLightSource<LightSource>(LightSource.class, 400,100,100);
+		/*ObjectTiedLightSource<LightSource> l3 = new ObjectTiedLightSource<>(LightSource.class, 400,100,100);
 		l3.getLightSource().setColour(new Color(0, 0, 255));
 		cnv.addLightSource(l3.getLightSource());
 		Lantern lantern3 = new Lantern();
 		lantern3.attachLightsource(l3);
 		cnv.registerObject(lantern3, new Point(400,100,100), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.NONE));*/
 		
-		ObjectTiedLightSource<DirectionalLightSource> l3 = new ObjectTiedLightSource<DirectionalLightSource>(DirectionalLightSource.class, 400,100,100);
+		ObjectTiedLightSource<DirectionalLightSource> l3 = new ObjectTiedLightSource<>(DirectionalLightSource.class, 400,100,100);
 		l3.getLightSource().setColour(new Color(0, 0, 255));
 		cnv.addLightSource(l3.getLightSource());
 		Lantern lantern3 = new Lantern();
@@ -132,7 +134,7 @@ public class GraphicsTest extends JFrame {
 		cnv.registerObject(ol3, new Point(400,100,100), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.NONE));
 		l3.getLightSource().setDirection(() -> {return ol3.getOrientation().getForward();});
 		l3.getLightSource().setLightConeAngle(40);
-		Transform l3spin = new RepeatingTransform<Rotation<?>>(new Rotation<XRotation>(XRotation.class, 4), 0);
+		Transform l3spin = new RepeatingTransform<Rotation<?>>(new Rotation<>(XRotation.class, 4), 0);
 		ol3.addTransformAboutCentre(l3spin);
 		
 		this.add(cnv, BorderLayout.CENTER);
@@ -146,7 +148,7 @@ public class GraphicsTest extends JFrame {
 		CanvasObject camcube = new Cuboid(20,20,20);
 		cnv.registerObject(camcube, new Point(1560, 200, 350), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.FLAT));
 		
-		PlugableCanvasObject<?> whale = new PlugableCanvasObject<Whale>(new Whale()); 
+		PlugableCanvasObject<?> whale = new PlugableCanvasObject<>(new Whale()); 
 		whale.setColour(Color.cyan);
 		cnv.registerObject(whale, new Point(1515, 300, 400), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
 		
@@ -156,7 +158,7 @@ public class GraphicsTest extends JFrame {
 		
 		ViewAngleCamera slaveCam = new ViewAngleCamera(new SimpleOrientation(OrientableCanvasObject.ORIENTATION_TAG));
 		slaveCam.setPosition(new Point(1550, 200, 350));
-		slaveCam.addTransform("INIT", new PanCamera<YRotation>(YRotation.class, -90));
+		slaveCam.addTransform("INIT", new PanCamera<>(YRotation.class, -90));
 		slaveCam.doTransforms();
 		SlaveCanvas3D scnv = new SlaveCanvas3D(slaveCam);
 		slave.add(scnv);
@@ -164,7 +166,7 @@ public class GraphicsTest extends JFrame {
 		cnv.addObserver(scnv);
 		this.setVisible(true);
 		
-		IPlugin<PlugableCanvasObject<?>,Void> explode = TestUtils.getExplodePlugin(clipLibrary);
+		IPlugin<IPlugable, Void> explode = TestUtils.getExplodePlugin(clipLibrary);
 		
 		IPointFinder leftOffset = () -> {
 			Point pos = new Point(cam.getPosition());
@@ -258,12 +260,14 @@ public class GraphicsTest extends JFrame {
 		torus.addFlag(Events.EXPLODE_PERSIST);
 		//torus.setCastsShadow(false);
 		
-		torus.getObjectAs(Gate.class).setPassThroughPlugin((obj) -> {
-			obj.setColour(Color.magenta);
-			return null;
+		torus.getObjectAs(Gate.class).ifPresent(t -> {
+			t.setPassThroughPlugin((obj) -> {
+				obj.setColour(Color.magenta);
+				return null;
+			});
 		});
 		
-		PlugableCanvasObject<TexturedCuboid> cube = new PlugableCanvasObject<TexturedCuboid>(new TexturedCuboid(200,200,200));
+		PlugableCanvasObject<TexturedCuboid> cube = new PlugableCanvasObject<>(new TexturedCuboid(200,200,200));
 		cnv.registerObject(cube, new Point(500,500,500), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.TEXGORAUD));
 		//cnv.registerObject(cube, new Point(500,500,500), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
 		Transform cubet2 = new RepeatingTransform<Rotation<?>>(new Rotation<ZRotation>(ZRotation.class, 3), 30);
@@ -283,13 +287,16 @@ public class GraphicsTest extends JFrame {
 		sphere.addFlag(Events.EXPLODE_PERSIST);
 		cnv.registerObject(sphere, new Point(500,200,450), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
 		
-		for (int i = 0; i < sphere.getFacetList().size() ; i++)
-		{
-			if (i % (sphere.getObjectAs(Sphere.class).getPointsPerCircle()/3) == 1 || i % (sphere.getObjectAs(Sphere.class).getPointsPerCircle()/3) == 0)
+		sphere.getObjectAs(Sphere.class).ifPresent(s -> {
+			for (int i = 0; i < sphere.getFacetList().size() ; i++)
 			{
-				sphere.getFacetList().get(i).setColour(new Color(150,0,150));
+				if (i % (s.getPointsPerCircle()/3) == 1 || i % (s.getPointsPerCircle()/3) == 0)
+				{
+					sphere.getFacetList().get(i).setColour(new Color(150,0,150));
+				}
 			}
-		}
+		});
+		
 		
 		Wall wall = new Wall(40,40);
 		wall.setColour(new Color(240, 240, 240));
@@ -395,7 +402,6 @@ public class GraphicsTest extends JFrame {
 					l3.toggle();
 				}
 				
-				checkEngineSound(ship);
 			}
 			
 			@Override
@@ -419,7 +425,7 @@ public class GraphicsTest extends JFrame {
 		});
 		
 		cnv.addDrawOperation((c, g) -> {
-			CanvasObject selectedObject = getSelectedObject();
+			ICanvasObject selectedObject = getSelectedObject();
 			if (selectedObject == null || !selectedObject.isVisible()) return;
 			
 			WorldCoord pt = selectedObject.getVertexList().get(0);
@@ -480,11 +486,11 @@ public class GraphicsTest extends JFrame {
 
 	}
 	
-	private synchronized CanvasObject getSelectedObject() {
+	private synchronized ICanvasObject getSelectedObject() {
 		return selectedObject;
 	}
 
-	private synchronized void setSelectedObject(CanvasObject selectedObject) {
+	private synchronized void setSelectedObject(ICanvasObject selectedObject) {
 		this.selectedObject = selectedObject;
 	}
 

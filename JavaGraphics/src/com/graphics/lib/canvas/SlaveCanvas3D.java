@@ -2,11 +2,19 @@ package com.graphics.lib.canvas;
 
 import java.util.ArrayList;
 
-import com.graphics.lib.Utils;
+import com.graphics.lib.ZBufferEnum;
 import com.graphics.lib.camera.Camera;
+import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ICanvasUpdateListener;
 import com.graphics.lib.shader.IShader;
 
+/**
+ * Provides another view of the same scene in the parent
+ * 
+ * (This sometimes seems to paint double on start, not sure why yet)
+ * @author paul
+ *
+ */
 public class SlaveCanvas3D extends Canvas3D implements ICanvasUpdateListener {
 	private static final long serialVersionUID = 1L;
 	
@@ -45,7 +53,7 @@ public class SlaveCanvas3D extends Canvas3D implements ICanvasUpdateListener {
 	}*/
 	
 
-	private void processShape(Canvas3D source, CanvasObject obj, IShader shader)
+	private void processShape(Canvas3D source, ICanvasObject obj, IShader shader)
 	{
 		//if (this.isOkToPaint()) return;
 		while(this.isOkToPaint()){
@@ -56,7 +64,7 @@ public class SlaveCanvas3D extends Canvas3D implements ICanvasUpdateListener {
 		}
 		
 		if (this.getzBuffer() == null)
-			this.setzBuffer(Utils.getDefaultZBuffer());
+			this.setzBuffer(ZBufferEnum.DEFAULT.get());
 
 		this.getzBuffer().setDimensions(this.getWidth(), this.getHeight());
 		
@@ -67,14 +75,14 @@ public class SlaveCanvas3D extends Canvas3D implements ICanvasUpdateListener {
 			
 			this.getzBuffer().Add(obj, shader, this.getCamera(), source.getHorizon());
 		}
-		for (CanvasObject child : new ArrayList<CanvasObject>(obj.getChildren()))
+		for (ICanvasObject child : new ArrayList<CanvasObject>(obj.getChildren()))
 		{
 			this.processShape(source, child, shader);
 		};
 	}
 
 	@Override
-	public void update(Canvas3D source, CanvasObject obj) {
+	public void update(Canvas3D source, ICanvasObject obj) {
 		if (obj == null){
 			this.setOkToPaint(true);
 			this.repaint();

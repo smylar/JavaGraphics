@@ -4,6 +4,7 @@ import java.util.Observable;
 
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
+import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.transform.Transform;
 
 
@@ -19,7 +20,7 @@ public class ObjectTiedLightSource<L extends LightSource> extends TiedLightSourc
 		if (o != this.getTiedTo()) return;
 		if (trans instanceof Transform)
 		{
-			CanvasObject temp = new CanvasObject();
+			ICanvasObject temp = new CanvasObject();
 			WorldCoord pos = new WorldCoord(this.getLightSource().getPosition());
 			temp.getVertexList().add(pos);
 			

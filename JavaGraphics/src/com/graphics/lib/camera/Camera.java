@@ -9,8 +9,9 @@ import java.util.function.BiConsumer;
 import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
 import com.graphics.lib.canvas.CanvasObject;
-import com.graphics.lib.canvas.OrientableCanvasObject;
+import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IOrientable;
+import com.graphics.lib.interfaces.IOrientableCamera;
 import com.graphics.lib.interfaces.IOrientation;
 import com.graphics.lib.orientation.OrientationTransform;
 import com.graphics.lib.transform.*;
@@ -22,7 +23,7 @@ import com.graphics.lib.transform.*;
  * @author Paul Brandon
  *
  */
-public abstract class Camera extends Observable implements IOrientable, Observer {
+public abstract class Camera extends Observable implements IOrientableCamera, Observer {
 	public static final String CAMERA_MOVED = "cameraMoved";
 	private Point position = new Point(0,0,0);
 	private CanvasObject tiedTo = null;
@@ -39,11 +40,11 @@ public abstract class Camera extends Observable implements IOrientable, Observer
 		this.setOrientation(orientation);
 	}
 	
-	public CameraTransform getTransform(String key) {
+	public CameraTransform getCameraTransform(String key) {
 		return this.transforms.get(key);
 	}
 	
-	public CanvasObject getTiedTo() {
+	public ICanvasObject getTiedTo() {
 		return tiedTo;
 	}
 
@@ -57,11 +58,8 @@ public abstract class Camera extends Observable implements IOrientable, Observer
 		this.tiedTo = tiedTo;
 		this.tiedObjectLocator = tiedObjectLocator;
 		tiedObjectLocator.accept(tiedTo, this);
-		OrientableCanvasObject<?> o = tiedTo.getObjectAs(OrientableCanvasObject.class);
 		tiedTo.addObserver(this);
-		if (o != null){
-			o.setOrientation(orientation);
-		}
+		tiedTo.getObjectAs(IOrientable.class).ifPresent(o -> o.setOrientation(orientation));
 	}
 
 	/**
@@ -142,31 +140,31 @@ public abstract class Camera extends Observable implements IOrientable, Observer
 		this.notifyObservers(CAMERA_MOVED);
 	}
 	
-	public void alignShapeToCamera(CanvasObject obj)
+	public void alignShapeToCamera(ICanvasObject obj)
 	{
 		obj.applyCameraTransform(new Translation(-position.x, -position.y, -position.z), this);
 		this.matchCameraRotation(obj);
 		obj.applyCameraTransform(new Translation(position.x, position.y, position.z), this);
 	}
 	
-	public void matchCameraRotation(CanvasObject obj)
+	public void matchCameraRotation(ICanvasObject obj)
 	{
 		obj.applyCameraTransform(new Rotation<YRotation>(YRotation.class, -ot.getyRot()), this);
 		obj.applyCameraTransform(new Rotation<XRotation>(XRotation.class, -ot.getxRot()), this);
 		obj.applyCameraTransform(new Rotation<ZRotation>(ZRotation.class, -ot.getzRot()), this);
 	}
 	
-	public void addCameraRotation(CanvasObject obj)
+	public void addCameraRotation(ICanvasObject obj)
 	{
 		ot.addRotation(obj);
 	}
 	
-	public void removeCameraRotation(CanvasObject obj)
+	public void removeCameraRotation(ICanvasObject obj)
 	{	
 		ot.removeRotation(obj);
 	}
 	
-	public final void getView(CanvasObject obj){
+	public final void getView(ICanvasObject obj){
 		this.getViewSpecific(obj);
 	}
 	
@@ -183,7 +181,7 @@ public abstract class Camera extends Observable implements IOrientable, Observer
 	 * 
 	 * @param obj - Canvas Object to generate coordinates for
 	 */
-	public abstract void getViewSpecific(CanvasObject obj);
+	public abstract void getViewSpecific(ICanvasObject obj);
 	
 	/**
 	 * Called before a every new draw cycle, for setting up anything that applies to the whole cycle but may have changed between cycles

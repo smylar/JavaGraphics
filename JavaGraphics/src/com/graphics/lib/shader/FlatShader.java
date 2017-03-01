@@ -10,7 +10,7 @@ import com.graphics.lib.IntensityComponents;
 import com.graphics.lib.Point;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.camera.Camera;
-import com.graphics.lib.canvas.CanvasObject;
+import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.zbuffer.ScanLine;
 
@@ -26,7 +26,7 @@ public class FlatShader implements IShader{
 	private Set<ILightSource> ls = new HashSet<ILightSource>();
 	
 	@Override
-	public void init(CanvasObject obj, Facet f, Camera c) {
+	public void init(ICanvasObject obj, Facet f, Camera c) {
 		Color colour = f.getColour() == null ? obj.getColour() : f.getColour();
 		
 		List<WorldCoord> points = f.getAsList();
