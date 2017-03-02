@@ -8,6 +8,8 @@ import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.AnimatedCanvasObject;
+import com.graphics.lib.canvas.CanvasObjectFunctionsImpl;
+import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.orientation.SimpleOrientation;
 import com.graphics.lib.skeleton.PivotSkeletonNode;
 
@@ -18,6 +20,8 @@ public class Whale extends AnimatedCanvasObject<Whale> {
 	//private int multiplier = 1;
 	
 	public Whale(){
+		this.setFunctions(getFunctionsImpl());
+		
 		this.getVertexList().add(new WorldCoord(62, 40, 0));
 		this.getVertexList().add(new WorldCoord(98, 40, 0));
 		
@@ -183,21 +187,18 @@ public class Whale extends AnimatedCanvasObject<Whale> {
 		this.startAnimation("TAIL");
 	}
 	
-	@Override
-	public boolean isPointInside(Point p)
-	{
-		//is as overridden method, but we need to ignore the fins and fluke as it messes it up
-		//TODO also there is an issue with this if we hit the whale low down in front of the tail and the tail is in or near the fully down position
-		
-		if (this.getBaseObject() != this) return this.getBaseObject().isPointInside(p);
-		for (Facet f : getFacetList())
-		{
-			if (FIN_TAG.equals(f.getTag()) || FLUKE_TAG.equals(f.getTag())) continue;
-			
-			Vector vecPointToFacet = p.vectorToPoint( f.getAsList().get(0)).getUnitVector();
-			double deg = Math.toDegrees(Math.acos(vecPointToFacet.dotProduct(f.getNormal())));
-			if (deg >= 90) return false;
-		}
-		return true;
+	private CanvasObjectFunctionsImpl getFunctionsImpl() {
+		return new CanvasObjectFunctionsImpl() {
+			@Override
+			public boolean isPointInside(ICanvasObject obj, Point p)
+			{	
+				return obj.getFacetList().parallelStream()
+						.filter(f -> !(FIN_TAG.equals(f.getTag()) || FLUKE_TAG.equals(f.getTag())))
+						.allMatch(f -> {
+							Vector vecPointToFacet = p.vectorToPoint(f.getAsList().get(0)).getUnitVector();
+							return Math.toDegrees(Math.acos(vecPointToFacet.dotProduct(f.getNormal()))) < 90;
+						});
+			}
+		};
 	}
 }

@@ -138,7 +138,7 @@ public class PluginLibrary {
 			for (ICanvasObject impactee : objects.get()){
 				if (impactee == obj) continue;
 			
-				if (obj.getVertexList().stream().anyMatch(p -> impactee.isPointInside(p)))
+				if (obj.getVertexList().stream().anyMatch(p -> impactee.getFunctions().isPointInside(impactee, p)))
 				{
 					if (inCollision == impactee) { return null;}
 					if (impactorPlugin != null) obj.executePlugin(impactorPlugin);
@@ -234,7 +234,7 @@ public class PluginLibrary {
 			//it won't come straight back as it would in reality, as we don't necessarily have a normal that is pointing straight back to use.
 			//However, we could add another plugin for spheres, the normal is then the vector from centre to impact point
 			
-			Set<WorldCoord> impactPoints = obj.getVertexList().stream().filter(p -> impactee.isPointInside(p)).collect(Collectors.toSet());
+			Set<WorldCoord> impactPoints = obj.getVertexList().stream().filter(p -> impactee.getFunctions().isPointInside(impactee, p)).collect(Collectors.toSet());
 			if (impactPoints.size() == 0) return null;
 			
 			List<MovementTransform> mTrans = obj.getTransformsOfType(MovementTransform.class);

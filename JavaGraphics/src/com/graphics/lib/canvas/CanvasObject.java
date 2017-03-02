@@ -555,28 +555,6 @@ public class CanvasObject extends Observable implements ICanvasObject{
 		}
 	}
 	
-	/**
-	 * Tests whether a point is inside this object
-	 * 
-	 * @param p - Point to test
-	 * @return <code>True</code> if point is inside object, <code>False</code> otherwise
-	 */
-	@Override
-	public boolean isPointInside(Point p)
-	{
-		if (this.getBaseObject() != this) return this.getBaseObject().isPointInside(p);
-		//should do for most simple objects - can override it for something shape specific - e.g. it doesn't work for the whale, and shapes such as spheres can can work this out much quicker
-		//checks if all facets appears as backfaces to the tested point
-		for (Facet f : getData().facetList)
-		{
-			Vector vecPointToFacet = p.vectorToPoint(f.getAsList().get(0)).getUnitVector();
-			double deg = Math.toDegrees(Math.acos(vecPointToFacet.dotProduct(f.getNormal())));
-			if (deg >= 90) return false;
-		}
-		return true;
-		//Sub shapes???
-	}
-	
 	
 	/**
 	 * Gets the maximum distance from the centre of an object to a vertex

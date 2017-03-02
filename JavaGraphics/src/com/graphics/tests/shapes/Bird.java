@@ -1,11 +1,16 @@
 package com.graphics.tests.shapes;
 
 import com.graphics.lib.Facet;
+import com.graphics.lib.Point;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
+import com.graphics.lib.canvas.CanvasObjectFunctionsImpl;
+import com.graphics.lib.interfaces.ICanvasObject;
 
 public class Bird extends CanvasObject{
 	public Bird(){
+		this.setFunctions(getFunctionsImpl());
+		
 		this.getVertexList().add(new WorldCoord(0, 0, 0));
 		this.getVertexList().add(new WorldCoord(0, 0, 60));
 		
@@ -34,5 +39,16 @@ public class Bird extends CanvasObject{
 	public double getMaxExtent()
 	{
 		return this.getCentre().distanceTo(this.getVertexList().get(4));
+	}
+	
+	private CanvasObjectFunctionsImpl getFunctionsImpl() {
+		return new CanvasObjectFunctionsImpl() {
+			@Override
+			public boolean isPointInside(ICanvasObject obj, Point p)
+			{		
+				//as this is essentially a 2D object this won't work, well it would report true if just underneath the object
+				return false;
+			}
+		};
 	}
 }

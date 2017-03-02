@@ -184,15 +184,6 @@ public interface ICanvasObject {
 	void stopObserving();
 
 	/**
-	 * Tests whether a point is inside this object
-	 * 
-	 * @param p - Point to test
-	 * @return <code>True</code> if point is inside object, <code>False</code> otherwise
-	 */
-	boolean isPointInside(Point p);
-
-
-	/**
 	 * Gets the maximum distance from the centre of an object to a vertex
 	 *	<br/>
 	 * This general implementation will do for most shapes, though specific shapes may want to override to improve speed
