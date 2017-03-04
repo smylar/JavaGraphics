@@ -26,7 +26,7 @@ public class CanvasObjectFunctionsImpl {
 	public boolean vectorIntersectsRoughly(ICanvasObject obj, Point start, Vector v)
 	{
 		double dCentre = start.distanceTo(obj.getCentre());
-		double angle = Math.atan(obj.getMaxExtent()/dCentre);
+		double angle = Math.atan(getMaxExtent(obj)/dCentre);
 		Vector vCentre = start.vectorToPoint(obj.getCentre()).getUnitVector();
 		
 		double vAngle = Math.acos(v.getUnitVector().dotProduct(vCentre));
@@ -184,7 +184,7 @@ public class CanvasObjectFunctionsImpl {
 	 * @param p - Point to test
 	 * @return <code>True</code> if point is inside object, <code>False</code> otherwise
 	 */
-	public boolean isPointInside(ICanvasObject obj,Point p)
+	public boolean isPointInside(ICanvasObject obj, Point p)
 	{
 		//should do for most simple objects - can override it for something shape specific - e.g. it doesn't work for the whale, and shapes such as spheres can can work this out much quicker
 		//checks if all facets appears as backfaces to the tested point
@@ -195,5 +195,19 @@ public class CanvasObjectFunctionsImpl {
 		});
 
 		//Sub shapes???
+	}
+	
+	/**
+	 * Gets the maximum distance from the centre of an object to a vertex
+	 *	<br/>
+	 * This general implementation will do for most shapes, though specific shapes may want to override to improve speed
+	 * 
+	 * @return
+	 */
+	public double getMaxExtent(ICanvasObject obj)
+	{
+		Point centre = obj.getCentre();
+		return obj.getVertexList().stream().filter(GeneralPredicates.untagged(obj)).map(v -> v.distanceTo(centre))
+				.reduce(0d, (a,b) -> b > a ? b : a); //playing with reduce, could equally just use max() instead of reduce
 	}
 }

@@ -13,6 +13,7 @@ public enum ZBufferEnum {
 	}
 	
 	public IZBuffer get() {
+		//always return new instance
 		try {
 			return this.clazz.newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {

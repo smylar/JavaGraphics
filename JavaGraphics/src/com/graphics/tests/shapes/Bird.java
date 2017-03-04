@@ -35,11 +35,6 @@ public class Bird extends CanvasObject{
 		this.getFacetList().add(new Facet(this.getVertexList().get(5), this.getVertexList().get(6), this.getVertexList().get(7)));
 	}
 	
-	@Override
-	public double getMaxExtent()
-	{
-		return this.getCentre().distanceTo(this.getVertexList().get(4));
-	}
 	
 	private CanvasObjectFunctionsImpl getFunctionsImpl() {
 		return new CanvasObjectFunctionsImpl() {
@@ -48,6 +43,12 @@ public class Bird extends CanvasObject{
 			{		
 				//as this is essentially a 2D object this won't work, well it would report true if just underneath the object
 				return false;
+			}
+			
+			@Override
+			public double getMaxExtent(ICanvasObject obj)
+			{
+				return obj.getCentre().distanceTo(obj.getVertexList().get(4));
 			}
 		};
 	}

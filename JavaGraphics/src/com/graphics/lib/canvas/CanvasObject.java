@@ -555,23 +555,6 @@ public class CanvasObject extends Observable implements ICanvasObject{
 		}
 	}
 	
-	
-	/**
-	 * Gets the maximum distance from the centre of an object to a vertex
-	 *	<br/>
-	 * This general implementation will do for most shapes, though specific shapes may want to override to improve speed
-	 * 
-	 * @return
-	 */
-	@Override
-	public double getMaxExtent()
-	{
-		if (this.getBaseObject() != this) return this.getBaseObject().getMaxExtent();
-		Point centre = this.getCentre();
-		return this.getVertexList().stream().filter(GeneralPredicates.untagged(this)).map(v -> v.distanceTo(centre))
-				.reduce(0d, (a,b) -> b > a ? b : a); //playing with reduce, could equally just use max() instead of reduce
-	}
-	
 	/**
 	 * This method will be executed once all draw operations (across all objects) are complete
 	 */

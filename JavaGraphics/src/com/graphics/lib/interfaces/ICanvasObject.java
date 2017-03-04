@@ -184,15 +184,6 @@ public interface ICanvasObject {
 	void stopObserving();
 
 	/**
-	 * Gets the maximum distance from the centre of an object to a vertex
-	 *	<br/>
-	 * This general implementation will do for most shapes, though specific shapes may want to override to improve speed
-	 * 
-	 * @return
-	 */
-	double getMaxExtent();
-
-	/**
 	 * This method will be executed once all draw operations (across all objects) are complete
 	 */
 	void onDrawComplete();

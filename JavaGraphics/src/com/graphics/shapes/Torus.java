@@ -8,8 +8,7 @@ import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
-import com.graphics.lib.canvas.CanvasObjectFunctionsImpl;
-import com.graphics.lib.interfaces.ICanvasObject;
+import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.interfaces.IVertexNormalFinder;
 import com.graphics.lib.transform.Rotation;
 import com.graphics.lib.transform.Translation;
@@ -26,7 +25,7 @@ public class Torus extends CanvasObject{
 	
 	public Torus (double tubeRadius, double holeRadius, int arcProgression)
 	{
-		this.setFunctions(getFunctionsImpl());
+		this.setFunctions(CanvasObjectFunctions.TORUS.get());
 		List<Point> circle = new ArrayList<Point>();
 		if (360 % arcProgression != 0) arcProgression = 18;
 		int points = 360/arcProgression;
@@ -154,27 +153,6 @@ public class Torus extends CanvasObject{
 			Point centre = obj.getVertexList().get(index);
 			
 			return centre.vectorToPoint(p).getUnitVector();
-		};
-	}
-	
-	private CanvasObjectFunctionsImpl getFunctionsImpl() {
-		return new CanvasObjectFunctionsImpl() {
-			@Override
-			public boolean isPointInside(ICanvasObject obj, Point p)
-			{		
-				double distFromCentre = obj.getCentre().distanceTo(p);
-				if (distFromCentre > getActualRadius() || obj.getCentre().distanceTo(p) < getActualHoleRadius()) return false;
-				
-				double distFromHolePlane = getHolePlane().getDistanceFromFacetPlane(p);
-				if (distFromHolePlane > getActualTubeRadius()) return false;
-				
-				//now just to check within the circular area of the tube
-				double pX = Math.sqrt(Math.pow(distFromCentre, 2) - Math.pow(distFromHolePlane, 2));
-				double circleX = getActualRadius() - getActualTubeRadius();
-				//pY would be distFromHolePlane and circleY = 0
-				
-				return Math.pow(pX - circleX, 2) + Math.pow(distFromHolePlane, 2) < Math.pow(getActualTubeRadius(), 2);
-			}
 		};
 	}
 	
