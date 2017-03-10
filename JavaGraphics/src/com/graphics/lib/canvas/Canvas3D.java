@@ -171,7 +171,7 @@ public class Canvas3D extends JPanel{
 	 * @param obj		Object to register
 	 * @param position	Position to draw the centre of the object at
 	 */
-	public void registerObject(CanvasObject obj, Point position){
+	public void registerObject(ICanvasObject obj, Point position){
 		this.registerObject(obj, position, null);
 	}
 	
@@ -182,7 +182,7 @@ public class Canvas3D extends JPanel{
 	 * @param position	Position to draw the centre of the object at
 	 * @param shader	Shader to draw the object with
 	 */
-	public void registerObject(CanvasObject obj, Point position, IShader shader)
+	public void registerObject(ICanvasObject obj, Point position, IShader shader)
 	{
 		if (this.shapes.containsKey(obj)) return;
 		CanvasObjectFunctions.DEFAULT.get().moveTo(obj, position);

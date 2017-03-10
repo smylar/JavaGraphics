@@ -52,7 +52,7 @@ public class LaserWeapon implements IEffector {
 		laser.addFlag("PHASED");
 		Point pos = origin.find();
 		
-		for (Rotation<?> r : OrientationTransform.getRotationsForVector(effectVector.getVector())){
+		for (Rotation r : OrientationTransform.getRotationsForVector(effectVector.getVector())){
 			lsr.applyTransform(r);
 		}
 		

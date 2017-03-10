@@ -24,10 +24,8 @@ import com.graphics.lib.camera.Camera;
 import com.graphics.lib.collectors.CentreFinder;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ILightIntensityFinder;
-import com.graphics.lib.interfaces.IPointFinder;
 import com.graphics.lib.interfaces.IVertexNormalFinder;
 import com.graphics.lib.transform.Transform;
-import com.graphics.lib.transform.Translation;
 
 /**
  * CanvasObject provides the basic functionality for representing an object and moving it around on the screen 
@@ -198,11 +196,6 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	}
 	
 	@Override
-	public final com.graphics.lib.interfaces.ICanvasObject getObserving(){
-		return getData().observing;
-	}
-	
-	@Override
 	public final boolean getCastsShadow() {
 		return getData().castsShadow;
 	}
@@ -278,17 +271,15 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	 * @return List of transforms found
 	 */
 	@Override
-	public final <T> List<T> getTransformsOfType(Class<T> type)
+	public final synchronized <T> List<T> getTransformsOfType(Class<T> type)
 	{
+		return getData().transforms.stream().filter(t -> type.isAssignableFrom(t.getClass())).collect(Collector.of(
+													ArrayList::new,
+													(trans, orig) -> trans.add(type.cast(orig)),
+													(left, right) -> {left.addAll(right); return left;},
+													Collector.Characteristics.CONCURRENT
+													));
 
-		List<T> mTrans = getData().transforms.stream().filter(t -> type.isAssignableFrom(t.getClass())).collect(Collector.of(
-				ArrayList::new,
-				(trans, orig) -> trans.add(type.cast(orig)),
-				(left, right) -> {left.addAll(right); return left;},
-				Collector.Characteristics.CONCURRENT
-				));
-
-		return mTrans;
 	}
 	
 	@Override
@@ -305,15 +296,6 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	@Override
 	public final void applyCameraTransform(Transform transform, Camera c)
 	{
-		/*transform.doTransform(getBaseData().vertexList.stream().collect(Collector.of(
-				ArrayList::new,
-				(trans, world) -> trans.add(world.getTransformed(c)),
-				(left, right) -> {left.addAll(right); return left;},
-				Collector.Characteristics.CONCURRENT
-				))
-		);*/
-		
-		//does the same as above, but simpler!
 		transform.doTransform(getData().vertexList.stream().map(v -> v.getTransformed(c)).collect(Collectors.toList()));
 	}
 	
@@ -438,79 +420,11 @@ public class CanvasObject extends Observable implements ICanvasObject{
 		if (this.getBaseObject() != this) return this.getBaseObject().getCentre();
 		
 		//default, average of all un-tagged points
-		/*Point pt = getBaseData().vertexList.get(0);
-		double maxX = pt.x;
-		double maxY = pt.y;
-		double maxZ = pt.z;
-		double minX = pt.x;
-		double minY = pt.y;
-		double minZ = pt.z;
-		for (Point p : getBaseData().vertexList)
-		{
-			if (p.getTag().length() > 0) continue;
-			if (p.x > maxX) maxX = p.x;
-			if (p.x < minX) minX = p.x;
-			if (p.y > maxY) maxY = p.y;
-			if (p.y < minY) minY = p.y;
-			if (p.z > maxZ) maxZ = p.z;
-			if (p.z < minZ) minZ = p.z;
-		};
-		
-		return new Point(minX + ((maxX - minX)/2), minY + ((maxY - minY)/2), minZ + ((maxZ - minZ)/2));*/
-		
-		//playing with collectors
 		CentreFinder centre = getData().vertexList.stream()
 				.filter(GeneralPredicates.untagged(this))
 				.collect(CentreFinder::new, CentreFinder::accept, CentreFinder::combine);
 		
 		return centre.result();
-	}
-	
-	
-	public final void addTransformAboutCentre(Transform...t)
-	{
-		this.addTransformAboutPoint(() -> this.getCentre(), t);
-	}
-	
-	public final void addTransformAboutPoint(Point p, Transform...transform)
-	{
-		this.addTransformAboutPoint(() -> p, transform);
-	}
-	
-	/**
-	 * Add a transform sequence where the given point is moved to the origin, the required transforms applied, and then moved back to the original point
-	 * 
-	 * @param pFinder - Anonymous method that generates the point to transform about
-	 * @param transform - List of transforms to apply
-	 */
-	public final void addTransformAboutPoint(IPointFinder pFinder, Transform...transform)
-	{
-		Translation temp = new Translation(){
-			@Override
-			public void beforeTransform(){
-				Point p = pFinder.find();
-				transX = -p.x;
-				transY = -p.y;
-				transZ = -p.z;
-			}
-		};
-		
-		Transform temp2 = new Translation(){
-			@Override
-			public void beforeTransform(){
-				transX = -temp.transX;
-				transY = -temp.transY;
-				transZ = -temp.transZ;
-			}
-		};
-		this.addTransform(temp);
-		for (Transform t : transform)
-		{
-			temp2.addDependency(t);
-			temp.addDependency(t);
-			this.addTransform(t);
-		}
-		this.addTransform(temp2);
 	}
 	
 	/**

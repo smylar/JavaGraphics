@@ -6,6 +6,7 @@ import com.graphics.lib.Point;
 import com.graphics.lib.canvas.Canvas3D;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.control.ObjectInputController;
+import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IEffector;
 import com.graphics.lib.interfaces.IPointFinder;
 import com.graphics.lib.interfaces.IVectorFinder;
@@ -19,9 +20,9 @@ public class ProjectileWeapon implements IEffector {
 	private Projectile projectile;
 	private IPointFinder origin;
 	private IVectorFinder effectVector;
-	private CanvasObject parent;
+	private ICanvasObject parent;
 	
-	public ProjectileWeapon(Projectile proj, IPointFinder origin, IVectorFinder effectVector, CanvasObject parent){
+	public ProjectileWeapon(Projectile proj, IPointFinder origin, IVectorFinder effectVector, ICanvasObject parent){
 		this.origin = origin;
 		this.effectVector = effectVector;
 		this.parent = parent;

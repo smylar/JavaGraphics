@@ -2,14 +2,13 @@ package com.graphics.tests;
 
 import java.util.List;
 
+import com.graphics.lib.Axis;
+import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.control.ObjectInputController;
 import com.graphics.lib.transform.MovementTransform;
 import com.graphics.lib.transform.RepeatingTransform;
 import com.graphics.lib.transform.Rotation;
 import com.graphics.lib.transform.Transform;
-import com.graphics.lib.transform.XRotation;
-import com.graphics.lib.transform.YRotation;
-import com.graphics.lib.transform.ZRotation;
 import com.graphics.tests.shapes.Ship;
 
 public class ShipControls extends ObjectInputController<Ship> {
@@ -34,7 +33,7 @@ public class ShipControls extends ObjectInputController<Ship> {
 	{
 		if (this.controlledObject.hasNamedTransform(PAN_RIGHT)) return;
 		
-		Rotation<?> r = new Rotation<YRotation>(YRotation.class, this.controlledObject.getPanRate())
+		Rotation r = new Rotation(Axis.Y, this.controlledObject.getPanRate())
 		{
 			@Override
 			public void beforeTransform(){
@@ -48,15 +47,15 @@ public class ShipControls extends ObjectInputController<Ship> {
 				controlledObject.reapplyOrientation();
 			}
 		};
-		Transform rot = new RepeatingTransform<Rotation<?>>(r, -1);
+		Transform rot = new RepeatingTransform<Rotation>(r, -1);
 		rot.setName(PAN_RIGHT);
-		this.controlledObject.addTransformAboutCentre(rot);
+		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(controlledObject, rot);
 	}
 	
 	public void panLeft()
 	{
 		if (this.controlledObject.hasNamedTransform(PAN_LEFT)) return;
-		Rotation<?> r = new Rotation<YRotation>(YRotation.class, -this.controlledObject.getPanRate())
+		Rotation r = new Rotation(Axis.Y, -this.controlledObject.getPanRate())
 		{
 			@Override
 			public void beforeTransform(){
@@ -70,15 +69,15 @@ public class ShipControls extends ObjectInputController<Ship> {
 				controlledObject.reapplyOrientation();
 			}
 		};
-		Transform rot = new RepeatingTransform<Rotation<?>>(r, -1);
+		Transform rot = new RepeatingTransform<Rotation>(r, -1);
 		rot.setName(PAN_LEFT);
-		this.controlledObject.addTransformAboutCentre(rot);
+		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(controlledObject, rot);
 	}
 	
 	public void panDown()
 	{
 		if (this.controlledObject.hasNamedTransform(PAN_DOWN)) return;
-		Rotation<?> r = new Rotation<XRotation>(XRotation.class, -this.controlledObject.getPanRate())
+		Rotation r = new Rotation(Axis.X, -this.controlledObject.getPanRate())
 		{
 			@Override
 			public void beforeTransform(){
@@ -92,15 +91,15 @@ public class ShipControls extends ObjectInputController<Ship> {
 				controlledObject.reapplyOrientation();
 			}
 		};
-		Transform rot = new RepeatingTransform<Rotation<?>>(r, -1);
+		Transform rot = new RepeatingTransform<Rotation>(r, -1);
 		rot.setName(PAN_DOWN);
-		this.controlledObject.addTransformAboutCentre(rot);
+		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(controlledObject, rot);
 	}
 	
 	public void panUp()
 	{
 		if (this.controlledObject.hasNamedTransform(PAN_UP)) return;
-		Rotation<?> r = new Rotation<XRotation>(XRotation.class, this.controlledObject.getPanRate())
+		Rotation r = new Rotation(Axis.X, this.controlledObject.getPanRate())
 		{
 			@Override
 			public void beforeTransform(){
@@ -114,15 +113,15 @@ public class ShipControls extends ObjectInputController<Ship> {
 				controlledObject.reapplyOrientation();
 			}
 		};
-		Transform rot = new RepeatingTransform<Rotation<?>>(r, -1);
+		Transform rot = new RepeatingTransform<Rotation>(r, -1);
 		rot.setName(PAN_UP);
-		this.controlledObject.addTransformAboutCentre(rot);
+		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(controlledObject, rot);
 	}
 	
 	public void rollRight()
 	{
 		if (this.controlledObject.hasNamedTransform(ROLL_RIGHT)) return;
-		Rotation<?> r = new Rotation<ZRotation>(ZRotation.class, 4)
+		Rotation r = new Rotation(Axis.Z, 4)
 		{
 			@Override
 			public void beforeTransform(){
@@ -136,15 +135,15 @@ public class ShipControls extends ObjectInputController<Ship> {
 				controlledObject.reapplyOrientation();
 			}
 		};
-		Transform rot = new RepeatingTransform<Rotation<?>>(r, -1);
+		Transform rot = new RepeatingTransform<Rotation>(r, -1);
 		rot.setName(ROLL_RIGHT);
-		this.controlledObject.addTransformAboutCentre(rot);
+		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(controlledObject, rot);
 	}
 	
 	public void rollLeft()
 	{
 		if (this.controlledObject.hasNamedTransform(ROLL_LEFT)) return;
-		Rotation<?> r = new Rotation<ZRotation>(ZRotation.class, -4)
+		Rotation r = new Rotation(Axis.Z, -4)
 		{
 			@Override
 			public void beforeTransform(){
@@ -158,9 +157,9 @@ public class ShipControls extends ObjectInputController<Ship> {
 				controlledObject.reapplyOrientation();
 			}
 		};
-		Transform rot = new RepeatingTransform<Rotation<?>>(r, -1);
+		Transform rot = new RepeatingTransform<Rotation>(r, -1);
 		rot.setName(ROLL_LEFT);
-		this.controlledObject.addTransformAboutCentre(rot);
+		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(controlledObject, rot);
 	}
 	
 	public void moveUp()

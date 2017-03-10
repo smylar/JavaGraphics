@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.graphics.lib.Axis;
 import com.graphics.lib.Facet;
 import com.graphics.lib.GeneralPredicates;
 import com.graphics.lib.Point;
@@ -25,8 +26,6 @@ import com.graphics.lib.transform.MovementTransform;
 import com.graphics.lib.transform.RepeatingTransform;
 import com.graphics.lib.transform.Rotation;
 import com.graphics.lib.transform.Transform;
-import com.graphics.lib.transform.XRotation;
-import com.graphics.lib.transform.YRotation;
 
 public class PluginLibrary {
 	
@@ -59,11 +58,11 @@ public class PluginLibrary {
 				double xVector = baseVector.x + (Math.random()/2) - 0.25;
 				double yVector = baseVector.y + (Math.random()/2) - 0.25;
 				double zVector = baseVector.z + (Math.random()/2) - 0.25;
-				Transform rot1 = new RepeatingTransform<Rotation<?>>(new Rotation<YRotation>(YRotation.class, Math.random() * 5), 45);
+				Transform rot1 = new RepeatingTransform<Rotation>(Axis.Y.getRotation(Math.random() * 5), 45);
 				MovementTransform move = new MovementTransform(new Vector(xVector, yVector, zVector), speed - exhaustVelocity);
 				move.moveUntil(t -> rot1.isCompleteSpecific());
-				Transform rot2 = new RepeatingTransform<Rotation<?>>(new Rotation<XRotation>(XRotation.class, Math.random() * 5), t -> rot1.isCompleteSpecific());				
-				fragment.addTransformAboutCentre(rot1, rot2);
+				Transform rot2 = new RepeatingTransform<Rotation>(Axis.X.getRotation(Math.random() * 5), t -> rot1.isCompleteSpecific());				
+				CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(fragment, rot1, rot2);
 				fragment.addTransform(move);
 				
 				fragment.deleteAfterTransforms();	
@@ -92,7 +91,10 @@ public class PluginLibrary {
 			double zVector = baseVector.z + (Math.random()/2) - 0.25;
 			MovementTransform move = new MovementTransform(new Vector(xVector, yVector, zVector), Math.random() * 15 + 1 );
 			fragment.addTransform(move);
-			fragment.addTransformAboutCentre(new RepeatingTransform<Rotation<?>>(new Rotation<YRotation>(YRotation.class, Math.random() * 10), t -> move.isComplete()), new RepeatingTransform<Rotation<?>>(new Rotation<XRotation>(XRotation.class, Math.random() * 10), t -> move.isComplete()));
+			CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(fragment, 
+																		new RepeatingTransform<Rotation>(Axis.Y.getRotation(Math.random() * 10), 
+																		t -> move.isComplete()), new RepeatingTransform<Rotation>(Axis.X.getRotation(Math.random() * 10), 
+																		t -> move.isComplete()));
 			if (!obj.hasFlag(Events.EXPLODE_PERSIST)){
 				move.moveUntil(t -> t.getDistanceMoved() > 100);
 				fragment.deleteAfterTransforms();
@@ -300,8 +302,8 @@ public class PluginLibrary {
 			WorldCoord tempCoord = new WorldCoord(vMove.x, vMove.y, vMove.z);
 			temp.getVertexList().add(tempCoord);
 			
-			temp.applyTransform(new Rotation<XRotation>(XRotation.class, xAngleMod));
-			temp.applyTransform(new Rotation<YRotation>(YRotation.class, yAngleMod));
+			temp.applyTransform(Axis.X.getRotation(xAngleMod));
+			temp.applyTransform(Axis.Y.getRotation(yAngleMod));
 			
 			vMove.x = tempCoord.x;
 			vMove.y = tempCoord.y;

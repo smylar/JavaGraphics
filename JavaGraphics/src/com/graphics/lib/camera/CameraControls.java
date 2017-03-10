@@ -3,12 +3,10 @@ package com.graphics.lib.camera;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+import com.graphics.lib.Axis;
 import com.graphics.lib.transform.CameraMovementTransform;
 import com.graphics.lib.transform.CameraTransform;
 import com.graphics.lib.transform.PanCamera;
-import com.graphics.lib.transform.XRotation;
-import com.graphics.lib.transform.YRotation;
-import com.graphics.lib.transform.ZRotation;
 
 public class CameraControls implements KeyListener{
 	private static final String FORWARD = "FORWARD";
@@ -86,32 +84,32 @@ public class CameraControls implements KeyListener{
 		}
 		else if (!this.panRightKeyDown && (key.getKeyChar() == 'd' || key.getKeyChar() == 'D'))
 		{
-			this.camera.addTransform(PAN_RIGHT, new PanCamera<YRotation>(YRotation.class, 5));
+			this.camera.addTransform(PAN_RIGHT, new PanCamera(Axis.Y, 5));
 			this.panRightKeyDown = true;
 		}
 		else if (!this.panLeftKeyDown && (key.getKeyChar() == 'a' || key.getKeyChar() == 'A'))
 		{
-			this.camera.addTransform(PAN_LEFT, new PanCamera<YRotation>(YRotation.class, -5));
+			this.camera.addTransform(PAN_LEFT, new PanCamera(Axis.Y, -5));
 			this.panLeftKeyDown = true;
 		}
 		else if (!this.panDownKeyDown && (key.getKeyChar() == 'w' || key.getKeyChar() == 'W'))
 		{
-			this.camera.addTransform(PAN_DOWN, new PanCamera<XRotation>(XRotation.class, -5));
+			this.camera.addTransform(PAN_DOWN, new PanCamera(Axis.X, -5));
 			this.panDownKeyDown = true;
 		}
 		else if (!this.panUpKeyDown && (key.getKeyChar() == 's' || key.getKeyChar() == 'S'))
 		{
-			this.camera.addTransform(PAN_UP, new PanCamera<XRotation>(XRotation.class, 5));
+			this.camera.addTransform(PAN_UP, new PanCamera(Axis.X, 5));
 			this.panUpKeyDown = true;
 		}
 		else if (!this.rollRightKeyDown && (key.getKeyChar() == 'e' || key.getKeyChar() == 'E'))
 		{
-			this.camera.addTransform(ROLL_RIGHT, new PanCamera<ZRotation>(ZRotation.class, 5));
+			this.camera.addTransform(ROLL_RIGHT, new PanCamera(Axis.Z, 5));
 			this.rollRightKeyDown = true;
 		}
 		else if (!this.rollLeftKeyDown && (key.getKeyChar() == 'q' || key.getKeyChar() == 'Q'))
 		{
-			this.camera.addTransform(ROLL_LEFT, new PanCamera<ZRotation>(ZRotation.class, -5));
+			this.camera.addTransform(ROLL_LEFT, new PanCamera(Axis.Z, -5));
 			this.rollLeftKeyDown = true;
 		}
 		else if (!this.upKeyDown && key.getKeyCode() == 38)

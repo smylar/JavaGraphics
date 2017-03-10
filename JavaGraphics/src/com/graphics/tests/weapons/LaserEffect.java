@@ -1,12 +1,11 @@
 package com.graphics.tests.weapons;
 
 import java.awt.Color;
+
+import com.graphics.lib.Axis;
 import com.graphics.lib.Facet;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
-import com.graphics.lib.transform.Rotation;
-import com.graphics.lib.transform.XRotation;
-import com.graphics.lib.transform.ZRotation;
 import com.graphics.shapes.Cylinder;
 
 public class LaserEffect extends Cylinder {
@@ -39,11 +38,11 @@ public class LaserEffect extends Cylinder {
 		this.getFacetList().addAll(subCylinder.getFacetList());
 		
 		//rotate from upright to forwards
-		this.addTransform(new Rotation<XRotation>(XRotation.class, 90));
+		this.addTransform(Axis.X.getRotation(90));
 		//seems to be a slight issue facet edges forming a line straight down the middle of the screen
 		//it sometimes draws an extended line to the top of the screen (not sure why yet, haven't noticed on other objects)
 		//this Z rotation mitigates that, so facet edges aren't dead centre
-		this.addTransform(new Rotation<ZRotation>(ZRotation.class, 5)); 
+		this.addTransform(Axis.Z.getRotation(5)); 
 		this.applyTransforms();
 		
 		startPoint = new WorldCoord(0,0,0);

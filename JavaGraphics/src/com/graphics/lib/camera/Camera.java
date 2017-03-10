@@ -6,9 +6,9 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.function.BiConsumer;
 
+import com.graphics.lib.Axis;
 import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
-import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IOrientable;
 import com.graphics.lib.interfaces.IOrientableCamera;
@@ -26,8 +26,8 @@ import com.graphics.lib.transform.*;
 public abstract class Camera extends Observable implements IOrientableCamera, Observer {
 	public static final String CAMERA_MOVED = "cameraMoved";
 	private Point position = new Point(0,0,0);
-	private CanvasObject tiedTo = null;
-	private BiConsumer<CanvasObject, Camera> tiedObjectLocator;
+	private ICanvasObject tiedTo = null;
+	private BiConsumer<ICanvasObject, Camera> tiedObjectLocator;
 	private IOrientation orientation;
 	private boolean tiedObjectUpdated = false;
 	private Map<String, CameraTransform> transforms = new HashMap<String, CameraTransform>();
@@ -54,7 +54,7 @@ public abstract class Camera extends Observable implements IOrientableCamera, Ob
 	 * @param tiedTo				Canvas Object the camera is tied to
 	 * @param tiedObjectLocator		Anonymous function defining the camera's position in relation to the tied object
 	 */
-	public void setTiedTo(CanvasObject tiedTo, BiConsumer<CanvasObject, Camera> tiedObjectLocator) {
+	public void setTiedTo(ICanvasObject tiedTo, BiConsumer<ICanvasObject, Camera> tiedObjectLocator) {
 		this.tiedTo = tiedTo;
 		this.tiedObjectLocator = tiedObjectLocator;
 		tiedObjectLocator.accept(tiedTo, this);
@@ -149,9 +149,9 @@ public abstract class Camera extends Observable implements IOrientableCamera, Ob
 	
 	public void matchCameraRotation(ICanvasObject obj)
 	{
-		obj.applyCameraTransform(new Rotation<YRotation>(YRotation.class, -ot.getyRot()), this);
-		obj.applyCameraTransform(new Rotation<XRotation>(XRotation.class, -ot.getxRot()), this);
-		obj.applyCameraTransform(new Rotation<ZRotation>(ZRotation.class, -ot.getzRot()), this);
+		obj.applyCameraTransform(Axis.Y.getRotation(-ot.getyRot()), this);
+		obj.applyCameraTransform(Axis.X.getRotation(-ot.getxRot()), this);
+		obj.applyCameraTransform(Axis.Z.getRotation(-ot.getzRot()), this);
 	}
 	
 	public void addCameraRotation(ICanvasObject obj)

@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Observer;
 import java.util.Optional;
 
 import com.graphics.lib.Facet;
@@ -55,8 +56,6 @@ public interface ICanvasObject {
 	void setDeleted(boolean isDeleted);
 
 	boolean isObserving();
-
-	ICanvasObject getObserving();
 
 	boolean getCastsShadow();
 
@@ -195,5 +194,7 @@ public interface ICanvasObject {
 	void setBaseIntensity(double intensity);
 
 	CanvasObjectFunctionsImpl getFunctions();
+	
+	void addObserver(Observer o);
 
 }

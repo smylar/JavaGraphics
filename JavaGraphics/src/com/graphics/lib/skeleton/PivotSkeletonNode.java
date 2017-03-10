@@ -164,7 +164,7 @@ public class PivotSkeletonNode extends SkeletonNode {
 		
 		if (detail.getAmount() == 0) return;
 		
-		Rotation<?> rot = Rotation.getRotation(detail.getDirection(), detail.getAmount());
+		Rotation rot = detail.getDirection().getRotation(detail.getAmount());
 		
 		if (rot != null)
 		{

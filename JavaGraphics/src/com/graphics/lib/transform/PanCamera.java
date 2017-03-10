@@ -1,23 +1,26 @@
 package com.graphics.lib.transform;
 
+import com.graphics.lib.Axis;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.IOrientation;
 
-public class PanCamera<T extends Matrix> extends Rotation<T> implements CameraTransform {
+public class PanCamera implements CameraTransform {
 
-	public PanCamera(Class<T> matrix, double angleProgression) {
-		super(matrix, angleProgression);
+	private Rotation rot;
+	
+	public PanCamera(Axis axis, double angleProgression) {
+		rot = axis.getRotation(angleProgression);
 	}
 
 	@Override
 	public void doTransform(Camera c) {
 		try{
 			IOrientation o = c.getOrientation().getClass().newInstance();
-			this.beforeTransform();
+			rot.beforeTransform();
 			o.getRepresentation().getVertexList().stream().forEach(p -> {
-				this.doTransformSpecific().accept(p);
+				rot.doTransformSpecific().accept(p);
 			});
-			this.afterTransform();
+			rot.afterTransform();
 			c.addCameraRotation(o.getRepresentation());
 			
 			c.setOrientation(o);

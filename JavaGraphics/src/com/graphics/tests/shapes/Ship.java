@@ -5,11 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.graphics.lib.Axis;
 import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
+import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.canvas.OrientableCanvasObject;
 import com.graphics.lib.canvas.PlugableCanvasObject;
 import com.graphics.lib.interfaces.IEffector;
@@ -18,8 +20,6 @@ import com.graphics.lib.transform.MovementTransform;
 import com.graphics.lib.transform.RepeatingTransform;
 import com.graphics.lib.transform.Rotation;
 import com.graphics.lib.transform.Transform;
-import com.graphics.lib.transform.XRotation;
-import com.graphics.lib.transform.YRotation;
 
 public class Ship extends OrientableCanvasObject<PlugableCanvasObject<Ship>> {
 	
@@ -97,11 +97,11 @@ public class Ship extends OrientableCanvasObject<PlugableCanvasObject<Ship>> {
 							double xVector = baseVector.x + (Math.random()/2) - 0.25;
 							double yVector = baseVector.y + (Math.random()/2) - 0.25;
 							double zVector = baseVector.z + (Math.random()/2) - 0.25;
-							Transform rot1 = new RepeatingTransform<Rotation<?>>(new Rotation<YRotation>(YRotation.class, Math.random() * 10), 15);
+							Transform rot1 = new RepeatingTransform<Rotation>(new Rotation(Axis.Y, Math.random() * 10), 15);
 							MovementTransform move = new MovementTransform(new Vector(xVector, yVector, zVector), movement.get().getAcceleration() > 0 ? -20 : 20);
 							move.moveUntil(t -> rot1.isCompleteSpecific());
-							Transform rot2 = new RepeatingTransform<Rotation<?>>(new Rotation<XRotation>(XRotation.class, Math.random() * 10), t -> rot1.isCompleteSpecific());				
-							fragment.addTransformAboutCentre(rot1, rot2);
+							Transform rot2 = new RepeatingTransform<Rotation>(new Rotation(Axis.X, Math.random() * 10), t -> rot1.isCompleteSpecific());				
+							CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(fragment, rot1, rot2);
 							fragment.addTransform(move);
 							fragment.deleteAfterTransforms();	
 							fragment.addFlag(Events.NO_SHADE);

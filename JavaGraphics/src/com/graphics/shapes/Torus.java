@@ -3,6 +3,7 @@ package com.graphics.shapes;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.graphics.lib.Axis;
 import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
@@ -10,9 +11,7 @@ import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.interfaces.IVertexNormalFinder;
-import com.graphics.lib.transform.Rotation;
 import com.graphics.lib.transform.Translation;
-import com.graphics.lib.transform.YRotation;
 
 public class Torus extends CanvasObject{
 	private int points = 0;
@@ -103,7 +102,7 @@ public class Torus extends CanvasObject{
 		
 		this.addTransform(new Translation(-tubeRadius,-(holeRadius + tubeRadius*2),-(holeRadius + tubeRadius*2)));
 		
-		this.addTransform(new Rotation<YRotation>(YRotation.class, 90));
+		this.addTransform(Axis.Y.getRotation(90));
 		this.applyTransforms();
 		
 		this.points = points;

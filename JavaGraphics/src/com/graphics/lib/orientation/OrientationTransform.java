@@ -3,15 +3,13 @@ package com.graphics.lib.orientation;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.graphics.lib.Axis;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IOrientation;
 import com.graphics.lib.transform.Rotation;
-import com.graphics.lib.transform.XRotation;
-import com.graphics.lib.transform.YRotation;
-import com.graphics.lib.transform.ZRotation;
 
 /**
  * Contains information on the transforms to be applied to match an orientation
@@ -84,7 +82,7 @@ public class OrientationTransform {
 		else if (forward.x < 0)
 			this.yRot = -90;
 			
-		temp.applyTransform(new Rotation<YRotation>(YRotation.class, -this.yRot));
+		temp.applyTransform(Axis.Y.getRotation(-this.yRot));
 		
 		if (forward.z != 0)
 			this.xRot += Math.toDegrees(Math.atan(forward.y / forward.z)) * -1;
@@ -93,7 +91,7 @@ public class OrientationTransform {
 		else if (forward.y < 0)
 			this.xRot = 90;
 			
-		temp.applyTransform(new Rotation<XRotation>(XRotation.class, -xRot));
+		temp.applyTransform(Axis.X.getRotation(-this.xRot));
 		
 		if (up.y > 0) 
 			this.zRot = 180;
@@ -114,9 +112,9 @@ public class OrientationTransform {
 	 */
 	public void addRotation(ICanvasObject obj)
 	{
-		obj.applyTransform(new Rotation<ZRotation>(ZRotation.class, zRot));
-		obj.applyTransform(new Rotation<XRotation>(XRotation.class, xRot));
-		obj.applyTransform(new Rotation<YRotation>(YRotation.class, yRot));
+		obj.applyTransform(Axis.Z.getRotation(zRot));
+		obj.applyTransform(Axis.X.getRotation(xRot));
+		obj.applyTransform(Axis.Y.getRotation(yRot));
 	}
 	
 	/**
@@ -126,13 +124,13 @@ public class OrientationTransform {
 	 */
 	public void removeRotation(ICanvasObject obj)
 	{	
-		obj.applyTransform(new Rotation<YRotation>(YRotation.class, -yRot));
-		obj.applyTransform(new Rotation<XRotation>(XRotation.class, -xRot));
-		obj.applyTransform(new Rotation<ZRotation>(ZRotation.class, -zRot));
+		obj.applyTransform(Axis.Y.getRotation(-yRot));
+		obj.applyTransform(Axis.X.getRotation(-xRot));
+		obj.applyTransform(Axis.Z.getRotation(-zRot));
 	}
 	
-	public static List<Rotation<?>> getRotationsForVector(Vector v){
-		List<Rotation<?>> rots = new ArrayList<Rotation<?>>();
+	public static List<Rotation> getRotationsForVector(Vector v){
+		List<Rotation> rots = new ArrayList<Rotation>();
 		Vector unit = v.getUnitVector();
 		WorldCoord wc = new WorldCoord(unit.x, unit.y, unit.z);
 			
@@ -152,10 +150,10 @@ public class OrientationTransform {
 		else if (wc.x < 0)
 			yRot = -90;
 			
-		Rotation<?> r = new Rotation<YRotation>(YRotation.class, -yRot);
+		Rotation r = Axis.Y.getRotation(-yRot);
 		temp.applyTransform(r);
 		
-		Rotation<?> r0 = new Rotation<YRotation>(YRotation.class, yRot);
+		Rotation r0 = Axis.Y.getRotation(yRot);
 		
 		if (wc.z != 0)
 			xRot += Math.toDegrees(Math.atan(wc.y / wc.z)) * -1;
@@ -164,7 +162,7 @@ public class OrientationTransform {
 		else if (wc.y < 0)
 			xRot = 90;
 			
-		Rotation<?> r1 = new Rotation<XRotation>(XRotation.class, xRot);
+		Rotation r1 = Axis.X.getRotation(xRot);
 		rots.add(r1);
 		rots.add(r0);
 		

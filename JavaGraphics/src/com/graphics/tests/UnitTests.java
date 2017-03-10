@@ -6,6 +6,7 @@ import java.text.DecimalFormat;
 
 import org.junit.Test;
 
+import com.graphics.lib.Axis;
 import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
@@ -15,8 +16,6 @@ import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.transform.MovementTransform;
 import com.graphics.lib.transform.Rotation;
-import com.graphics.lib.transform.XRotation;
-import com.graphics.lib.transform.YRotation;
 
 public class UnitTests {
 
@@ -87,7 +86,7 @@ public class UnitTests {
 		WorldCoord coord = new WorldCoord(1,2,3);
 		obj.getVertexList().add(coord);
 		
-		Rotation<YRotation> rot = new Rotation<YRotation>(YRotation.class, 90);
+		Rotation rot = new Rotation(Axis.Y, 90);
 		obj.applyTransform(rot);
 		DecimalFormat round = new DecimalFormat("#.###");
 		
@@ -100,7 +99,7 @@ public class UnitTests {
 		WorldCoord coord = new WorldCoord(1,2,3);
 		obj.getVertexList().add(coord);
 		
-		Rotation<XRotation> rot = new Rotation<XRotation>(XRotation.class, 90);
+		Rotation rot = new Rotation(Axis.X, 90);
 		obj.applyTransform(rot);
 		DecimalFormat round = new DecimalFormat("#.###");
 		assertTrue(round.format(coord.x).equals("1") && round.format(coord.y).equals("-3") && round.format(coord.z).equals("2"));

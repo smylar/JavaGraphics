@@ -3,8 +3,10 @@ package com.graphics.tests.weapons;
 import java.awt.Color;
 import java.util.Optional;
 
+import com.graphics.lib.Axis;
 import com.graphics.lib.Vector;
 import com.graphics.lib.canvas.CanvasObject;
+import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.canvas.OrientableCanvasObject;
 import com.graphics.lib.canvas.PlugableCanvasObject;
 import com.graphics.lib.interfaces.IOrientable;
@@ -16,8 +18,6 @@ import com.graphics.lib.transform.MovementTransform;
 import com.graphics.lib.transform.RepeatingTransform;
 import com.graphics.lib.transform.Rotation;
 import com.graphics.lib.transform.Transform;
-import com.graphics.lib.transform.XRotation;
-import com.graphics.lib.transform.ZRotation;
 import com.graphics.shapes.Ovoid;
 import com.graphics.tests.TestUtils;
 
@@ -26,7 +26,7 @@ public class ExplodingProjectile extends Projectile{
 	@Override
 	public CanvasObject get(Vector initialVector, double parentSpeed) {
 		PlugableCanvasObject<?> proj = new PlugableCanvasObject<CanvasObject>(new OrientableCanvasObject<Ovoid>(new Ovoid(20,0.3,30)));
-		proj.applyTransform(new Rotation<XRotation>(XRotation.class, -90));
+		proj.applyTransform(new Rotation(Axis.X, -90));
 		proj.getObjectAs(IOrientable.class).ifPresent(o -> o.setOrientation(new SimpleOrientation()));
 		proj.setBaseIntensity(1);
 		proj.setColour(new Color(255, 0, 0, 80));
@@ -44,7 +44,7 @@ public class ExplodingProjectile extends Projectile{
 				}
 			}
 		}
-		for (Rotation<?> r : OrientationTransform.getRotationsForVector(initialVector)){
+		for (Rotation r : OrientationTransform.getRotationsForVector(initialVector)){
 			proj.applyTransform(r);
 		}
 
@@ -59,7 +59,7 @@ public class ExplodingProjectile extends Projectile{
 		move.moveUntil(t -> t.getDistanceMoved() >= this.getRange());
 		proj.addTransform(move);
 		
-		Rotation<?> rot = new Rotation<ZRotation>(ZRotation.class, 20)
+		Rotation rot = new Rotation(Axis.Z, 20)
 		{
 			@Override
 			public void beforeTransform(){
@@ -75,9 +75,9 @@ public class ExplodingProjectile extends Projectile{
 		}
 		;
 		
-		Transform projt = new RepeatingTransform<Rotation<?>>(rot, t -> move.isCompleteSpecific());
+		Transform projt = new RepeatingTransform<Rotation>(rot, t -> move.isCompleteSpecific());
 
-		proj.addTransformAboutCentre(projt);
+		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(proj, projt);
 		proj.deleteAfterTransforms();
 		proj.setProcessBackfaces(true);
 		

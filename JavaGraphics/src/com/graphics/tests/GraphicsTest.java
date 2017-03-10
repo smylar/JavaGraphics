@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+import com.graphics.lib.Axis;
 import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
 import com.graphics.lib.Utils;
@@ -40,6 +41,7 @@ import com.graphics.tests.weapons.TrackingProjectile;
 import com.graphics.lib.camera.ViewAngleCamera;
 import com.graphics.lib.canvas.Canvas3D;
 import com.graphics.lib.canvas.CanvasObject;
+import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.canvas.OrientableCanvasObject;
 import com.graphics.lib.canvas.PlugableCanvasObject;
 import com.graphics.lib.canvas.SlaveCanvas3D;
@@ -117,25 +119,19 @@ public class GraphicsTest extends JFrame {
 		lantern2.attachLightsource(l2);
 		cnv.registerObject(lantern2, new Point(500,200,-100), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.NONE));
 		
-		/*ObjectTiedLightSource<LightSource> l3 = new ObjectTiedLightSource<>(LightSource.class, 400,100,100);
-		l3.getLightSource().setColour(new Color(0, 0, 255));
-		cnv.addLightSource(l3.getLightSource());
-		Lantern lantern3 = new Lantern();
-		lantern3.attachLightsource(l3);
-		cnv.registerObject(lantern3, new Point(400,100,100), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.NONE));*/
-		
 		ObjectTiedLightSource<DirectionalLightSource> l3 = new ObjectTiedLightSource<>(DirectionalLightSource.class, 400,100,100);
 		l3.getLightSource().setColour(new Color(0, 0, 255));
 		cnv.addLightSource(l3.getLightSource());
 		Lantern lantern3 = new Lantern();
 		lantern3.attachLightsource(l3);
 		OrientableCanvasObject<Lantern> ol3 = new OrientableCanvasObject<Lantern>(lantern3);
+		//N.B. As it currently stands I don't think a wrapped lantern lightsource would respond to any transform via tieTo, would have to add it here
 		ol3.setOrientation(new SimpleOrientation(OrientableCanvasObject.ORIENTATION_TAG));
 		cnv.registerObject(ol3, new Point(400,100,100), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.NONE));
 		l3.getLightSource().setDirection(() -> {return ol3.getOrientation().getForward();});
 		l3.getLightSource().setLightConeAngle(40);
-		Transform l3spin = new RepeatingTransform<Rotation<?>>(new Rotation<>(XRotation.class, 4), 0);
-		ol3.addTransformAboutCentre(l3spin);
+		Transform l3spin = new RepeatingTransform<Rotation>(Axis.X.getRotation(4), 0);
+		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(ol3, l3spin);
 		
 		this.add(cnv, BorderLayout.CENTER);
 		
@@ -158,7 +154,7 @@ public class GraphicsTest extends JFrame {
 		
 		ViewAngleCamera slaveCam = new ViewAngleCamera(new SimpleOrientation(OrientableCanvasObject.ORIENTATION_TAG));
 		slaveCam.setPosition(new Point(1550, 200, 350));
-		slaveCam.addTransform("INIT", new PanCamera<>(YRotation.class, -90));
+		slaveCam.addTransform("INIT", new PanCamera(Axis.Y, -90));
 		slaveCam.doTransforms();
 		SlaveCanvas3D scnv = new SlaveCanvas3D(slaveCam);
 		slave.add(scnv);
@@ -241,7 +237,7 @@ public class GraphicsTest extends JFrame {
 		}, ship));
 		
 		ship.setColour(new Color(50, 50, 50));
-		ship.applyTransform(new Rotation<YRotation>(YRotation.class, 180));
+		ship.applyTransform(Axis.Y.getRotation(180));
 		ship.setOrientation(new SimpleOrientation(OrientableCanvasObject.ORIENTATION_TAG));
 		cnv.registerObject(ship, new Point(350, 350, -50), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
 				
@@ -251,12 +247,11 @@ public class GraphicsTest extends JFrame {
 		torus.setColour(new Color(250, 250, 250));
 		//torus.setLightIntensityFinder(Utils.getShadowLightIntensityFinder(() -> { return cnv.getShapes();})); //for testing shadows falling on the torus
 		cnv.registerObject(torus, new Point(200,200,450), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
-		Transform torust1 = new RepeatingTransform<Rotation<?>>(new Rotation<YRotation>(YRotation.class, 3), 60);
-		Transform torust2 = new RepeatingTransform<Rotation<?>>(new Rotation<XRotation>(XRotation.class, 3), 60);
+		Transform torust1 = new RepeatingTransform<Rotation>(Axis.Y.getRotation(3), 60);
+		Transform torust2 = new RepeatingTransform<Rotation>(Axis.X.getRotation(3), 60);
 		SequenceTransform torust = new SequenceTransform();
-		torust.addTransform(torust1);
-		torust.addTransform(torust2);
-		torus.addTransformAboutCentre(torust);
+		torust.add(torust1).add(torust2);
+		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(torus, torust);
 		torus.addFlag(Events.EXPLODE_PERSIST);
 		//torus.setCastsShadow(false);
 		
@@ -270,8 +265,8 @@ public class GraphicsTest extends JFrame {
 		PlugableCanvasObject<TexturedCuboid> cube = new PlugableCanvasObject<>(new TexturedCuboid(200,200,200));
 		cnv.registerObject(cube, new Point(500,500,500), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.TEXGORAUD));
 		//cnv.registerObject(cube, new Point(500,500,500), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
-		Transform cubet2 = new RepeatingTransform<Rotation<?>>(new Rotation<ZRotation>(ZRotation.class, 3), 30);
-		cube.addTransformAboutCentre(cubet2);
+		Transform cubet2 = new RepeatingTransform<Rotation>(Axis.Z.getRotation(3), 30);
+		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(cube, cubet2);
 		cube.addFlag(Events.STICKY);
 		
 		//Transform cubet = new RepeatingTransform<Translation>(new Translation(-5,0,0), (t) -> {
@@ -316,7 +311,7 @@ public class GraphicsTest extends JFrame {
 		rpt.setResetAfterComplete(true);
 		RepeatingTransform<?> spheret = new RepeatingTransform<RepeatingTransform<?>>(rpt,30);
 			
-		sphere.addTransformAboutCentre(spheret);
+		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(sphere, spheret);
 		
 		//CameraTiedLightSource l4 = new CameraTiedLightSource(cam.getPosition().x, cam.getPosition().y, cam.getPosition().z);
 		//l4.tieTo(cam);
@@ -343,7 +338,7 @@ public class GraphicsTest extends JFrame {
 				if (key.getKeyChar() == 'l') l4.toggle();
 				
 				else if (key.getKeyChar() == 'y'){
-					PlugableCanvasObject<Cuboid> movingTarget = new PlugableCanvasObject<Cuboid>(new Cuboid(20,20,20));
+					PlugableCanvasObject<Cuboid> movingTarget = new PlugableCanvasObject<>(new Cuboid(20,20,20));
 					//CanvasObject movingTarget = new Cuboid(20,20,20);
 					MovementTransform move = new MovementTransform(new Vector(1,1,0).getUnitVector(), 4);
 					move.moveUntil(t -> t.getDistanceMoved() > 5000);

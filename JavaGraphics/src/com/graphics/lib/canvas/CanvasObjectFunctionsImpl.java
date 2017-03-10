@@ -10,7 +10,9 @@ import com.graphics.lib.GeneralPredicates;
 import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
 import com.graphics.lib.interfaces.ICanvasObject;
+import com.graphics.lib.interfaces.IPointFinder;
 import com.graphics.lib.transform.MovementTransform;
+import com.graphics.lib.transform.Transform;
 import com.graphics.lib.transform.Translation;
 
 public class CanvasObjectFunctionsImpl {
@@ -209,5 +211,51 @@ public class CanvasObjectFunctionsImpl {
 		Point centre = obj.getCentre();
 		return obj.getVertexList().stream().filter(GeneralPredicates.untagged(obj)).map(v -> v.distanceTo(centre))
 				.reduce(0d, (a,b) -> b > a ? b : a); //playing with reduce, could equally just use max() instead of reduce
+	}
+	
+	public void addTransformAboutCentre(ICanvasObject obj, Transform...t)
+	{
+		this.addTransformAboutPoint(obj, () -> obj.getCentre(), t);
+	}
+	
+	public void addTransformAboutPoint(ICanvasObject obj, Point p, Transform...transform)
+	{
+		this.addTransformAboutPoint(obj, () -> p, transform);
+	}
+	
+	/**
+	 * Add a transform sequence where the given point is moved to the origin, the required transforms applied, and then moved back to the original point
+	 * 
+	 * @param pFinder - Anonymous method that generates the point to transform about
+	 * @param transform - List of transforms to apply
+	 */
+	public void addTransformAboutPoint(ICanvasObject obj, IPointFinder pFinder, Transform...transform)
+	{
+		Translation temp = new Translation(){
+			@Override
+			public void beforeTransform(){
+				Point p = pFinder.find();
+				transX = -p.x;
+				transY = -p.y;
+				transZ = -p.z;
+			}
+		};
+		
+		Transform temp2 = new Translation(){
+			@Override
+			public void beforeTransform(){
+				transX = -temp.transX;
+				transY = -temp.transY;
+				transZ = -temp.transZ;
+			}
+		};
+		obj.addTransform(temp);
+		for (Transform t : transform)
+		{
+			temp2.addDependency(t);
+			temp.addDependency(t);
+			obj.addTransform(t);
+		}
+		obj.addTransform(temp2);
 	}
 }

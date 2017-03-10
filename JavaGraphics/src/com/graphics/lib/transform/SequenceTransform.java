@@ -12,9 +12,10 @@ public class SequenceTransform extends Transform {
 	private int cnt = 0;
 	private Transform applied;
 	
-	public void addTransform(Transform t)
+	public SequenceTransform add(Transform t)
 	{
 		sequence.add(t);
+		return this;
 	}
 
 	@Override
