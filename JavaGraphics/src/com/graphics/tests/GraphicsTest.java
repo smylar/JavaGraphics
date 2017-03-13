@@ -45,6 +45,7 @@ import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.canvas.OrientableCanvasObject;
 import com.graphics.lib.canvas.PlugableCanvasObject;
 import com.graphics.lib.canvas.SlaveCanvas3D;
+import com.graphics.lib.canvas.TexturableCanvasObject;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IPlugable;
 import com.graphics.lib.interfaces.IPointFinder;
@@ -55,6 +56,8 @@ import com.graphics.lib.orientation.SimpleOrientation;
 import com.graphics.lib.plugins.Events;
 import com.graphics.lib.plugins.IPlugin;
 import com.graphics.lib.shader.ShaderFactory;
+import com.graphics.lib.texture.BmpTexture;
+import com.graphics.lib.texture.OvoidTextureMapper;
 import com.graphics.lib.transform.*;
 import com.graphics.lib.zbuffer.ZBuffer;
 import com.sound.ClipLibrary;
@@ -151,6 +154,7 @@ public class GraphicsTest extends JFrame {
 		FlapTest flap = new FlapTest(); 
 		flap.setColour(Color.ORANGE);
 		cnv.registerObject(flap, new Point(1000, 500, 200), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
+		CanvasObjectFunctions.DEFAULT.get().addTransformAboutPoint(flap, new Point(1200, 500, 200), new RepeatingTransform<Rotation>(Axis.Y.getRotation(2),0));
 		
 		ViewAngleCamera slaveCam = new ViewAngleCamera(new SimpleOrientation(OrientableCanvasObject.ORIENTATION_TAG));
 		slaveCam.setPosition(new Point(1550, 200, 350));
@@ -277,10 +281,12 @@ public class GraphicsTest extends JFrame {
 		
 		cube.addTransform(cubet);
 		
-		PlugableCanvasObject<Sphere> sphere = new PlugableCanvasObject<Sphere>(new Sphere(100,15));
+		TexturableCanvasObject<Sphere> txSphere = new TexturableCanvasObject<Sphere>(new Sphere(100,15));
+		txSphere.addTexture(new BmpTexture("smily")).mapTexture(new OvoidTextureMapper());
+		PlugableCanvasObject<TexturableCanvasObject<Sphere>> sphere = new PlugableCanvasObject<>(txSphere);
 		sphere.setColour(new Color(255, 255, 0));
 		sphere.addFlag(Events.EXPLODE_PERSIST);
-		cnv.registerObject(sphere, new Point(500,200,450), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
+		cnv.registerObject(sphere, new Point(500,200,450), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.TEXGORAUD));
 		
 		sphere.getObjectAs(Sphere.class).ifPresent(s -> {
 			for (int i = 0; i < sphere.getFacetList().size() ; i++)
