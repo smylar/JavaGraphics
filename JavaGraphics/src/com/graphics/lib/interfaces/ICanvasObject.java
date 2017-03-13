@@ -11,6 +11,7 @@ import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.camera.Camera;
+import com.graphics.lib.canvas.BaseData;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.CanvasObjectFunctionsImpl;
 import com.graphics.lib.transform.Transform;
@@ -153,6 +154,8 @@ public interface ICanvasObject {
 	 * @return
 	 */
 	IVertexNormalFinder getVertexNormalFinder();
+	
+	void setVertexNormalFinder(IVertexNormalFinder finder);
 
 	/**
 	 * Gets the centre point of this object
@@ -196,5 +199,7 @@ public interface ICanvasObject {
 	CanvasObjectFunctionsImpl getFunctions();
 	
 	void addObserver(Observer o);
+
+    BaseData getData();
 
 }

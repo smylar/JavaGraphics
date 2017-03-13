@@ -1,6 +1,8 @@
 package com.graphics.lib.canvas;
 
-public class CanvasObjectWrapper<T extends CanvasObject> extends CanvasObject {
+import com.graphics.lib.interfaces.ICanvasObject;
+
+public class CanvasObjectWrapper<T extends ICanvasObject> extends CanvasObject {
 	private T wrappedObject;
 	
 	public CanvasObjectWrapper()

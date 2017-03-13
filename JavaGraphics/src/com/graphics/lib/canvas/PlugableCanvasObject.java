@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IPlugable;
 import com.graphics.lib.plugins.IPlugin;
 
@@ -16,7 +17,7 @@ import com.graphics.lib.plugins.IPlugin;
  *
  * @param <T> Type of the CanvasObject being wrapped
  */
-public class PlugableCanvasObject<T extends CanvasObject> extends CanvasObjectWrapper<T> implements IPlugable {
+public class PlugableCanvasObject<T extends ICanvasObject> extends CanvasObjectWrapper<T> implements IPlugable {
 	private Map<String,IPlugin<IPlugable,?>> plugins = new HashMap<>();
 	private List<String> afterDrawPlugins = new ArrayList<>();
 	private List<String> singleAfterDrawPlugins = new ArrayList<>();
@@ -32,16 +33,20 @@ public class PlugableCanvasObject<T extends CanvasObject> extends CanvasObjectWr
 	@Override
 	public void onDrawComplete()
 	{
-		if (this.getWrappedObject() != null) this.getWrappedObject().onDrawComplete();
-		else super.onDrawComplete();
+		if (this.getWrappedObject() != null) {
+		    this.getWrappedObject().onDrawComplete();
+		}
+		else {
+		    super.onDrawComplete();
+		}
 		
-		List<String> pluginList = new ArrayList<String>(this.afterDrawPlugins);
+		List<String> pluginList = new ArrayList<>(this.afterDrawPlugins);
 		for (String key : pluginList)
 		{
 			this.executePlugin(key);
 		}
 		
-		pluginList = new ArrayList<String>(this.singleAfterDrawPlugins);
+		pluginList = new ArrayList<>(this.singleAfterDrawPlugins);
 		for (String key : pluginList)
 		{
 			this.executePlugin(key);

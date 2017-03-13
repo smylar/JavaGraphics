@@ -1,5 +1,6 @@
 package com.graphics.lib.canvas;
 
+import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IOrientable;
 import com.graphics.lib.interfaces.IOrientation;
 import com.graphics.lib.orientation.OrientationTransform;
@@ -12,7 +13,7 @@ import com.graphics.lib.orientation.OrientationTransform;
  *
  * @param <T> Type of the CanvasObject being wrapped
  */
-public class OrientableCanvasObject<T extends CanvasObject> extends CanvasObjectWrapper<T> implements IOrientable {
+public class OrientableCanvasObject<T extends ICanvasObject> extends CanvasObjectWrapper<T> implements IOrientable {
 	public static final String ORIENTATION_TAG = "Orientation";
 	private IOrientation orientation;
 	private OrientationTransform oTrans = new OrientationTransform();

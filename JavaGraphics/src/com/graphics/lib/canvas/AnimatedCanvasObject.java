@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.graphics.lib.interfaces.IAnimatable;
+import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.skeleton.SkeletonNode;
 
-public class AnimatedCanvasObject<T extends CanvasObject> extends OrientableCanvasObject<T> implements IAnimatable{
+public class AnimatedCanvasObject<T extends ICanvasObject> extends OrientableCanvasObject<T> implements IAnimatable{
 	private SkeletonNode skeletonRootNode;
 	
-	private List<String> activeAnimations = new ArrayList<String>();
+	private List<String> activeAnimations = new ArrayList<>();
 	
 	public AnimatedCanvasObject()
 	{
@@ -49,7 +50,7 @@ public class AnimatedCanvasObject<T extends CanvasObject> extends OrientableCanv
 	@Override
 	public void afterTransforms()
 	{
-		if (activeAnimations.size() > 0 && skeletonRootNode != null && !isDeleted() && isVisible()){		
+		if (!activeAnimations.isEmpty() && skeletonRootNode != null && !isDeleted() && isVisible()){		
 			this.toBaseOrientation();
 			
 			for(String animation : activeAnimations){
@@ -59,9 +60,12 @@ public class AnimatedCanvasObject<T extends CanvasObject> extends OrientableCanv
 			this.reapplyOrientation();
 		}
 		
-		if (getWrappedObject() != null) getWrappedObject().afterTransforms();
-		else 
+		if (getWrappedObject() != null) {
+		    getWrappedObject().afterTransforms();
+		}
+		else {
 			super.afterTransforms();
+		}
 	}
 
 }

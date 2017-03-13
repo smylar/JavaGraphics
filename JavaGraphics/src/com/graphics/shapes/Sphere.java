@@ -13,7 +13,7 @@ public class Sphere extends Ovoid {
 	public Sphere(double radius, int angleProgression)
 	{
 		super(radius, 1, angleProgression);
-		this.getData().vnFinder = VertexNormalFinderEnum.CENTRE_TO_POINT;
+		this.setVertexNormalFinder(VertexNormalFinderEnum.CENTRE_TO_POINT.get());
 		this.setFunctions(CanvasObjectFunctions.SPHERE.get());
 	}
 }
