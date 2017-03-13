@@ -143,7 +143,7 @@ public class LaserWeapon implements IEffector {
 			Utils.getPointFromKnownPoints(tp1, tp2, r1, r2).ifPresent(points -> {	
 				process.accept(points.getFirst());
 				process.accept(points.getSecond());
-				//wrong one will be out of bounds
+				//wrong one will be out of bounds (TODO - needs more work - not always the case - such as texture with lots of intermediate points - see sphere)
 			});
 			
 			return true;

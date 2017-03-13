@@ -19,11 +19,15 @@ public class BmpTexture implements Texture{
 	private boolean applyLighting = true;
 	private int order = 0;
 	
-	public BmpTexture(String bmpFileResource, Color transparentColour){
-		this.transparentColour = transparentColour;
+	public BmpTexture(String bmpFileResource){
 		try {
 			bmpImage = ImageIO.read(getClass().getResource(bmpFileResource + ".bmp"));
 		} catch (IOException e) {}
+	}
+	
+	public BmpTexture(String bmpFileResource, Color transparentColour){
+		this(bmpFileResource);
+		this.transparentColour = transparentColour;
 	}
 	
 	@Override

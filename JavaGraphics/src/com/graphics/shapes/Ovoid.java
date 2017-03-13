@@ -9,9 +9,11 @@ public class Ovoid extends CanvasObject{
 	private double radius = 0;
 	private int pointsPerCircle = 0;
 	private WorldCoord centre;
+	private int angleProgression = 0;
 	
 	public Ovoid(double radius, double radiusMod, int angleProgression)
 	{
+		this.angleProgression = angleProgression;
 		this.radius = radius;
 		if (360 % angleProgression != 0) angleProgression = 10;
 		
@@ -77,6 +79,10 @@ public class Ovoid extends CanvasObject{
 
 	public int getPointsPerCircle() {
 		return pointsPerCircle;
+	}
+
+	public int getAngleProgression() {
+		return angleProgression;
 	}
 
 	@Override

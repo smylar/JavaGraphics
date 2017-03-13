@@ -9,8 +9,8 @@ import java.util.Set;
 import com.graphics.lib.Point;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.interfaces.ITexturable;
-import com.graphics.lib.texture.ITextureMapper;
 import com.graphics.lib.texture.Texture;
+import com.graphics.lib.texture.TextureMapper;
 
 public class TexturableCanvasObject<T extends CanvasObject> extends CanvasObjectWrapper<T> implements ITexturable {
 	//note currently can't apply textures on a per facet (or set of facets) basis, though may be able to achieve that with the mapper used
@@ -33,8 +33,8 @@ public class TexturableCanvasObject<T extends CanvasObject> extends CanvasObject
 	}
 	
 	@Override
-	public ITexturable mapTexture(ITextureMapper mapper) {
-		textureMap.entrySet().forEach(e -> mapper.map(this.getVertexList(), e.getValue(), e.getKey()));
+	public ITexturable mapTexture(TextureMapper<?> mapper) {
+		textureMap.entrySet().forEach(e -> mapper.map(this.getWrappedObject(), e.getValue(), e.getKey()));
 		return this;
 	}
 	
@@ -62,4 +62,5 @@ public class TexturableCanvasObject<T extends CanvasObject> extends CanvasObject
 		});
 		return textures;
 	}
+
 }
