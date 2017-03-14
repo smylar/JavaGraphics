@@ -109,6 +109,8 @@ public class Torus extends CanvasObject{
 		
 		this.centre = new WorldCoord(0,0,0);
 		this.getVertexList().add(centre);//centre point
+		
+		this.setVertexNormalFinder(getvnFinder());
 	}
 	
 	public double getActualTubeRadius(){
@@ -141,8 +143,7 @@ public class Torus extends CanvasObject{
 		return this.centre;
 	}
 	
-	@Override
-	public IVertexNormalFinder getVertexNormalFinder()
+	private IVertexNormalFinder getvnFinder()
 	{
 		return (obj, p, f) -> {
 			if (!obj.getVertexList().contains(p)) return new Vector(0,0,-1);

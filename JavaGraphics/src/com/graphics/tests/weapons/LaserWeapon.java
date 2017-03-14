@@ -124,8 +124,8 @@ public class LaserWeapon implements IEffector {
 			double distTexture = tp1.distanceTo(tp2);
 			double ratio = distTexture/distWorld;
 			
-			double r1 = coords.get(0).distanceTo(intersectionData.getIntersection()) * ratio;
-			double r2 = coords.get(1).distanceTo(intersectionData.getIntersection()) * ratio;
+			double d1 = coords.get(0).distanceTo(intersectionData.getIntersection());
+			double d2 = coords.get(1).distanceTo(intersectionData.getIntersection());
 			
 			Consumer<Point> process = p -> {
 				int x = (int)Math.round(p.x);
@@ -140,10 +140,15 @@ public class LaserWeapon implements IEffector {
 				active.setColour(x, y, current);
 			};
 			
-			Utils.getPointFromKnownPoints(tp1, tp2, r1, r2).ifPresent(points -> {	
-				process.accept(points.getFirst());
-				process.accept(points.getSecond());
-				//wrong one will be out of bounds (TODO - needs more work - not always the case - such as texture with lots of intermediate points - see sphere)
+			
+			Utils.getPointFromKnownPoints(tp1, tp2, d1 * ratio, d2 * ratio).ifPresent(points -> {	
+				Utils.getPointFromKnownPoints(coords.get(0), coords.get(1), d1, d2).ifPresent(p -> {	
+					if (intersectionData.getFacet().isPointWithin(p.getFirst())) {
+						process.accept(points.getFirst());
+					} else {
+						process.accept(points.getSecond());
+					}
+				});
 			});
 			
 			return true;

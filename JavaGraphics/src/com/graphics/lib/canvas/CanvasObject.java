@@ -411,13 +411,13 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	 * @return
 	 */
 	@Override
-	public IVertexNormalFinder getVertexNormalFinder()
+	public final IVertexNormalFinder getVertexNormalFinder()
 	{
 		return getData().getVnFinder();
 	}
 	
 	@Override
-    public void setVertexNormalFinder(IVertexNormalFinder finder)
+    public final void setVertexNormalFinder(IVertexNormalFinder finder)
     {
         getData().setVnFinder(finder);
     }

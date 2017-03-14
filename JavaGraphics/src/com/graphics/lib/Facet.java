@@ -180,9 +180,9 @@ public class Facet {
 	 */
 	public boolean isPointWithin(Point p){
 		if (p != null &&
-			this.isSameSide(p, this.point1, this.point2, this.point3) &&
-			this.isSameSide(p, this.point2, this.point3, this.point1) &&
-			this.isSameSide(p, this.point3, this.point1, this.point2)
+			isSameSide(p, this.point1, this.point2, this.point3) &&
+			isSameSide(p, this.point2, this.point3, this.point1) &&
+			isSameSide(p, this.point3, this.point1, this.point2)
 		){
 			return true;
 		}
@@ -199,7 +199,7 @@ public class Facet {
 	 * @param fPoint3 - Facet point 3
 	 * @return <code>True</code> if p and fPoint3 are the same side of the line, <code>False</code> otherwise
 	 */
-	private boolean isSameSide(Point p, Point fPoint1, Point fPoint2, Point fPoint3){
+	public static boolean isSameSide(Point p, Point fPoint1, Point fPoint2, Point fPoint3){
 		Vector vInteresect = p.vectorToPoint(fPoint1);
 		Vector vector1 = fPoint2.vectorToPoint(fPoint1);
 		Vector vector2 = fPoint3.vectorToPoint(fPoint1);

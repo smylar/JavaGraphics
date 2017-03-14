@@ -47,7 +47,7 @@ public class BmpTexture implements Texture{
 			c = new Color(rgb);
 			colourMap.put(rgb, c);
 		}
-		return Optional.of(c);
+		return Optional.ofNullable(c);
 	}
 	
 	@Override
