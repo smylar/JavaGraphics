@@ -202,4 +202,8 @@ public interface ICanvasObject {
 
     BaseData getData();
 
+    void addFlag(String flag);
+
+    void removeFlag(String flag);
+
 }

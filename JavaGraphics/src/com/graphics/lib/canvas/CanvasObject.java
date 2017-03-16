@@ -141,11 +141,13 @@ public class CanvasObject extends Observable implements ICanvasObject{
 		return this.getData().getAnchorPoint()== null ? this.getCentre() : this.getData().getAnchorPoint();
 	}
 	
+	@Override
 	public final void addFlag(String flag)
 	{
 		getData().getFlags().add(flag);
 	}
 	
+	@Override
 	public final void removeFlag(String flag)
 	{
 		getData().getFlags().remove(flag);
