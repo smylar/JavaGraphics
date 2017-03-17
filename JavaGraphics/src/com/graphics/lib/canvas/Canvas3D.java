@@ -41,30 +41,33 @@ public class Canvas3D extends JPanel{
 	
 	private Map<ICanvasObject, IShader> shapes = Collections.synchronizedMap(new HashMap<ICanvasObject, IShader>());
 	
-	private Set<ILightSource> lightSources = new HashSet<ILightSource>(); 
+	private Set<ILightSource> lightSources = new HashSet<>(); 
 	private Set<ILightSource> lightSourcesToAdd = Collections.synchronizedSet(new HashSet<ILightSource>()); 
 	private Camera camera;
 	private IZBuffer zBuffer;
 	private double horizon = 8000;
-	private Set<ICanvasUpdateListener> slaves = new HashSet<ICanvasUpdateListener>();
-	private List<BiConsumer<Canvas3D,Graphics>> drawPlugins = new ArrayList<BiConsumer<Canvas3D,Graphics>>();
+	private Set<ICanvasUpdateListener> slaves = new HashSet<>();
+	private List<BiConsumer<Canvas3D,Graphics>> drawPlugins = new ArrayList<>();
 	private boolean drawShadows = false;
 	private Facet floor = null;
 	private boolean okToPaint = false;
 
+	protected Canvas3D(Camera camera)
+    {
+        this.camera = camera;   
+    }
+	
 	public static Canvas3D get(Camera camera){
-		if (cnv == null) cnv = new Canvas3D(camera);
-		else cnv.setCamera(camera);
+		if (cnv == null) {
+		    cnv = new Canvas3D(camera);
+		} else {
+		    cnv.setCamera(camera);
+		}
 		return cnv;
 	}
 	
 	public static Canvas3D get(){
 		return cnv;
-	}
-	
-	protected Canvas3D(Camera camera)
-	{
-		this.camera = camera;	
 	}
 	
 	/**
@@ -184,9 +187,13 @@ public class Canvas3D extends JPanel{
 	 */
 	public void registerObject(ICanvasObject obj, Point position, IShader shader)
 	{
-		if (this.shapes.containsKey(obj)) return;
-		CanvasObjectFunctions.DEFAULT.get().moveTo(obj, position);
-		this.shapes.put(obj, shader);
+		if (!this.shapes.containsKey(obj)) {
+		    CanvasObjectFunctions.DEFAULT.get().moveTo(obj, position);
+    		if (shader != null) {
+                shader.setLightsources(lightSources);
+    		}
+    		this.shapes.put(obj, shader);
+		}
 	}
 	
 	/**
@@ -194,7 +201,7 @@ public class Canvas3D extends JPanel{
 	 */
 	public void doDraw()
 	{
-		if (lightSourcesToAdd.size() > 0){
+		if (!lightSourcesToAdd.isEmpty()){
 			lightSources.addAll(lightSourcesToAdd);
 			lightSourcesToAdd.clear();
 		}
@@ -212,29 +219,23 @@ public class Canvas3D extends JPanel{
 		this.zBuffer.setDimensions(this.getWidth(), this.getHeight());
 		this.camera.setViewport(this.getWidth(), this.getHeight());
 		
-		this.lightSources.removeIf(l -> l.isDeleted());
+		this.lightSources.removeIf(ILightSource::isDeleted);
 		
 		Set<ICanvasObject> processShapes = new HashSet<>(this.getShapes());
-		processShapes.stream().filter(s -> s.isDeleted()).forEach(s -> this.shapes.remove(s));
+		processShapes.stream().filter(ICanvasObject::isDeleted).forEach(this.shapes::remove);
 		processShapes.removeIf(s -> s.isDeleted() || s.isObserving());
 
-		processShapes.parallelStream().forEach(s -> {
-			this.processShape(s);
-		});
+		processShapes.parallelStream().forEach(ICanvasObject::applyTransforms);
 		
 		this.camera.doTransforms();
 		
 		if (this.drawShadows && this.floor != null){
 			Set<CanvasObject> shadows = Collections.synchronizedSet(new HashSet<CanvasObject>()); 
-			processShapes.parallelStream().forEach(s -> {
-				shadows.addAll(getShadowOnFloor(s));
-			});
+			processShapes.parallelStream().forEach(s -> shadows.addAll(getShadowOnFloor(s)));
 			processShapes.addAll(shadows);
 		}
 		
-		processShapes.parallelStream().forEach(s -> {
-			s.onDrawComplete();
-		});
+		processShapes.parallelStream().forEach(ICanvasObject::onDrawComplete);
 		
 		processShapes.parallelStream().forEach(s -> {
 			this.processShape(s, this.zBuffer, getShader(s));
@@ -262,25 +263,13 @@ public class Canvas3D extends JPanel{
 		if (obj.isVisible() && !obj.isDeleted())
 		{
 			this.camera.getView(obj);
-			if (shader != null) shader.setLightsources(lightSources);
+			
 			zBuf.Add(obj, shader, this.camera, this.horizon);
 		}
 		
-		for (ICanvasObject child : new ArrayList<CanvasObject>(obj.getChildren()))
-		{
-			this.processShape(child, zBuf, shapes.containsKey(child) ? getShader(child) : shader);
-		}
+		obj.getChildren().forEach(child -> this.processShape(child, zBuf, shapes.containsKey(child) ? getShader(child) : shader));
 	}
 	
-	private void processShape(ICanvasObject obj)
-	{
-		obj.applyTransforms();
-		
-		for (ICanvasObject child : new ArrayList<CanvasObject>(obj.getChildren()))
-		{
-			this.processShape(child);
-		}
-	}
 	
 	/**
 	 * EXPERIMENTAL - Used to project shadows on to a plane (in this case a floor plane - though it could be any plane)
@@ -293,7 +282,7 @@ public class Canvas3D extends JPanel{
 	 * @return		Set of generated shadow objects
 	 */
 	private Set<CanvasObject> getShadowOnFloor(ICanvasObject obj){	
-		Set<CanvasObject> shadows = new HashSet<CanvasObject>();
+		Set<CanvasObject> shadows = new HashSet<>();
 		if (floor == null || !obj.getCastsShadow()) return shadows;
 		
 		for (ILightSource ls : lightSources){
@@ -338,8 +327,7 @@ public class Canvas3D extends JPanel{
 		Point intersect = floor.getIntersectionPointWithFacetPlane(end, lightVector);
 		if (intersect == null) return null;
 		
-		WorldCoord planePoint = new WorldCoord(intersect);
-		return planePoint;
+		return new WorldCoord(intersect);
 	}
 	
 	@Override

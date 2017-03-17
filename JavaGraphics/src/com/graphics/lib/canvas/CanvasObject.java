@@ -396,14 +396,16 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	public void afterTransforms(){
 		if (this.getBaseObject() != this) {
 		    this.getBaseObject().afterTransforms(); 
-		}
+		} else {
+            this.getChildren().forEach(ICanvasObject::applyTransforms);
+        }
 	}
 	
 	@Override
 	public void beforeTransforms(){
 		if (this.getBaseObject() != this) {
 		    this.getBaseObject().beforeTransforms(); 
-		}
+		} 
 	}
 	/**
 	 * Describes how to generate a normal vector for a Vertex 
@@ -499,11 +501,7 @@ public class CanvasObject extends Observable implements ICanvasObject{
 		    this.getBaseObject().onDrawComplete();
 		}
 		else{
-			List<CanvasObject> children = new ArrayList<>(this.getChildren());
-			for (com.graphics.lib.interfaces.ICanvasObject child : children)
-			{
-				child.onDrawComplete();
-			}
+			this.getChildren().forEach(ICanvasObject::onDrawComplete);
 		}
 	}
 	
