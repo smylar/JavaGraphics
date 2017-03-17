@@ -15,7 +15,7 @@ import com.graphics.lib.Point;
  */
 public abstract class Transform {
 	
-	private List<Transform> dependencyList = new ArrayList<Transform>();
+	private List<Transform> dependencyList = new ArrayList<>();
 	private boolean completed = false;
 	private boolean cancelled = false;
 	private String name = "";

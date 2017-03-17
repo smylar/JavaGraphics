@@ -17,8 +17,6 @@ public class ObjectTracker implements InvocationHandler {
     public static final String TRACKING_TAG = "tracking";
     
     private static final Map<ICanvasObject, Set<ICanvasObject>> trackerMap = Collections.synchronizedMap(new HashMap<>());
-    
-    private static final Map<ICanvasObject, ICanvasObject> proxyMap = Collections.synchronizedMap(new HashMap<>());
 
     private final ICanvasObject proxiedObject;
     
@@ -35,49 +33,42 @@ public class ObjectTracker implements InvocationHandler {
      */
     public static Optional<ICanvasObject> track (ICanvasObject target, ICanvasObject tracker) {
         //possible improvement - may want to check for cyclic tracking - which will stop everything while two objects call invoke on each other forever
-        ICanvasObject actual = getActual(target);
-
         Optional<ICanvasObject> ret = Optional.empty();
-        if (!trackerMap.containsKey(actual)) {
-            trackerMap.put(actual, new HashSet<>());
+        if (!trackerMap.containsKey(target)) {
+            trackerMap.put(target, new HashSet<>());
             
             ICanvasObject proxy = (ICanvasObject) Proxy.newProxyInstance(ICanvasObject.class.getClassLoader(),
                                     new Class[] { ICanvasObject.class },
-                                    new ObjectTracker(actual));
+                                    new ObjectTracker(target));
             
-            proxyMap.put(proxy, actual);
             ret = Optional.of(proxy);
         }
         
-        trackerMap.get(actual).add(tracker);
         tracker.addFlag(TRACKING_TAG);
         
         return ret;
     }
     
     public static void stop(ICanvasObject target, ICanvasObject tracker) {
-        ICanvasObject actual = getActual(target);
-        if (trackerMap.containsKey(actual)) {
-            trackerMap.get(actual).remove(tracker);
+        if (trackerMap.containsKey(target)) {
+            trackerMap.get(target).remove(tracker);
         }
         tracker.removeFlag(TRACKING_TAG);
         //note currently object will stay proxied even if we remove the last tracker
     }
     
-    private static ICanvasObject getActual(ICanvasObject target) {
-        return proxyMap.containsKey(target) ? proxyMap.get(target) : target;
-    }
-    
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         Object results = method.invoke(proxiedObject, args);
-        if ("applyTransform".equals(method.getName())) {
+        /*if ("applyTransform".equals(method.getName())) {
             trackerMap.get(this).forEach(tracker -> {
                 try {
                     method.invoke(tracker, args);
                 } catch (Exception e) {}
             });
-        }
+        }*/
+        //this won't really work for forwarding transforms, as transforms could be object specific or will change internal data
+        //so a transfom would have to be applied to a single merged object
         
         return results;
     }
