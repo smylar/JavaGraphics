@@ -501,7 +501,7 @@ public class CanvasObject extends Observable implements ICanvasObject{
 		    this.getBaseObject().onDrawComplete();
 		}
 		else{
-			this.getChildren().forEach(ICanvasObject::onDrawComplete);
+			this.getChildren().parallelStream().forEach(ICanvasObject::onDrawComplete);
 		}
 	}
 	
