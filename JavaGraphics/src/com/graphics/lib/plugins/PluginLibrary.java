@@ -72,13 +72,13 @@ public class PluginLibrary {
 		};
 	}
 	
-	public static IPlugin<IPlugable, Set<PlugableCanvasObject<CanvasObject>>> explode(Collection<ILightSource> lightSources) 
+	public static IPlugin<IPlugable, Set<PlugableCanvasObject>> explode(Collection<ILightSource> lightSources) 
 	{
 		return (obj) -> {
-		Set<PlugableCanvasObject<CanvasObject>> children = new HashSet<PlugableCanvasObject<CanvasObject>>();
+		Set<PlugableCanvasObject> children = new HashSet<>();
 		for (Facet f : obj.getFacetList())
 		{
-			PlugableCanvasObject<CanvasObject> fragment = new PlugableCanvasObject<CanvasObject>(new CanvasObject());
+			PlugableCanvasObject fragment = new PlugableCanvasObject(new CanvasObject());
 			for (WorldCoord p : f.getAsList()){
 				fragment.getVertexList().add(new WorldCoord(p.x, p.y, p.z));
 			}

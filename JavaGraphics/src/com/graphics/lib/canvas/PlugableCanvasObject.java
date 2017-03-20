@@ -17,7 +17,7 @@ import com.graphics.lib.plugins.IPlugin;
  *
  * @param <T> Type of the CanvasObject being wrapped
  */
-public class PlugableCanvasObject<T extends ICanvasObject> extends CanvasObjectWrapper<T> implements IPlugable {
+public class PlugableCanvasObject extends CanvasObjectWrapper implements IPlugable {
 	private Map<String,IPlugin<IPlugable,?>> plugins = new HashMap<>();
 	private List<String> afterDrawPlugins = new ArrayList<>();
 	private List<String> singleAfterDrawPlugins = new ArrayList<>();
@@ -26,7 +26,7 @@ public class PlugableCanvasObject<T extends ICanvasObject> extends CanvasObjectW
 		super();
 	}
 	
-	public PlugableCanvasObject(T obj) {
+	public PlugableCanvasObject(ICanvasObject obj) {
 		super(obj);
 	}
 

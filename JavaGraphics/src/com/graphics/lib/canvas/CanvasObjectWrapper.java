@@ -2,26 +2,26 @@ package com.graphics.lib.canvas;
 
 import com.graphics.lib.interfaces.ICanvasObject;
 
-public class CanvasObjectWrapper<T extends ICanvasObject> extends CanvasObject {
-	private T wrappedObject;
+public class CanvasObjectWrapper extends CanvasObject {
+	private ICanvasObject wrappedObject;
 	
 	public CanvasObjectWrapper()
 	{
 		this.setData(getData());
 	}
 	
-	public CanvasObjectWrapper(T obj)
+	public CanvasObjectWrapper(ICanvasObject obj)
 	{
 		this.setWrappedObject(obj);
 	}
 	
 	@Override
-	protected T getWrappedObject()
+	protected ICanvasObject getWrappedObject()
 	{
 		return wrappedObject;
 	}
 	
-	protected void setWrappedObject(T obj){
+	protected void setWrappedObject(ICanvasObject obj){
 		wrappedObject = obj;
 		this.setData(obj.getData());
 	}

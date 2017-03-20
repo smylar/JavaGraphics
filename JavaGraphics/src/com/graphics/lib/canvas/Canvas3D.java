@@ -26,6 +26,7 @@ import com.graphics.lib.interfaces.IZBuffer;
 import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.shader.IShader;
+import com.graphics.lib.shader.ShaderFactory;
 import com.graphics.lib.zbuffer.ZBufferItem;
 
 /**
@@ -104,7 +105,9 @@ public class Canvas3D extends JPanel{
 	}
 
 	public void addLightSource(LightSource lightSource) {
-		if (lightSource != null) this.lightSourcesToAdd.add(lightSource);
+		if (lightSource != null) {
+		    this.lightSourcesToAdd.add(lightSource);
+		}
 	}
 	
 	public Set<ICanvasObject> getShapes() {
@@ -115,8 +118,8 @@ public class Canvas3D extends JPanel{
 		return shapes.get(obj);
 	}
 	
-	public void replaceShader(ICanvasObject obj, IShader shader){
-		this.shapes.replace(obj, shader);
+	public void replaceShader(ICanvasObject obj, ShaderFactory shader){
+		this.shapes.replace(obj, shader.getShader());
 	}
 
 	public Set<ILightSource> getLightSources() {
@@ -185,8 +188,9 @@ public class Canvas3D extends JPanel{
 	 * @param position	Position to draw the centre of the object at
 	 * @param shader	Shader to draw the object with
 	 */
-	public void registerObject(ICanvasObject obj, Point position, IShader shader)
+	public void registerObject(ICanvasObject obj, Point position, ShaderFactory shaderFactory)
 	{
+	    IShader shader = shaderFactory.getShader();
 		if (!this.shapes.containsKey(obj)) {
 		    CanvasObjectFunctions.DEFAULT.get().moveTo(obj, position);
     		if (shader != null) {

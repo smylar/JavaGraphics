@@ -11,7 +11,7 @@ import com.graphics.lib.skeleton.PivotDetail;
 import com.graphics.lib.skeleton.PivotSkeletonNode;
 import com.graphics.lib.skeleton.SkeletonNode;
 
-public class FlapTest extends AnimatedCanvasObject<Bird> {
+public class FlapTest extends AnimatedCanvasObject {
 	private String tipAnimation = "";
 	
 	public FlapTest(){

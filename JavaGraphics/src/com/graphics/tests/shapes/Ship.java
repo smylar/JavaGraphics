@@ -21,19 +21,19 @@ import com.graphics.lib.transform.RepeatingTransform;
 import com.graphics.lib.transform.Rotation;
 import com.graphics.lib.transform.Transform;
 
-public class Ship extends OrientableCanvasObject<PlugableCanvasObject<Ship>> {
+public class Ship extends OrientableCanvasObject {
 	
 	private Facet wingFlashLeft;
 	private Facet wingFlashRight;
 	private int cnt = 0;
 	private double acceleration = 0.2;
 	private double panRate = 4;
-	private List<IEffector> weapons = new ArrayList<IEffector>();
+	private List<IEffector> weapons = new ArrayList<>();
 	
 	public Ship(int width, int depth, int height)
 	{
 		//super();
-		PlugableCanvasObject<Ship> ship = new PlugableCanvasObject<Ship>();
+		PlugableCanvasObject ship = new PlugableCanvasObject();
 		ship.getVertexList().add(new WorldCoord(0, 0, 0));
 		ship.getVertexList().add(new WorldCoord(width/2, 0, depth));
 		ship.getVertexList().add(new WorldCoord(-width/2, 0, depth));

@@ -7,7 +7,7 @@ import com.graphics.lib.interfaces.IAnimatable;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.skeleton.SkeletonNode;
 
-public class AnimatedCanvasObject<T extends ICanvasObject> extends OrientableCanvasObject<T> implements IAnimatable{
+public class AnimatedCanvasObject extends OrientableCanvasObject implements IAnimatable{
 	private SkeletonNode skeletonRootNode;
 	
 	private List<String> activeAnimations = new ArrayList<>();
@@ -17,7 +17,7 @@ public class AnimatedCanvasObject<T extends ICanvasObject> extends OrientableCan
 		super();
 	}
 	
-	public AnimatedCanvasObject(T obj)
+	public AnimatedCanvasObject(ICanvasObject obj)
 	{
 		super(obj);
 	}

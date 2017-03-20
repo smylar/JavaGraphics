@@ -35,7 +35,7 @@ public class TestUtils {
 				if (offset > 90 || offset < -90) continue;
 				int pos = middleHeight - (int)Math.round((offset*pixelsPerDegree)); 
 				g.drawLine(5,pos,30,pos);
-				g.drawString(""+(int)marker, 10, pos-1);
+				g.drawString(Double.toString(marker), 10, pos-1);
 			}
 			g.setColor(Color.RED);
 			g.drawLine(5,middleHeight,30,middleHeight);
@@ -59,15 +59,13 @@ public class TestUtils {
 					marker = -180 + (marker - 180);
 				}
 				g.drawLine(pos,5,pos,30);
-				g.drawString(""+(int)marker, pos+1, 20);
+				g.drawString(Double.toString(marker), pos+1, 20);
 			}
 			g.setColor(Color.RED);
 			g.drawLine(middleWidth,5,middleWidth,30);
 			
 			g.setColor(Color.black);
-			//System.out.println(middleWidth + ":" + middleHeight);
-			//g.drawLine(middleWidth - 5, middleHeight, middleWidth + 5, middleHeight);
-			//g.drawLine(middleWidth, middleHeight - 5, middleWidth, middleHeight + 5);
+
 			Utils.drawCircle(middleWidth, middleHeight, 20, new Color(255,0,0), new Color(0,255,0,0)).accept(c, g);
 			
 			if (c.getCamera() instanceof ViewAngleCamera){	
@@ -89,9 +87,7 @@ public class TestUtils {
 			@Override
 			public Void execute(IPlugable obj) {
 				PluginLibrary.explode(Canvas3D.get().getLightSources()).execute(obj).forEach(c -> {
-					Canvas3D.get().replaceShader(obj, ShaderFactory.GetShader(ShaderFactory.ShaderEnum.FLAT));
-					//c.registerPlugin(Events.STOP, PluginLibrary.stop(), false);
-					//c.registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollided(getFilteredObjectList(), Events.STOP, null), true);
+					Canvas3D.get().replaceShader(obj, ShaderFactory.FLAT);
 					c.registerPlugin(Events.CHECK_COLLISION, getBouncePlugin(), true);
 					if (!obj.hasFlag(SILENT_EXPLODE) && clipLibrary != null) clipLibrary.playSound("EXPLODE", -20f);
 				});
@@ -110,7 +106,7 @@ public class TestUtils {
 					if (impactee.hasFlag(Events.STICKY)){ 
 						obj.cancelTransforms();
 						//obj.observeAndMatch(impactee); 
-						//TODO needs to stop being a child of the original object, as observe and match also makes this fragment a child of impactee, get weird artifacts with the double processing
+						//TODO if already a child, object needs to stop being a child of that object, as observe and match also makes this fragment a child of impactee, get weird artifacts with the double processing
 					}
 					else {
 						PluginLibrary.bounce(impactee).execute(obj);

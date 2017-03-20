@@ -13,7 +13,7 @@ import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.orientation.SimpleOrientation;
 import com.graphics.lib.skeleton.PivotSkeletonNode;
 
-public class Whale extends AnimatedCanvasObject<Whale> {
+public class Whale extends AnimatedCanvasObject {
 	public static final String FIN_TAG = "fin";
 	public static final String FLUKE_TAG = "fluke";
 	

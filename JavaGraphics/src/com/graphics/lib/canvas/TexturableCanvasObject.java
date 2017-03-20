@@ -13,7 +13,7 @@ import com.graphics.lib.interfaces.ITexturable;
 import com.graphics.lib.texture.Texture;
 import com.graphics.lib.texture.TextureMapper;
 
-public class TexturableCanvasObject<T extends ICanvasObject> extends CanvasObjectWrapper<T> implements ITexturable {
+public class TexturableCanvasObject extends CanvasObjectWrapper implements ITexturable {
 	//note currently can't apply textures on a per facet (or set of facets) basis, though may be able to achieve that with the mapper used
 	private Map<Texture, Map<WorldCoord, Point>> textureMap = new HashMap<>();
 	
@@ -22,7 +22,7 @@ public class TexturableCanvasObject<T extends ICanvasObject> extends CanvasObjec
 		super();
 	}
 	
-	public TexturableCanvasObject(T obj)
+	public TexturableCanvasObject(ICanvasObject obj)
 	{
 		super(obj);
 	}

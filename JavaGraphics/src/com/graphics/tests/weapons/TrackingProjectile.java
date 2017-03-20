@@ -17,7 +17,7 @@ public class TrackingProjectile extends TargetedProjectile {
 	public CanvasObject get(Vector initialVector, double parentSpeed) {
 		if (this.getTargetFinder() == null || this.getTargetFinder().find() == null) return null;
 		
-		PlugableCanvasObject<Sphere> proj = new PlugableCanvasObject<Sphere>(new Sphere(18,20));
+		PlugableCanvasObject proj = new PlugableCanvasObject(new Sphere(18,20));
 		proj.setBaseIntensity(1);
 		proj.setColour(new Color(255, 255, 0, 80));
 		proj.setCastsShadow(false);

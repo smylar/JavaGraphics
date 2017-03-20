@@ -16,7 +16,7 @@ import com.graphics.lib.interfaces.IZBuffer;
 import com.graphics.lib.shader.IShader;
 
 public class ZBuffer implements IZBuffer{
-	private List<List<ZBufferItem>> zBuffer;
+	private List<List<ZBufferItem>> zBuffer = new ArrayList<>();
 	private int dispWidth;
 	private int dispHeight;
 	private int skip = 2; //controls how often we do a colour calculation, a value of 1 checks all lines, whereas 3 calculates every 3rd line and intervening points use the same as the last calculated point
@@ -104,7 +104,7 @@ public class ZBuffer implements IZBuffer{
 			localShader.init(parent, facet, c);
 		}
 		
-		List<LineEquation> lines = new ArrayList<LineEquation>();
+		List<LineEquation> lines = new ArrayList<>();
 		
 		lines.add(new LineEquation(points.get(0), points.get(1), c));
 		lines.add(new LineEquation(points.get(1), points.get(2), c));

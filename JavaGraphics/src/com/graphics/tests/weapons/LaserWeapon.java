@@ -48,7 +48,7 @@ public class LaserWeapon implements IEffector {
 		
 		LaserEffect lsr = new LaserEffect(range);
 		lsr.setTickLife(this.duration);
-		PlugableCanvasObject<LaserEffect> laser = new PlugableCanvasObject<LaserEffect>(lsr);
+		PlugableCanvasObject laser = new PlugableCanvasObject(lsr);
 		laser.addFlag("PHASED");
 		Point pos = origin.find();
 		

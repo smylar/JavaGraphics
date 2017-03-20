@@ -19,7 +19,7 @@ public class BouncyProjectile extends Projectile {
 	
 	@Override
 	public CanvasObject get(Vector initialVector, double parentSpeed) {
-		PlugableCanvasObject<Sphere> proj = new PlugableCanvasObject<Sphere>(new Sphere(18,20));
+		PlugableCanvasObject proj = new PlugableCanvasObject(new Sphere(18,20));
 		proj.setBaseIntensity(1);
 		proj.setColour(new Color(0, 255, 255, 80));
 		proj.setCastsShadow(false);

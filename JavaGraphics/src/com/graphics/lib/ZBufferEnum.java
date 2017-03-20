@@ -1,23 +1,20 @@
 package com.graphics.lib;
 
+import java.util.function.Supplier;
+
 import com.graphics.lib.interfaces.IZBuffer;
 import com.graphics.lib.zbuffer.ZBuffer;
 
 public enum ZBufferEnum {
-	DEFAULT(ZBuffer.class);
+	DEFAULT(ZBuffer::new);
 	
-	private Class<? extends IZBuffer> clazz;
+	private Supplier<IZBuffer> supplier;
 	
-	private ZBufferEnum(Class<? extends IZBuffer> clazz) {
-		this.clazz = clazz;
+	private ZBufferEnum(Supplier<IZBuffer> supplier) {
+		this.supplier = supplier;
 	}
 	
 	public IZBuffer get() {
-		//always return new instance
-		try {
-			return this.clazz.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
-			throw new RuntimeException(e);
-		}
+		return supplier.get();
 	}
 }

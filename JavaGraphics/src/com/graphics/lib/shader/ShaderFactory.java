@@ -1,17 +1,21 @@
 package com.graphics.lib.shader;
 
+import java.util.function.Supplier;
 
-public class ShaderFactory {
-	public static enum ShaderEnum{
-		GORAUD, TEXGORAUD, FLAT, NONE
+public enum ShaderFactory{
+		GORAUD(GoraudShader::new), 
+		TEXGORAUD(TexturedGoraudShader::new), 
+		FLAT(FlatShader::new), 
+		NONE(null);
+
+	
+	private Supplier<IShader> shader;
+	
+	private ShaderFactory(Supplier<IShader> shader) {
+	    this.shader = shader;
 	}
 	
-	public static IShader GetShader(ShaderEnum type){
-		switch(type){
-			case GORAUD: return new GoraudShader();
-			case TEXGORAUD: return new TexturedGoraudShader();
-			case FLAT: return new FlatShader();
-			default: return null;
-		}
+	public IShader getShader(){
+		return shader.get();
 	}
 }

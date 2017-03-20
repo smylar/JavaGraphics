@@ -8,7 +8,7 @@ import com.graphics.lib.texture.SimpleTextureMapper;
 import com.graphics.lib.texture.TestTexture;
 import com.graphics.shapes.Cuboid;
 
-public class TexturedCuboid extends TexturableCanvasObject<Cuboid> {
+public class TexturedCuboid extends TexturableCanvasObject {
 	
 	public TexturedCuboid(int height, int width, int depth) {
 		super(new Cuboid(height, width, depth));

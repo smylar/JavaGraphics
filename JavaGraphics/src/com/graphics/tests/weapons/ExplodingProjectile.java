@@ -25,7 +25,7 @@ public class ExplodingProjectile extends Projectile{
 
 	@Override
 	public CanvasObject get(Vector initialVector, double parentSpeed) {
-		PlugableCanvasObject<?> proj = new PlugableCanvasObject<CanvasObject>(new OrientableCanvasObject<Ovoid>(new Ovoid(20,0.3,30)));
+		PlugableCanvasObject proj = new PlugableCanvasObject(new OrientableCanvasObject(new Ovoid(20,0.3,30)));
 		proj.applyTransform(new Rotation(Axis.X, -90));
 		proj.getObjectAs(IOrientable.class).ifPresent(o -> o.setOrientation(new SimpleOrientation()));
 		proj.setBaseIntensity(1);
