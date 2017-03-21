@@ -3,12 +3,14 @@ package com.graphics.tests;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import com.graphics.lib.Utils;
 import com.graphics.lib.camera.ViewAngleCamera;
 import com.graphics.lib.canvas.Canvas3D;
+import com.graphics.lib.canvas.ITracker;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ICanvasObjectList;
 import com.graphics.lib.interfaces.IPlugable;
@@ -103,10 +105,10 @@ public class TestUtils {
 			public Void execute(IPlugable obj) {	
 				ICanvasObject impactee = PluginLibrary.hasCollided(TestUtils.getFilteredObjectList(),null, null).execute(obj);
 				if (impactee != null){
-					if (impactee.hasFlag(Events.STICKY)){ 
+				    Optional<ITracker> tracker = obj.getObjectAs(ITracker.class);
+					if (impactee.hasFlag(Events.STICKY) && tracker.isPresent()){ 
 						obj.cancelTransforms();
-						//obj.observeAndMatch(impactee); 
-						//TODO if already a child, object needs to stop being a child of that object, as observe and match also makes this fragment a child of impactee, get weird artifacts with the double processing
+						tracker.get().observeAndMatch(impactee);
 					}
 					else {
 						PluginLibrary.bounce(impactee).execute(obj);

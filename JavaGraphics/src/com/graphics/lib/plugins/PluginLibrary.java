@@ -17,6 +17,7 @@ import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.canvas.PlugableCanvasObject;
+import com.graphics.lib.canvas.TrackingCanvasObject;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ICanvasObjectList;
 import com.graphics.lib.interfaces.IPlugable;
@@ -78,7 +79,7 @@ public class PluginLibrary {
 		Set<PlugableCanvasObject> children = new HashSet<>();
 		for (Facet f : obj.getFacetList())
 		{
-			PlugableCanvasObject fragment = new PlugableCanvasObject(new CanvasObject());
+			PlugableCanvasObject fragment = new PlugableCanvasObject(new TrackingCanvasObject(new CanvasObject()));
 			for (WorldCoord p : f.getAsList()){
 				fragment.getVertexList().add(new WorldCoord(p.x, p.y, p.z));
 			}
@@ -113,7 +114,7 @@ public class PluginLibrary {
 	
 	public static IPlugin<IPlugable,Void> flash(Collection<ILightSource> lightSources)
 	{
-		return (obj)-> {
+		return obj -> {
 			LightSource flash = new LightSource(obj.getCentre().x,  obj.getCentre().y, obj.getCentre().z);
 			flash.setRange(-1);
 			lightSources.add(flash);
@@ -218,7 +219,7 @@ public class PluginLibrary {
 	
 	public static IPlugin<IPlugable, Void> stop2()
 	{
-		return (obj) -> {
+		return obj -> {
 			for (MovementTransform t : obj.getTransformsOfType(MovementTransform.class)){
 				t.setSpeed(0);
 			}
@@ -280,17 +281,13 @@ public class PluginLibrary {
 	public static IPlugin<IPlugable, Void> track(ICanvasObject objectToTrack, double rotationRate){
 		return (obj) -> {
 			if (objectToTrack == null) return null;
-			//Point centre = obj.getCentre();
-			//Point trackeeCentre = objectToTrack.getCentre();
+
 			Optional<MovementTransform> move = obj.getTransformsOfType(MovementTransform.class).stream().findFirst();
 			if (!move.isPresent()) return null;
 			
 			//plot deflection (if target moving) and aim for that
 			Vector vTrackee = CanvasObjectFunctions.DEFAULT.get().plotDeflectionShot(objectToTrack, obj.getCentre(), move.get().getSpeed());
-			/*if (vTrackee == null){
-				System.out.println("NULL");
-				vTrackee = centre.vectorToPoint(trackeeCentre).getUnitVector();
-			}*/
+
 			Vector vMove = move.get().getVector();
 			double xAngleDif = Math.toDegrees(Math.acos(vTrackee.y) - Math.acos(vMove.getUnitVector().y));
 			double xAngleMod = xAngleDif > 0 ? rotationRate : -rotationRate;

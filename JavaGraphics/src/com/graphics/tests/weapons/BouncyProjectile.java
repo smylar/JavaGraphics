@@ -2,9 +2,11 @@ package com.graphics.tests.weapons;
 
 import java.awt.Color;
 import java.util.Date;
+import java.util.Optional;
 
 import com.graphics.lib.Vector;
 import com.graphics.lib.canvas.CanvasObject;
+import com.graphics.lib.canvas.ITracker;
 import com.graphics.lib.canvas.PlugableCanvasObject;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IPlugable;
@@ -42,15 +44,20 @@ public class BouncyProjectile extends Projectile {
 			@Override
 			public Void execute(IPlugable obj) {	
 				ICanvasObject impactee = PluginLibrary.hasCollidedNew(TestUtils.getFilteredObjectList(),null, null).execute(obj);
-				if (impactee != null){
-					if (impactee.hasFlag(Events.STICKY)){ 
+				if (impactee != null) {
+				    Optional<ITracker> tracker = obj.getObjectAs(ITracker.class);
+					if (impactee.hasFlag(Events.STICKY) && tracker.isPresent()){ 
 						PluginLibrary.stop2().execute(obj);
-						obj.observeAndMatch(impactee);
-						if (getClipLibrary() != null) getClipLibrary().playSound("STICK", -20f);
+						tracker.get().observeAndMatch(impactee);
+						if (getClipLibrary() != null) {
+						    getClipLibrary().playSound("STICK", -20f);
+						}
 					}
 					else {
 						PluginLibrary.bounce(impactee).execute(obj);
-						if (getClipLibrary() != null)getClipLibrary().playSound("BOUNCE", -20f);
+						if (getClipLibrary() != null) {
+						    getClipLibrary().playSound("BOUNCE", -20f);
+						}
 					}
 				}
 				return null;

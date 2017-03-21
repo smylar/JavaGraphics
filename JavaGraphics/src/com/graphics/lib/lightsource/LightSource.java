@@ -81,7 +81,7 @@ public class LightSource extends Observable implements ILightSource{
 	 */
 	@Override
 	public Color getActualColour(){
-		return (isOn() ? actualColour : Color.black);
+		return isOn() ? actualColour : Color.black;
 	}
 	
 	protected void setActualColour() {

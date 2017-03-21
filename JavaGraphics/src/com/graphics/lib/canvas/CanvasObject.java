@@ -138,7 +138,7 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	
 	@Override
 	public Point getAnchorPoint(){
-		return this.getData().getAnchorPoint()== null ? this.getCentre() : this.getData().getAnchorPoint();
+		return this.getData().getAnchorPoint() == null ? this.getCentre() : this.getData().getAnchorPoint();
 	}
 	
 	@Override
@@ -182,16 +182,15 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	}
 
 	@Override
-	public final void setDeleted(boolean isDeleted) {
-		getData().setDeleted(isDeleted);
-		this.stopObserving();
-		this.setChanged();
-		this.notifyObservers();
-	}
-
-	@Override
-	public final boolean isObserving(){
-		return getData().getObserving() != null;
+	public void setDeleted(boolean isDeleted) {
+	    this.setChanged();
+        this.notifyObservers();
+        
+	    if (this.getBaseObject() != this) {
+            this.getWrappedObject().setDeleted(isDeleted); 
+        } else {
+            getData().setDeleted(isDeleted);
+        }
 	}
 	
 	@Override
@@ -395,7 +394,7 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	@Override
 	public void afterTransforms(){
 		if (this.getBaseObject() != this) {
-		    this.getBaseObject().afterTransforms(); 
+		    this.getWrappedObject().afterTransforms(); 
 		} else {
             this.getChildren().forEach(ICanvasObject::applyTransforms);
         }
@@ -404,7 +403,7 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	@Override
 	public void beforeTransforms(){
 		if (this.getBaseObject() != this) {
-		    this.getBaseObject().beforeTransforms(); 
+		    this.getWrappedObject().beforeTransforms(); 
 		} 
 	}
 	/**
@@ -436,10 +435,6 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	@Override
 	public Point getCentre()
 	{
-		if (this.getBaseObject() != this) {
-		    return this.getBaseObject().getCentre();
-		}
-		
 		//default, average of all un-tagged points
 		CentreFinder centre = getData().getVertexList().stream()
 				.filter(GeneralPredicates.untagged(this))
@@ -457,39 +452,6 @@ public class CanvasObject extends Observable implements ICanvasObject{
 		getData().setDeleteAfterTransforms(true);
 	}
 	
-	/**
-	 * Observe another object and match its movements, <s>observed item will call update in this item via the Observer/Observable interface when it changes</s>
-	 * <br/>
-	 * Changed to add objects vertex list to the parent, avoids issues such as double counting when reusing a transform
-	 * <br/>
-	 * <br/>
-	 * Note this object will be made a child of that it is observing so that it is always processed after the observed item
-	 * 
-	 * @param o
-	 */
-	@Override
-	public final synchronized void observeAndMatch (ICanvasObject o){
-	    //TODO separate out observers
-		getData().setObserving(o);
-		synchronized(o.getVertexList()){
-			o.getChildren().add(this);
-			this.getVertexList().forEach(v -> v.addTag(this.getObjectTag()));
-			o.getVertexList().addAll(this.getVertexList());
-		}
-		
-	}
-	
-	@Override
-	public final synchronized void stopObserving(){
-		if (getData().getObserving() != null){
-			getData().getObserving().getChildren().remove(this);
-			synchronized(getData().getObserving().getVertexList()){
-				getData().getObserving().getVertexList().removeIf(v -> v.hasTag(this.getObjectTag()));
-				this.getVertexList().forEach(v -> v.removeTag(this.getObjectTag()));
-			}
-			getData().setObserving(null);
-		}
-	}
 	
 	/**
 	 * This method will be executed once all draw operations (across all objects) are complete
@@ -498,7 +460,7 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	public void onDrawComplete(){
 		this.getChildren().removeIf(ICanvasObject::isDeleted);
 		if (this.getBaseObject() != this) {
-		    this.getBaseObject().onDrawComplete();
+		    this.getWrappedObject().onDrawComplete();
 		}
 		else{
 			this.getChildren().parallelStream().forEach(ICanvasObject::onDrawComplete);

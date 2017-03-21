@@ -24,9 +24,7 @@ public class ObjectTiedLightSource<L extends LightSource> extends TiedLightSourc
 			WorldCoord pos = new WorldCoord(this.getLightSource().getPosition());
 			temp.getVertexList().add(pos);
 			
-			temp.getVertexList().forEach(p -> {
-				((Transform) trans).doTransformSpecific().accept(p);
-			});
+			temp.getVertexList().forEach(p -> ((Transform) trans).doTransformSpecific().accept(p));
 			
 			this.getLightSource().setPosition(pos);
 		}

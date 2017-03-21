@@ -14,7 +14,9 @@ import com.graphics.lib.Utils;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.Canvas3D;
+import com.graphics.lib.canvas.ITracker;
 import com.graphics.lib.canvas.PlugableCanvasObject;
+import com.graphics.lib.canvas.TrackingCanvasObject;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IEffector;
 import com.graphics.lib.interfaces.IPointFinder;
@@ -44,7 +46,9 @@ public class LaserWeapon implements IEffector {
 	
 	@Override
 	public void activate() {
-		if (Canvas3D.get() == null || effectVector == null) return;
+		if (Canvas3D.get() == null || effectVector == null) {
+		    return;
+		}
 		
 		LaserEffect lsr = new LaserEffect(range);
 		lsr.setTickLife(this.duration);
@@ -57,7 +61,7 @@ public class LaserWeapon implements IEffector {
 		}
 		
 		laser.registerPlugin("LASER", 
-				(obj) -> {
+				obj -> {
 						Vector v = effectVector.getVector();
 						obj.getObjectAs(LaserEffect.class).ifPresent(l -> {
 							Entry<Double, IntersectionData<ICanvasObject>> f = TestUtils.getFilteredObjectList().get().stream().collect(new NearestIntersectedFacetFinder<>(v,l.getAnchorPoint(),l.getLength()));
@@ -71,12 +75,12 @@ public class LaserWeapon implements IEffector {
 								l.resetLength();
 							}
 						});
-						//as an aspiration - create dynamic texture map for laser 'holes'
 						return null;
 		},true);
 		
-		Canvas3D.get().registerObject(laser, pos);
-		laser.observeAndMatch(parent);
+		ITracker tLaser = new TrackingCanvasObject(laser);
+		Canvas3D.get().registerObject(tLaser, pos);
+		tLaser.observeAndMatch(parent);
 		this.laserEffect = lsr;
 	}
 
@@ -104,7 +108,9 @@ public class LaserWeapon implements IEffector {
 	
 	private boolean markTexture(IntersectionData<ICanvasObject> intersectionData) {
 		Optional<ITexturable> texturable = intersectionData.getParent().getObjectAs(ITexturable.class);
-		if (!texturable.isPresent()) return false;
+		if (!texturable.isPresent()) {
+		    return false;
+		}
 		
 		List<WorldCoord> coords = intersectionData.getFacet().getAsList();
 		Set<Texture> textures = new HashSet<>(texturable.get().getTextures());
