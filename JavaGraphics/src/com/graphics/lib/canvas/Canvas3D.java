@@ -227,7 +227,7 @@ public class Canvas3D extends JPanel{
 		
 		Set<ICanvasObject> processShapes = new HashSet<>(this.getShapes());
 		processShapes.stream().filter(ICanvasObject::isDeleted).forEach(this.shapes::remove);
-		processShapes.removeIf(s -> s.isDeleted() || s.hasFlag(TrackingCanvasObject.TRACKING_TAG)); //may want ignore items to be configurable
+		processShapes.removeIf(s -> s.isDeleted() || s.isObserving());
 
 		processShapes.parallelStream().forEach(ICanvasObject::applyTransforms);
 		

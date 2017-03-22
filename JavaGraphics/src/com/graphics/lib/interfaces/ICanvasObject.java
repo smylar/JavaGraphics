@@ -56,6 +56,8 @@ public interface ICanvasObject {
 
 	void setDeleted(boolean isDeleted);
 
+	boolean isObserving();
+
 	boolean getCastsShadow();
 
 	Color getColour();
@@ -170,6 +172,20 @@ public interface ICanvasObject {
 	void deleteAfterTransforms();
 
 	/**
+	 * Observe another object and match its movements, <s>observed item will call update in this item via the Observer/Observable interface when it changes</s>
+	 * <br/>
+	 * Changed to add objects vertex list to the parent, avoids issues such as double counting when reusing a transform
+	 * <br/>
+	 * <br/>
+	 * Note this object will be made a child of that it is observing so that it is always processed after the observed item
+	 * 
+	 * @param o
+	 */
+	void observeAndMatch(ICanvasObject o);
+
+	void stopObserving();
+
+	/**
 	 * This method will be executed once all draw operations (across all objects) are complete
 	 */
 	void onDrawComplete();
@@ -183,8 +199,6 @@ public interface ICanvasObject {
 	CanvasObjectFunctionsImpl getFunctions();
 	
 	void addObserver(Observer o);
-	
-	void deleteObserver(Observer o);
 
     BaseData getData();
 

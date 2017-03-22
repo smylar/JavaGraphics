@@ -17,6 +17,7 @@ import java.util.Observer;
  * @param <L> - Type of light source
  * @param <T> - Type of object being tied to
  */
+//public abstract class TiedLightSource extends LightSource implements Observer {
 public abstract class TiedLightSource<L extends LightSource, T extends Observable> implements Observer {
 	
 	private T tiedTo;
@@ -26,8 +27,10 @@ public abstract class TiedLightSource<L extends LightSource, T extends Observabl
 		try {
 			this.lightSource = ls.getConstructor(double.class, double.class, double.class).newInstance(x, y, z);
 		} catch (Exception e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		//super(x, y, z);
 	}
 
 	public void tieTo(T obj){

@@ -29,8 +29,8 @@ public class DirectionalLightSource extends LightSource {
 	
 	public DirectionalLightSource(double x, double y, double z) {
 		super(x, y, z);
-		direction = () -> new Vector(0,0,1);
-		position = () -> new Point(x,y,z);
+		direction = () -> {return new Vector(0,0,1);};
+		position = () -> {return new Point(x,y,z);};
 	}
 
 	public double getLightConeAngle() {
@@ -56,7 +56,7 @@ public class DirectionalLightSource extends LightSource {
 	
 	@Override
 	public void setPosition(Point p) {
-		position = () -> p;
+		position = () -> {return p;};
 	}
 
 	public void setPosition(IPointFinder position) {
@@ -75,9 +75,7 @@ public class DirectionalLightSource extends LightSource {
 		Vector lightVector = this.getPosition().vectorToPoint(p).getUnitVector();
 		
 		double angleRad = this.getDirection().dotProduct(lightVector);
-		if (Math.toDegrees(Math.acos(angleRad)) > this.getLightConeAngle()) {
-		    return new IntensityComponents();
-		}
+		if (Math.toDegrees(Math.acos(angleRad)) > this.getLightConeAngle()) return new IntensityComponents();
 
 		return super.getIntensityComponents(p);
 	}
