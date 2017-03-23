@@ -3,7 +3,7 @@ package com.graphics.lib.interfaces;
 import java.util.List;
 
 import com.graphics.lib.camera.Camera;
-import com.graphics.lib.shader.IShader;
+import com.graphics.lib.shader.ShaderFactory;
 import com.graphics.lib.zbuffer.ZBufferItem;
 
 /**
@@ -24,7 +24,7 @@ public interface IZBuffer {
 	 * @param shader - The shader object that will handle colouring of the facet
 	 * @param c		- The camera being processed
 	 */
-	public void Add(ICanvasObject obj, IShader shader, Camera c, double horizon);
+	public void add(ICanvasObject obj, ShaderFactory shader, Camera c, double horizon);
 	
 	/**
 	 * Get the Z buffer, the form is (in an attempt for some performance when finding a specific entry):

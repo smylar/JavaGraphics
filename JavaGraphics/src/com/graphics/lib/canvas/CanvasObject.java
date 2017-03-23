@@ -3,6 +3,7 @@ package com.graphics.lib.canvas;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
@@ -45,6 +46,18 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	
 	private BaseData data;
 	private int objectId = nextId++;
+	protected Optional<ICanvasObject> wrappedObject = Optional.empty();
+	
+	
+	public CanvasObject()
+	{
+		setData(getData());
+	}
+	
+	public CanvasObject(ICanvasObject obj)
+	{
+		setWrappedObject(obj);
+	}
 	
 	/**
 	 * Get this object as the given class as long as that class is found in the wrapped object hierarchy
@@ -58,36 +71,19 @@ public class CanvasObject extends Observable implements ICanvasObject{
 		if (cl.isAssignableFrom(this.getClass())){
 			return Optional.of(cl.cast(this));
 		}else{
-			ICanvasObject wrapped = getWrappedObject();
-			if (wrapped == null) {
-			    return Optional.empty(); //may prefer to throw exception?
+			if (wrappedObject.isPresent()) {
+				return wrappedObject.get().getObjectAs(cl);
 			}
-			return wrapped.getObjectAs(cl);
+			
+			return Optional.empty(); //may prefer to throw exception?
 		}
 	}
 	
-	/**
-	 * Get the object wrapped by this object, or this object if it isn't wrapped
-	 * <br/>
-	 * Wrapper objects must override this method so as not to return itself
-	 * 
-	 * @return The canvas object directly wrapped by this wrapper
-	 */
-	protected ICanvasObject getWrappedObject()
-	{
-		return null;
+	protected final void setWrappedObject(ICanvasObject obj){
+		wrappedObject = Optional.ofNullable(obj);
+		wrappedObject.ifPresent(o -> this.setData(o.getData()));
 	}
 	
-	/**
-	 * Get the wrapped object at the root of the hierarchy, or this object if it isn't wrapped
-	 * 
-	 * @return The root canvas object wrapped by this wrapper
-	 */
-	@Override
-	public ICanvasObject getBaseObject()
-	{
-		return getWrappedObject() == null ? this : getWrappedObject().getBaseObject();
-	}
 	
 	protected final void setFunctions(CanvasObjectFunctionsImpl functions) {
 		this.getData().setFunctions(functions);
@@ -172,8 +168,7 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	@Override
 	public final void setVisible(boolean isVisible) {
 		getData().setVisible(isVisible);
-		this.setChanged();
-		this.notifyObservers();
+		doNotify();
 	}
 
 	@Override
@@ -185,8 +180,7 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	public final void setDeleted(boolean isDeleted) {
 		getData().setDeleted(isDeleted);
 		this.stopObserving();
-		this.setChanged();
-		this.notifyObservers();
+		doNotify();
 	}
 
 	@Override
@@ -333,12 +327,11 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	 * @return The transform found or null
 	 */
 	@Override
-	public final Transform getTransform(String key) {
-		Optional<Transform> tr = getData().getTransforms().stream().filter(t -> t.getName() == key).findFirst();
-		if (tr.isPresent()) {
-		    return tr.get();
-		}
-		return null;
+	public final <T extends Transform> Optional<T> getTransform(String key, Class<T> clazz) {
+		return getData().getTransforms().stream()
+								.filter(t -> t.getName() == key && clazz.isAssignableFrom(t.getClass()))
+								.map(clazz::cast)
+								.findFirst();
 	}
 	
 	/**
@@ -354,8 +347,7 @@ public class CanvasObject extends Observable implements ICanvasObject{
 		//can be called directly for singular ad-hoc adjustments, without adding to the transform list, 
 		//this should generally only be done on objects that haven't been registered to a canvas yet
 		t.doTransform(getData().getVertexList());
-		this.setChanged();
-		this.notifyObservers(t);
+		doNotify(t);
 	}
 	
 	/**
@@ -394,8 +386,8 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	
 	@Override
 	public void afterTransforms(){
-		if (this.getBaseObject() != this) {
-		    this.getBaseObject().afterTransforms(); 
+		if (wrappedObject.isPresent()) {
+			wrappedObject.get().afterTransforms(); 
 		} else {
             this.getChildren().forEach(ICanvasObject::applyTransforms);
         }
@@ -403,8 +395,8 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	
 	@Override
 	public void beforeTransforms(){
-		if (this.getBaseObject() != this) {
-		    this.getBaseObject().beforeTransforms(); 
+		if (wrappedObject.isPresent()) {
+			wrappedObject.get().beforeTransforms(); 
 		} 
 	}
 	/**
@@ -436,8 +428,8 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	@Override
 	public Point getCentre()
 	{
-		if (this.getBaseObject() != this) {
-		    return this.getBaseObject().getCentre();
+		if (wrappedObject.isPresent()) {
+		    return wrappedObject.get().getCentre();
 		}
 		
 		//default, average of all un-tagged points
@@ -496,12 +488,13 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	 */
 	@Override
 	public void onDrawComplete(){
-		this.getChildren().removeIf(ICanvasObject::isDeleted);
-		if (this.getBaseObject() != this) {
-		    this.getBaseObject().onDrawComplete();
+		
+		if (wrappedObject.isPresent()) {
+			wrappedObject.get().onDrawComplete();
 		}
 		else{
-			this.getChildren().parallelStream().forEach(ICanvasObject::onDrawComplete);
+			this.getChildren().removeIf(ICanvasObject::isDeleted);
+			new HashSet<ICanvasObject>(this.getChildren()).parallelStream().forEach(ICanvasObject::onDrawComplete);
 		}
 	}
 	
@@ -555,6 +548,17 @@ public class CanvasObject extends Observable implements ICanvasObject{
 
 	}
 	
+	public void doNotify() {
+		doNotify(null);
+	}
+	
+	@Override
+	public void doNotify(Object arg) {
+		this.setChanged();
+		this.notifyObservers(arg);
+		wrappedObject.ifPresent(o -> o.doNotify(arg));
+	}
+	
 	private void addPointFacetToMap(Point p, Facet f)
 	{
 		if (!getData().getVertexFacetMap().containsKey(p)){
@@ -596,10 +600,6 @@ public class CanvasObject extends Observable implements ICanvasObject{
 			if (other.getFacetList() != null)
 				return false;
 		} else if (!this.getFacetList().equals(other.getFacetList()))
-			return false;
-		if (isDeleted() != other.isDeleted())
-			return false;
-		if (isVisible() != other.isVisible())
 			return false;
 		if (this.getVertexList() == null) {
 			if (other.getVertexList() != null)

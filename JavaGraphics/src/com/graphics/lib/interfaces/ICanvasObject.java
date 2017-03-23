@@ -31,13 +31,6 @@ public interface ICanvasObject {
 	 */
 	<C extends ICanvasObject> Optional<C> getObjectAs(Class<C> cl);
 
-	/**
-	 * Get the wrapped object at the root of the hierarchy, or this object if it isn't wrapped
-	 * 
-	 * @return The root canvas object wrapped by this wrapper
-	 */
-	ICanvasObject getBaseObject();
-
 	String getObjectTag();
 
 	void setAnchorPoint(Point p);
@@ -123,7 +116,7 @@ public interface ICanvasObject {
 	 * @param key - Name of the transform
 	 * @return The transform found or null
 	 */
-	Transform getTransform(String key);
+	<T extends Transform> Optional<T> getTransform(String key, Class<T> clazz);
 
 	/**
 	 * Apply a given transform (e.g. Moving or rotating the object) immediately to this object
@@ -205,5 +198,7 @@ public interface ICanvasObject {
     void addFlag(String flag);
 
     void removeFlag(String flag);
+
+	void doNotify(Object arg);
 
 }

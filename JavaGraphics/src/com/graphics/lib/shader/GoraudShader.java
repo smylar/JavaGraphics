@@ -2,7 +2,6 @@ package com.graphics.lib.shader;
 
 import java.awt.Color;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -13,6 +12,7 @@ import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.camera.Camera;
+import com.graphics.lib.canvas.Canvas3D;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.plugins.Events;
@@ -35,7 +35,7 @@ public class GoraudShader implements IShader{
 	protected Point startTexture;
 	protected Point endTexture;
 	protected double lineLength = 0;
-	protected Set<ILightSource> ls = new HashSet<ILightSource>();
+	protected Set<ILightSource> ls = Canvas3D.get().getLightSources();
 	protected Map<Point, IntensityComponents> pointLight = new HashMap<Point, IntensityComponents>();
 	
 	@Override
@@ -103,17 +103,6 @@ public class GoraudShader implements IShader{
 		pointComponents.setBlue(startComponents.getBlue() + ((endComponents.getBlue() - startComponents.getBlue()) * percentLength));
 		
 		return pointComponents;
-	}
-	
-	@Override
-	public void setLightsources(Set<ILightSource> ls) {
-		this.ls = ls;
-		
-	}
-
-	@Override
-	public Set<ILightSource> getLightsources() {
-		return ls;
 	}
 
 }

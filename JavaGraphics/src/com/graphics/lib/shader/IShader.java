@@ -1,12 +1,9 @@
 package com.graphics.lib.shader;
 
 import java.awt.Color;
-import java.util.Set;
-
 import com.graphics.lib.Facet;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasObject;
-import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.zbuffer.ScanLine;
 
 /**
@@ -38,18 +35,4 @@ public interface IShader {
 	 * @return		The colour of the pixel
 	 */
 	public Color getColour (ScanLine sl, int x, int y);
-	
-	/**
-	 * Shaders will usually need to be aware of light sources, this method will set them
-	 * 
-	 * @param ls
-	 */
-	public void setLightsources(Set<ILightSource> ls);
-	
-	/**
-	 * Shaders will usually need to be aware of light sources, this method will retrieve them
-	 * 
-	 * @return List of lightsources
-	 */
-	public Set<ILightSource> getLightsources();
 }

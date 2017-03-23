@@ -1,7 +1,6 @@
 package com.graphics.lib.shader;
 
 import java.awt.Color;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -10,6 +9,7 @@ import com.graphics.lib.IntensityComponents;
 import com.graphics.lib.Point;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.camera.Camera;
+import com.graphics.lib.canvas.Canvas3D;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.zbuffer.ScanLine;
@@ -23,7 +23,7 @@ import com.graphics.lib.zbuffer.ScanLine;
 public class FlatShader implements IShader{
 
 	private Color colour = new Color(255,255,255);
-	private Set<ILightSource> ls = new HashSet<ILightSource>();
+	private Set<ILightSource> ls = Canvas3D.get().getLightSources();
 	
 	@Override
 	public void init(ICanvasObject obj, Facet f, Camera c) {
@@ -46,17 +46,6 @@ public class FlatShader implements IShader{
 	@Override
 	public Color getColour(ScanLine sl, int x, int y) {
 		return this.colour;
-	}
-
-	@Override
-	public void setLightsources(Set<ILightSource> ls) {
-		this.ls = ls;
-		
-	}
-
-	@Override
-	public Set<ILightSource> getLightsources() {
-		return ls;
 	}
 
 }

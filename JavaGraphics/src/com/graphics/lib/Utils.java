@@ -21,6 +21,7 @@ import com.graphics.lib.interfaces.ILightIntensityFinder;
 public class Utils {	
 	public static ILightIntensityFinder getShadowLightIntensityFinder(ICanvasObjectList objectsToCheck)
 	{
+		//EXPERIMENTAL
 		return (ls, obj, p, v, bf) -> {
 			IntensityComponents maxIntensity = new IntensityComponents();
 			

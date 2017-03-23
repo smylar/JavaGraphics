@@ -60,12 +60,7 @@ public class AnimatedCanvasObject extends OrientableCanvasObject implements IAni
 			this.reapplyOrientation();
 		}
 		
-		if (getWrappedObject() != null) {
-		    getWrappedObject().afterTransforms();
-		}
-		else {
-			super.afterTransforms();
-		}
+		super.afterTransforms();
 	}
 
 }

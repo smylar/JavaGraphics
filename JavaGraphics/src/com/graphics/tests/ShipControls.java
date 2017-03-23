@@ -260,12 +260,11 @@ public class ShipControls extends ObjectInputController<Ship> {
 	}
 	
 	private MovementTransform getMovement(String tag){
-		Transform transform = this.controlledObject.getTransform(tag);
-		if (transform == null || !(transform instanceof MovementTransform)){
-			transform = new MovementTransform(() -> this.controlledObject.getOrientation().getForward(), 0d);
+		return this.controlledObject.getTransform(tag, MovementTransform.class).orElseGet(() -> {
+			MovementTransform transform = new MovementTransform(() -> this.controlledObject.getOrientation().getForward(), 0d);
 			transform.setName(tag);
 			this.controlledObject.addTransform(transform);
-		}
-		return (MovementTransform)transform;
+			return transform;
+		});
 	}
 }

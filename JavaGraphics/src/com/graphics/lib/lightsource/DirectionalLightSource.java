@@ -29,8 +29,8 @@ public class DirectionalLightSource extends LightSource {
 	
 	public DirectionalLightSource(double x, double y, double z) {
 		super(x, y, z);
-		direction = () -> {return new Vector(0,0,1);};
-		position = () -> {return new Point(x,y,z);};
+		direction = () -> new Vector(0,0,1);
+		position = () -> new Point(x,y,z);
 	}
 
 	public double getLightConeAngle() {
@@ -56,7 +56,7 @@ public class DirectionalLightSource extends LightSource {
 	
 	@Override
 	public void setPosition(Point p) {
-		position = () -> {return p;};
+		position = () -> p;
 	}
 
 	public void setPosition(IPointFinder position) {

@@ -13,7 +13,13 @@ import com.graphics.lib.interfaces.ITexturable;
 import com.graphics.lib.texture.Texture;
 import com.graphics.lib.texture.TextureMapper;
 
-public class TexturableCanvasObject extends CanvasObjectWrapper implements ITexturable {
+/**
+ * Allows a texture to be applied to an object
+ * 
+ * @author paul
+ *
+ */
+public class TexturableCanvasObject extends CanvasObject implements ITexturable {
 	//note currently can't apply textures on a per facet (or set of facets) basis, though may be able to achieve that with the mapper used
 	private Map<Texture, Map<WorldCoord, Point>> textureMap = new HashMap<>();
 	
@@ -35,7 +41,7 @@ public class TexturableCanvasObject extends CanvasObjectWrapper implements IText
 	
 	@Override
 	public ITexturable mapTexture(TextureMapper<?> mapper) {
-		textureMap.entrySet().forEach(e -> mapper.map(this.getWrappedObject(), e.getValue(), e.getKey()));
+		textureMap.entrySet().forEach(e -> mapper.map(wrappedObject.orElse(this), e.getValue(), e.getKey()));
 		return this;
 	}
 	

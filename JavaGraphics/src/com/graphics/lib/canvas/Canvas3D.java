@@ -25,7 +25,6 @@ import com.graphics.lib.interfaces.ICanvasUpdateListener;
 import com.graphics.lib.interfaces.IZBuffer;
 import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.lightsource.LightSource;
-import com.graphics.lib.shader.IShader;
 import com.graphics.lib.shader.ShaderFactory;
 import com.graphics.lib.zbuffer.ZBufferItem;
 
@@ -40,7 +39,7 @@ public class Canvas3D extends JPanel{
 	private static final long serialVersionUID = 1L;
 	private static Canvas3D cnv = null;
 	
-	private Map<ICanvasObject, IShader> shapes = Collections.synchronizedMap(new HashMap<ICanvasObject, IShader>());
+	private Map<ICanvasObject, ShaderFactory> shapes = Collections.synchronizedMap(new HashMap<ICanvasObject, ShaderFactory>());
 	
 	private Set<ILightSource> lightSources = new HashSet<>(); 
 	private Set<ILightSource> lightSourcesToAdd = Collections.synchronizedSet(new HashSet<ILightSource>()); 
@@ -114,12 +113,12 @@ public class Canvas3D extends JPanel{
 		return shapes.keySet();
 	}
 	
-	public IShader getShader(ICanvasObject obj){
-		return shapes.get(obj);
+	public ShaderFactory getShader(ICanvasObject obj){
+		return shapes.get(obj) == null ? ShaderFactory.NONE : shapes.get(obj);
 	}
 	
 	public void replaceShader(ICanvasObject obj, ShaderFactory shader){
-		this.shapes.replace(obj, shader.getShader());
+		this.shapes.replace(obj, shader);
 	}
 
 	public Set<ILightSource> getLightSources() {
@@ -178,7 +177,7 @@ public class Canvas3D extends JPanel{
 	 * @param position	Position to draw the centre of the object at
 	 */
 	public void registerObject(ICanvasObject obj, Point position){
-		this.registerObject(obj, position, null);
+		this.registerObject(obj, position, ShaderFactory.NONE);
 	}
 	
 	/**
@@ -190,13 +189,9 @@ public class Canvas3D extends JPanel{
 	 */
 	public void registerObject(ICanvasObject obj, Point position, ShaderFactory shaderFactory)
 	{
-	    IShader shader = shaderFactory.getShader();
 		if (!this.shapes.containsKey(obj)) {
 		    CanvasObjectFunctions.DEFAULT.get().moveTo(obj, position);
-    		if (shader != null) {
-                shader.setLightsources(lightSources);
-    		}
-    		this.shapes.put(obj, shader);
+    		this.shapes.put(obj, shaderFactory);
 		}
 	}
 	
@@ -262,13 +257,13 @@ public class Canvas3D extends JPanel{
 	 * @param zBuf	Z Buffer to update
 	 * @param shader	Shader to draw pixels with
 	 */
-	private void processShape(ICanvasObject obj, IZBuffer zBuf, IShader shader)
+	private void processShape(ICanvasObject obj, IZBuffer zBuf, ShaderFactory shader)
 	{
 		if (obj.isVisible() && !obj.isDeleted())
 		{
 			this.camera.getView(obj);
 			
-			zBuf.Add(obj, shader, this.camera, this.horizon);
+			zBuf.add(obj, shader, this.camera, this.horizon);
 		}
 		
 		obj.getChildren().forEach(child -> this.processShape(child, zBuf, shapes.containsKey(child) ? getShader(child) : shader));

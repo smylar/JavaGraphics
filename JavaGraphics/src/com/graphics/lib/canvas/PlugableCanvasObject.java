@@ -17,7 +17,7 @@ import com.graphics.lib.plugins.IPlugin;
  *
  * @param <T> Type of the CanvasObject being wrapped
  */
-public class PlugableCanvasObject extends CanvasObjectWrapper implements IPlugable {
+public class PlugableCanvasObject extends CanvasObject implements IPlugable {
 	private Map<String,IPlugin<IPlugable,?>> plugins = new HashMap<>();
 	private List<String> afterDrawPlugins = new ArrayList<>();
 	private List<String> singleAfterDrawPlugins = new ArrayList<>();
@@ -32,14 +32,7 @@ public class PlugableCanvasObject extends CanvasObjectWrapper implements IPlugab
 
 	@Override
 	public void onDrawComplete()
-	{
-		if (this.getWrappedObject() != null) {
-		    this.getWrappedObject().onDrawComplete();
-		}
-		else {
-		    super.onDrawComplete();
-		}
-		
+	{	
 		List<String> pluginList = new ArrayList<>(this.afterDrawPlugins);
 		for (String key : pluginList)
 		{
@@ -52,6 +45,7 @@ public class PlugableCanvasObject extends CanvasObjectWrapper implements IPlugab
 			this.executePlugin(key);
 		}
 		this.singleAfterDrawPlugins.clear();
+		super.onDrawComplete();
 	}
 	
 	@Override

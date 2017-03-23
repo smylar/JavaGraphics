@@ -126,13 +126,13 @@ public class GraphicsTest extends JFrame {
 		l3.getLightSource().setColour(new Color(0, 0, 255));
 		cnv.addLightSource(l3.getLightSource());
 		Lantern lantern3 = new Lantern();
-		lantern3.attachLightsource(l3);
+		
 		OrientableCanvasObject ol3 = new OrientableCanvasObject(lantern3);
-		//N.B. As it currently stands I don't think a wrapped lantern lightsource would respond to any transform via tieTo, would have to add it here
 		ol3.setOrientation(new SimpleOrientation(OrientableCanvasObject.ORIENTATION_TAG));
 		cnv.registerObject(ol3, new Point(400,100,100), ShaderFactory.NONE);
 		l3.getLightSource().setDirection(() -> {return ol3.getOrientation().getForward();});
 		l3.getLightSource().setLightConeAngle(40);
+		lantern3.attachLightsource(l3);
 		Transform l3spin = new RepeatingTransform<Rotation>(Axis.X.getRotation(4), 0);
 		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(ol3, l3spin);
 		
@@ -244,12 +244,10 @@ public class GraphicsTest extends JFrame {
 		ship.applyTransform(Axis.Y.getRotation(180));
 		ship.setOrientation(new SimpleOrientation(OrientableCanvasObject.ORIENTATION_TAG));
 		cnv.registerObject(ship, new Point(350, 350, -50), ShaderFactory.GORAUD);
-				
-		
-		//PlugableCanvasObject<Torus> torus = new PlugableCanvasObject<Torus>(new Torus(50,50,20));
+
 		PlugableCanvasObject torus = new PlugableCanvasObject(new Gate(50,50,20, () -> {return cam.getPosition();} ));
 		torus.setColour(new Color(250, 250, 250));
-		//torus.setLightIntensityFinder(Utils.getShadowLightIntensityFinder(() -> { return cnv.getShapes();})); //for testing shadows falling on the torus
+		torus.setLightIntensityFinder(Utils.getShadowLightIntensityFinder(() -> { return cnv.getShapes();})); //for testing shadows falling on the torus
 		cnv.registerObject(torus, new Point(200,200,450), ShaderFactory.GORAUD);
 		Transform torust1 = new RepeatingTransform<Rotation>(Axis.Y.getRotation(3), 60);
 		Transform torust2 = new RepeatingTransform<Rotation>(Axis.X.getRotation(3), 60);

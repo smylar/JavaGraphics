@@ -6,7 +6,7 @@ import com.graphics.lib.ZBufferEnum;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ICanvasUpdateListener;
-import com.graphics.lib.shader.IShader;
+import com.graphics.lib.shader.ShaderFactory;
 
 /**
  * Provides another view of the same scene in the parent
@@ -53,7 +53,7 @@ public class SlaveCanvas3D extends Canvas3D implements ICanvasUpdateListener {
 	}*/
 	
 
-	private void processShape(Canvas3D source, ICanvasObject obj, IShader shader)
+	private void processShape(Canvas3D source, ICanvasObject obj, ShaderFactory shader)
 	{
 		//if (this.isOkToPaint()) return;
 		while(this.isOkToPaint()){
@@ -71,9 +71,8 @@ public class SlaveCanvas3D extends Canvas3D implements ICanvasUpdateListener {
 		if (obj.isVisible())
 		{
 			this.getCamera().getView(obj);
-			if (shader != null) shader.setLightsources(source.getLightSources());
 			
-			this.getzBuffer().Add(obj, shader, this.getCamera(), source.getHorizon());
+			this.getzBuffer().add(obj, shader, this.getCamera(), source.getHorizon());
 		}
 		for (ICanvasObject child : new ArrayList<CanvasObject>(obj.getChildren()))
 		{

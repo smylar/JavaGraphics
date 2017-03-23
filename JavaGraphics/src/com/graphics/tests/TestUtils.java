@@ -86,7 +86,17 @@ public class TestUtils {
 		return new IPlugin<IPlugable,Void>(){
 			@Override
 			public Void execute(IPlugable obj) {
-				PluginLibrary.explode(Canvas3D.get().getLightSources()).execute(obj).forEach(c -> {
+				
+				//could be 2 hits at the same time
+				synchronized(obj.getData()) {
+					if (obj.isVisible()) {
+						obj.setVisible(false);
+					} else {
+						return null;
+					}
+				}
+				
+				PluginLibrary.explode().execute(obj).forEach(c -> {
 					Canvas3D.get().replaceShader(obj, ShaderFactory.FLAT);
 					c.registerPlugin(Events.CHECK_COLLISION, getBouncePlugin(), true);
 					if (!obj.hasFlag(SILENT_EXPLODE) && clipLibrary != null) clipLibrary.playSound("EXPLODE", -20f);

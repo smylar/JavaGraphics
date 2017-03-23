@@ -14,6 +14,7 @@ import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IZBuffer;
 import com.graphics.lib.shader.IShader;
+import com.graphics.lib.shader.ShaderFactory;
 
 public class ZBuffer implements IZBuffer{
 	private List<List<ZBufferItem>> zBuffer = new ArrayList<>();
@@ -46,30 +47,22 @@ public class ZBuffer implements IZBuffer{
 	 * Override notes: A null shader here will mean that the facets specified colour will be used
 	 */
 	@Override
-	public void Add(ICanvasObject obj, IShader shader, Camera c, double horizon)
+	public void add(ICanvasObject obj, ShaderFactory shader, Camera c, double horizon)
 	{
-		/*Stream<Facet> facetStream = obj.getFacetList().parallelStream();
-		if (!obj.isProcessBackfaces()){
-			facetStream = facetStream.filter(GeneralPredicates.isFrontface(c));
-		}*/
 		obj.getFacetList().parallelStream().filter(f -> (obj.isProcessBackfaces() || GeneralPredicates.isFrontface(c).test(f)) && !GeneralPredicates.isOverHorizon(c, horizon).test(f)).forEach(f ->{
 			f.setFrontFace(GeneralPredicates.isFrontface(c).test(f));
-			Add(f, obj, shader, c);
+			add(f, obj, shader, c);
 		});
 	}
 	
 	
-	private void Add(Facet facet, ICanvasObject parent, IShader shader, Camera c)
+	private void add(Facet facet, ICanvasObject parent, ShaderFactory shader, Camera c)
 	{
 		if (zBuffer == null) return;
 		
 		List<WorldCoord> points = facet.getAsList();
 		if (points.stream().allMatch(p -> p.getTransformed(c).z <= 1)) return;
 		
-		//not sure about these though - it is possible to have points out of range either side of the screen so something should be drawn - but performance likely to be better (when significant objects are off screen)
-		//if (points.stream().allMatch(p -> p.getTransformed(c).x < 0 || p.getTransformed(c).x > this.dispWidth)) return;
-		//if (points.stream().allMatch(p -> p.getTransformed(c).y < 0 || p.getTransformed(c).y > this.dispHeight)) return;
-		//do separately? so returns if all points off one side
 		if (points.stream().allMatch(p -> p.getTransformed(c).x < 0)) return;
 		if (points.stream().allMatch(p -> p.getTransformed(c).x > this.dispWidth)) return;
 		if (points.stream().allMatch(p -> p.getTransformed(c).y < 0)) return;
@@ -79,12 +72,7 @@ public class ZBuffer implements IZBuffer{
 		
 		if (normal.z == 0) return;
 		
-		Comparator<WorldCoord> xComp = new Comparator<WorldCoord>(){
-			@Override
-			public int compare(WorldCoord o1, WorldCoord o2) {
-				return (int)(o1.getTransformed(c).x - o2.getTransformed(c).x);
-			}		
-		};
+		Comparator<WorldCoord> xComp = (o1, o2) -> (int)(o1.getTransformed(c).x - o2.getTransformed(c).x);
 
 		double minX = points.stream().min(xComp).get().getTransformed(c).x;
 		double maxX = points.stream().max(xComp).get().getTransformed(c).x;
@@ -93,14 +81,8 @@ public class ZBuffer implements IZBuffer{
 		if (minX < 0) minX = 0;
 		if (maxX > this.dispWidth) maxX = this.dispWidth;			
 		
-		IShader localShader = null;
-		if (shader != null){
-			try {
-				localShader = shader.getClass().newInstance();
-				localShader.setLightsources(shader.getLightsources());
-			} catch (Exception e) {
-				//e.printStackTrace();
-			} 
+		IShader localShader = shader.getShader();
+		if (localShader != null){
 			localShader.init(parent, facet, c);
 		}
 		

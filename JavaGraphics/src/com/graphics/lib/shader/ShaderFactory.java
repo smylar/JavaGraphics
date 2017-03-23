@@ -6,7 +6,7 @@ public enum ShaderFactory{
 		GORAUD(GoraudShader::new), 
 		TEXGORAUD(TexturedGoraudShader::new), 
 		FLAT(FlatShader::new), 
-		NONE(null);
+		NONE(() -> null);
 
 	
 	private Supplier<IShader> shader;
