@@ -59,7 +59,9 @@ public class PlugableCanvasObject extends CanvasObject implements IPlugable {
 	public void registerPlugin(String key, IPlugin<IPlugable,?> plugin, boolean doAfterDraw)
 	{
 		plugins.put(key, plugin);
-		if (doAfterDraw) afterDrawPlugins.add(key);
+		if (doAfterDraw) {
+		    afterDrawPlugins.add(key);
+		}
 	}
 	
 	@Override

@@ -36,14 +36,18 @@ public class GoraudShader implements IShader{
 	protected Point endTexture;
 	protected double lineLength = 0;
 	protected Set<ILightSource> ls = Canvas3D.get().getLightSources();
-	protected Map<Point, IntensityComponents> pointLight = new HashMap<Point, IntensityComponents>();
+	protected Map<Point, IntensityComponents> pointLight = new HashMap<>();
 	
 	@Override
 	public void init(ICanvasObject parent, Facet facet, Camera c) {
 		colour = facet.getColour() == null ? parent.getColour() : facet.getColour();
-		if (colour == null) colour = new Color(255,255,255);
+		if (colour == null) {
+		    colour = new Color(255,255,255);
+		}
 		
-		if (parent.hasFlag(Events.NO_SHADE)) return;
+		if (parent.hasFlag(Events.NO_SHADE)) {
+		    return;
+		}
 
 		for (WorldCoord p : facet.getAsList())
 		{
@@ -61,7 +65,8 @@ public class GoraudShader implements IShader{
 
 	@Override
 	public Color getColour(ScanLine scanLine, int x, int y) {
-		if (facet == null || scanLine == null) return colour;
+		if (facet == null || scanLine == null) 
+		    return colour;
 		
 		if (scanLine != this.curScanline){
 			startIntensity = this.getIntensities(x, scanLine.startY, scanLine.startLine);
@@ -70,7 +75,8 @@ public class GoraudShader implements IShader{
 			lineLength = Math.ceil(scanLine.endY) - Math.floor(scanLine.startY);
 		}
 		
-		if (lineLength == 0) return colour;
+		if (lineLength == 0) 
+		    return colour;
 
 		double percentDistCovered = (y - Math.floor(scanLine.startY)) / lineLength;
 		

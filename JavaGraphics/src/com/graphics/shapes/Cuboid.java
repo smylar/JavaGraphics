@@ -11,6 +11,7 @@ public class Cuboid extends CanvasObject{
 	
 	public Cuboid (int height, int width, int depth)
 	{
+	    super();
 		this.generateVertexList(height, width, depth);
 		
 		this.generateFacetList();

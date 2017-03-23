@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 import com.graphics.lib.Axis;
 import com.graphics.lib.Facet;
@@ -32,7 +33,7 @@ public class Ship extends OrientableCanvasObject {
 	
 	public Ship(int width, int depth, int height)
 	{
-		//super();
+		super();
 		PlugableCanvasObject ship = new PlugableCanvasObject();
 		ship.getVertexList().add(new WorldCoord(0, 0, 0));
 		ship.getVertexList().add(new WorldCoord(width/2, 0, depth));
@@ -81,7 +82,7 @@ public class Ship extends OrientableCanvasObject {
 						for (int i = 0 ; i < 50 ; i++)
 						{
 
-							int index = (int)Math.round(Math.random() * 4);
+							int index = new Random().nextInt(5);
 							if (index == 0) index++;
 							Point p = obj.getVertexList().get(index);
 							CanvasObject fragment = new CanvasObject();
@@ -89,7 +90,7 @@ public class Ship extends OrientableCanvasObject {
 							fragment.getVertexList().add(new WorldCoord(p.x + 9 , p.y, p.z));
 							fragment.getVertexList().add(new WorldCoord(p.x, p.y + 9, p.z));
 							fragment.getFacetList().add(new Facet(fragment.getVertexList().get(0), fragment.getVertexList().get(1), fragment.getVertexList().get(2)));
-							int colour = (int)Math.round(Math.random() * 2);
+							int colour = new Random().nextInt(3);
 							if (colour == 0) fragment.setColour(Color.PINK);
 							if (colour == 1) fragment.setColour(Color.ORANGE);
 							if (colour == 2) fragment.setColour(Color.YELLOW);

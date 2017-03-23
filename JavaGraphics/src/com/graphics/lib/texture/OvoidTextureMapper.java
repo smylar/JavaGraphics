@@ -24,12 +24,14 @@ public class OvoidTextureMapper extends TextureMapper<Ovoid> {
 		for (int i = 0 ; i < pointsarc-1 ; i++){
 			double curAngle = (i+1) * angleProgression;
 			double circleRad = Math.sin(Math.toRadians(curAngle)) * obj.getRadius();
-			if (circleRad < 0) circleRad = circleRad * -1 ;
+			if (circleRad < 0) {
+			    circleRad = circleRad * -1 ;
+			}
 			double length = Math.PI * circleRad;
 			
 			double teY = texture.getHeight() - (texture.getHeight() * (curAngle / 180));
-			double teWidth = texture.getWidth() * (length / maxLength);
-			double teIncr = teWidth / (pointsarc - 1);
+			double teWidth = length * (texture.getWidth() / maxLength);
+			double teIncr = teWidth / pointsarc;
 			double teX = (texture.getWidth() - teWidth) / 2;		
 
 			for (int j = 0 ; j < pointsarc+1 ; j++){

@@ -16,6 +16,7 @@ public class Cylinder extends CanvasObject {
 	
 	public Cylinder(double radius, double height, int arcProgression)
 	{
+	    super();
 		//N.B. this is currently an open cylinder, i.e. ends are not closed like a sealed can
 		//may like option to specify if an end is open or not
 		if (360 % arcProgression != 0) arcProgression = 18;

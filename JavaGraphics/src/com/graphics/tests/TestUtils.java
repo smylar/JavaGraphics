@@ -2,10 +2,7 @@ package com.graphics.tests;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.util.ArrayList;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
-
 import com.graphics.lib.Utils;
 import com.graphics.lib.camera.ViewAngleCamera;
 import com.graphics.lib.canvas.Canvas3D;
@@ -75,10 +72,7 @@ public class TestUtils {
 	}
 	
 	public static ICanvasObjectList getFilteredObjectList(){
-		return () -> {
-			if (Canvas3D.get() == null) return new ArrayList<ICanvasObject>();
-			return Canvas3D.get().getShapes().stream().filter(s -> s.isVisible() && !s.isDeleted() && !s.hasFlag("PHASED")).collect(Collectors.toList());
-			};
+		return () -> Canvas3D.get().getShapes(s -> s.isVisible() && !s.isDeleted() && !s.hasFlag("PHASED"));
 	}
 	
 	public static IPlugin<IPlugable,Void> getExplodePlugin(ClipLibrary clipLibrary)

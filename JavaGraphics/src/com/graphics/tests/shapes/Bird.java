@@ -7,8 +7,9 @@ import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.CanvasObjectFunctionsImpl;
 import com.graphics.lib.interfaces.ICanvasObject;
 
-public class Bird extends CanvasObject{
-	public Bird(){
+public class Bird extends CanvasObject {
+	public Bird() {
+	    super();
 		this.setFunctions(getFunctionsImpl());
 		
 		this.getVertexList().add(new WorldCoord(0, 0, 0));

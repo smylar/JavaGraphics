@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.swing.JPanel;
 
@@ -107,6 +109,12 @@ public class Canvas3D extends JPanel{
 		if (lightSource != null) {
 		    this.lightSourcesToAdd.add(lightSource);
 		}
+	}
+	
+	public Set<ICanvasObject> getShapes(Predicate<ICanvasObject> predicate) {
+	    synchronized(shapes) {
+	        return shapes.keySet().stream().filter(predicate).collect(Collectors.toSet());
+	    }
 	}
 	
 	public Set<ICanvasObject> getShapes() {
@@ -233,7 +241,7 @@ public class Canvas3D extends JPanel{
 			processShapes.parallelStream().forEach(s -> shadows.addAll(getShadowOnFloor(s)));
 			processShapes.addAll(shadows);
 		}
-		
+
 		processShapes.parallelStream().forEach(ICanvasObject::onDrawComplete);
 		
 		processShapes.parallelStream().forEach(s -> {
@@ -242,7 +250,7 @@ public class Canvas3D extends JPanel{
 		});
 		
 		
-		
+		processShapes.clear();
 		this.setOkToPaint(true);
 		this.repaint(); 
 

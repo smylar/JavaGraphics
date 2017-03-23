@@ -20,6 +20,7 @@ public class Whale extends AnimatedCanvasObject {
 	//private int multiplier = 1;
 	
 	public Whale(){
+	    super();
 		this.setFunctions(getFunctionsImpl());
 		
 		this.getVertexList().add(new WorldCoord(62, 40, 0));

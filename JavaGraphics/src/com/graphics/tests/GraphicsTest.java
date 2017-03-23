@@ -247,7 +247,7 @@ public class GraphicsTest extends JFrame {
 
 		PlugableCanvasObject torus = new PlugableCanvasObject(new Gate(50,50,20, () -> {return cam.getPosition();} ));
 		torus.setColour(new Color(250, 250, 250));
-		torus.setLightIntensityFinder(Utils.getShadowLightIntensityFinder(() -> { return cnv.getShapes();})); //for testing shadows falling on the torus
+		//torus.setLightIntensityFinder(Utils.getShadowLightIntensityFinder(() -> { return cnv.getShapes();})); //for testing shadows falling on the torus
 		cnv.registerObject(torus, new Point(200,200,450), ShaderFactory.GORAUD);
 		Transform torust1 = new RepeatingTransform<Rotation>(Axis.Y.getRotation(3), 60);
 		Transform torust2 = new RepeatingTransform<Rotation>(Axis.X.getRotation(3), 60);

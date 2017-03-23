@@ -11,6 +11,7 @@ import com.graphics.lib.lightsource.ObjectTiedLightSource;
 
 public class Lantern extends CanvasObject implements Observer{
 	public Lantern(){
+	    super();
 		this.getVertexList().add(new WorldCoord(0, -10, 0)); //0
 		this.getVertexList().add(new WorldCoord(5, 0, 5)); //1
 		this.getVertexList().add(new WorldCoord(5, 0, -5)); //2

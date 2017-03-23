@@ -24,6 +24,7 @@ public class Torus extends CanvasObject{
 	
 	public Torus (double tubeRadius, double holeRadius, int arcProgression)
 	{
+	    super();
 		this.setFunctions(CanvasObjectFunctions.TORUS.get());
 		List<Point> circle = new ArrayList<Point>();
 		if (360 % arcProgression != 0) arcProgression = 18;

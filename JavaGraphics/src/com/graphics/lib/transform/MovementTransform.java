@@ -92,7 +92,7 @@ public class MovementTransform extends Transform {
 
 	@Override
 	public Consumer<Point> doTransformSpecific() {
-		return (p) -> {
+		return p -> {
 			p.x += vector.x * speed;
 			p.y += vector.y * speed;
 			p.z += vector.z * speed;

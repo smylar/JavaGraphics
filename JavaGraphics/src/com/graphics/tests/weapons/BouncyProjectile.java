@@ -27,7 +27,7 @@ public class BouncyProjectile extends Projectile {
 		proj.setProcessBackfaces(true);
 
 		MovementTransform move = new MovementTransform(initialVector, this.getSpeed() + parentSpeed);
-		long delTime = new Date().getTime() + 5000;
+		long delTime = new Date().getTime() + 10000;
 		move.moveUntil(t -> t.getDistanceMoved() > this.getRange() || (t.getSpeed() == 0 && new Date().getTime() > delTime));
 		proj.addTransform(move);
 

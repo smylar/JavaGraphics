@@ -13,6 +13,7 @@ public class Ovoid extends CanvasObject{
 	
 	public Ovoid(double radius, double radiusMod, int angleProgression)
 	{
+	    super();
 		this.angleProgression = angleProgression;
 		this.radius = radius;
 		if (360 % angleProgression != 0) angleProgression = 10;
