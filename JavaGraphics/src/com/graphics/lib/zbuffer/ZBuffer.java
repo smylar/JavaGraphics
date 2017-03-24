@@ -68,7 +68,7 @@ public class ZBuffer implements IZBuffer{
 		if (points.stream().allMatch(p -> p.getTransformed(c).x < 0)) 
 		    return;
 		if (points.stream().allMatch(p -> p.getTransformed(c).x > this.dispWidth))
-return;
+			return;
 		if (points.stream().allMatch(p -> p.getTransformed(c).y < 0)) 
 		    return;
 		if (points.stream().allMatch(p -> p.getTransformed(c).y > this.dispHeight)) 

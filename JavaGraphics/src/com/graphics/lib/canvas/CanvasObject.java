@@ -3,7 +3,6 @@ package com.graphics.lib.canvas;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
@@ -179,7 +178,6 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	@Override
 	public final void setDeleted(boolean isDeleted) {
 		getData().setDeleted(isDeleted);
-		this.stopObserving();
 		doNotify();
 	}
 
@@ -389,7 +387,7 @@ public class CanvasObject extends Observable implements ICanvasObject{
 		if (wrappedObject.isPresent()) {
 			wrappedObject.get().afterTransforms(); 
 		} else {
-            this.getChildren().forEach(ICanvasObject::applyTransforms);
+			this.getChildren().forEach(ICanvasObject::applyTransforms);
         }
 	}
 	
@@ -460,10 +458,10 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	 * @param o
 	 */
 	@Override
-	public final synchronized void observeAndMatch (ICanvasObject o){
+	public final void observeAndMatch (ICanvasObject o){
 	    //TODO separate out observers
-		getData().setObserving(o);
-		synchronized(o.getVertexList()){
+		synchronized(data){
+			getData().setObserving(o);
 			o.getChildren().add(this);
 			this.getVertexList().forEach(v -> v.addTag(this.getObjectTag()));
 			o.getVertexList().addAll(this.getVertexList());
@@ -472,14 +470,14 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	}
 	
 	@Override
-	public final synchronized void stopObserving(){
+	public final void stopObserving(){
 		if (getData().getObserving() != null){
-			getData().getObserving().getChildren().remove(this);
-			synchronized(getData().getObserving().getVertexList()){
+			synchronized(data) {
+				getData().getObserving().getChildren().remove(this);
 				getData().getObserving().getVertexList().removeIf(v -> v.hasTag(this.getObjectTag()));
 				this.getVertexList().forEach(v -> v.removeTag(this.getObjectTag()));
+				getData().setObserving(null);
 			}
-			getData().setObserving(null);
 		}
 	}
 	
@@ -493,8 +491,11 @@ public class CanvasObject extends Observable implements ICanvasObject{
 			wrappedObject.get().onDrawComplete();
 		}
 		else{
+			if (this.isDeleted()) {
+				this.stopObserving();
+			}
 			this.getChildren().removeIf(ICanvasObject::isDeleted);
-			new HashSet<ICanvasObject>(this.getChildren()).parallelStream().forEach(ICanvasObject::onDrawComplete);
+			this.getChildren().parallelStream().forEach(ICanvasObject::onDrawComplete);
 		}
 	}
 	
