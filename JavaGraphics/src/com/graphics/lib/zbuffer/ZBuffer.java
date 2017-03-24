@@ -58,19 +58,26 @@ public class ZBuffer implements IZBuffer{
 	
 	private void add(Facet facet, ICanvasObject parent, ShaderFactory shader, Camera c)
 	{
-		if (zBuffer == null) return;
+		if (zBuffer == null) 
+		    return;
 		
 		List<WorldCoord> points = facet.getAsList();
-		if (points.stream().allMatch(p -> p.getTransformed(c).z <= 1)) return;
+		if (points.stream().allMatch(p -> p.getTransformed(c).z <= 1)) 
+		    return;
 		
-		if (points.stream().allMatch(p -> p.getTransformed(c).x < 0)) return;
-		if (points.stream().allMatch(p -> p.getTransformed(c).x > this.dispWidth)) return;
-		if (points.stream().allMatch(p -> p.getTransformed(c).y < 0)) return;
-		if (points.stream().allMatch(p -> p.getTransformed(c).y > this.dispHeight)) return;
+		if (points.stream().allMatch(p -> p.getTransformed(c).x < 0)) 
+		    return;
+		if (points.stream().allMatch(p -> p.getTransformed(c).x > this.dispWidth))
+return;
+		if (points.stream().allMatch(p -> p.getTransformed(c).y < 0)) 
+		    return;
+		if (points.stream().allMatch(p -> p.getTransformed(c).y > this.dispHeight)) 
+		    return;
 		
 		Vector normal = facet.getTransformedNormal(c);
 		
-		if (normal.z == 0) return;
+		if (normal.z == 0) 
+		    return;
 		
 		Comparator<WorldCoord> xComp = (o1, o2) -> (int)(o1.getTransformed(c).x - o2.getTransformed(c).x);
 
@@ -78,44 +85,50 @@ public class ZBuffer implements IZBuffer{
 		double maxX = points.stream().max(xComp).get().getTransformed(c).x;
 
 		
-		if (minX < 0) minX = 0;
-		if (maxX > this.dispWidth) maxX = this.dispWidth;			
+		if (minX < 0) 
+		    minX = 0;
+		if (maxX > this.dispWidth) 
+		    maxX = this.dispWidth;			
 		
-		IShader localShader = shader.getShader();
-		if (localShader != null){
+		try (IShader localShader = shader.getShader()) {
+		    //reduce complexity in here
 			localShader.init(parent, facet, c);
-		}
 		
-		List<LineEquation> lines = new ArrayList<>();
-		
-		lines.add(new LineEquation(points.get(0), points.get(1), c));
-		lines.add(new LineEquation(points.get(1), points.get(2), c));
-		lines.add(new LineEquation(points.get(2), points.get(0), c));
-		
-		for (int x = (int)Math.floor(minX) ; x <= Math.ceil(maxX) ; x++)
-		{
-			ScanLine scanLine = this.getScanline(x, lines);
-			if (scanLine == null) continue;
-			
-			double scanLineLength = Math.floor(scanLine.endY) - Math.floor(scanLine.startY);
-			double percentDistCovered = 0;
-			Color colour = null;
-			for (int y = (int)Math.floor(scanLine.startY < 0 ? 0 : scanLine.startY) ; y < Math.floor(scanLine.endY > this.dispHeight ? this.dispHeight : scanLine.endY ) ; y++)
-			{
-				
-				if (scanLineLength != 0)
-				{
-					percentDistCovered = (y - Math.floor(scanLine.startY)) / scanLineLength;
-				}
-				
-				double z = this.interpolateZ(scanLine.startZ, scanLine.endZ, percentDistCovered);
-				
-				if (skip == 1 || y % skip == 0 || colour == null){	
-					colour = localShader == null ? (facet.getColour() == null ? parent.getColour() : facet.getColour()) : localShader.getColour(scanLine, x, y);
-				}
-				this.addToBuffer(parent, x, y, z, colour);
-			}
-		}
+    		List<LineEquation> lines = new ArrayList<>();
+    		
+    		lines.add(new LineEquation(points.get(0), points.get(1), c));
+    		lines.add(new LineEquation(points.get(1), points.get(2), c));
+    		lines.add(new LineEquation(points.get(2), points.get(0), c));
+    		
+    		for (int x = (int)Math.floor(minX) ; x <= Math.ceil(maxX) ; x++)
+    		{
+    			ScanLine scanLine = this.getScanline(x, lines);
+    			if (scanLine == null) 
+    			    continue;
+    			
+    			double scanLineLength = Math.floor(scanLine.endY) - Math.floor(scanLine.startY);
+    			double percentDistCovered = 0;
+    			Color colour = null;
+    			for (int y = (int)Math.floor(scanLine.startY < 0 ? 0 : scanLine.startY) ; y < Math.floor(scanLine.endY > this.dispHeight ? this.dispHeight : scanLine.endY ) ; y++)
+    			{
+    				
+    				if (scanLineLength != 0)
+    				{
+    					percentDistCovered = (y - Math.floor(scanLine.startY)) / scanLineLength;
+    				}
+    				
+    				double z = this.interpolateZ(scanLine.startZ, scanLine.endZ, percentDistCovered);
+    				
+    				if (skip == 1 || y % skip == 0 || colour == null){	
+    					colour = localShader.getColour(scanLine, x, y);
+    				}
+    				this.addToBuffer(parent, x, y, z, colour);
+    			}
+    		}
+		} catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 	}
 	
 	@Override

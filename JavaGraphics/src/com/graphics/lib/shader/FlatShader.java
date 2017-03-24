@@ -20,14 +20,14 @@ import com.graphics.lib.zbuffer.ScanLine;
  * @author Paul Brandon
  *
  */
-public class FlatShader implements IShader{
+public class FlatShader extends DefaultShader {
 
 	private Color colour = new Color(255,255,255);
-	private Set<ILightSource> ls = Canvas3D.get().getLightSources();
 	
 	@Override
 	public void init(ICanvasObject obj, Facet f, Camera c) {
-		Color colour = f.getColour() == null ? obj.getColour() : f.getColour();
+	    Set<ILightSource> ls = Canvas3D.get().getLightSources();
+		Color newColour = f.getColour() == null ? obj.getColour() : f.getColour();
 		
 		List<WorldCoord> points = f.getAsList();
 		Point p = new Point((points.get(0).x + points.get(1).x + points.get(2).x)/3, 
@@ -36,10 +36,10 @@ public class FlatShader implements IShader{
 		
 		IntensityComponents pointLight = obj.getLightIntensityFinder().getLightIntensity(ls, obj, p, f.getNormal(), !f.isFrontFace());
 		
-		this.colour = new Color((int)((double)colour.getRed() * pointLight.getRed()), 
-				(int)((double)colour.getGreen() * pointLight.getGreen()), 
-				(int)((double)colour.getBlue() * pointLight.getBlue()),
-				colour.getAlpha());
+		this.colour = new Color((int)((double)newColour.getRed() * pointLight.getRed()), 
+				(int)((double)newColour.getGreen() * pointLight.getGreen()), 
+				(int)((double)newColour.getBlue() * pointLight.getBlue()),
+				newColour.getAlpha());
 		
 	}
 
@@ -47,5 +47,6 @@ public class FlatShader implements IShader{
 	public Color getColour(ScanLine sl, int x, int y) {
 		return this.colour;
 	}
+
 
 }

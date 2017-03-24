@@ -3,7 +3,6 @@ package com.graphics.lib.shader;
 import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import com.graphics.lib.Facet;
 import com.graphics.lib.IntensityComponents;
@@ -14,7 +13,6 @@ import com.graphics.lib.WorldCoord;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.canvas.Canvas3D;
 import com.graphics.lib.interfaces.ICanvasObject;
-import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.plugins.Events;
 import com.graphics.lib.zbuffer.ScanLine;
 
@@ -24,22 +22,23 @@ import com.graphics.lib.zbuffer.ScanLine;
  * @author Paul Brandon
  *
  */
-public class GoraudShader implements IShader{
-
-	protected Color colour; //TODO as private with getters etc
+public class GoraudShader extends DefaultShader {
+    
+	protected Color colour;
 	protected Facet facet;
 	protected ScanLine curScanline;
 	protected IntensityComponents startIntensity;
 	protected IntensityComponents endIntensity;
 	protected IntensityComponents pointIntensity = new IntensityComponents();
-	protected Point startTexture;
-	protected Point endTexture;
+	
 	protected double lineLength = 0;
-	protected Set<ILightSource> ls = Canvas3D.get().getLightSources();
 	protected Map<Point, IntensityComponents> pointLight = new HashMap<>();
 	
 	@Override
 	public void init(ICanvasObject parent, Facet facet, Camera c) {
+	    pointLight.clear();
+	    lineLength = 0;
+	    
 		colour = facet.getColour() == null ? parent.getColour() : facet.getColour();
 		if (colour == null) {
 		    colour = new Color(255,255,255);
@@ -52,15 +51,14 @@ public class GoraudShader implements IShader{
 		for (WorldCoord p : facet.getAsList())
 		{
 			Vector n = parent.getVertexNormalFinder().getVertexNormal(parent, p, facet);
-			pointLight.put(p.getTransformed(c), parent.getLightIntensityFinder().getLightIntensity(ls, parent, p, n, !facet.isFrontFace()));
+			pointLight.put(p.getTransformed(c), parent.getLightIntensityFinder().getLightIntensity(Canvas3D.get().getLightSources(), parent, p, n, !facet.isFrontFace()));
 		}
 
 		this.facet = facet;
 		curScanline = null;
 		startIntensity = null;
 		endIntensity = null;
-		startTexture = null;
-		endTexture = null;
+		pointIntensity = new IntensityComponents();
 	}
 
 	@Override

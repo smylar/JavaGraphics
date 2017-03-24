@@ -1,6 +1,8 @@
 package com.graphics.lib.shader;
 
 import java.awt.Color;
+import java.util.function.Consumer;
+
 import com.graphics.lib.Facet;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasObject;
@@ -14,7 +16,7 @@ import com.graphics.lib.zbuffer.ScanLine;
  * @author Paul Brandon
  *
  */
-public interface IShader {
+public interface IShader extends AutoCloseable {
 	/**
 	 * The initialisation method called before processing Scan Lines in a facet
 	 * 
@@ -35,4 +37,6 @@ public interface IShader {
 	 * @return		The colour of the pixel
 	 */
 	public Color getColour (ScanLine sl, int x, int y);
+
+    public void setCloseAction(Consumer<IShader> onClose);
 }

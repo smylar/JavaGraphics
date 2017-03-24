@@ -20,12 +20,16 @@ public class TexturedGoraudShader extends GoraudShader {
 	
 	private List<Texture> textures = new ArrayList<>();
 	private Optional<ITexturable> texturableParent = Optional.empty();
+	private Point startTexture;
+    private Point endTexture;
 	
 	@Override
 	public void init(ICanvasObject parent, Facet facet, Camera c) {
 		super.init(parent, facet, c);
 		
-		this.textures.clear();
+		startTexture = null;
+        endTexture = null;
+		textures.clear();
 		
 		this.texturableParent = parent.getObjectAs(ITexturable.class);
 		
