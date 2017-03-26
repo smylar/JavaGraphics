@@ -1,6 +1,6 @@
 package com.graphics.lib.canvas;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 
 import com.graphics.lib.ZBufferEnum;
 import com.graphics.lib.camera.Camera;
@@ -74,7 +74,7 @@ public class SlaveCanvas3D extends Canvas3D implements ICanvasUpdateListener {
 			
 			this.getzBuffer().add(obj, shader, this.getCamera(), source.getHorizon());
 		}
-		for (ICanvasObject child : new ArrayList<CanvasObject>(obj.getChildren()))
+		for (ICanvasObject child : new HashSet<ICanvasObject>(obj.getChildren()))
 		{
 			this.processShape(source, child, shader);
 		};

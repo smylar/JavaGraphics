@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -155,7 +156,7 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	}
 	
 	@Override
-	public final List<CanvasObject> getChildren() {
+	public final Set<ICanvasObject> getChildren() {
 		return getData().getChildren();
 	}
 
@@ -176,16 +177,16 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	}
 
 	@Override
-	public final void setDeleted(boolean isDeleted) {
+	public void setDeleted(boolean isDeleted) {
 		getData().setDeleted(isDeleted);
-		doNotify();
+		wrappedObject.ifPresent(w -> {
+			w.setDeleted(isDeleted); 
+		});
+		
+		this.setChanged();
+		this.notifyObservers();
 	}
 
-	@Override
-	public final boolean isObserving(){
-		return getData().getObserving() != null;
-	}
-	
 	@Override
 	public final boolean getCastsShadow() {
 		return getData().isCastsShadow();
@@ -236,18 +237,22 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	}
 
 	@Override
-	public final synchronized void cancelTransforms()
+	public final void cancelTransforms()
 	{
-		getData().getTransforms().forEach(Transform::cancel);
+		synchronized(getData().getTransforms()) {
+			getData().getTransforms().forEach(Transform::cancel);
+		}
 	}
 	
 	@Override
-	public final synchronized void cancelNamedTransform(String key)
+	public final void cancelNamedTransform(String key)
 	{
 		if (key == null) {
 		    return;
 		}
-		getData().getTransforms().stream().filter(t -> key.equals(t.getName())).forEach(Transform::cancel);
+		synchronized(getData().getTransforms()) {
+			getData().getTransforms().stream().filter(t -> key.equals(t.getName())).forEach(Transform::cancel);
+		}
 	}
 	
 	@Override
@@ -264,21 +269,24 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	 * @return List of transforms found
 	 */
 	@Override
-	public final synchronized <T> List<T> getTransformsOfType(Class<T> type)
+	public final <T> List<T> getTransformsOfType(Class<T> type)
 	{
-		return getData().getTransforms().stream().filter(t -> type.isAssignableFrom(t.getClass())).collect(Collector.of(
+		synchronized(getData().getTransforms()) {
+			return getData().getTransforms().stream().filter(t -> type.isAssignableFrom(t.getClass())).collect(Collector.of(
 													ArrayList::new,
 													(trans, orig) -> trans.add(type.cast(orig)),
 													(left, right) -> {left.addAll(right); return left;},
 													Collector.Characteristics.CONCURRENT
 													));
-
+		}
 	}
 	
 	@Override
-	public final synchronized void addTransform(Transform transform)
+	public final void addTransform(Transform transform)
 	{
-		getData().getTransforms().add(transform);
+		synchronized(getData().getTransforms()) {
+			getData().getTransforms().add(transform);
+		}
 	}
 	
 	/**
@@ -289,7 +297,9 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	@Override
 	public final void applyCameraTransform(Transform transform, Camera c)
 	{
-		transform.doTransform(getData().getVertexList().stream().map(v -> v.getTransformed(c)).collect(Collectors.toList()));
+		//synchronized(getData().getVertexList()) {
+			transform.doTransform(getData().getVertexList().stream().map(v -> v.getTransformed(c)).collect(Collectors.toList()));
+		//}
 	}
 	
 	/**
@@ -315,7 +325,9 @@ public class CanvasObject extends Observable implements ICanvasObject{
 		if (name == null) {
 		    return false;
 		}
-		return getData().getTransforms().stream().anyMatch(t -> name.equals(t.getName()));
+		synchronized(getData().getTransforms()) {
+			return getData().getTransforms().stream().anyMatch(t -> name.equals(t.getName()));
+		}
 	}
 	
 	/**
@@ -326,10 +338,12 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	 */
 	@Override
 	public final <T extends Transform> Optional<T> getTransform(String key, Class<T> clazz) {
-		return getData().getTransforms().stream()
+		synchronized(getData().getTransforms()) {
+			return getData().getTransforms().stream()
 								.filter(t -> t.getName() == key && clazz.isAssignableFrom(t.getClass()))
 								.map(clazz::cast)
 								.findFirst();
+		}
 	}
 	
 	/**
@@ -340,7 +354,7 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	 * @param t - Transform to apply
 	 */
 	@Override
-	public final synchronized void applyTransform(Transform t)
+	public final void applyTransform(Transform t)
 	{
 		//can be called directly for singular ad-hoc adjustments, without adding to the transform list, 
 		//this should generally only be done on objects that haven't been registered to a canvas yet
@@ -355,20 +369,21 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	 * 
 	 */
 	@Override
-	public final synchronized void applyTransforms()
+	public final void applyTransforms()
 	{
 		if (getData().getVertexList() == null || getData().getVertexList().isEmpty() || getData().isDeleted()) {
 		    return;
 		}
 		
-		this.beforeTransforms();
-		getData().getTransforms().stream().filter(t -> !t.isCancelled()).forEach(this::applyTransform);
-		
-		getData().getTransforms().removeIf(t -> {
-								t.getDependencyList().removeIf(Transform::isComplete);
-								return t.isComplete() && t.getDependencyList().size() == 0;
-								});
-
+		synchronized(getData().getTransforms()) {
+			this.beforeTransforms();
+			getData().getTransforms().stream().filter(t -> !t.isCancelled()).forEach(this::applyTransform);
+			
+			getData().getTransforms().removeIf(t -> {
+									t.getDependencyList().removeIf(Transform::isComplete);
+									return t.isComplete() && t.getDependencyList().size() == 0;
+									});
+		}
 		if (getData().getTransforms().isEmpty() && getData().isDeleteAfterTransforms()){
 			if (!getData().getChildren().isEmpty()) {
 			    this.setVisible(false);
@@ -387,7 +402,9 @@ public class CanvasObject extends Observable implements ICanvasObject{
 		if (wrappedObject.isPresent()) {
 			wrappedObject.get().afterTransforms(); 
 		} else {
-			this.getChildren().forEach(ICanvasObject::applyTransforms);
+			synchronized(getData().getChildren()) {
+				this.getChildren().parallelStream().forEach(ICanvasObject::applyTransforms);
+			}
         }
 	}
 	
@@ -457,10 +474,10 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	 * 
 	 * @param o
 	 */
-	@Override
+	/*@Override
 	public final void observeAndMatch (ICanvasObject o){
 	    //TODO separate out observers
-		synchronized(data){
+		synchronized(data.getVertexList()){
 			getData().setObserving(o);
 			o.getChildren().add(this);
 			this.getVertexList().forEach(v -> v.addTag(this.getObjectTag()));
@@ -472,14 +489,14 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	@Override
 	public final void stopObserving(){
 		if (getData().getObserving() != null){
-			synchronized(data) {
+			synchronized(data.getVertexList()) {
 				getData().getObserving().getChildren().remove(this);
 				getData().getObserving().getVertexList().removeIf(v -> v.hasTag(this.getObjectTag()));
 				this.getVertexList().forEach(v -> v.removeTag(this.getObjectTag()));
 				getData().setObserving(null);
 			}
 		}
-	}
+	}*/
 	
 	/**
 	 * This method will be executed once all draw operations (across all objects) are complete
@@ -491,11 +508,13 @@ public class CanvasObject extends Observable implements ICanvasObject{
 			wrappedObject.get().onDrawComplete();
 		}
 		else{
-			if (this.isDeleted()) {
-				this.stopObserving();
+			//if (this.isDeleted()) {
+			//	this.stopObserving();
+			//}
+			synchronized(data.getChildren()) {
+				this.getChildren().removeIf(ICanvasObject::isDeleted);
+				this.getChildren().parallelStream().forEach(ICanvasObject::onDrawComplete);
 			}
-			this.getChildren().removeIf(ICanvasObject::isDeleted);
-			this.getChildren().parallelStream().forEach(ICanvasObject::onDrawComplete);
 		}
 	}
 	

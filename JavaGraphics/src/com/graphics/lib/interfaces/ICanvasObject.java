@@ -6,13 +6,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Observer;
 import java.util.Optional;
+import java.util.Set;
 
 import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.canvas.BaseData;
-import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.CanvasObjectFunctionsImpl;
 import com.graphics.lib.transform.Transform;
 
@@ -39,7 +39,7 @@ public interface ICanvasObject {
 
 	boolean hasFlag(String flag);
 
-	List<CanvasObject> getChildren();
+	Set<ICanvasObject> getChildren();
 
 	boolean isVisible();
 
@@ -48,8 +48,6 @@ public interface ICanvasObject {
 	boolean isDeleted();
 
 	void setDeleted(boolean isDeleted);
-
-	boolean isObserving();
 
 	boolean getCastsShadow();
 
@@ -163,20 +161,6 @@ public interface ICanvasObject {
 	 * Sets a flag indicating if this object should be set as deleted once all its Transforms are complete
 	 */
 	void deleteAfterTransforms();
-
-	/**
-	 * Observe another object and match its movements, <s>observed item will call update in this item via the Observer/Observable interface when it changes</s>
-	 * <br/>
-	 * Changed to add objects vertex list to the parent, avoids issues such as double counting when reusing a transform
-	 * <br/>
-	 * <br/>
-	 * Note this object will be made a child of that it is observing so that it is always processed after the observed item
-	 * 
-	 * @param o
-	 */
-	void observeAndMatch(ICanvasObject o);
-
-	void stopObserving();
 
 	/**
 	 * This method will be executed once all draw operations (across all objects) are complete

@@ -6,8 +6,10 @@ import java.util.Date;
 import com.graphics.lib.Vector;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.PlugableCanvasObject;
+import com.graphics.lib.canvas.TrackingCanvasObject;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IPlugable;
+import com.graphics.lib.interfaces.ITracker;
 import com.graphics.lib.plugins.Events;
 import com.graphics.lib.plugins.IPlugin;
 import com.graphics.lib.plugins.PluginLibrary;
@@ -19,7 +21,7 @@ public class BouncyProjectile extends Projectile {
 	
 	@Override
 	public CanvasObject get(Vector initialVector, double parentSpeed) {
-		PlugableCanvasObject proj = new PlugableCanvasObject(new Sphere(18,20));
+		PlugableCanvasObject proj = new PlugableCanvasObject(new TrackingCanvasObject(new Sphere(18,20)));
 		proj.setBaseIntensity(1);
 		proj.setColour(new Color(0, 255, 255, 80));
 		proj.setCastsShadow(false);
@@ -45,7 +47,7 @@ public class BouncyProjectile extends Projectile {
 				if (impactee != null){
 					if (impactee.hasFlag(Events.STICKY)){ 
 						PluginLibrary.stop2().execute(obj);
-						obj.observeAndMatch(impactee);
+						obj.getObjectAs(ITracker.class).ifPresent(o -> o.observeAndMatch(impactee));
 						if (getClipLibrary() != null) getClipLibrary().playSound("STICK", -20f);
 					}
 					else {

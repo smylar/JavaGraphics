@@ -38,6 +38,11 @@ public class GoraudShader extends DefaultShader {
 	public void init(ICanvasObject parent, Facet facet, Camera c) {
 	    pointLight.clear();
 	    lineLength = 0;
+	    this.facet = facet;
+		curScanline = null;
+		startIntensity = null;
+		endIntensity = null;
+		pointIntensity = new IntensityComponents();
 	    
 		colour = facet.getColour() == null ? parent.getColour() : facet.getColour();
 		if (colour == null) {
@@ -45,6 +50,7 @@ public class GoraudShader extends DefaultShader {
 		}
 		
 		if (parent.hasFlag(Events.NO_SHADE)) {
+			this.facet = null;
 		    return;
 		}
 
@@ -53,12 +59,6 @@ public class GoraudShader extends DefaultShader {
 			Vector n = parent.getVertexNormalFinder().getVertexNormal(parent, p, facet);
 			pointLight.put(p.getTransformed(c), parent.getLightIntensityFinder().getLightIntensity(Canvas3D.get().getLightSources(), parent, p, n, !facet.isFrontFace()));
 		}
-
-		this.facet = facet;
-		curScanline = null;
-		startIntensity = null;
-		endIntensity = null;
-		pointIntensity = new IntensityComponents();
 	}
 
 	@Override

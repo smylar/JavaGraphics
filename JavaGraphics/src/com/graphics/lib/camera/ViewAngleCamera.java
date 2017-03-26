@@ -28,7 +28,7 @@ public class ViewAngleCamera extends Camera {
 	@Override
 	public void getViewSpecific(ICanvasObject obj) {
 		
-		synchronized(obj.getVertexList()){
+		//synchronized(obj.getVertexList()){
 			obj.getVertexList().parallelStream().forEach(p -> {
 				p.resetTransformed(this);
 			});
@@ -53,7 +53,7 @@ public class ViewAngleCamera extends Camera {
 				}
 				else doPointInFront(trans, zed);
 			});
-		}
+		//}
 	}
 	
 	private void getCameraCoords(Point p, Point position){

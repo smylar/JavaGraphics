@@ -3,11 +3,18 @@ package com.graphics.lib.shader;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Supplier;
 
+/**
+ * Sets up various shaders that can be used, they are placed on a queue to enable re-use
+ * The user of the shader should ensure that close is called once done with it, so that it is returned to the queue 
+ * 
+ * @author Paul Brandon
+ *
+ */
 public enum ShaderFactory{
-		GORAUD(GoraudShader::new, 16), 
-		TEXGORAUD(TexturedGoraudShader::new, 16), 
-		FLAT(FlatShader::new, 16), 
-		NONE(DefaultShader::new, 16);
+		GORAUD(GoraudShader::new, 8), 
+		TEXGORAUD(TexturedGoraudShader::new, 8), 
+		FLAT(FlatShader::new, 8), 
+		NONE(DefaultShader::new, 8);
 
 	private LinkedBlockingQueue<IShader> pool;
 	
@@ -20,7 +27,8 @@ public enum ShaderFactory{
         }
 	}
 	
-	public IShader getShader() {	    
+	public IShader getShader() {	 
+		//System.out.println(pool.size());
 	    try {
             return pool.take();
         } catch (InterruptedException e) {

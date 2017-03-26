@@ -14,13 +14,17 @@ import com.graphics.lib.Utils;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.Canvas3D;
+import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.canvas.PlugableCanvasObject;
+import com.graphics.lib.canvas.TrackingCanvasObject;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IEffector;
 import com.graphics.lib.interfaces.IPointFinder;
 import com.graphics.lib.interfaces.ITexturable;
+import com.graphics.lib.interfaces.ITracker;
 import com.graphics.lib.interfaces.IVectorFinder;
 import com.graphics.lib.orientation.OrientationTransform;
+import com.graphics.lib.plugins.Events;
 import com.graphics.lib.texture.Texture;
 import com.graphics.lib.transform.Rotation;
 import com.graphics.lib.collectors.NearestIntersectedFacetFinder;
@@ -50,14 +54,21 @@ public class LaserWeapon implements IEffector {
 		lsr.setTickLife(this.duration);
 		PlugableCanvasObject laser = new PlugableCanvasObject(lsr);
 		laser.addFlag("PHASED");
-		Point pos = origin.find();
 		
 		for (Rotation r : OrientationTransform.getRotationsForVector(effectVector.getVector())){
 			lsr.applyTransform(r);
 		}
 		
+		ITracker tracker = new TrackingCanvasObject(laser);
+		
 		laser.registerPlugin("LASER", 
-				(obj) -> {
+				obj -> {
+						if (lsr.getTickLife() <= 0) {
+							tracker.setDeleted(true);
+							return null;
+						}
+					
+						lsr.setTickLife(lsr.getTickLife() - 1);
 						Vector v = effectVector.getVector();
 						obj.getObjectAs(LaserEffect.class).ifPresent(l -> {
 							Entry<Double, IntersectionData<ICanvasObject>> f = TestUtils.getFilteredObjectList().get().stream().collect(new NearestIntersectedFacetFinder<>(v,l.getAnchorPoint(),l.getLength()));
@@ -71,12 +82,20 @@ public class LaserWeapon implements IEffector {
 								l.resetLength();
 							}
 						});
-						//as an aspiration - create dynamic texture map for laser 'holes'
 						return null;
 		},true);
 		
-		Canvas3D.get().registerObject(laser, pos);
-		laser.observeAndMatch(parent);
+		tracker.addFlag(Events.NO_SHADE);
+		
+		parent.getObjectAs(PlugableCanvasObject.class).ifPresent(p -> {
+			p.registerSingleAfterDrawPlugin("ADD_LASER", obj -> {
+				CanvasObjectFunctions.DEFAULT.get().moveTo(tracker, origin.find());
+				tracker.observeAndMatch(parent);
+				return null;
+			});
+		});
+		
+		
 		this.laserEffect = lsr;
 	}
 

@@ -11,7 +11,7 @@ import com.graphics.shapes.Cylinder;
 public class LaserEffect extends Cylinder {
 
 	private int tickLife = 15;
-	private int currentTick = 0;
+	private int tickLifeStart = 15;
 	private double length = 1000;
 	private double curLength = 1000;
 	private Cylinder subCylinder;
@@ -65,14 +65,11 @@ public class LaserEffect extends Cylinder {
 	
 	@Override
 	public void onDrawComplete(){
-		if (++currentTick >= tickLife){
-			this.setDeleted(true);
-		}else{
+		if (tickLife > 0) {
 			super.onDrawComplete();
-		}
-		
-		for (Facet f : subCylinder.getFacetList()){
-			f.setColour(new Color(255,255 - (255/tickLife * currentTick),0, 200));
+			for (Facet f : subCylinder.getFacetList()){
+				f.setColour(new Color(255, 255/tickLifeStart * tickLife ,0, 200));
+			}
 		}
 	}
 

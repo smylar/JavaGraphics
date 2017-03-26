@@ -91,7 +91,6 @@ public class ZBuffer implements IZBuffer{
 		    maxX = this.dispWidth;			
 		
 		try (IShader localShader = shader.getShader()) {
-		    //reduce complexity in here
 			localShader.init(parent, facet, c);
 		
     		List<LineEquation> lines = new ArrayList<>();
@@ -103,27 +102,9 @@ public class ZBuffer implements IZBuffer{
     		for (int x = (int)Math.floor(minX) ; x <= Math.ceil(maxX) ; x++)
     		{
     			ScanLine scanLine = this.getScanline(x, lines);
-    			if (scanLine == null) 
-    			    continue;
     			
-    			double scanLineLength = Math.floor(scanLine.endY) - Math.floor(scanLine.startY);
-    			double percentDistCovered = 0;
-    			Color colour = null;
-    			for (int y = (int)Math.floor(scanLine.startY < 0 ? 0 : scanLine.startY) ; y < Math.floor(scanLine.endY > this.dispHeight ? this.dispHeight : scanLine.endY ) ; y++)
-    			{
-    				
-    				if (scanLineLength != 0)
-    				{
-    					percentDistCovered = (y - Math.floor(scanLine.startY)) / scanLineLength;
-    				}
-    				
-    				double z = this.interpolateZ(scanLine.startZ, scanLine.endZ, percentDistCovered);
-    				
-    				if (skip == 1 || y % skip == 0 || colour == null){	
-    					colour = localShader.getColour(scanLine, x, y);
-    				}
-    				this.addToBuffer(parent, x, y, z, colour);
-    			}
+    			if (scanLine != null) 
+    				processScanline(scanLine, parent, x, localShader);
     		}
 		} catch (Exception e) {
             // TODO Auto-generated catch block
@@ -136,6 +117,27 @@ public class ZBuffer implements IZBuffer{
 		return zBuffer;
 	}
 
+	private void processScanline(ScanLine scanLine, ICanvasObject parent, int x, IShader shader) {
+		double scanLineLength = Math.floor(scanLine.endY) - Math.floor(scanLine.startY);
+		double percentDistCovered = 0;
+		Color colour = null;
+		for (int y = (int)Math.floor(scanLine.startY < 0 ? 0 : scanLine.startY) ; y < Math.floor(scanLine.endY > this.dispHeight ? this.dispHeight : scanLine.endY ) ; y++)
+		{
+			
+			if (scanLineLength != 0)
+			{
+				percentDistCovered = (y - Math.floor(scanLine.startY)) / scanLineLength;
+			}
+			
+			double z = this.interpolateZ(scanLine.startZ, scanLine.endZ, percentDistCovered);
+			
+			if (skip == 1 || y % skip == 0 || colour == null){	
+				colour = shader.getColour(scanLine, x, y);
+			}
+			this.addToBuffer(parent, x, y, z, colour);
+		}
+	}
+	
 	private void addToBuffer(ICanvasObject parent, Integer x, Integer y, double z, Color colour)
 	{	
 		if (z < 0) return;

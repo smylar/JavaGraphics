@@ -23,8 +23,8 @@ public class BaseData {
     private List<WorldCoord> vertexList = new ArrayList<>();
     private List<Facet> facetList = new ArrayList<>();
     private Color colour = new Color(255, 0, 0);
-    private List<Transform> transforms = new ArrayList<>();
-    private List<CanvasObject> children = Collections.synchronizedList(new ArrayList<CanvasObject>());
+    private List<Transform> transforms = Collections.synchronizedList(new ArrayList<>());
+    private Set<ICanvasObject> children = Collections.synchronizedSet(new HashSet<ICanvasObject>());
     private Map<Point, ArrayList<Facet>> vertexFacetMap;
     private boolean processBackfaces = false;
     private boolean isVisible = true;
@@ -32,7 +32,6 @@ public class BaseData {
     private boolean castsShadow = true;
     //TODO - is solid or phased when invisible?
     private boolean deleteAfterTransforms = false;
-    private ICanvasObject observing = null;
     private Point anchorPoint = null;
     private Set<String> flags = new HashSet<>();
     private CanvasObjectFunctionsImpl functions = CanvasObjectFunctions.DEFAULT.get();
@@ -83,11 +82,11 @@ public class BaseData {
         this.transforms = transforms;
     }
 
-    public List<CanvasObject> getChildren() {
+    public Set<ICanvasObject> getChildren() {
         return children;
     }
 
-    public void setChildren(List<CanvasObject> children) {
+    public void setChildren(Set<ICanvasObject> children) {
         this.children = children;
     }
 
@@ -137,14 +136,6 @@ public class BaseData {
 
     public void setDeleteAfterTransforms(boolean deleteAfterTransforms) {
         this.deleteAfterTransforms = deleteAfterTransforms;
-    }
-
-    public ICanvasObject getObserving() {
-        return observing;
-    }
-
-    public void setObserving(ICanvasObject observing) {
-        this.observing = observing;
     }
 
     public Point getAnchorPoint() {
