@@ -67,8 +67,8 @@ public class Vector {
 	{
 		Vector normal = new Vector();
 		 normal.x = (this.y*v2.z) - (v2.y*this.z);
-		 normal.y = (-(this.x*v2.z ) + (v2.x*this.z));
-		 normal.z = ((this.x*v2.y) - (v2.x*this.y));
+		 normal.y = -(this.x*v2.z ) + (v2.x*this.z);
+		 normal.z = (this.x*v2.y) - (v2.x*this.y);
 		 return normal;
 	}
 	
@@ -101,11 +101,13 @@ public class Vector {
 
 	@Override
 	public int hashCode() {
-		//TODO will need to change these, as vector is altered it will change the hash code which is not good
+		//As vector is altered it will change the hash code which is not good
 		// it means the system would no longer be able to find the item in a hash map or similar
 		// as such we'll generate a code once and store it
 		
-		if (hashCode != null) return hashCode;
+		if (hashCode != null) {
+		    return hashCode;
+		}
 		
 		final int prime = 31;
 		int result = 1;

@@ -15,7 +15,7 @@ public class Point {
 	public double x = 0;
 	public double y = 0;
 	public double z = 0;
-	private Set<String> tags = new HashSet<String>();
+	private Set<String> tags = new HashSet<>();
 	
 	public Point(Point p)
 	{

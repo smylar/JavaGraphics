@@ -1,9 +1,6 @@
 package com.graphics.lib;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.graphics.lib.camera.Camera;
 
 /**
@@ -13,11 +10,7 @@ import com.graphics.lib.camera.Camera;
  * @author Paul Brandon
  *
  */
-public class Facet {
-	private WorldCoord point1;
-	private WorldCoord point2;
-	private WorldCoord point3;
-	private List<WorldCoord> list = new ArrayList<WorldCoord>();
+public class Facet extends Triplet<WorldCoord> {
 	private Color colour;
 	private double baseIntensity = 0.15;
 	private double maxIntensity = 1;
@@ -25,23 +18,14 @@ public class Facet {
 	private String tag = null;
 	
 	public Facet(WorldCoord p1, WorldCoord p2, WorldCoord p3)
-	{
-		this.point1 = p1;
-		this.point2 = p2;
-		this.point3 = p3;
-		list.add(point1);
-		list.add(point2);
-		list.add(point3);
-	}
+    {
+	    super(p1, p2, p3);
+    }
 	
 	public Facet(WorldCoord p1, WorldCoord p2, WorldCoord p3, String tag)
 	{
-		this(p1, p2, p3);
+		super(p1, p2, p3);
 		this.tag = tag;
-	}
-	
-	public List<WorldCoord> getAsList(){
-		return list;
 	}
 	
 	public String getTag() {
@@ -57,9 +41,12 @@ public class Facet {
 	}
 	
 	public void setMaxIntensity(double maxIntensity) {
-		if (maxIntensity < 0) this.maxIntensity = 0;
-		else if (maxIntensity > 1) this.maxIntensity = 1;
-		else this.maxIntensity = maxIntensity;
+		if (maxIntensity < 0) 
+		    this.maxIntensity = 0;
+		else if (maxIntensity > 1) 
+		    this.maxIntensity = 1;
+		else 
+		    this.maxIntensity = maxIntensity;
 	}
 
 	public double getBaseIntensity() {
@@ -67,20 +54,29 @@ public class Facet {
 	}
 
 	public void setBaseIntensity(double baseIntensity) {
-		if (baseIntensity < 0) this.baseIntensity = 0;
-		else if (baseIntensity > 1) this.baseIntensity = 1;
-		else this.baseIntensity = baseIntensity;
+		if (baseIntensity < 0) 
+		    this.baseIntensity = 0;
+		else if (baseIntensity > 1) 
+		    this.baseIntensity = 1;
+		else 
+		    this.baseIntensity = baseIntensity;
 	}
 	
 	public void checkIntensity(IntensityComponents intensity){
-		if (intensity.getRed() > maxIntensity) intensity.setRed(maxIntensity);
-		else if (intensity.getRed() < baseIntensity) intensity.setRed(baseIntensity);
+		if (intensity.getRed() > maxIntensity) 
+		    intensity.setRed(maxIntensity);
+		else if (intensity.getRed() < baseIntensity) 
+		    intensity.setRed(baseIntensity);
 		
-		if (intensity.getGreen() > maxIntensity) intensity.setGreen(maxIntensity);
-		else if (intensity.getGreen() < baseIntensity) intensity.setGreen(baseIntensity);
+		if (intensity.getGreen() > maxIntensity) 
+		    intensity.setGreen(maxIntensity);
+		else if (intensity.getGreen() < baseIntensity) 
+		    intensity.setGreen(baseIntensity);
 		
-		if (intensity.getBlue() > maxIntensity) intensity.setBlue(maxIntensity);
-		else if (intensity.getBlue() < baseIntensity) intensity.setBlue(baseIntensity);
+		if (intensity.getBlue() > maxIntensity) 
+		    intensity.setBlue(maxIntensity);
+		else if (intensity.getBlue() < baseIntensity) 
+		    intensity.setBlue(baseIntensity);
 	}
 	
 	public Color getColour() {
@@ -100,7 +96,7 @@ public class Facet {
 	}
 	
 	public boolean contains(WorldCoord wc){
-		return point1 == wc || point2 == wc || point3 == wc;
+		return getAsList().contains(wc);
 	}
 
 	/**
@@ -109,8 +105,8 @@ public class Facet {
 	 * @return Normal Vector
 	 */
 	public Vector getTransformedNormal(Camera c){
-		 Vector vector1 = new Vector(point2.getTransformed(c).x - point1.getTransformed(c).x, point2.getTransformed(c).y - point1.getTransformed(c).y, point2.getTransformed(c).z - point1.getTransformed(c).z);
-		 Vector vector2 = new Vector(point3.getTransformed(c).x - point1.getTransformed(c).x, point3.getTransformed(c).y - point1.getTransformed(c).y, point3.getTransformed(c).z - point1.getTransformed(c).z);
+		 Vector vector1 = new Vector(second().getTransformed(c).x - first().getTransformed(c).x, second().getTransformed(c).y - first().getTransformed(c).y, second().getTransformed(c).z - first().getTransformed(c).z);
+		 Vector vector2 = new Vector(third().getTransformed(c).x - first().getTransformed(c).x, third().getTransformed(c).y - first().getTransformed(c).y, third().getTransformed(c).z - first().getTransformed(c).z);
 		 
 		 Vector normal = vector1.crossProduct(vector2);
 		 return normal.getUnitVector();
@@ -123,8 +119,8 @@ public class Facet {
 	 */
 	public Vector getNormal()
 	{
-		Vector vector1 = new Vector(point2.x - point1.x, point2.y - point1.y, point2.z - point1.z);
-		Vector vector2 = new Vector(point3.x - point1.x, point3.y - point1.y, point3.z - point1.z);
+		Vector vector1 = new Vector(second().x - first().x, second().y - first().y, second().z - first().z);
+		Vector vector2 = new Vector(third().x - first().x, third().y - first().y, third().z - first().z);
 		 
 		Vector normal = vector1.crossProduct(vector2);
 		return normal.getUnitVector();
@@ -146,9 +142,11 @@ public class Facet {
 		Vector v = vec.getUnitVector();
 		double t = (normal.x * v.x) + (normal.y * v.y) + (normal.z * v.z);
 		double tmod = (normal.x*p.x) + (normal.y*p.y) + (normal.z*p.z);
-		if (includeBackfaces && t == 0) return null;
-		if (!includeBackfaces && t >= 0) return null;
-		double tval = ((normal.x* point1.x) + (normal.y* point1.y) + (normal.z* point1.z) - tmod) / t;
+		if (includeBackfaces && t == 0) 
+		    return null;
+		if (!includeBackfaces && t >= 0) 
+		    return null;
+		double tval = ((normal.x* first().x) + (normal.y* first().y) + (normal.z* first().z) - tmod) / t;
 		Point intersect =  new Point(p.x + (v.x*tval), p.y + (v.y*tval), p.z + (v.z*tval));
 		
 		Vector v2 = p.vectorToPoint(intersect).getUnitVector(); //check intersect isn't in opposite direction to vec
@@ -164,9 +162,9 @@ public class Facet {
 	 */
 	public double getDistanceFromFacetPlane(Point p){
 		Vector normal = this.getNormal();
-		double planex = normal.x * (p.x - point1.x);
-		double planey = normal.y * (p.y - point1.y);
-		double planez = normal.z * (p.z - point1.z);
+		double planex = normal.x * (p.x - first().x);
+		double planey = normal.y * (p.y - first().y);
+		double planez = normal.z * (p.z - first().z);
 		
 		double dist = planex + planey + planez; //should not need to divide by normal length as already normalized (=1)
 		return dist < 0 ? -dist : dist;
@@ -180,9 +178,9 @@ public class Facet {
 	 */
 	public boolean isPointWithin(Point p){
 		if (p != null &&
-			isSameSide(p, this.point1, this.point2, this.point3) &&
-			isSameSide(p, this.point2, this.point3, this.point1) &&
-			isSameSide(p, this.point3, this.point1, this.point2)
+			isSameSide(p, this.first(), this.second(), this.third()) &&
+			isSameSide(p, this.second(), this.third(), this.first()) &&
+			isSameSide(p, this.third(), this.first(), this.second())
 		){
 			return true;
 		}
@@ -191,21 +189,23 @@ public class Facet {
 	}
 	
 	/**
-	 * Checks if p and fPoint3 are on the same side of the line fPoint1 to fPoint2
+	 * Checks if p and fthird() are on the same side of the line ffirst() to fsecond()
 	 * 
 	 * @param p - Point being tested
-	 * @param fPoint1 - Facet point 1
-	 * @param fPoint2 - Facet point 2
-	 * @param fPoint3 - Facet point 3
-	 * @return <code>True</code> if p and fPoint3 are the same side of the line, <code>False</code> otherwise
+	 * @param ffirst() - Facet point 1
+	 * @param fsecond() - Facet point 2
+	 * @param fthird() - Facet point 3
+	 * @return <code>True</code> if p and fthird() are the same side of the line, <code>False</code> otherwise
 	 */
-	public static boolean isSameSide(Point p, Point fPoint1, Point fPoint2, Point fPoint3){
-		Vector vInteresect = p.vectorToPoint(fPoint1);
-		Vector vector1 = fPoint2.vectorToPoint(fPoint1);
-		Vector vector2 = fPoint3.vectorToPoint(fPoint1);
+	public static boolean isSameSide(Point p, Point fpoint1, Point fpoint2, Point fpoint3){
+		Vector vInteresect = p.vectorToPoint(fpoint1);
+		Vector vector1 = fpoint2.vectorToPoint(fpoint1);
+		Vector vector2 = fpoint3.vectorToPoint(fpoint1);
 		Vector cp1 = vector1.crossProduct(vInteresect);
 		Vector cp2 = vector1.crossProduct(vector2);
-		if (cp1.dotProduct(cp2) >= 0) return true;
+		if (cp1.dotProduct(cp2) >= 0)
+		    return true;
+		
 		return false;
 	}
 
@@ -214,9 +214,9 @@ public class Facet {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((colour == null) ? 0 : colour.hashCode());
-		result = prime * result + ((point1 == null) ? 0 : point1.hashCode());
-		result = prime * result + ((point2 == null) ? 0 : point2.hashCode());
-		result = prime * result + ((point3 == null) ? 0 : point3.hashCode());
+		result = prime * result + ((first() == null) ? 0 : first().hashCode());
+		result = prime * result + ((second() == null) ? 0 : second().hashCode());
+		result = prime * result + ((third() == null) ? 0 : third().hashCode());
 		return result;
 	}
 
@@ -234,20 +234,20 @@ public class Facet {
 				return false;
 		} else if (!colour.equals(other.colour))
 			return false;
-		if (point1 == null) {
-			if (other.point1 != null)
+		if (first() == null) {
+			if (other.first() != null)
 				return false;
-		} else if (!point1.equals(other.point1))
+		} else if (!first().equals(other.first()))
 			return false;
-		if (point2 == null) {
-			if (other.point2 != null)
+		if (second() == null) {
+			if (other.second() != null)
 				return false;
-		} else if (!point2.equals(other.point2))
+		} else if (!second().equals(other.second()))
 			return false;
-		if (point3 == null) {
-			if (other.point3 != null)
+		if (third() == null) {
+			if (other.third() != null)
 				return false;
-		} else if (!point3.equals(other.point3))
+		} else if (!third().equals(other.third()))
 			return false;
 		return true;
 	}
