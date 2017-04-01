@@ -14,7 +14,7 @@ import com.graphics.lib.texture.TextureMapper;
  * @author paul
  *
  */
-public interface ITexturable extends ICanvasObject {
+public interface ITexturable extends ITrait {
 
 	/**
 	 * Add a texture to this object

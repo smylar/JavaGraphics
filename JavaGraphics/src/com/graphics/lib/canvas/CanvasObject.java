@@ -20,6 +20,7 @@ import com.graphics.lib.camera.Camera;
 import com.graphics.lib.collectors.CentreFinder;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ILightIntensityFinder;
+import com.graphics.lib.interfaces.ITrait;
 import com.graphics.lib.interfaces.IVertexNormalFinder;
 import com.graphics.lib.transform.Transform;
 
@@ -45,6 +46,7 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	private static int nextId = 0;
 	
 	private BaseData data;
+	//private Set<ITrait> traits = new HashSet<>(); moving to BaseData, should move back here once all object wrappers converted to traits
 	private int objectId = nextId++;
 	protected Optional<ICanvasObject> wrappedObject = Optional.empty();
 	
@@ -59,6 +61,24 @@ public class CanvasObject extends Observable implements ICanvasObject{
 		setWrappedObject(obj);
 	}
 	
+	@Override
+	public final Set<ITrait> getTraits() {
+	    return getData().getTraits();
+	}
+	
+	public <T extends ITrait> T addTrait(T trait) {
+        trait.setParent(this);
+        //traits.add(instance);
+        getData().getTraits().add(trait);
+        return trait;
+
+	}
+	
+	@Override
+	public final <T extends ITrait> Optional<T> getTrait(Class<T> trait) {
+	    return getData().getTraits().stream().filter(t -> trait.isAssignableFrom(t.getClass())).map(trait::cast).findFirst();
+	}
+	
 	/**
 	 * Get this object as the given class as long as that class is found in the wrapped object hierarchy
 	 * 
@@ -66,8 +86,9 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	 * @return A canvas object as the given type or null if it cannot be found
 	 */
 	@Override
-	public <C extends ICanvasObject> Optional<C> getObjectAs(Class<C> cl)
+	public final <C extends ICanvasObject> Optional<C> getObjectAs(Class<C> cl)
 	{		
+	    //TO go once all wrappers converted to traits
 		if (cl.isAssignableFrom(this.getClass())){
 			return Optional.of(cl.cast(this));
 		}else{

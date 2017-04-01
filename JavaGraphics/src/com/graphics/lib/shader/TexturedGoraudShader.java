@@ -31,13 +31,13 @@ public class TexturedGoraudShader extends GoraudShader {
         endTexture = null;
 		textures.clear();
 		
-		this.texturableParent = parent.getObjectAs(ITexturable.class);
+		this.texturableParent = parent.getTrait(ITexturable.class);
 		
-		if (this.texturableParent.isPresent()) {
-			this.textures = this.texturableParent.get().getTextures().stream().filter(t ->
-				facet.getAsList().stream().allMatch(v -> texturableParent.get().getTextureCoord(t, v).isPresent())
-			).sorted((a,b) -> b.getOrder() - a.getOrder()).collect(Collectors.toList());
-		}
+		parent.getTrait(ITexturable.class).ifPresent(tp -> 
+			textures = tp.getTextures().stream().filter(t ->
+				            facet.getAsList().stream().allMatch(v -> tp.getTextureCoord(t, v).isPresent())
+			            ).sorted((a,b) -> b.getOrder() - a.getOrder()).collect(Collectors.toList())
+		);
 	}
 
 	@Override

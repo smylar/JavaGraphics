@@ -1,6 +1,6 @@
 package com.graphics.lib.interfaces;
 
-public interface ITracker extends ICanvasObject {
+public interface ITracker extends ITrait {
 
     /**
      * Observe another object and match its movements

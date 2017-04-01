@@ -16,16 +16,15 @@ import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.Canvas3D;
 import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.canvas.PlugableCanvasObject;
-import com.graphics.lib.canvas.TrackingCanvasObject;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IEffector;
 import com.graphics.lib.interfaces.IPointFinder;
 import com.graphics.lib.interfaces.ITexturable;
-import com.graphics.lib.interfaces.ITracker;
 import com.graphics.lib.interfaces.IVectorFinder;
 import com.graphics.lib.orientation.OrientationTransform;
 import com.graphics.lib.plugins.Events;
 import com.graphics.lib.texture.Texture;
+import com.graphics.lib.traits.TrackingTrait;
 import com.graphics.lib.transform.Rotation;
 import com.graphics.lib.collectors.NearestIntersectedFacetFinder;
 import com.graphics.lib.collectors.IntersectionData;
@@ -59,12 +58,12 @@ public class LaserWeapon implements IEffector {
 			lsr.applyTransform(r);
 		}
 		
-		ITracker tracker = new TrackingCanvasObject(laser);
+		laser.addTrait(new TrackingTrait());
 		
 		laser.registerPlugin("LASER", 
 				obj -> {
 						if (lsr.getTickLife() <= 0) {
-							tracker.setDeleted(true);
+							laser.setDeleted(true);
 							return null;
 						}
 					
@@ -85,12 +84,12 @@ public class LaserWeapon implements IEffector {
 						return null;
 		},true);
 		
-		tracker.addFlag(Events.NO_SHADE);
+		laser.addFlag(Events.NO_SHADE);
 		
 		parent.getObjectAs(PlugableCanvasObject.class).ifPresent(p -> {
 			p.registerSingleAfterDrawPlugin("ADD_LASER", obj -> {
-				CanvasObjectFunctions.DEFAULT.get().moveTo(tracker, origin.find());
-				tracker.observeAndMatch(parent);
+				CanvasObjectFunctions.DEFAULT.get().moveTo(laser, origin.find());
+				laser.getTrait(TrackingTrait.class).ifPresent(trait -> trait.observeAndMatch(parent));
 				return null;
 			});
 		});
@@ -122,7 +121,7 @@ public class LaserWeapon implements IEffector {
 	}
 	
 	private boolean markTexture(IntersectionData<ICanvasObject> intersectionData) {
-		Optional<ITexturable> texturable = intersectionData.getParent().getObjectAs(ITexturable.class);
+		Optional<ITexturable> texturable = intersectionData.getParent().getTrait(ITexturable.class);
 		if (!texturable.isPresent()) return false;
 		
 		List<WorldCoord> coords = intersectionData.getFacet().getAsList();

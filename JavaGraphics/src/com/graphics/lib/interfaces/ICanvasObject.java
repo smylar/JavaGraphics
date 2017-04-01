@@ -185,4 +185,8 @@ public interface ICanvasObject {
 
 	void doNotify(Object arg);
 
+    <T extends ITrait> Optional<T> getTrait(Class<T> cl);
+
+    Set<ITrait> getTraits();
+
 }

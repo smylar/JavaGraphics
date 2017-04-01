@@ -1,4 +1,4 @@
-package com.graphics.lib.canvas;
+package com.graphics.lib.traits;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,20 +19,11 @@ import com.graphics.lib.texture.TextureMapper;
  * @author paul
  *
  */
-public class TexturableCanvasObject extends CanvasObject implements ITexturable {
+public class TexturableTrait implements ITexturable {
 	//note currently can't apply textures on a per facet (or set of facets) basis, though may be able to achieve that with the mapper used
 	private Map<Texture, Map<WorldCoord, Point>> textureMap = new HashMap<>();
+	private ICanvasObject parent;
 	
-	public TexturableCanvasObject()
-	{
-		super();
-	}
-	
-	public TexturableCanvasObject(ICanvasObject obj)
-	{
-		super(obj);
-	}
-
 	@Override
 	public ITexturable addTexture(Texture texture) {
 		textureMap.put(texture, new HashMap<>());
@@ -41,7 +32,7 @@ public class TexturableCanvasObject extends CanvasObject implements ITexturable 
 	
 	@Override
 	public ITexturable mapTexture(TextureMapper<?> mapper) {
-		textureMap.entrySet().forEach(e -> mapper.map(wrappedObject.orElse(this), e.getValue(), e.getKey()));
+		textureMap.entrySet().forEach(e -> mapper.map(parent, e.getValue(), e.getKey()));
 		return this;
 	}
 	
@@ -69,5 +60,10 @@ public class TexturableCanvasObject extends CanvasObject implements ITexturable 
 		});
 		return textures;
 	}
+
+    @Override
+    public void setParent(ICanvasObject parent) {
+        this.parent = parent;
+    }
 
 }

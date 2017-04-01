@@ -28,6 +28,7 @@ import com.graphics.lib.interfaces.IZBuffer;
 import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.shader.ShaderFactory;
+import com.graphics.lib.traits.TrackingTrait;
 import com.graphics.lib.zbuffer.ZBufferItem;
 
 /**
@@ -230,7 +231,7 @@ public class Canvas3D extends JPanel{
 		
 		Set<ICanvasObject> processShapes = new HashSet<>(this.getShapes());
 		processShapes.stream().filter(ICanvasObject::isDeleted).forEach(this.shapes::remove);
-		processShapes.removeIf(s -> s.isDeleted() || s.hasFlag(TrackingCanvasObject.TRACKING_TAG));
+		processShapes.removeIf(s -> s.isDeleted() || s.hasFlag(TrackingTrait.TRACKING_TAG));
 
 		processShapes.parallelStream().forEach(ICanvasObject::applyTransforms);
 		

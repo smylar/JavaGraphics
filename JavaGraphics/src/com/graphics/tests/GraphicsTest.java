@@ -45,7 +45,6 @@ import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.canvas.OrientableCanvasObject;
 import com.graphics.lib.canvas.PlugableCanvasObject;
 import com.graphics.lib.canvas.SlaveCanvas3D;
-import com.graphics.lib.canvas.TexturableCanvasObject;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IPlugable;
 import com.graphics.lib.interfaces.IPointFinder;
@@ -58,6 +57,7 @@ import com.graphics.lib.plugins.IPlugin;
 import com.graphics.lib.shader.ShaderFactory;
 import com.graphics.lib.texture.BmpTexture;
 import com.graphics.lib.texture.OvoidTextureMapper;
+import com.graphics.lib.traits.TexturableTrait;
 import com.graphics.lib.transform.*;
 import com.graphics.lib.zbuffer.ZBuffer;
 import com.sound.ClipLibrary;
@@ -266,22 +266,18 @@ public class GraphicsTest extends JFrame {
 		
 		PlugableCanvasObject cube = new PlugableCanvasObject(new TexturedCuboid(200,200,200));
 		cnv.registerObject(cube, new Point(500,500,500), ShaderFactory.TEXGORAUD);
-		//cnv.registerObject(cube, new Point(500,500,500), ShaderFactory.GetShader(ShaderFactory.ShaderEnum.GORAUD));
 		Transform cubet2 = new RepeatingTransform<Rotation>(Axis.Z.getRotation(3), 30);
 		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(cube, cubet2);
 		cube.addFlag(Events.STICKY);
 		
-		//Transform cubet = new RepeatingTransform<Translation>(new Translation(-5,0,0), (t) -> {
-		//	return cube.getCentre().x <= 200; 
-		//});
 		MovementTransform cubet = new MovementTransform(new Vector(-1,0,0), 5);
 		cubet.moveUntil(t -> t.getDistanceMoved() >= 350);
 		
 		cube.addTransform(cubet);
 		
-		TexturableCanvasObject txSphere = new TexturableCanvasObject(new Sphere(100,15));
-		txSphere.addTexture(new BmpTexture("smily")).mapTexture(new OvoidTextureMapper());
-		PlugableCanvasObject sphere = new PlugableCanvasObject(txSphere);
+		Sphere ball = new Sphere(100,15);
+		ball.addTrait(new TexturableTrait()).addTexture(new BmpTexture("smily")).mapTexture(new OvoidTextureMapper());
+		PlugableCanvasObject sphere = new PlugableCanvasObject(ball);
 		sphere.setColour(new Color(255, 255, 0));
 		sphere.addFlag(Events.EXPLODE_PERSIST);
 		cnv.registerObject(sphere, new Point(500,200,450), ShaderFactory.TEXGORAUD);

@@ -15,6 +15,7 @@ import com.graphics.lib.VertexNormalFinderEnum;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ILightIntensityFinder;
+import com.graphics.lib.interfaces.ITrait;
 import com.graphics.lib.interfaces.IVertexNormalFinder;
 import com.graphics.lib.transform.Transform;
 
@@ -37,7 +38,13 @@ public class BaseData {
     private CanvasObjectFunctionsImpl functions = CanvasObjectFunctions.DEFAULT.get();
     private ILightIntensityFinder liFinder = LightIntensityFinderEnum.DEFAULT.get();    
     private IVertexNormalFinder vnFinder = VertexNormalFinderEnum.DEFAULT.get(); 
+    private Set<ITrait> traits = new HashSet<>();
     
+    
+    public Set<ITrait> getTraits() {
+        return traits;
+    }
+
     public BaseData(String objTag) {
         this.objTag = objTag;
     }
