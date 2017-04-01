@@ -42,10 +42,10 @@ import com.graphics.lib.camera.ViewAngleCamera;
 import com.graphics.lib.canvas.Canvas3D;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.CanvasObjectFunctions;
-import com.graphics.lib.canvas.OrientableCanvasObject;
 import com.graphics.lib.canvas.PlugableCanvasObject;
 import com.graphics.lib.canvas.SlaveCanvas3D;
 import com.graphics.lib.interfaces.ICanvasObject;
+import com.graphics.lib.interfaces.IOrientable;
 import com.graphics.lib.interfaces.IPlugable;
 import com.graphics.lib.interfaces.IPointFinder;
 import com.graphics.lib.lightsource.DirectionalLightSource;
@@ -57,6 +57,7 @@ import com.graphics.lib.plugins.IPlugin;
 import com.graphics.lib.shader.ShaderFactory;
 import com.graphics.lib.texture.BmpTexture;
 import com.graphics.lib.texture.OvoidTextureMapper;
+import com.graphics.lib.traits.OrientableTrait;
 import com.graphics.lib.traits.TexturableTrait;
 import com.graphics.lib.transform.*;
 import com.graphics.lib.zbuffer.ZBuffer;
@@ -93,7 +94,7 @@ public class GraphicsTest extends JFrame {
 		
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 			
-		ViewAngleCamera cam = new ViewAngleCamera(new SimpleOrientation(OrientableCanvasObject.ORIENTATION_TAG));
+		ViewAngleCamera cam = new ViewAngleCamera(new SimpleOrientation(OrientableTrait.ORIENTATION_TAG));
 		cam.setPosition(new Point(350, 280, -200));
 		//FocusPointCamera cam = new FocusPointCamera();
 		//cam.setFocusPoint(new Point(300, 300, 1000));
@@ -127,14 +128,13 @@ public class GraphicsTest extends JFrame {
 		cnv.addLightSource(l3.getLightSource());
 		Lantern lantern3 = new Lantern();
 		
-		OrientableCanvasObject ol3 = new OrientableCanvasObject(lantern3);
-		ol3.setOrientation(new SimpleOrientation(OrientableCanvasObject.ORIENTATION_TAG));
-		cnv.registerObject(ol3, new Point(400,100,100), ShaderFactory.NONE);
-		l3.getLightSource().setDirection(() -> {return ol3.getOrientation().getForward();});
+		lantern3.addTrait(new OrientableTrait()).setOrientation(new SimpleOrientation(OrientableTrait.ORIENTATION_TAG));
+		cnv.registerObject(lantern3, new Point(400,100,100), ShaderFactory.NONE);
+		l3.getLightSource().setDirection(() -> {return lantern3.getTrait(IOrientable.class).get().getOrientation().getForward();});
 		l3.getLightSource().setLightConeAngle(40);
 		lantern3.attachLightsource(l3);
 		Transform l3spin = new RepeatingTransform<Rotation>(Axis.X.getRotation(4), 0);
-		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(ol3, l3spin);
+		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(lantern3, l3spin);
 		
 		this.add(cnv, BorderLayout.CENTER);
 		
@@ -156,7 +156,7 @@ public class GraphicsTest extends JFrame {
 		cnv.registerObject(flap, new Point(1000, 500, 200), ShaderFactory.GORAUD);
 		CanvasObjectFunctions.DEFAULT.get().addTransformAboutPoint(flap, new Point(1200, 500, 200), new RepeatingTransform<Rotation>(Axis.Y.getRotation(2),0));
 		
-		ViewAngleCamera slaveCam = new ViewAngleCamera(new SimpleOrientation(OrientableCanvasObject.ORIENTATION_TAG));
+		ViewAngleCamera slaveCam = new ViewAngleCamera(new SimpleOrientation(OrientableTrait.ORIENTATION_TAG));
 		slaveCam.setPosition(new Point(1550, 200, 350));
 		slaveCam.addTransform("INIT", new PanCamera(Axis.Y, -90));
 		slaveCam.doTransforms();
@@ -241,8 +241,8 @@ public class GraphicsTest extends JFrame {
 		}, ship));
 		
 		ship.setColour(new Color(50, 50, 50));
+		ship.addTrait(new OrientableTrait()).setOrientation(new SimpleOrientation(OrientableTrait.ORIENTATION_TAG));
 		ship.applyTransform(Axis.Y.getRotation(180));
-		ship.setOrientation(new SimpleOrientation(OrientableCanvasObject.ORIENTATION_TAG));
 		cnv.registerObject(ship, new Point(350, 350, -50), ShaderFactory.GORAUD);
 
 		PlugableCanvasObject torus = new PlugableCanvasObject(new Gate(50,50,20, () -> {return cam.getPosition();} ));

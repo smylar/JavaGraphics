@@ -54,10 +54,6 @@ public class LaserWeapon implements IEffector {
 		PlugableCanvasObject laser = new PlugableCanvasObject(lsr);
 		laser.addFlag("PHASED");
 		
-		for (Rotation r : OrientationTransform.getRotationsForVector(effectVector.getVector())){
-			lsr.applyTransform(r);
-		}
-		
 		laser.addTrait(new TrackingTrait());
 		
 		laser.registerPlugin("LASER", 
@@ -88,6 +84,9 @@ public class LaserWeapon implements IEffector {
 		
 		parent.getObjectAs(PlugableCanvasObject.class).ifPresent(p -> {
 			p.registerSingleAfterDrawPlugin("ADD_LASER", obj -> {
+				for (Rotation r : OrientationTransform.getRotationsForVector(effectVector.getVector())){
+					laser.applyTransform(r);
+				}
 				CanvasObjectFunctions.DEFAULT.get().moveTo(laser, origin.find());
 				laser.getTrait(TrackingTrait.class).ifPresent(trait -> trait.observeAndMatch(parent));
 				return null;

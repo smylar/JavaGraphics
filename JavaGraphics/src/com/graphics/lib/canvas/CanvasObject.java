@@ -132,6 +132,11 @@ public class CanvasObject extends Observable implements ICanvasObject{
 		return data;
 	}
 	
+	@Override
+	public final boolean is(ICanvasObject obj) {
+		return obj == null ? false : getData() == obj.getData();
+	}
+	
 	/**
 	 * Set the data for the root canvas object
 	 * 

@@ -7,13 +7,14 @@ import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
-import com.graphics.lib.canvas.AnimatedCanvasObject;
+import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.CanvasObjectFunctionsImpl;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.orientation.SimpleOrientation;
 import com.graphics.lib.skeleton.PivotSkeletonNode;
+import com.graphics.lib.traits.AnimatedTrait;
 
-public class Whale extends AnimatedCanvasObject {
+public class Whale extends CanvasObject {
 	public static final String FIN_TAG = "fin";
 	public static final String FLUKE_TAG = "fluke";
 	
@@ -164,8 +165,6 @@ public class Whale extends AnimatedCanvasObject {
 		//TODO - an interface for building all this?!?!?
 		
 		this.useAveragedNormals(90);
-		this.setOrientation(new SimpleOrientation(ORIENTATION_TAG));
-		this.getOrientation().getRepresentation().getVertexList().get(0).z = -1;
 		
 		PivotSkeletonNode rootNode = new PivotSkeletonNode();
 		rootNode.setPosition(new WorldCoord(this.getCentre()));
@@ -184,8 +183,12 @@ public class Whale extends AnimatedCanvasObject {
 		tailNode.setMin(Axis.Y,-10);
 		tailNode.getAnimations().put("TAIL",  PivotSkeletonNode.getDefaultPivotAction(Axis.Y, 0.5, 0.5));
 		
-		this.setSkeletonRootNode(rootNode);
-		this.startAnimation("TAIL");
+		AnimatedTrait animated = this.addTrait(new AnimatedTrait());
+		
+		animated.setOrientation(new SimpleOrientation(AnimatedTrait.ORIENTATION_TAG));
+		animated.getOrientation().getRepresentation().getVertexList().get(0).z = -1;
+		animated.setSkeletonRootNode(rootNode);
+		animated.startAnimation("TAIL");
 	}
 	
 	private CanvasObjectFunctionsImpl getFunctionsImpl() {

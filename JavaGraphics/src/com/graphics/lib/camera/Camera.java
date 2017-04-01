@@ -59,7 +59,7 @@ public abstract class Camera extends Observable implements IOrientableCamera, Ob
 		this.tiedObjectLocator = tiedObjectLocator;
 		tiedObjectLocator.accept(tiedTo, this);
 		tiedTo.addObserver(this);
-		tiedTo.getObjectAs(IOrientable.class).ifPresent(o -> o.setOrientation(orientation));
+		tiedTo.getTrait(IOrientable.class).ifPresent(o -> o.setOrientation(orientation));
 	}
 
 	/**

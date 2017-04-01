@@ -2,17 +2,17 @@ package com.graphics.lib.interfaces;
 
 import com.graphics.lib.orientation.OrientationTransform;
 
-public interface IOrientable extends ICanvasObject {
+public interface IOrientable extends ITrait {
 	IOrientation getOrientation();
 	
-	void setOrientation(IOrientation orientation);
+	IOrientable setOrientation(IOrientation orientation);
 	
 	/**
 	 * Revert object to the orientation it started in
 	 */
-	void toBaseOrientation();
+	IOrientable toBaseOrientation();
 	
-	public void reapplyOrientation();
+	public IOrientable reapplyOrientation();
 	
-	public void applyOrientation(OrientationTransform oTrans);
+	public IOrientable applyOrientation(OrientationTransform oTrans);
 }

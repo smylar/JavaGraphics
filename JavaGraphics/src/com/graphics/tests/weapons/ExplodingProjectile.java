@@ -7,13 +7,13 @@ import com.graphics.lib.Axis;
 import com.graphics.lib.Vector;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.CanvasObjectFunctions;
-import com.graphics.lib.canvas.OrientableCanvasObject;
 import com.graphics.lib.canvas.PlugableCanvasObject;
 import com.graphics.lib.interfaces.IOrientable;
 import com.graphics.lib.orientation.OrientationTransform;
 import com.graphics.lib.orientation.SimpleOrientation;
 import com.graphics.lib.plugins.Events;
 import com.graphics.lib.plugins.PluginLibrary;
+import com.graphics.lib.traits.OrientableTrait;
 import com.graphics.lib.transform.MovementTransform;
 import com.graphics.lib.transform.RepeatingTransform;
 import com.graphics.lib.transform.Rotation;
@@ -25,9 +25,9 @@ public class ExplodingProjectile extends Projectile{
 
 	@Override
 	public CanvasObject get(Vector initialVector, double parentSpeed) {
-		PlugableCanvasObject proj = new PlugableCanvasObject(new OrientableCanvasObject(new Ovoid(20,0.3,30)));
+		PlugableCanvasObject proj = new PlugableCanvasObject(new Ovoid(20,0.3,30));
 		proj.applyTransform(new Rotation(Axis.X, -90));
-		proj.getObjectAs(IOrientable.class).ifPresent(o -> o.setOrientation(new SimpleOrientation()));
+		proj.addTrait(new OrientableTrait()).setOrientation(new SimpleOrientation());
 		proj.setBaseIntensity(1);
 		proj.setColour(new Color(255, 0, 0, 80));
 		proj.setCastsShadow(false);
@@ -64,13 +64,13 @@ public class ExplodingProjectile extends Projectile{
 			@Override
 			public void beforeTransform(){
 				super.beforeTransform();
-				proj.getObjectAs(IOrientable.class).ifPresent(o -> o.toBaseOrientation());
+				proj.getTrait(IOrientable.class).ifPresent(o -> o.toBaseOrientation());
 			}
 			
 			@Override
 			public void afterTransform(){
 				super.afterTransform();	
-				proj.getObjectAs(IOrientable.class).ifPresent(o -> o.reapplyOrientation());
+				proj.getTrait(IOrientable.class).ifPresent(o -> o.reapplyOrientation());
 			}
 		}
 		;

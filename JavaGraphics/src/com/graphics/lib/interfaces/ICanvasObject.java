@@ -189,4 +189,6 @@ public interface ICanvasObject {
 
     Set<ITrait> getTraits();
 
+	boolean is(ICanvasObject obj);
+
 }

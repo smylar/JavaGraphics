@@ -1,4 +1,4 @@
-package com.graphics.lib.canvas;
+package com.graphics.lib.traits;
 
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IOrientable;
@@ -13,20 +13,11 @@ import com.graphics.lib.orientation.OrientationTransform;
  *
  * @param <T> Type of the CanvasObject being wrapped
  */
-public class OrientableCanvasObject extends CanvasObject implements IOrientable {
+public class OrientableTrait implements IOrientable {
 	public static final String ORIENTATION_TAG = "Orientation";
 	private IOrientation orientation;
 	private OrientationTransform oTrans = new OrientationTransform();
-	
-	public OrientableCanvasObject()
-	{
-		super();
-	}
-	
-	public OrientableCanvasObject(ICanvasObject obj)
-	{
-		super(obj);
-	}
+	protected ICanvasObject parent;
 	
 	
 	@Override
@@ -35,34 +26,43 @@ public class OrientableCanvasObject extends CanvasObject implements IOrientable 
 	}
 
 	@Override
-	public void setOrientation(IOrientation orientation) {
+	public IOrientable setOrientation(IOrientation orientation) {
 		if (this.orientation != null){
-			this.getVertexList().removeIf(v -> v.hasTag(ORIENTATION_TAG));
+			parent.getVertexList().removeIf(v -> v.hasTag(ORIENTATION_TAG));
 		}
 		
 		this.orientation = orientation;
 		if (this.orientation != null){
-			this.getVertexList().addAll(this.orientation.getRepresentation().getVertexList());
+			parent.getVertexList().addAll(this.orientation.getRepresentation().getVertexList());
 		}
+		return this;
 	}
 	
 	/**
 	 * Revert object to the orientation it started in
 	 */
 	@Override
-	public void toBaseOrientation(){
+	public IOrientable toBaseOrientation(){
 		oTrans.saveCurrentTransforms(orientation);
-		oTrans.removeRotation(this);
+		oTrans.removeRotation(parent);
+		return this;
 	}
 	
 	@Override
-	public void reapplyOrientation(){
-		oTrans.addRotation(this);
+	public IOrientable reapplyOrientation(){
+		oTrans.addRotation(parent);
+		return this;
 	}
 	
 	@Override
-	public void applyOrientation(OrientationTransform oTrans){
-		oTrans.addRotation(this);
+	public IOrientable applyOrientation(OrientationTransform oTrans){
+		oTrans.addRotation(parent);
+		return this;
+	}
+
+	@Override
+	public void setParent(ICanvasObject parent) {
+		this.parent = parent;
 	}
 
 }

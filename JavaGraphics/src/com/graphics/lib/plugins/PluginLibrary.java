@@ -144,11 +144,11 @@ public class PluginLibrary {
 			ICanvasObject inCollision = (ICanvasObject)obj.executePlugin(IN_COLLISION); //may need to be a list - may hit more than one!
 			
 			for (ICanvasObject impactee : objects.get()){
-				if (impactee == obj) continue;
+				if (impactee.is(obj)) continue;
 			
 				if (obj.getVertexList().stream().anyMatch(p -> impactee.getFunctions().isPointInside(impactee, p)))
 				{
-					if (inCollision == impactee) { return null;}
+					if (impactee.is(inCollision)) { return null;}
 					if (impactorPlugin != null) obj.executePlugin(impactorPlugin);
 					if (impacteePlugin != null){
 						impactee.getObjectAs(IPlugable.class).ifPresent(impacteePlugable -> impacteePlugable.executePlugin(impacteePlugin));
@@ -156,7 +156,7 @@ public class PluginLibrary {
 
 					obj.registerPlugin(IN_COLLISION, o -> impactee, false);
 					return impactee;
-				}else if (inCollision == impactee){
+				}else if (impactee.is(inCollision)){
 					obj.removePlugin(IN_COLLISION);
 				}
 			}
@@ -182,7 +182,7 @@ public class PluginLibrary {
 			}
 			
 			for (ICanvasObject impactee : objects.get()){
-				if (impactee == obj) continue;
+				if (impactee.is(obj)) continue;
 				//Tries to factor in possibility object was drawn completely on the other side of an object (after moving) and thus not detected as a collision by point inside check
 				for(Point p : obj.getVertexList()){
 					Point prevPoint = new Point(p);
@@ -194,7 +194,7 @@ public class PluginLibrary {
 					{
 						Point in = f.getIntersectionPointWithFacetPlane(prevPoint, prevPoint.vectorToPoint(p).getUnitVector(), false);
 						if (f.isPointWithin(in) && prevPoint.distanceTo(in) <= prevPoint.distanceTo(p)){
-							if (inCollision == impactee) { return null;}
+							if (impactee.is(inCollision)) { return null;}
 							if (impactorPlugin != null) obj.executePlugin(impactorPlugin);
 							if (impacteePlugin != null){
 								impactee.getObjectAs(IPlugable.class).ifPresent(impacteePlugable -> impacteePlugable.executePlugin(impacteePlugin));
@@ -205,7 +205,7 @@ public class PluginLibrary {
 						}
 					}
 				}
-				if (inCollision == impactee){
+				if (impactee.is(inCollision)){
 					obj.removePlugin(IN_COLLISION);
 				} //is slow if lots of objects using this method, might split so things like explosion fragments use the simpler point is inside method
 				

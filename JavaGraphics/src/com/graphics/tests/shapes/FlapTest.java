@@ -5,19 +5,21 @@ import java.util.List;
 
 import com.graphics.lib.Axis;
 import com.graphics.lib.WorldCoord;
-import com.graphics.lib.canvas.AnimatedCanvasObject;
+import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.orientation.SimpleOrientation;
 import com.graphics.lib.skeleton.PivotDetail;
 import com.graphics.lib.skeleton.PivotSkeletonNode;
 import com.graphics.lib.skeleton.SkeletonNode;
+import com.graphics.lib.traits.AnimatedTrait;
 
-public class FlapTest extends AnimatedCanvasObject {
+public class FlapTest extends CanvasObject {
 	private String tipAnimation = "";
 	
 	public FlapTest(){
 		super(new Bird());
 		
-		this.setOrientation(new SimpleOrientation(ORIENTATION_TAG));
+		AnimatedTrait animatable = addTrait(new AnimatedTrait());
+		animatable.setOrientation(new SimpleOrientation(AnimatedTrait.ORIENTATION_TAG));
 		
 		SkeletonNode rootNode = new SkeletonNode();
 		rootNode.setPosition(new WorldCoord(0, 0, 30));
@@ -126,7 +128,7 @@ public class FlapTest extends AnimatedCanvasObject {
 			return p;
 		});
 		
-		this.setSkeletonRootNode(rootNode);
-		this.startAnimation("FLAP");
+		animatable.setSkeletonRootNode(rootNode);
+		animatable.startAnimation("FLAP");
 	}
 }

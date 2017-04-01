@@ -14,7 +14,7 @@ public class TraitInterceptor implements InvocationHandler {
         this.proxiedObject = proxiedObject;
     }
     
-    public static ICanvasObject intercept (ICanvasObject target) {        
+    public static ICanvasObject intercept (ICanvasObject target) {    
         return (ICanvasObject) Proxy.newProxyInstance(ICanvasObject.class.getClassLoader(),
                                 new Class[] { ICanvasObject.class },
                                 new TraitInterceptor(target));
@@ -22,9 +22,8 @@ public class TraitInterceptor implements InvocationHandler {
     
     
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        Object results = method.invoke(proxiedObject, args);
-        
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {    	
+        Object results = method.invoke(proxiedObject, args);      
         
         proxiedObject.getTraits().stream().filter(trait -> trait.getInterceptors().containsKey(method.getName().toLowerCase()))
                                           .forEach(trait -> invokeTrait(trait, trait.getInterceptors().get(method.getName().toLowerCase()), args));

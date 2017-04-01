@@ -13,7 +13,6 @@ import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.CanvasObjectFunctions;
-import com.graphics.lib.canvas.OrientableCanvasObject;
 import com.graphics.lib.canvas.PlugableCanvasObject;
 import com.graphics.lib.interfaces.IEffector;
 import com.graphics.lib.plugins.Events;
@@ -22,7 +21,7 @@ import com.graphics.lib.transform.RepeatingTransform;
 import com.graphics.lib.transform.Rotation;
 import com.graphics.lib.transform.Transform;
 
-public class Ship extends OrientableCanvasObject {
+public class Ship extends CanvasObject {
 	
 	private Facet wingFlashLeft;
 	private Facet wingFlashRight;
