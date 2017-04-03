@@ -12,24 +12,14 @@ import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.camera.Camera;
-import com.graphics.lib.canvas.BaseData;
-import com.graphics.lib.canvas.CanvasObjectFunctionsImpl;
 import com.graphics.lib.transform.Transform;
 
 /**
- * Currently a straight extract from CanvasObject, not all of these will be needed here, will cut down evetually
+ * Currently a straight extract from CanvasObject, not all of these will be needed here.
  * @author paul
  *
  */
 public interface ICanvasObject {
-
-	/**
-	 * Get this object as the given class as long as that class is found in the wrapped object hierarchy
-	 * 
-	 * @param cl - The class to look for
-	 * @return A canvas object as the given type or null if it cannot be found
-	 */
-	<C extends ICanvasObject> Optional<C> getObjectAs(Class<C> cl);
 
 	String getObjectTag();
 
@@ -135,7 +125,7 @@ public interface ICanvasObject {
 
 	void afterTransforms();
 
-	void beforeTransforms();
+	default void beforeTransforms(){ };
 
 	/**
 	 * Describes how to generate a normal vector for a Vertex 
@@ -172,23 +162,21 @@ public interface ICanvasObject {
 	void setLightIntensityFinder(ILightIntensityFinder liFinder);
 
 	void setBaseIntensity(double intensity);
-
-	CanvasObjectFunctionsImpl getFunctions();
 	
 	void addObserver(Observer o);
-
-    BaseData getData();
 
     void addFlag(String flag);
 
     void removeFlag(String flag);
-
-	void doNotify(Object arg);
 
     <T extends ITrait> Optional<T> getTrait(Class<T> cl);
 
     Set<ITrait> getTraits();
 
 	boolean is(ICanvasObject obj);
+
+	<T extends ITrait> T addTrait(T trait);
+
+    <C extends ICanvasObject> Optional<C> getObjectAs(Class<C> target);
 
 }

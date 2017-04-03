@@ -14,7 +14,8 @@ public class TrackingTrait implements ITracker  {
 	public static final String TRACKING_TAG = "tracking_tag";
 	
 	static {
-	    try{
+	    try {
+	        //could make this attribute based, can then ensure correct spellings for the target and lowercase for the key
 	        interceptors.put("setdeleted", TrackingTrait.class.getMethod("setDeleted", boolean.class));
 	        interceptors.put("ondrawcomplete", TrackingTrait.class.getMethod("onDrawComplete"));
 	    } catch (Exception ex) {

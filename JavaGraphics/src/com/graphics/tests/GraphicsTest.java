@@ -42,7 +42,6 @@ import com.graphics.lib.camera.ViewAngleCamera;
 import com.graphics.lib.canvas.Canvas3D;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.CanvasObjectFunctions;
-import com.graphics.lib.canvas.PlugableCanvasObject;
 import com.graphics.lib.canvas.SlaveCanvas3D;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IOrientable;
@@ -58,6 +57,7 @@ import com.graphics.lib.shader.ShaderFactory;
 import com.graphics.lib.texture.BmpTexture;
 import com.graphics.lib.texture.OvoidTextureMapper;
 import com.graphics.lib.traits.OrientableTrait;
+import com.graphics.lib.traits.PlugableTrait;
 import com.graphics.lib.traits.TexturableTrait;
 import com.graphics.lib.transform.*;
 import com.graphics.lib.zbuffer.ZBuffer;
@@ -144,10 +144,13 @@ public class GraphicsTest extends JFrame {
 		slave.setSize(300, 300);
 		slave.setLocation(750, 50);
 		
+		IPlugin<IPlugable, Void> explode = TestUtils.getExplodePlugin(clipLibrary);
+		
 		CanvasObject camcube = new Cuboid(20,20,20);
 		cnv.registerObject(camcube, new Point(1560, 200, 350), ShaderFactory.FLAT);
 		
-		PlugableCanvasObject whale = new PlugableCanvasObject(new Whale()); 
+		Whale whale = new Whale(); 
+		whale.addTrait(new PlugableTrait()).registerPlugin(Events.EXPLODE, explode, false);
 		whale.setColour(Color.cyan);
 		cnv.registerObject(whale, new Point(1515, 300, 400), ShaderFactory.GORAUD);
 		
@@ -166,7 +169,6 @@ public class GraphicsTest extends JFrame {
 		cnv.addObserver(scnv);
 		this.setVisible(true);
 		
-		IPlugin<IPlugable, Void> explode = TestUtils.getExplodePlugin(clipLibrary);
 		
 		IPointFinder leftOffset = () -> {
 			Point pos = new Point(cam.getPosition());
@@ -245,7 +247,8 @@ public class GraphicsTest extends JFrame {
 		ship.applyTransform(Axis.Y.getRotation(180));
 		cnv.registerObject(ship, new Point(350, 350, -50), ShaderFactory.GORAUD);
 
-		PlugableCanvasObject torus = new PlugableCanvasObject(new Gate(50,50,20, () -> {return cam.getPosition();} ));
+		Gate torus = new Gate(50,50,20, () -> {return cam.getPosition();} );
+		torus.addTrait(new PlugableTrait()).registerPlugin(Events.EXPLODE, explode, false);
 		torus.setColour(new Color(250, 250, 250));
 		//torus.setLightIntensityFinder(Utils.getShadowLightIntensityFinder(() -> { return cnv.getShapes();})); //for testing shadows falling on the torus
 		cnv.registerObject(torus, new Point(200,200,450), ShaderFactory.GORAUD);
@@ -257,14 +260,13 @@ public class GraphicsTest extends JFrame {
 		torus.addFlag(Events.EXPLODE_PERSIST);
 		//torus.setCastsShadow(false);
 		
-		torus.getObjectAs(Gate.class).ifPresent(t -> {
-			t.setPassThroughPlugin((obj) -> {
-				obj.setColour(Color.magenta);
-				return null;
-			});
+		torus.setPassThroughPlugin((obj) -> {
+			obj.setColour(Color.magenta);
+			return null;
 		});
 		
-		PlugableCanvasObject cube = new PlugableCanvasObject(new TexturedCuboid(200,200,200));
+		TexturedCuboid cube = new TexturedCuboid(200,200,200);
+		cube.addTrait(new PlugableTrait());
 		cnv.registerObject(cube, new Point(500,500,500), ShaderFactory.TEXGORAUD);
 		Transform cubet2 = new RepeatingTransform<Rotation>(Axis.Z.getRotation(3), 30);
 		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(cube, cubet2);
@@ -277,20 +279,18 @@ public class GraphicsTest extends JFrame {
 		
 		Sphere ball = new Sphere(100,15);
 		ball.addTrait(new TexturableTrait()).addTexture(new BmpTexture("smily")).mapTexture(new OvoidTextureMapper());
-		PlugableCanvasObject sphere = new PlugableCanvasObject(ball);
-		sphere.setColour(new Color(255, 255, 0));
-		sphere.addFlag(Events.EXPLODE_PERSIST);
-		cnv.registerObject(sphere, new Point(500,200,450), ShaderFactory.TEXGORAUD);
+		ball.addTrait(new PlugableTrait()).registerPlugin(Events.EXPLODE, explode, false);
+		ball.setColour(new Color(255, 255, 0));
+		ball.addFlag(Events.EXPLODE_PERSIST);
+		cnv.registerObject(ball, new Point(500,200,450), ShaderFactory.TEXGORAUD);
 		
-		sphere.getObjectAs(Sphere.class).ifPresent(s -> {
-			for (int i = 0; i < sphere.getFacetList().size() ; i++)
+		for (int i = 0; i < ball.getFacetList().size() ; i++)
+		{
+			if (i % (ball.getPointsPerCircle()/3) == 1 || i % (ball.getPointsPerCircle()/3) == 0)
 			{
-				if (i % (s.getPointsPerCircle()/3) == 1 || i % (s.getPointsPerCircle()/3) == 0)
-				{
-					sphere.getFacetList().get(i).setColour(new Color(150,0,150));
-				}
+			    ball.getFacetList().get(i).setColour(new Color(150,0,150));
 			}
-		});
+		}
 		
 		
 		Wall wall = new Wall(40,40);
@@ -298,8 +298,6 @@ public class GraphicsTest extends JFrame {
 		wall.setLightIntensityFinder(Utils.getShadowLightIntensityFinder(() -> { return cnv.getShapes();}));
 		wall.setVisible(false);
 		cnv.registerObject(wall, new Point(350,350,700), ShaderFactory.GORAUD);		
-		
-		whale.registerPlugin(Events.EXPLODE, explode, false);
 		
 		ScaleTransform st = new ScaleTransform(0.95);
 		RepeatingTransform<ScaleTransform> rpt = new RepeatingTransform<ScaleTransform>(st,15){
@@ -311,7 +309,7 @@ public class GraphicsTest extends JFrame {
 		rpt.setResetAfterComplete(true);
 		RepeatingTransform<?> spheret = new RepeatingTransform<RepeatingTransform<?>>(rpt,30);
 			
-		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(sphere, spheret);
+		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(ball, spheret);
 		
 		//CameraTiedLightSource l4 = new CameraTiedLightSource(cam.getPosition().x, cam.getPosition().y, cam.getPosition().z);
 		//l4.tieTo(cam);
@@ -321,9 +319,6 @@ public class GraphicsTest extends JFrame {
 		l4.setLightConeAngle(45);
 		l4.setColour(new Color(255, 255, 255));
 		cnv.addLightSource(l4);
-		
-		sphere.registerPlugin(Events.EXPLODE, explode, false);
-		torus.registerPlugin(Events.EXPLODE, explode, false);
 		
 		try {
 			this.addKeyListener(new ShipControls(ship));
@@ -338,14 +333,13 @@ public class GraphicsTest extends JFrame {
 				if (key.getKeyChar() == 'l') l4.toggle();
 				
 				else if (key.getKeyChar() == 'y'){
-					PlugableCanvasObject movingTarget = new PlugableCanvasObject(new Cuboid(20,20,20));
-					//CanvasObject movingTarget = new Cuboid(20,20,20);
+				    Cuboid movingTarget = new Cuboid(20,20,20);
 					MovementTransform move = new MovementTransform(new Vector(1,1,0).getUnitVector(), 4);
 					move.moveUntil(t -> t.getDistanceMoved() > 5000);
 					movingTarget.addTransform(move);
 					movingTarget.setCastsShadow(false);
 					movingTarget.deleteAfterTransforms();
-					movingTarget.registerPlugin(Events.EXPLODE, explode, false);
+					movingTarget.addTrait(new PlugableTrait()).registerPlugin(Events.EXPLODE, explode, false);
 					cnv.registerObject(movingTarget , new Point(0, 0, 0), ShaderFactory.FLAT);
 				}
 				

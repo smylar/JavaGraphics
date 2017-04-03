@@ -15,7 +15,7 @@ public abstract class TextureMapper<T extends ICanvasObject> {
 	}
 	
 	public final void map(ICanvasObject obj, Map<WorldCoord, Point> textureMap, Texture texture) {
-		obj.getObjectAs(clazz).ifPresent(o -> mapImpl(o, textureMap, texture));
+	    obj.getObjectAs(clazz).ifPresent(o -> mapImpl(o, textureMap, texture));
 	}
 	
 	protected abstract void mapImpl(T obj, Map<WorldCoord, Point> textureMap, Texture texture);

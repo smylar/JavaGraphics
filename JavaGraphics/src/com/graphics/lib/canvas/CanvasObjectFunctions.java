@@ -1,6 +1,5 @@
 package com.graphics.lib.canvas;
 
-
 public enum CanvasObjectFunctions {
 	DEFAULT(new CanvasObjectFunctionsImpl()),
 	TORUS(new TorusFunctionsImpl()),

@@ -5,18 +5,17 @@ import java.util.List;
 
 import com.graphics.lib.Axis;
 import com.graphics.lib.WorldCoord;
-import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.orientation.SimpleOrientation;
 import com.graphics.lib.skeleton.PivotDetail;
 import com.graphics.lib.skeleton.PivotSkeletonNode;
 import com.graphics.lib.skeleton.SkeletonNode;
 import com.graphics.lib.traits.AnimatedTrait;
 
-public class FlapTest extends CanvasObject {
+public class FlapTest extends Bird {
 	private String tipAnimation = "";
 	
 	public FlapTest(){
-		super(new Bird());
+		super();
 		
 		AnimatedTrait animatable = addTrait(new AnimatedTrait());
 		animatable.setOrientation(new SimpleOrientation(AnimatedTrait.ORIENTATION_TAG));

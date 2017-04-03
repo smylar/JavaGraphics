@@ -10,6 +10,7 @@ import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.CanvasObjectFunctions;
+import com.graphics.lib.canvas.FunctionHandler;
 import com.graphics.lib.interfaces.IVertexNormalFinder;
 import com.graphics.lib.transform.Translation;
 
@@ -25,9 +26,11 @@ public class Torus extends CanvasObject{
 	public Torus (double tubeRadius, double holeRadius, int arcProgression)
 	{
 	    super();
-		this.setFunctions(CanvasObjectFunctions.TORUS.get());
-		List<Point> circle = new ArrayList<Point>();
-		if (360 % arcProgression != 0) arcProgression = 18;
+	    FunctionHandler.register(this, CanvasObjectFunctions.TORUS);
+		List<Point> circle = new ArrayList<>();
+		if (360 % arcProgression != 0) {
+		    arcProgression = 18;
+		}
 		int points = 360/arcProgression;
 		Point circleCentre = new Point(tubeRadius,holeRadius+(tubeRadius*2),tubeRadius);
 		
@@ -41,7 +44,7 @@ public class Torus extends CanvasObject{
 		//note, this is a clockwise circle
 		//now move circle in a circle in y plane around centre point of torus
 		
-		List<WorldCoord> circleCentres = new ArrayList<WorldCoord>();
+		List<WorldCoord> circleCentres = new ArrayList<>();
 		for (int i = 0 ; i < points ; i++){
 			double angle = Math.toRadians(i*arcProgression);
 			for (Point p : circle)

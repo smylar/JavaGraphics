@@ -9,6 +9,7 @@ import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.CanvasObjectFunctionsImpl;
+import com.graphics.lib.canvas.FunctionHandler;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.orientation.SimpleOrientation;
 import com.graphics.lib.skeleton.PivotSkeletonNode;
@@ -22,7 +23,7 @@ public class Whale extends CanvasObject {
 	
 	public Whale(){
 	    super();
-		this.setFunctions(getFunctionsImpl());
+	    FunctionHandler.register(this, getFunctionsImpl());
 		
 		this.getVertexList().add(new WorldCoord(62, 40, 0));
 		this.getVertexList().add(new WorldCoord(98, 40, 0));

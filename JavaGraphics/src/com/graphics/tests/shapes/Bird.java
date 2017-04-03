@@ -5,12 +5,13 @@ import com.graphics.lib.Point;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.CanvasObjectFunctionsImpl;
+import com.graphics.lib.canvas.FunctionHandler;
 import com.graphics.lib.interfaces.ICanvasObject;
 
 public class Bird extends CanvasObject {
 	public Bird() {
 	    super();
-		this.setFunctions(getFunctionsImpl());
+	    FunctionHandler.register(this, getFunctionsImpl());
 		
 		this.getVertexList().add(new WorldCoord(0, 0, 0));
 		this.getVertexList().add(new WorldCoord(0, 0, 60));

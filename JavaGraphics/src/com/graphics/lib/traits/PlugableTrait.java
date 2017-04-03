@@ -1,5 +1,6 @@
-package com.graphics.lib.canvas;
+package com.graphics.lib.traits;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,20 +18,21 @@ import com.graphics.lib.plugins.IPlugin;
  *
  * @param <T> Type of the CanvasObject being wrapped
  */
-public class PlugableCanvasObject extends CanvasObject implements IPlugable {
+public class PlugableTrait implements IPlugable {
+    private static final Map<String, Method> interceptors = new HashMap<>();
 	private Map<String,IPlugin<IPlugable,?>> plugins = new HashMap<>();
 	private List<String> afterDrawPlugins = new ArrayList<>();
 	private List<String> singleAfterDrawPlugins = new ArrayList<>();
+	private ICanvasObject parent;
+	    
+    static {
+        try {
+            interceptors.put("ondrawcomplete", PlugableTrait.class.getMethod("onDrawComplete"));
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
 	
-	public PlugableCanvasObject() {
-		super();
-	}
-	
-	public PlugableCanvasObject(ICanvasObject obj) {
-		super(obj);
-	}
-
-	@Override
 	public void onDrawComplete()
 	{	
 		List<String> pluginList = new ArrayList<>(this.afterDrawPlugins);
@@ -45,23 +47,25 @@ public class PlugableCanvasObject extends CanvasObject implements IPlugable {
 			this.executePlugin(key);
 		}
 		this.singleAfterDrawPlugins.clear();
-		super.onDrawComplete();
 	}
 	
 	@Override
-	public void registerSingleAfterDrawPlugin(String key, IPlugin<IPlugable,?> plugin)
+	public IPlugable registerSingleAfterDrawPlugin(String key, IPlugin<IPlugable,?> plugin)
 	{
 		plugins.put(key, plugin);
 		singleAfterDrawPlugins.add(key);
+		return this;
 	}
 	
 	@Override
-	public void registerPlugin(String key, IPlugin<IPlugable,?> plugin, boolean doAfterDraw)
+	public IPlugable registerPlugin(String key, IPlugin<IPlugable,?> plugin, boolean doAfterDraw)
 	{
 		plugins.put(key, plugin);
 		if (doAfterDraw) {
 		    afterDrawPlugins.add(key);
 		}
+		
+		return this;
 	}
 	
 	@Override
@@ -83,10 +87,25 @@ public class PlugableCanvasObject extends CanvasObject implements IPlugable {
 	@Override
 	public Object executePlugin(String key)
 	{
-		if (this.plugins.containsKey(key) && !this.isDeleted())
+		if (this.plugins.containsKey(key) && !parent.isDeleted())
 		{
 			return this.plugins.get(key).execute(this);
 		}
 		return null;
 	}
+
+    @Override
+    public void setParent(ICanvasObject parent) {
+        this.parent = parent;
+    }
+
+    @Override
+    public ICanvasObject getParent() {
+        return this.parent;
+    }
+    
+    @Override
+    public Map<String, Method> getInterceptors() {
+        return interceptors;
+    }
 }

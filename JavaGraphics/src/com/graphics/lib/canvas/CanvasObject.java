@@ -2,7 +2,9 @@ package com.graphics.lib.canvas;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
@@ -13,8 +15,10 @@ import java.util.stream.Collectors;
 
 import com.graphics.lib.Facet;
 import com.graphics.lib.GeneralPredicates;
+import com.graphics.lib.LightIntensityFinderEnum;
 import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
+import com.graphics.lib.VertexNormalFinderEnum;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.collectors.CentreFinder;
@@ -45,228 +49,169 @@ import com.graphics.lib.transform.Transform;
 public class CanvasObject extends Observable implements ICanvasObject{
 	private static int nextId = 0;
 	
-	private BaseData data;
-	//private Set<ITrait> traits = new HashSet<>(); moving to BaseData, should move back here once all object wrappers converted to traits
+	private List<WorldCoord> vertexList = new ArrayList<>();
+    private List<Facet> facetList = new ArrayList<>();
+    private Color colour = new Color(255, 0, 0);
+    private List<Transform> transforms = Collections.synchronizedList(new ArrayList<>());
+    private Set<ICanvasObject> children = Collections.synchronizedSet(new HashSet<ICanvasObject>());
+    private Map<Point, ArrayList<Facet>> vertexFacetMap;
+    private boolean processBackfaces = false;
+    private boolean isVisible = true;
+    private boolean isDeleted = false;
+    private boolean castsShadow = true;
+    private boolean deleteAfterTransforms = false;
+    private Optional<Point> anchorPoint = Optional.empty();
+    private Set<String> flags = new HashSet<>();
+    private ILightIntensityFinder liFinder = LightIntensityFinderEnum.DEFAULT.get();    
+    private IVertexNormalFinder vnFinder = VertexNormalFinderEnum.DEFAULT.get();
+    
+	private Set<ITrait> traits = new HashSet<>(); //may move traits completely external of canvas object, possibly others too like functions
 	private int objectId = nextId++;
-	protected Optional<ICanvasObject> wrappedObject = Optional.empty();
-	
-	
-	public CanvasObject()
-	{
-		setData(getData());
-	}
-	
-	public CanvasObject(ICanvasObject obj)
-	{
-		setWrappedObject(obj);
-	}
 	
 	@Override
 	public final Set<ITrait> getTraits() {
-	    return getData().getTraits();
+	    return traits;
 	}
 	
-	public <T extends ITrait> T addTrait(T trait) {
+	@Override
+	public final <T extends ITrait> T addTrait(T trait) {
         trait.setParent(this);
-        //traits.add(instance);
-        getData().getTraits().add(trait);
+        traits.add(trait);
         return trait;
 
 	}
 	
 	@Override
 	public final <T extends ITrait> Optional<T> getTrait(Class<T> trait) {
-	    return getData().getTraits().stream().filter(t -> trait.isAssignableFrom(t.getClass())).map(trait::cast).findFirst();
-	}
-	
-	/**
-	 * Get this object as the given class as long as that class is found in the wrapped object hierarchy
-	 * 
-	 * @param cl - The class to look for
-	 * @return A canvas object as the given type or null if it cannot be found
-	 */
-	@Override
-	public final <C extends ICanvasObject> Optional<C> getObjectAs(Class<C> cl)
-	{		
-	    //TO go once all wrappers converted to traits
-		if (cl.isAssignableFrom(this.getClass())){
-			return Optional.of(cl.cast(this));
-		}else{
-			if (wrappedObject.isPresent()) {
-				return wrappedObject.get().getObjectAs(cl);
-			}
-			
-			return Optional.empty(); //may prefer to throw exception?
-		}
-	}
-	
-	protected final void setWrappedObject(ICanvasObject obj){
-		wrappedObject = Optional.ofNullable(obj);
-		wrappedObject.ifPresent(o -> this.setData(o.getData()));
-	}
-	
-	
-	protected final void setFunctions(CanvasObjectFunctionsImpl functions) {
-		this.getData().setFunctions(functions);
-	}
-	
-	@Override
-	public final CanvasObjectFunctionsImpl getFunctions() {
-		return this.getData().getFunctions();
-	}
-	
-	/**
-	 * All data members are held within the BaseData class for easy sharing with wrappers.
-	 * <br/>
-	 * This method returns that data
-	 * 
-	 * @see BaseData
-	 * 
-	 * @return The data for the root canvas object
-	 */
-	@Override
-	public final BaseData getData()
-	{
-		if (data == null)
-			data = new BaseData("obj" + objectId);
-		return data;
+	    return traits.stream().filter(t -> trait.isAssignableFrom(t.getClass())).map(trait::cast).findFirst();
 	}
 	
 	@Override
 	public final boolean is(ICanvasObject obj) {
-		return obj == null ? false : getData() == obj.getData();
-	}
-	
-	/**
-	 * Set the data for the root canvas object
-	 * 
-	 * @param data - BaseData object containing the data for this object
-	 */
-	protected final void setData(BaseData data)
-	{
-		this.data = data;
+	    //need to do this because of the use of proxies, == may not always work
+		return obj == null ? false : getObjectTag().equals(obj.getObjectTag());
 	}
 
 	@Override
+	public <C extends ICanvasObject> Optional<C> getObjectAs(Class<C> target) {
+        return target.isAssignableFrom(this.getClass()) ? Optional.of(target.cast(this)) : Optional.empty();
+    }
+	
+	@Override
 	public final String getObjectTag(){
-		return getData().getObjTag();
+		return "object"+objectId;
 	}
 	
 	@Override
 	public final void setAnchorPoint(Point p)
 	{
-		this.getData().setAnchorPoint(p);
+		this.anchorPoint = Optional.ofNullable(p);
 	}
 	
 	@Override
 	public Point getAnchorPoint(){
-		return this.getData().getAnchorPoint()== null ? this.getCentre() : this.getData().getAnchorPoint();
+	    return this.anchorPoint.orElse(getCentre());
 	}
 	
 	@Override
 	public final void addFlag(String flag)
 	{
-		getData().getFlags().add(flag);
+		this.flags.add(flag);
 	}
 	
 	@Override
 	public final void removeFlag(String flag)
 	{
-		getData().getFlags().remove(flag);
+	    this.flags.remove(flag);
 	}
 	
 	@Override
 	public final boolean hasFlag(String flag)
 	{
-		return getData().getFlags().contains(flag);
+		return this.flags.contains(flag);
 	}
 	
 	@Override
 	public final Set<ICanvasObject> getChildren() {
-		return getData().getChildren();
+		return this.children;
 	}
 
 	@Override
 	public final boolean isVisible() {
-		return getData().isVisible();
+		return this.isVisible;
 	}
 
 	@Override
 	public final void setVisible(boolean isVisible) {
-		getData().setVisible(isVisible);
+		this.isVisible = isVisible;
 		doNotify();
 	}
 
 	@Override
 	public final boolean isDeleted() {
-		return getData().isDeleted();
+		return this.isDeleted;
 	}
 
 	@Override
 	public void setDeleted(boolean isDeleted) {
-		getData().setDeleted(isDeleted);
-		wrappedObject.ifPresent(w -> {
-			w.setDeleted(isDeleted); 
-		});
-		
-		this.setChanged();
-		this.notifyObservers();
+		this.isDeleted = isDeleted;
+		this.doNotify();
 	}
 
 	@Override
 	public final boolean getCastsShadow() {
-		return getData().isCastsShadow();
+		return this.castsShadow;
 	}
 
 	public final void setCastsShadow(boolean castsShadow) {
-		getData().setCastsShadow(castsShadow);
+		this.castsShadow = castsShadow;
 	}
 	
 	@Override
 	public final Color getColour() {
-		return getData().getColour();
+		return this.colour;
 	}
 
 	@Override
 	public final void setColour(Color colour) {
-		getData().setColour(colour);
+		this.colour = colour;
 	}
 	
 	@Override
 	public final List<WorldCoord> getVertexList() {
-		return getData().getVertexList();
+		return this.vertexList;
 	}
 
 	@Override
 	public final void setVertexList(List<WorldCoord> vertexList) {
-		getData().setVertexList(vertexList);
+		this.vertexList = vertexList;
 	}
 
 	@Override
 	public final List<Facet> getFacetList() {
-		return getData().getFacetList();
+		return this.facetList;
 	}
 
 	@Override
 	public final void setFacetList(List<Facet> facetList) {
-		getData().setFacetList(facetList);
+		this.facetList = facetList;
 	}
 	
 	@Override
 	public final boolean isProcessBackfaces() {
-		return getData().isProcessBackfaces();
+		return this.processBackfaces;
 	}
 
 	@Override
 	public final void setProcessBackfaces(boolean processBackfaces) {
-		getData().setProcessBackfaces(processBackfaces);
+		this.processBackfaces = processBackfaces;
 	}
 
 	@Override
 	public final void cancelTransforms()
 	{
-		synchronized(getData().getTransforms()) {
-			getData().getTransforms().forEach(Transform::cancel);
+		synchronized(this.transforms) {
+			this.transforms.forEach(Transform::cancel);
 		}
 	}
 	
@@ -276,14 +221,14 @@ public class CanvasObject extends Observable implements ICanvasObject{
 		if (key == null) {
 		    return;
 		}
-		synchronized(getData().getTransforms()) {
-			getData().getTransforms().stream().filter(t -> key.equals(t.getName())).forEach(Transform::cancel);
+		synchronized(this.transforms) {
+			this.transforms.stream().filter(t -> key.equals(t.getName())).forEach(Transform::cancel);
 		}
 	}
 	
 	@Override
 	public final Map<Point, ArrayList<Facet>> getVertexFacetMap() {
-		return getData().getVertexFacetMap();
+		return this.vertexFacetMap;
 	}
 
 	/**
@@ -297,8 +242,8 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	@Override
 	public final <T> List<T> getTransformsOfType(Class<T> type)
 	{
-		synchronized(getData().getTransforms()) {
-			return getData().getTransforms().stream().filter(t -> type.isAssignableFrom(t.getClass())).collect(Collector.of(
+		synchronized(this.transforms) {
+			return this.transforms.stream().filter(t -> type.isAssignableFrom(t.getClass())).collect(Collector.of(
 													ArrayList::new,
 													(trans, orig) -> trans.add(type.cast(orig)),
 													(left, right) -> {left.addAll(right); return left;},
@@ -310,8 +255,8 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	@Override
 	public final void addTransform(Transform transform)
 	{
-		synchronized(getData().getTransforms()) {
-			getData().getTransforms().add(transform);
+		synchronized(this.transforms) {
+		    this.transforms.add(transform);
 		}
 	}
 	
@@ -323,9 +268,7 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	@Override
 	public final void applyCameraTransform(Transform transform, Camera c)
 	{
-		//synchronized(getData().getVertexList()) {
-			transform.doTransform(getData().getVertexList().stream().map(v -> v.getTransformed(c)).collect(Collectors.toList()));
-		//}
+			transform.doTransform(this.vertexList.stream().map(v -> v.getTransformed(c)).collect(Collectors.toList()));
 	}
 	
 	/**
@@ -337,7 +280,7 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	@Override
 	public final boolean hasTransforms()
 	{
-		return !getData().getTransforms().isEmpty();
+		return !this.transforms.isEmpty();
 	}
 	
 	/**
@@ -351,8 +294,8 @@ public class CanvasObject extends Observable implements ICanvasObject{
 		if (name == null) {
 		    return false;
 		}
-		synchronized(getData().getTransforms()) {
-			return getData().getTransforms().stream().anyMatch(t -> name.equals(t.getName()));
+		synchronized(this.transforms) {
+			return this.transforms.stream().anyMatch(t -> name.equals(t.getName()));
 		}
 	}
 	
@@ -364,11 +307,11 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	 */
 	@Override
 	public final <T extends Transform> Optional<T> getTransform(String key, Class<T> clazz) {
-		synchronized(getData().getTransforms()) {
-			return getData().getTransforms().stream()
-								.filter(t -> t.getName() == key && clazz.isAssignableFrom(t.getClass()))
-								.map(clazz::cast)
-								.findFirst();
+		synchronized(this.transforms) {
+			return this.transforms.stream()
+            						.filter(t -> t.getName() == key && clazz.isAssignableFrom(t.getClass()))
+            						.map(clazz::cast)
+            						.findFirst();
 		}
 	}
 	
@@ -384,7 +327,7 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	{
 		//can be called directly for singular ad-hoc adjustments, without adding to the transform list, 
 		//this should generally only be done on objects that haven't been registered to a canvas yet
-		t.doTransform(getData().getVertexList());
+		t.doTransform(this.vertexList);
 		doNotify(t);
 	}
 	
@@ -397,21 +340,21 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	@Override
 	public final void applyTransforms()
 	{
-		if (getData().getVertexList() == null || getData().getVertexList().isEmpty() || getData().isDeleted()) {
+		if (this.vertexList == null || this.vertexList.isEmpty() || this.isDeleted) {
 		    return;
 		}
 		
-		synchronized(getData().getTransforms()) {
+		synchronized(this.transforms) {
 			this.beforeTransforms();
-			getData().getTransforms().stream().filter(t -> !t.isCancelled()).forEach(this::applyTransform);
+			this.transforms.stream().filter(t -> !t.isCancelled()).forEach(this::applyTransform);
 			
-			getData().getTransforms().removeIf(t -> {
+			this.transforms.removeIf(t -> {
 									t.getDependencyList().removeIf(Transform::isComplete);
 									return t.isComplete() && t.getDependencyList().size() == 0;
 									});
 		}
-		if (getData().getTransforms().isEmpty() && getData().isDeleteAfterTransforms()){
-			if (!getData().getChildren().isEmpty()) {
+		if (this.transforms.isEmpty() && this.deleteAfterTransforms){
+			if (!this.children.isEmpty()) {
 			    this.setVisible(false);
 			}
 			else {
@@ -425,21 +368,11 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	
 	@Override
 	public void afterTransforms(){
-		if (wrappedObject.isPresent()) {
-			wrappedObject.get().afterTransforms(); 
-		} else {
-			synchronized(getData().getChildren()) {
-				this.getChildren().parallelStream().forEach(ICanvasObject::applyTransforms);
-			}
-        }
+		synchronized(this.children) {
+			this.children.parallelStream().forEach(ICanvasObject::applyTransforms);
+		}
 	}
 	
-	@Override
-	public void beforeTransforms(){
-		if (wrappedObject.isPresent()) {
-			wrappedObject.get().beforeTransforms(); 
-		} 
-	}
 	/**
 	 * Describes how to generate a normal vector for a Vertex 
 	 * 
@@ -450,13 +383,13 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	@Override
 	public final IVertexNormalFinder getVertexNormalFinder()
 	{
-		return getData().getVnFinder();
+		return this.vnFinder;
 	}
 	
 	@Override
     public final void setVertexNormalFinder(IVertexNormalFinder finder)
     {
-        getData().setVnFinder(finder);
+        this.vnFinder = finder;
     }
 	
 	/**
@@ -469,12 +402,8 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	@Override
 	public Point getCentre()
 	{
-		if (wrappedObject.isPresent()) {
-		    return wrappedObject.get().getCentre();
-		}
-		
 		//default, average of all un-tagged points
-		CentreFinder centre = getData().getVertexList().stream()
+		CentreFinder centre = this.vertexList.stream()
 				.filter(GeneralPredicates.untagged(this))
 				.collect(CentreFinder::new, CentreFinder::accept, CentreFinder::combine);
 		
@@ -487,73 +416,30 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	@Override
 	public final void deleteAfterTransforms()
 	{
-		getData().setDeleteAfterTransforms(true);
+		this.deleteAfterTransforms = true;
 	}
-	
-	/**
-	 * Observe another object and match its movements, <s>observed item will call update in this item via the Observer/Observable interface when it changes</s>
-	 * <br/>
-	 * Changed to add objects vertex list to the parent, avoids issues such as double counting when reusing a transform
-	 * <br/>
-	 * <br/>
-	 * Note this object will be made a child of that it is observing so that it is always processed after the observed item
-	 * 
-	 * @param o
-	 */
-	/*@Override
-	public final void observeAndMatch (ICanvasObject o){
-	    //TODO separate out observers
-		synchronized(data.getVertexList()){
-			getData().setObserving(o);
-			o.getChildren().add(this);
-			this.getVertexList().forEach(v -> v.addTag(this.getObjectTag()));
-			o.getVertexList().addAll(this.getVertexList());
-		}
-		
-	}
-	
-	@Override
-	public final void stopObserving(){
-		if (getData().getObserving() != null){
-			synchronized(data.getVertexList()) {
-				getData().getObserving().getChildren().remove(this);
-				getData().getObserving().getVertexList().removeIf(v -> v.hasTag(this.getObjectTag()));
-				this.getVertexList().forEach(v -> v.removeTag(this.getObjectTag()));
-				getData().setObserving(null);
-			}
-		}
-	}*/
 	
 	/**
 	 * This method will be executed once all draw operations (across all objects) are complete
 	 */
 	@Override
 	public void onDrawComplete(){
-		
-		if (wrappedObject.isPresent()) {
-			wrappedObject.get().onDrawComplete();
-		}
-		else{
-			//if (this.isDeleted()) {
-			//	this.stopObserving();
-			//}
-			synchronized(data.getChildren()) {
-				this.getChildren().removeIf(ICanvasObject::isDeleted);
-				this.getChildren().parallelStream().forEach(ICanvasObject::onDrawComplete);
-			}
+		synchronized(this.getChildren()) {
+			this.getChildren().removeIf(ICanvasObject::isDeleted);
+			this.getChildren().parallelStream().forEach(ICanvasObject::onDrawComplete);
 		}
 	}
 	
 	@Override
 	public ILightIntensityFinder getLightIntensityFinder()
 	{
-		return getData().getLiFinder();
+		return this.liFinder;
 	}
 	
 	@Override
 	public void setLightIntensityFinder(ILightIntensityFinder liFinder)
 	{
-		getData().setLiFinder(liFinder);
+		this.liFinder = liFinder;
 	}
 	
 	/**
@@ -566,9 +452,9 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	public final void useAveragedNormals(int divergenceLimit)
 	{
 		//create map for getting all the facets attached to a specific vertex
-		getData().setVertexFacetMap(new HashMap<>());
+		this.vertexFacetMap = new HashMap<>();
 		
-		for (Facet f : getData().getFacetList())
+		for (Facet f : this.facetList)
 		{
 			for (WorldCoord w : f.getAsList()){
 				this.addPointFacetToMap(w, f);
@@ -576,19 +462,19 @@ public class CanvasObject extends Observable implements ICanvasObject{
 		}
 
 	 	//remove anything where the facet group is highly divergent (will then use facet normal when shading)
-	 	for (List<Facet> facetList : getData().getVertexFacetMap().values())
+	 	for (List<Facet> fl : this.vertexFacetMap.values())
 	 	{
 	 		boolean isDivergent;
-	 		Vector normal = facetList.get(0).getNormal();
+	 		Vector normal = fl.get(0).getNormal();
 
-	 		isDivergent = facetList.stream().anyMatch(f -> {
+	 		isDivergent = fl.stream().anyMatch(f -> {
 	 			double answer = normal.dotProduct(f.getNormal());
 	 			if (Math.toDegrees(Math.acos(answer)) > divergenceLimit) return true;
 	 			return false;
 	 		});
 	 		
 	 		if (isDivergent) {
-	 		    facetList.clear();
+	 		    fl.clear();
 	 		}
 	 	}
 
@@ -598,25 +484,23 @@ public class CanvasObject extends Observable implements ICanvasObject{
 		doNotify(null);
 	}
 	
-	@Override
 	public void doNotify(Object arg) {
 		this.setChanged();
 		this.notifyObservers(arg);
-		wrappedObject.ifPresent(o -> o.doNotify(arg));
 	}
 	
 	private void addPointFacetToMap(Point p, Facet f)
 	{
-		if (!getData().getVertexFacetMap().containsKey(p)){
-			getData().getVertexFacetMap().put(p, new ArrayList<Facet>());
+		if (!this.vertexFacetMap.containsKey(p)){
+		    this.vertexFacetMap.put(p, new ArrayList<Facet>());
 		}
-		getData().getVertexFacetMap().get(p).add(f);
+		this.vertexFacetMap.get(p).add(f);
 	}
 	
 	@Override
 	public void setBaseIntensity(double intensity)
 	{
-		getData().getFacetList().forEach(f -> f.setBaseIntensity(intensity));
+		this.getFacetList().forEach(f -> f.setBaseIntensity(intensity));
 	}
 
 	@Override

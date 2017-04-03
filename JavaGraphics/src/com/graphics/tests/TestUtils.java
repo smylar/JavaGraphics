@@ -79,10 +79,10 @@ public class TestUtils {
 	{
 		return new IPlugin<IPlugable,Void>(){
 			@Override
-			public Void execute(IPlugable obj) {
-				
+			public Void execute(IPlugable plugable) {
+			    ICanvasObject obj = plugable.getParent();
 				//could be 2 hits at the same time
-				synchronized(obj.getData()) {
+				synchronized(obj) {
 					if (obj.isVisible()) {
 						obj.setVisible(false);
 					} else {
@@ -90,12 +90,12 @@ public class TestUtils {
 					}
 				}
 				
-				PluginLibrary.explode().execute(obj).forEach(c -> {
+				PluginLibrary.explode().execute(plugable).forEach(c -> {
 					Canvas3D.get().replaceShader(obj, ShaderFactory.FLAT);
-					c.registerPlugin(Events.CHECK_COLLISION, getBouncePlugin(), true);
+					c.getTrait(IPlugable.class).ifPresent(p -> p.registerPlugin(Events.CHECK_COLLISION, getBouncePlugin(), true));
 					if (!obj.hasFlag(SILENT_EXPLODE) && clipLibrary != null) clipLibrary.playSound("EXPLODE", -20f);
 				});
-				obj.registerSingleAfterDrawPlugin(Events.FLASH, PluginLibrary.flash(Canvas3D.get().getLightSources()));
+				plugable.registerSingleAfterDrawPlugin(Events.FLASH, PluginLibrary.flash(Canvas3D.get().getLightSources()));
 				return null;
 			}			
 		};
@@ -104,8 +104,9 @@ public class TestUtils {
 	public static IPlugin<IPlugable,Void> getBouncePlugin(){
 		return new IPlugin<IPlugable,Void>(){
 			@Override
-			public Void execute(IPlugable obj) {	
-				ICanvasObject impactee = PluginLibrary.hasCollided(TestUtils.getFilteredObjectList(),null, null).execute(obj);
+			public Void execute(IPlugable plugable) {
+			    ICanvasObject obj = plugable.getParent();
+				ICanvasObject impactee = PluginLibrary.hasCollided(TestUtils.getFilteredObjectList(),null, null).execute(plugable);
 				if (impactee != null){
 					if (impactee.hasFlag(Events.STICKY)){ 
 						obj.cancelTransforms();
@@ -113,7 +114,7 @@ public class TestUtils {
 						//TODO if already a child, object needs to stop being a child of that object, as observe and match also makes this fragment a child of impactee, get weird artifacts with the double processing
 					}
 					else {
-						PluginLibrary.bounce(impactee).execute(obj);
+						PluginLibrary.bounce(impactee).execute(plugable);
 					}
 				}
 				return null;

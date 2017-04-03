@@ -14,6 +14,7 @@ import java.util.stream.Collector;
 import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
+import com.graphics.lib.canvas.FunctionHandler;
 import com.graphics.lib.interfaces.ICanvasObject;
 
 public class NearestIntersectedFacetFinder<T extends ICanvasObject> implements Collector<T, Map<Double, IntersectionData<T>>, Entry<Double, IntersectionData<T>>>{
@@ -32,7 +33,7 @@ public class NearestIntersectedFacetFinder<T extends ICanvasObject> implements C
 	@Override
 	public BiConsumer<Map<Double, IntersectionData<T>>, T> accumulator() {
 		return (acc, elem) -> {
-			Map<Facet,Point> mfp = elem.getFunctions().getIntersectedFacets(elem, p, v);
+			Map<Facet,Point> mfp = FunctionHandler.getFunctions(elem).getIntersectedFacets(elem, p, v);
 			for (Entry<Facet,Point> entry : mfp.entrySet())
 			{
 				double dist = p.distanceTo(entry.getValue());

@@ -15,7 +15,6 @@ import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.Canvas3D;
 import com.graphics.lib.canvas.CanvasObjectFunctions;
-import com.graphics.lib.canvas.PlugableCanvasObject;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IEffector;
 import com.graphics.lib.interfaces.IPointFinder;
@@ -24,6 +23,7 @@ import com.graphics.lib.interfaces.IVectorFinder;
 import com.graphics.lib.orientation.OrientationTransform;
 import com.graphics.lib.plugins.Events;
 import com.graphics.lib.texture.Texture;
+import com.graphics.lib.traits.PlugableTrait;
 import com.graphics.lib.traits.TrackingTrait;
 import com.graphics.lib.transform.Rotation;
 import com.graphics.lib.collectors.NearestIntersectedFacetFinder;
@@ -47,25 +47,25 @@ public class LaserWeapon implements IEffector {
 	
 	@Override
 	public void activate() {
-		if (Canvas3D.get() == null || effectVector == null) return;
+		if (Canvas3D.get() == null || effectVector == null) 
+		    return;
 		
 		LaserEffect lsr = new LaserEffect(range);
 		lsr.setTickLife(this.duration);
-		PlugableCanvasObject laser = new PlugableCanvasObject(lsr);
-		laser.addFlag("PHASED");
+		lsr.addFlag("PHASED");
 		
-		laser.addTrait(new TrackingTrait());
+		lsr.addTrait(new TrackingTrait());
 		
-		laser.registerPlugin("LASER", 
+		lsr.addTrait(new PlugableTrait()).registerPlugin("LASER", 
 				obj -> {
 						if (lsr.getTickLife() <= 0) {
-							laser.setDeleted(true);
+							lsr.setDeleted(true);
 							return null;
 						}
 					
 						lsr.setTickLife(lsr.getTickLife() - 1);
 						Vector v = effectVector.getVector();
-						obj.getObjectAs(LaserEffect.class).ifPresent(l -> {
+						obj.getParent().getObjectAs(LaserEffect.class).ifPresent(l -> {
 							Entry<Double, IntersectionData<ICanvasObject>> f = TestUtils.getFilteredObjectList().get().stream().collect(new NearestIntersectedFacetFinder<>(v,l.getAnchorPoint(),l.getLength()));
 							if (f != null)
 							{
@@ -80,18 +80,18 @@ public class LaserWeapon implements IEffector {
 						return null;
 		},true);
 		
-		laser.addFlag(Events.NO_SHADE);
+		lsr.addFlag(Events.NO_SHADE);
 		
-		parent.getObjectAs(PlugableCanvasObject.class).ifPresent(p -> {
+		parent.getTrait(PlugableTrait.class).ifPresent(p -> 
 			p.registerSingleAfterDrawPlugin("ADD_LASER", obj -> {
-				for (Rotation r : OrientationTransform.getRotationsForVector(effectVector.getVector())){
-					laser.applyTransform(r);
+				for (Rotation r : OrientationTransform.getRotationsForVector(effectVector.getVector())) {
+					lsr.applyTransform(r);
 				}
-				CanvasObjectFunctions.DEFAULT.get().moveTo(laser, origin.find());
-				laser.getTrait(TrackingTrait.class).ifPresent(trait -> trait.observeAndMatch(parent));
+				CanvasObjectFunctions.DEFAULT.get().moveTo(lsr, origin.find());
+				lsr.getTrait(TrackingTrait.class).ifPresent(trait -> trait.observeAndMatch(parent));
 				return null;
-			});
-		});
+			})
+		);
 		
 		
 		this.laserEffect = lsr;

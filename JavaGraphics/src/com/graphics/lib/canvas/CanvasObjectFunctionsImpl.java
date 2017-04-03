@@ -15,6 +15,12 @@ import com.graphics.lib.transform.MovementTransform;
 import com.graphics.lib.transform.Transform;
 import com.graphics.lib.transform.Translation;
 
+/**
+ * Extension functions for canvas objects, different objects may implement their own versions
+ * 
+ * @author paul.brandon
+ *
+ */
 public class CanvasObjectFunctionsImpl {
 	
 	/**

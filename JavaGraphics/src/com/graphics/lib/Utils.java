@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 
 import com.graphics.lib.canvas.Canvas3D;
+import com.graphics.lib.canvas.FunctionHandler;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ICanvasObjectList;
 import com.graphics.lib.interfaces.ILightIntensityFinder;
@@ -38,7 +39,7 @@ public class Utils {
 					Vector v2 = p.vectorToPoint(checkObj.getCentre()).getUnitVector();
 					if (v1.dotProduct(v2) >= 0) continue; //not pointing towards each other so test object not between lightsource and obj
 					
-					if (checkObj.getFunctions().vectorIntersects(checkObj, l.getPosition(), lightVector)) return; //an object is blocking light
+					if (FunctionHandler.getFunctions(checkObj).vectorIntersects(checkObj, l.getPosition(), lightVector)) return; //an object is blocking light
 
 				}
 				

@@ -13,10 +13,12 @@ public class TorusFunctionsImpl extends CanvasObjectFunctionsImpl {
 		Optional<Torus> torus = obj.getObjectAs(Torus.class);
 		if(torus.isPresent()) {
 			double distFromCentre = torus.get().getCentre().distanceTo(p);
-			if (distFromCentre > torus.get().getActualRadius() || torus.get().getCentre().distanceTo(p) < torus.get().getActualHoleRadius()) return false;
+			if (distFromCentre > torus.get().getActualRadius() || torus.get().getCentre().distanceTo(p) < torus.get().getActualHoleRadius()) 
+			    return false;
 			
 			double distFromHolePlane = torus.get().getHolePlane().getDistanceFromFacetPlane(p);
-			if (distFromHolePlane > torus.get().getActualTubeRadius()) return false;
+			if (distFromHolePlane > torus.get().getActualTubeRadius()) 
+			    return false;
 			
 			//now just to check within the circular area of the tube
 			double pX = Math.sqrt(Math.pow(distFromCentre, 2) - Math.pow(distFromHolePlane, 2));
