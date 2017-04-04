@@ -106,6 +106,7 @@ public class Ship extends CanvasObject {
 							CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(fragment, rot1, rot2);
 							fragment.addTransform(move);
 							fragment.deleteAfterTransforms();	
+							fragment.addFlag(Events.PHASED);
 							fragment.addFlag(Events.NO_SHADE);
 							obj.getChildren().add(fragment);
 						}

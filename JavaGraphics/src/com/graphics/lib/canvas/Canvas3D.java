@@ -243,7 +243,7 @@ public class Canvas3D extends JPanel{
 			processShapes.addAll(shadows);
 		}
 
-		processShapes.parallelStream().forEach(ICanvasObject::onDrawComplete);
+		processShapes.forEach(ICanvasObject::onDrawComplete); //cross object updates can happen here safer not to be parallel
 		
 		processShapes.parallelStream().forEach(s -> {
 			this.processShape(s, this.zBuffer, getShader(s));

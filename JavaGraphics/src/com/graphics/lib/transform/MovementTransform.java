@@ -30,17 +30,19 @@ public class MovementTransform extends Transform {
 		this.vector = vector;
 	}
 	
-	public void moveUntil(Predicate<MovementTransform> until)
+	public MovementTransform moveUntil(Predicate<MovementTransform> until)
 	{
 		this.until = until;
+		return this;
 	}
 	
 	public Vector getVector() {
 		return vector;
 	}
 
-	public void setVector(Vector vector) {
+	public MovementTransform setVector(Vector vector) {
 		this.vector = vector.getUnitVector();
+		return this;
 	}
 	
 	public double getMaxSpeed() {

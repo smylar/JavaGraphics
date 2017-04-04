@@ -11,4 +11,5 @@ public class Events {
 	public static final String NO_SHADE = "noshade";
 	public static final String EXPLODE_PERSIST = "explode_persist";
 	public static final String STOP = "stop";
+	public static final String PHASED = "PHASED";
 }

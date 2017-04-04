@@ -73,7 +73,8 @@ public class PluginLibrary {
 				Transform rot2 = new RepeatingTransform<Rotation>(Axis.X.getRotation(Math.random() * 5), t -> rot1.isCompleteSpecific());				
 				CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(fragment, rot1, rot2);
 				fragment.addTransform(move);
-				
+
+				fragment.addFlag(Events.PHASED);
 				fragment.deleteAfterTransforms();	
 				obj.getChildren().add(fragment);
 			}

@@ -72,7 +72,7 @@ public class TestUtils {
 	}
 	
 	public static ICanvasObjectList getFilteredObjectList(){
-		return () -> Canvas3D.get().getShapes(s -> s.isVisible() && !s.isDeleted() && !s.hasFlag("PHASED"));
+		return () -> Canvas3D.get().getShapes(s -> s.isVisible() && !s.isDeleted() && !s.hasFlag(Events.PHASED));
 	}
 	
 	public static IPlugin<IPlugable,Void> getExplodePlugin(ClipLibrary clipLibrary)
