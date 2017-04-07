@@ -38,7 +38,7 @@ public class Gate extends Torus {
 	public Gate(double tubeRadius, double holeRadius, int arcProgression) {
 		super(tubeRadius, holeRadius, arcProgression);
 		this.holeRadius = holeRadius;
-		innerPoints = this.getVertexList().stream().filter(v -> v.distanceTo(getCentre()) <= holeRadius + 0.01).collect(Collectors.toList());
+		innerPoints = this.getVertexList().stream().filter(v -> v.distanceTo(getCentre()) <= holeRadius + 0.01 && !v.equals(getCentre())).collect(Collectors.toList());
 	}
 	
 	public void setPassThroughPluginForGate(IPlugin<Gate, Void> passThroughPlugin) {
@@ -90,11 +90,11 @@ public class Gate extends Torus {
 	    for (int i = offset++ ; i < innerPoints.size() ; i+=interval) {
 	        Point p = innerPoints.get(i);
             CanvasObject fragment = new CanvasObject();
-            fragment.getVertexList().add(new WorldCoord(p.x , p.y, p.z));
+            fragment.getVertexList().add(new WorldCoord(p.x, p.y, p.z));
             fragment.getVertexList().add(new WorldCoord(p.x + 2, p.y, p.z));
             fragment.getVertexList().add(new WorldCoord(p.x, p.y + 2, p.z));
             fragment.getFacetList().add(new Facet(fragment.getVertexList().get(0), fragment.getVertexList().get(1), fragment.getVertexList().get(2)));
-            fragment.setColour(Color.PINK);
+            fragment.setColour(i % 2 == 0 ? Color.PINK : Color.BLUE);
             fragment.setProcessBackfaces(true);
             MovementTransform move = new MovementTransform(p.vectorToPoint(getCentre()).getUnitVector(), 1).moveUntil(t -> t.getDistanceMoved() >= holeRadius-2);        
             fragment.addTransform(move);
