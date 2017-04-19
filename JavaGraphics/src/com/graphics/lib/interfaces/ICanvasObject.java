@@ -47,11 +47,7 @@ public interface ICanvasObject {
 
 	List<WorldCoord> getVertexList();
 
-	void setVertexList(List<WorldCoord> vertexList);
-
 	List<Facet> getFacetList();
-
-	void setFacetList(List<Facet> facetList);
 
 	boolean isProcessBackfaces();
 
@@ -172,8 +168,6 @@ public interface ICanvasObject {
     <T extends ITrait> Optional<T> getTrait(Class<T> cl);
 
     Set<ITrait> getTraits();
-
-	boolean is(ICanvasObject obj);
 
 	<T extends ITrait> T addTrait(T trait);
 

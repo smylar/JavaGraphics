@@ -57,6 +57,10 @@ public class Gate extends Torus {
 	@Override
 	public void onDrawComplete(){
 		super.onDrawComplete();
+		if (!this.isVisible() || this.isDeleted()) {
+			return;
+		}
+		
 		Map<ICanvasObject, Double> dotProducts = new HashMap<>();
 		TestUtils.getFilteredObjectList().get().parallelStream().forEach(obj -> {
 		    double dot = getCurrentDotProduct(obj);

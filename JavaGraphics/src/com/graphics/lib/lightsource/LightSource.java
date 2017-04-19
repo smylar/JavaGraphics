@@ -151,19 +151,7 @@ public class LightSource extends Observable implements ILightSource{
 		return this.intensity - ((intensity/range) * distanceAway);
 	}
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((colour == null) ? 0 : colour.hashCode());
-		long temp;
-		temp = Double.doubleToLongBits(range);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
+	public boolean isEqualTo(Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -179,7 +167,7 @@ public class LightSource extends Observable implements ILightSource{
 		if (position == null) {
 			if (other.position != null)
 				return false;
-		} else if (!position.equals(other.position))
+		} else if (!position.isEqualTo(other.position))
 			return false;
 		if (Double.doubleToLongBits(range) != Double
 				.doubleToLongBits(other.range))

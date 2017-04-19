@@ -1,6 +1,5 @@
 package com.graphics.lib.orientation;
 
-import java.util.ArrayList;
 
 import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
@@ -20,7 +19,6 @@ public class SimpleOrientation implements IOrientation {
 
 	public SimpleOrientation(String tag){
 		orientation = new CanvasObject();
-		orientation.setVertexList(new ArrayList<WorldCoord>(4));
 		orientation.getVertexList().add(new WorldCoord(0,0,1)); //forward
 		orientation.getVertexList().add(new WorldCoord(0,-1,0)); //up
 		orientation.getVertexList().add(new WorldCoord(1,0,0)); //right

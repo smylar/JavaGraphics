@@ -10,8 +10,6 @@ import java.util.Set;
  *
  */
 public class Point {
-	
-	private Integer hashCode = null;
 	public double x = 0;
 	public double y = 0;
 	public double z = 0;
@@ -117,30 +115,9 @@ public class Point {
 	public String toString(){
 		return this.x + "," + this.y + "," + this.z;
 	}
-
-	@Override
-	public int hashCode() {
-		if (hashCode != null) return hashCode;
-		
-		final int prime = 31;
-		int result = 1;
-		result = prime * result +  tags.hashCode();
-		long temp;
-		temp = Double.doubleToLongBits(x);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(y);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(z);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		
-		hashCode = result;
-		return result;
-	}
-	
 	
 
-	@Override
-	public boolean equals(Object obj) {
+	public boolean isEqualTo(Object obj) {
 		//checks if two points occupy the same coordinate
 		if (this == obj)
 			return true;

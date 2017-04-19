@@ -49,11 +49,11 @@ import com.graphics.lib.transform.Transform;
 public class CanvasObject extends Observable implements ICanvasObject{
 	private static int nextId = 0;
 	
-	private List<WorldCoord> vertexList = new ArrayList<>();
-    private List<Facet> facetList = new ArrayList<>();
+	private final List<WorldCoord> vertexList = new ArrayList<>();
+    private final List<Facet> facetList = new ArrayList<>();
     private Color colour = new Color(255, 0, 0);
-    private List<Transform> transforms = Collections.synchronizedList(new ArrayList<>());
-    private Set<ICanvasObject> children = Collections.synchronizedSet(new HashSet<ICanvasObject>());
+    private final List<Transform> transforms = Collections.synchronizedList(new ArrayList<>());
+    private final Set<ICanvasObject> children = Collections.synchronizedSet(new HashSet<ICanvasObject>());
     private Map<Point, ArrayList<Facet>> vertexFacetMap;
     private boolean processBackfaces = false;
     private boolean isVisible = true;
@@ -61,12 +61,12 @@ public class CanvasObject extends Observable implements ICanvasObject{
     private boolean castsShadow = true;
     private boolean deleteAfterTransforms = false;
     private Optional<Point> anchorPoint = Optional.empty();
-    private Set<String> flags = new HashSet<>();
+    private final Set<String> flags = new HashSet<>();
     private ILightIntensityFinder liFinder = LightIntensityFinderEnum.DEFAULT.get();    
     private IVertexNormalFinder vnFinder = VertexNormalFinderEnum.DEFAULT.get();
     
-	private Set<ITrait> traits = new HashSet<>(); //may move traits completely external of canvas object, possibly others too like functions
-	private int objectId = nextId++;
+	private final Set<ITrait> traits = new HashSet<>(); //may move traits completely external of canvas object, possibly others too like functions
+	private final int objectId = nextId++;
 	
 	@Override
 	public final Set<ITrait> getTraits() {
@@ -87,9 +87,16 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	}
 	
 	@Override
-	public final boolean is(ICanvasObject obj) {
-	    //need to do this because of the use of proxies, == may not always work
-		return obj == null ? false : getObjectTag().equals(obj.getObjectTag());
+	public boolean equals(Object obj) {
+		return (obj != null && obj instanceof ICanvasObject) ? getObjectTag().equals(((ICanvasObject) obj).getObjectTag()) : false;
+	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + objectId;
+		return result;
 	}
 
 	@Override
@@ -183,18 +190,8 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	}
 
 	@Override
-	public final void setVertexList(List<WorldCoord> vertexList) {
-		this.vertexList = vertexList;
-	}
-
-	@Override
 	public final List<Facet> getFacetList() {
 		return this.facetList;
-	}
-
-	@Override
-	public final void setFacetList(List<Facet> facetList) {
-		this.facetList = facetList;
 	}
 	
 	@Override
@@ -501,41 +498,5 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	public void setBaseIntensity(double intensity)
 	{
 		this.getFacetList().forEach(f -> f.setBaseIntensity(intensity));
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + this.getClass().getName().hashCode();
-		result = prime * result + objectId;
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		ICanvasObject other = (ICanvasObject) obj;
-		if (this.getColour() == null) {
-			if (other.getColour()!= null)
-				return false;
-		} else if (!this.getColour().equals(other.getColour()))
-			return false;
-		if (this.getFacetList() == null) {
-			if (other.getFacetList() != null)
-				return false;
-		} else if (!this.getFacetList().equals(other.getFacetList()))
-			return false;
-		if (this.getVertexList() == null) {
-			if (other.getVertexList() != null)
-				return false;
-		} else if (!this.getVertexList().equals(other.getVertexList()))
-			return false;
-		return true;
 	}
 }

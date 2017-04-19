@@ -2,7 +2,6 @@ package com.graphics.lib;
 
 public class Vector {
 
-	private Integer hashCode = null;
 	public double x = 0;
 	public double y = 0;
 	public double z = 0;
@@ -99,33 +98,7 @@ public class Vector {
 		return this.x + "," + this.y + "," + this.z;
 	}
 
-	@Override
-	public int hashCode() {
-		//As vector is altered it will change the hash code which is not good
-		// it means the system would no longer be able to find the item in a hash map or similar
-		// as such we'll generate a code once and store it
-		
-		if (hashCode != null) {
-		    return hashCode;
-		}
-		
-		final int prime = 31;
-		int result = 1;
-		long temp;
-		
-		temp = Double.doubleToLongBits(x);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(y);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(z);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		
-		hashCode = result;
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
+	public boolean isEqualTo(Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
