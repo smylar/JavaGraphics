@@ -39,7 +39,8 @@ public class CanvasObjectFunctionsImpl {
 		
 		double vAngle = Math.acos(v.getUnitVector().dotProduct(vCentre));
 		
-		if (vAngle >= angle) return false;
+		if (vAngle >= angle) 
+		    return false;
 		
 		return true;
 	}
@@ -55,19 +56,21 @@ public class CanvasObjectFunctionsImpl {
 		Vector defaultVector = startPoint.vectorToPoint(target.getCentre()).getUnitVector();
 		
 		List<MovementTransform> mTrans = target.getTransformsOfType(MovementTransform.class);
-		if (mTrans.size() == 0) return defaultVector;
+		if (mTrans.isEmpty()) 
+		    return defaultVector;
+		
 		Vector targetVec = new Vector(0,0,0);
 		for (MovementTransform t : mTrans){
-			targetVec.x += t.getVector().x * t.getSpeed();
-			targetVec.y += t.getVector().y * t.getSpeed();
-			targetVec.z += t.getVector().z * t.getSpeed();
+			targetVec.addX(t.getVector().getX() * t.getSpeed());
+			targetVec.addY(t.getVector().getY() * t.getSpeed());
+			targetVec.addZ(t.getVector().getZ() * t.getSpeed());
 		}
 		double speed = targetVec.getSpeed();
 		targetVec = targetVec.getUnitVector();
 		
 		double cosTheta = target.getCentre().vectorToPoint(startPoint).getUnitVector().dotProduct(targetVec);
 		double distStartToTarget = startPoint.distanceTo(target.getCentre());
-		double time = 0;
+		double time;
 		
 		if (projSpeed - speed == 0){
 			//target and projectile will travel the same distance, therefore C = B and equation boils down to A / (2 * cos(theta)) = B 
@@ -89,7 +92,8 @@ public class CanvasObjectFunctionsImpl {
 			double c = -Math.pow(distStartToTarget,2);
 			double discriminant = Math.pow(b,2) - (4 * a * c); 
 			
-			if (discriminant < 0) return defaultVector;
+			if (discriminant < 0) 
+			    return defaultVector;
 			
 			double sqrtDisc = Math.sqrt(discriminant);
 			double result1 = (-b + sqrtDisc) / (2*a);
@@ -100,16 +104,17 @@ public class CanvasObjectFunctionsImpl {
 				time = Math.max(result1, result2);
 			}
 			
-			if (time < 0) return defaultVector;
+			if (time < 0) 
+			    return defaultVector;
 		}
 		
 		//finalProjectilePosition = finalTargetPosition so:
 		// Start + (Vector of Proj * time) = TargetPos +  (Vector of target * time), which becomes
 		//Vector of Proj = Vector of target + [(TargetPos - Start) / time ]
 		return new Vector (
-				(targetVec.x * speed) + ((target.getCentre().x - startPoint.x) / time),
-				(targetVec.y * speed) + ((target.getCentre().y - startPoint.y) / time),
-				(targetVec.z * speed) + ((target.getCentre().z - startPoint.z) / time)
+				(targetVec.getX() * speed) + ((target.getCentre().x - startPoint.x) / time),
+				(targetVec.getY() * speed) + ((target.getCentre().y - startPoint.y) / time),
+				(targetVec.getZ() * speed) + ((target.getCentre().z - startPoint.z) / time)
 				).getUnitVector();
 		
 	}
@@ -131,7 +136,8 @@ public class CanvasObjectFunctionsImpl {
 	public Facet getIntersectedFacet(ICanvasObject obj, Point start, Vector v, boolean getAny)
 	{
 		//get quick estimate for those that are nowhere near - check if hit sphere centred on centre point with diameter of largest dimension	
-		if (!this.vectorIntersectsRoughly(obj, start, v)) return null;
+		if (!this.vectorIntersectsRoughly(obj, start, v)) 
+		    return null;
 		
 		Facet closest = null;
 		double closestDist = 0;
@@ -139,10 +145,10 @@ public class CanvasObjectFunctionsImpl {
 		for (Facet f : obj.getFacetList().stream().filter(GeneralPredicates.isFrontface(start)).collect(Collectors.toList()))
 		{
 			if (f.isPointWithin(f.getIntersectionPointWithFacetPlane(start, v))){
-				if (getAny) return f;
+				if (getAny) 
+				    return f;
 			
-				//double dist = (start.distanceTo(f.point1) + start.distanceTo(f.point2) + start.distanceTo(f.point3)) / 3;
-				double dist = f.getAsList().stream().mapToDouble(p -> start.distanceTo(p)).average().getAsDouble(); 
+				double dist = f.getAsList().stream().mapToDouble(start::distanceTo).average().getAsDouble(); 
 				if (closest == null || dist < closestDist){
 					closest = f;
 					closestDist = dist;
@@ -161,9 +167,10 @@ public class CanvasObjectFunctionsImpl {
 	 */
 	public Map<Facet, Point> getIntersectedFacets(ICanvasObject obj, Point start, Vector v)
 	{
-		Map<Facet,Point> list = new HashMap<Facet,Point>();
+		Map<Facet,Point> list = new HashMap<>();
 
-		if (!this.vectorIntersectsRoughly(obj, start, v)) return list;
+		if (!this.vectorIntersectsRoughly(obj, start, v)) 
+		    return list;
 		
 		for (Facet f : obj.getFacetList())
 		{
@@ -221,7 +228,7 @@ public class CanvasObjectFunctionsImpl {
 	
 	public void addTransformAboutCentre(ICanvasObject obj, Transform...t)
 	{
-		this.addTransformAboutPoint(obj, () -> obj.getCentre(), t);
+		this.addTransformAboutPoint(obj, obj::getCentre, t);
 	}
 	
 	public void addTransformAboutPoint(ICanvasObject obj, Point p, Transform...transform)
@@ -241,18 +248,18 @@ public class CanvasObjectFunctionsImpl {
 			@Override
 			public void beforeTransform(){
 				Point p = pFinder.find();
-				transX = -p.x;
-				transY = -p.y;
-				transZ = -p.z;
+				setTransX(-p.x);
+				setTransY(-p.y);
+				setTransZ(-p.z);
 			}
 		};
 		
 		Transform temp2 = new Translation(){
 			@Override
 			public void beforeTransform(){
-				transX = -temp.transX;
-				transY = -temp.transY;
-				transZ = -temp.transZ;
+			    setTransX(-temp.getTransX());
+			    setTransY(-temp.getTransY());
+			    setTransZ(-temp.getTransZ());
 			}
 		};
 		obj.addTransform(temp);

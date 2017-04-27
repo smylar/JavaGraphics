@@ -45,9 +45,7 @@ public class PluginLibrary {
 			
 			Vector baseVector = new Vector(0,0,0);
 			for (MovementTransform t : mTrans){
-				baseVector.x += t.getVector().x * t.getSpeed();
-				baseVector.y += t.getVector().y * t.getSpeed();
-				baseVector.z += t.getVector().z * t.getSpeed();
+			    baseVector.addVector(t.getVelocity());
 			}
 			double speed = baseVector.getSpeed();
 			baseVector = baseVector.getUnitVector();
@@ -64,9 +62,9 @@ public class PluginLibrary {
 				fragment.getFacetList().add(new Facet(fragment.getVertexList().get(0), fragment.getVertexList().get(1), fragment.getVertexList().get(2)));
 				fragment.setColour(colour);
 				fragment.setProcessBackfaces(true);
-				double xVector = baseVector.x + (Math.random()/2) - 0.25;
-				double yVector = baseVector.y + (Math.random()/2) - 0.25;
-				double zVector = baseVector.z + (Math.random()/2) - 0.25;
+				double xVector = baseVector.getX() + (Math.random()/2) - 0.25;
+				double yVector = baseVector.getY() + (Math.random()/2) - 0.25;
+				double zVector = baseVector.getZ() + (Math.random()/2) - 0.25;
 				Transform rot1 = new RepeatingTransform<Rotation>(Axis.Y.getRotation(Math.random() * 5), 45);
 				MovementTransform move = new MovementTransform(new Vector(xVector, yVector, zVector), speed - exhaustVelocity);
 				move.moveUntil(t -> rot1.isCompleteSpecific());
@@ -98,9 +96,9 @@ public class PluginLibrary {
     			fragment.setProcessBackfaces(true);
     			fragment.setColour(f.getColour() != null ? f.getColour() : obj.getColour());
     			Vector baseVector = fragment.getFacetList().get(0).getNormal();
-    			double xVector = baseVector.x + (Math.random()/2) - 0.25;
-    			double yVector = baseVector.y + (Math.random()/2) - 0.25;
-    			double zVector = baseVector.z + (Math.random()/2) - 0.25;
+    			double xVector = baseVector.getX() + (Math.random()/2) - 0.25;
+    			double yVector = baseVector.getY() + (Math.random()/2) - 0.25;
+    			double zVector = baseVector.getZ() + (Math.random()/2) - 0.25;
     			MovementTransform move = new MovementTransform(new Vector(xVector, yVector, zVector), Math.random() * 15 + 1 );
     			fragment.addTransform(move);
     			CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(fragment, 
@@ -185,9 +183,7 @@ public class PluginLibrary {
 			
 			Vector baseVector = new Vector(0,0,0);
 			for (MovementTransform t : mTrans){
-				baseVector.x += t.getVector().x * t.getSpeed();
-				baseVector.y += t.getVector().y * t.getSpeed();
-				baseVector.z += t.getVector().z * t.getSpeed();
+			    baseVector.addVector(t.getVelocity());
 			}
 			
 			for (ICanvasObject impactee : objects.get()){
@@ -195,9 +191,9 @@ public class PluginLibrary {
 				//Tries to factor in possibility object was drawn completely on the other side of an object (after moving) and thus not detected as a collision by point inside check
 				for(Point p : obj.getVertexList()){
 					Point prevPoint = new Point(p);
-					prevPoint.x -= baseVector.x;
-					prevPoint.y -= baseVector.y;
-					prevPoint.z -= baseVector.z;
+					prevPoint.x -= baseVector.getX();
+					prevPoint.y -= baseVector.getY();
+					prevPoint.z -= baseVector.getZ();
 				
 					for(Facet f : impactee.getFacetList())
 					{
@@ -256,25 +252,24 @@ public class PluginLibrary {
 			//However, we could add another plugin for spheres, the normal is then the vector from centre to impact point
 			
 			Set<WorldCoord> impactPoints = obj.getVertexList().stream().filter(p -> FunctionHandler.getFunctions(impactee).isPointInside(impactee, p)).collect(Collectors.toSet());
-			if (impactPoints.size() == 0) 
+			if (impactPoints.isEmpty()) 
 			    return null;
 			
 			List<MovementTransform> mTrans = obj.getTransformsOfType(MovementTransform.class);
-			if (mTrans.size() == 0) return null;
+			if (mTrans.isEmpty()) return null;
 			
-			Vector move = mTrans.get(0).getVector(); //just getting the first one for now (if there is more than one) 
-
-			double speed = mTrans.get(0).getSpeed(); 
+			MovementTransform move = mTrans.get(0); //just getting the first one for now (if there is more than one) 
+			Vector velocity = move.getVelocity();
 			
 			Facet curFacet = null;
 			double curDist = -1;
 			
 			for(WorldCoord impactPoint : impactPoints){
-				Point prevPoint = new Point(impactPoint.x - (move.x * speed), impactPoint.y - (move.y * speed), impactPoint.z - (move.z * speed));
+				Point prevPoint = new Point(impactPoint.x - velocity.getX(), impactPoint.y - velocity.getY(), impactPoint.z - velocity.getZ());
 
-				for(Facet f : impactee.getFacetList().stream().filter(f -> f.getDistanceFromFacetPlane(impactPoint) < speed + 1).collect(Collectors.toList()))
+				for(Facet f : impactee.getFacetList().stream().filter(f -> f.getDistanceFromFacetPlane(impactPoint) < move.getSpeed() + 1).collect(Collectors.toList()))
 				{
-					Point intersect = f.getIntersectionPointWithFacetPlane(prevPoint, move);
+					Point intersect = f.getIntersectionPointWithFacetPlane(prevPoint, move.getVector());
 	
 					//if intersected with plane of facet check we are within the bounds of the facet
 					if (intersect != null && (prevPoint.distanceTo(intersect) < curDist || curDist == -1 ) && f.isPointWithin(intersect)){
@@ -287,10 +282,10 @@ public class PluginLibrary {
 			Vector impactedNormal = curFacet.getNormal();
 			
 			//I know r=d-2(d.n)n is reflection vector in 2 dimension (hopefully it'll work on 3)
-			double multiplier = move.dotProduct(impactedNormal) * -2;
-			move.x += (impactedNormal.x * multiplier);
-			move.y += (impactedNormal.y * multiplier);
-			move.z += (impactedNormal.z * multiplier);
+			double multiplier = move.getVector().dotProduct(impactedNormal) * -2;
+			move.getVector().addX(impactedNormal.getX() * multiplier);
+			move.getVector().addY(impactedNormal.getY() * multiplier);
+			move.getVector().addZ(impactedNormal.getZ() * multiplier);
 			
 			return null;
 		};
@@ -309,22 +304,22 @@ public class PluginLibrary {
 			Vector vTrackee = CanvasObjectFunctions.DEFAULT.get().plotDeflectionShot(objectToTrack, obj.getCentre(), move.get().getSpeed());
 
 			Vector vMove = move.get().getVector();
-			double xAngleDif = Math.toDegrees(Math.acos(vTrackee.y) - Math.acos(vMove.getUnitVector().y));
+			double xAngleDif = Math.toDegrees(Math.acos(vTrackee.getY()) - Math.acos(vMove.getUnitVector().getY()));
 			double xAngleMod = xAngleDif > 0 ? rotationRate : -rotationRate;
 			
-			double yAngleDif = Math.toDegrees(Math.acos(vTrackee.x) - Math.acos(vMove.getUnitVector().x));
+			double yAngleDif = Math.toDegrees(Math.acos(vTrackee.getX()) - Math.acos(vMove.getUnitVector().getX()));
 			double yAngleMod = yAngleDif > 0 ? -rotationRate : rotationRate;
 			
 			ICanvasObject temp = new CanvasObject();
-			WorldCoord tempCoord = new WorldCoord(vMove.x, vMove.y, vMove.z);
+			WorldCoord tempCoord = new WorldCoord(vMove.getX(), vMove.getY(), vMove.getZ());
 			temp.getVertexList().add(tempCoord);
 			
 			temp.applyTransform(Axis.X.getRotation(xAngleMod));
 			temp.applyTransform(Axis.Y.getRotation(yAngleMod));
 			
-			vMove.x = tempCoord.x;
-			vMove.y = tempCoord.y;
-			vMove.z = tempCoord.z;
+			vMove.setX(tempCoord.x);
+			vMove.setY(tempCoord.y);
+			vMove.setZ(tempCoord.z);
 			
 			return null;
 		};

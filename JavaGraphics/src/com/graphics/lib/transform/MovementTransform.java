@@ -57,8 +57,13 @@ public class MovementTransform extends Transform {
 		return speed;
 	}
 	
+	/**
+	 * Get the vector combined with the speed (velocity)
+	 * (Note each call generates a new Vector object)
+	 * @return
+	 */
 	public Vector getVelocity(){
-		return new Vector(vector.x * speed, vector.y * speed, vector.z * speed);
+		return new Vector(vector.getX() * speed, vector.getY() * speed, vector.getZ() * speed);
 	}
 
 	public void setSpeed(double speed) {
@@ -95,9 +100,9 @@ public class MovementTransform extends Transform {
 	@Override
 	public Consumer<Point> doTransformSpecific() {
 		return p -> {
-			p.x += vector.x * speed;
-			p.y += vector.y * speed;
-			p.z += vector.z * speed;
+			p.x += vector.getX() * speed;
+			p.y += vector.getY() * speed;
+			p.z += vector.getZ() * speed;
 		};
 	}
 

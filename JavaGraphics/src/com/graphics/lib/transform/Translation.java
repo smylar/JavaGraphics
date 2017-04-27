@@ -6,19 +6,11 @@ import com.graphics.lib.Point;
 
 public class Translation extends Transform {
 
-	public double transX = 0;
-	public double transY = 0;
-	public double transZ = 0;
+	private double transX = 0;
+	private double transY = 0;
+	private double transZ = 0;
 	
-	public Translation()
-	{}
-	
-	/*public Translation(Point p)
-	{
-		this.transX = p.x;
-		this.transY = p.y;
-		this.transZ = p.z;
-	}*/
+	public Translation(){}
 	
 	public Translation(double transX, double transY, double transZ)
 	{
@@ -27,14 +19,56 @@ public class Translation extends Transform {
 		this.transZ = transZ;
 	}
 
-	@Override
+	/**
+     * @return the transX
+     */
+    public double getTransX() {
+        return transX;
+    }
+
+    /**
+     * @param transX the transX to set
+     */
+    public void setTransX(double transX) {
+        this.transX = transX;
+    }
+
+    /**
+     * @return the transY
+     */
+    public double getTransY() {
+        return transY;
+    }
+
+    /**
+     * @param transY the transY to set
+     */
+    public void setTransY(double transY) {
+        this.transY = transY;
+    }
+
+    /**
+     * @return the transZ
+     */
+    public double getTransZ() {
+        return transZ;
+    }
+
+    /**
+     * @param transZ the transZ to set
+     */
+    public void setTransZ(double transZ) {
+        this.transZ = transZ;
+    }
+
+    @Override
 	public boolean isCompleteSpecific() {
 		return true;
 	}
 
 	@Override
 	public Consumer<Point> doTransformSpecific() {
-		return (p) -> {
+		return p -> {
 			p.x += transX;
 			p.y += transY;
 			p.z += transZ;

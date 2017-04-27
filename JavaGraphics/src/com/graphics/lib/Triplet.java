@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Triplet<T> {
-    List<T> triplet = new ArrayList<>(3);
+    final List<T> triplet = new ArrayList<>(3);
     
     public Triplet(T first, T second, T third) {
         triplet.add(first);

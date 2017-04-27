@@ -133,7 +133,7 @@ public class GraphicsTest extends JFrame {
 		l3.getLightSource().setDirection(() -> {return lantern3.getTrait(IOrientable.class).get().getOrientation().getForward();});
 		l3.getLightSource().setLightConeAngle(40);
 		lantern3.attachLightsource(l3);
-		lantern3.getFacetList().stream().filter(f -> f.getNormal().z <= 0).forEach(f -> f.setColour(Color.BLACK));
+		lantern3.getFacetList().stream().filter(f -> f.getNormal().getZ() <= 0).forEach(f -> f.setColour(Color.BLACK));
 		Transform l3spin = new RepeatingTransform<Rotation>(Axis.X.getRotation(4), 0);
 		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(lantern3, l3spin);
 		
@@ -174,18 +174,18 @@ public class GraphicsTest extends JFrame {
 		IPointFinder leftOffset = () -> {
 			Point pos = new Point(cam.getPosition());
 			Vector right = cam.getOrientation().getRight();
-			pos.x -= right.x * 25;
-			pos.y -= right.y * 25;
-			pos.z -= right.z * 25;
+			pos.x -= right.getX() * 25;
+			pos.y -= right.getY() * 25;
+			pos.z -= right.getZ() * 25;
 			return pos;
 		};
 		
 		IPointFinder rightOffset = () -> {
 			Point pos = new Point(cam.getPosition());
 			Vector right = cam.getOrientation().getRight();
-			pos.x += right.x * 25;
-			pos.y += right.y * 25;
-			pos.z += right.z * 25;
+			pos.x += right.getX() * 25;
+			pos.y += right.getY() * 25;
+			pos.z += right.getZ() * 25;
 			return pos;
 		};
 		
@@ -193,9 +193,9 @@ public class GraphicsTest extends JFrame {
 		ship.addWeapon(new LaserWeapon(() -> {
 			Point pos = new Point(cnv.getCamera().getPosition());
 			Vector down = cam.getOrientation().getDown();
-			pos.x += down.x * 15;
-			pos.y += down.y * 15;
-			pos.z += down.z * 15;
+			pos.x += down.getX() * 15;
+			pos.y += down.getY() * 15;
+			pos.z += down.getZ() * 15;
 			return pos;
 		},
 		() -> {

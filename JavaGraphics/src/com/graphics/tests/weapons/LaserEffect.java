@@ -87,9 +87,9 @@ public class LaserEffect extends Cylinder {
 			if (wc.hasTag("laserEndMarker")) continue;
 			
 			WorldCoord wcprev = this.getVertexList().get(i-1);
-			wc.x = wcprev.x + (v.x * length);
-			wc.y = wcprev.y + (v.y * length);
-			wc.z = wcprev.z + (v.z * length);
+			wc.x = wcprev.x + (v.getX() * length);
+			wc.y = wcprev.y + (v.getY() * length);
+			wc.z = wcprev.z + (v.getZ() * length);
 		}
 	}
 

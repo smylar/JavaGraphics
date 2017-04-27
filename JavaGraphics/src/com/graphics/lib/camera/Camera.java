@@ -68,7 +68,7 @@ public abstract class Camera extends Observable implements IOrientableCamera, Ob
 	 * @return Angle in degrees
 	 */
 	public double getPitch(){
-		return Math.toDegrees(Math.asin(this.orientation.getForward().y));
+		return Math.toDegrees(Math.asin(this.orientation.getForward().getY()));
 	}
 	
 	/**
@@ -78,9 +78,12 @@ public abstract class Camera extends Observable implements IOrientableCamera, Ob
 	 */
 	public double getBearing(){
 		Vector forward = this.orientation.getForward();
-		double angle = Math.toDegrees(Math.asin(forward.x));
-		if (forward.z < 0 && angle < 0) return -180 - angle;
-		if (forward.z < 0) return 180 - angle;
+		double angle = Math.toDegrees(Math.asin(forward.getX()));
+		if (forward.getZ() < 0 && angle < 0) 
+		    return -180 - angle;
+		if (forward.getZ() < 0) 
+		    return 180 - angle;
+		
 		return angle;
 	}
 

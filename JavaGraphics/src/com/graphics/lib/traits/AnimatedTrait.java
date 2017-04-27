@@ -9,15 +9,23 @@ import java.util.Map;
 import com.graphics.lib.interfaces.IAnimatable;
 import com.graphics.lib.skeleton.SkeletonNode;
 
+/**
+ * Handles animation of an object by intercepting the applyTransforms call to the parent object
+ * and applying further transforms.<br/>
+ * Animation adds a skeleton, a skeleton consists of points (nodes) that can be attached to other nodes (forming a bone)
+ * and to points belonging to the parent object, so that when that node moves, the attached nodes and mesh moves with it.<br/>
+ * To play an animation, the node tree will be traversed and adjustments made as per the animation definition of that node
+ * 
+ * @author paul.brandon
+ *
+ */
 public class AnimatedTrait extends OrientableTrait implements IAnimatable {
 	private static final Map<String, Method> interceptors = new HashMap<>();
 	
 	static {
 	    try{
 	        interceptors.put("applytransforms", AnimatedTrait.class.getMethod("applyTransforms"));
-	    } catch (Exception ex) {
-	        System.out.println(ex.getMessage());
-	    }
+	    } catch (Exception ex) {}
 	}
 	
 	private SkeletonNode skeletonRootNode;
@@ -28,8 +36,14 @@ public class AnimatedTrait extends OrientableTrait implements IAnimatable {
 		return skeletonRootNode;
 	}
 
+	/**
+	 * Set the skeleton root node (start of the node tree), this add the Skeleton nodes to the object vertex list
+	 * so that transforms applied to the object also apply to skeleton. Any existing skeleton nodes in the vertex list 
+	 * will be removed first
+	 * 
+	 * @param skeletonRootNode
+	 */
 	public void setSkeletonRootNode(SkeletonNode skeletonRootNode) {
-		//include skeleton in vertex list so they get transformed along with the object mesh
 		parent.getVertexList().removeIf(v -> v.hasTag(SkeletonNode.POS_TAG));
 		
 		if (skeletonRootNode != null){
@@ -54,6 +68,9 @@ public class AnimatedTrait extends OrientableTrait implements IAnimatable {
         return interceptors;
     }
 	
+	/**
+	 * Apply animation transforms
+	 */
 	public void applyTransforms()
 	{
 		if (!activeAnimations.isEmpty() && skeletonRootNode != null && !parent.isDeleted() && parent.isVisible()){		

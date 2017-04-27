@@ -29,17 +29,17 @@ public class UnitTests {
 	public void testPointVectorCalculation() {
 		Point p = new Point(1,1,1);
 		Vector v = p.vectorToPoint(new Point(5,1,4));
-		assertTrue(v.x == 4 && v.y == 0 && v.z == 3); 
+		assertTrue(v.getX() == 4 && v.getY() == 0 && v.getZ() == 3); 
 	}
 	
 	@Test
 	public void testUnitVector() {
 		Vector v1 = new Vector(0,0,1).getUnitVector(); //will be unchanged
-		assertTrue(v1.x == 0 && v1.y == 0 && v1.z == 1);
+		assertTrue(v1.getX() == 0 && v1.getY() == 0 && v1.getZ() == 1);
 		
 		v1 = new Vector(0,1,1).getUnitVector(); 
 		DecimalFormat rounded = new DecimalFormat("#.###");
-		assertTrue(v1.x == 0 && rounded.format(v1.y).equals("0.707") && rounded.format(v1.z).equals("0.707"));
+		assertTrue(v1.getX() == 0 && rounded.format(v1.getY()).equals("0.707") && rounded.format(v1.getZ()).equals("0.707"));
 	}
 	
 	@Test
@@ -64,10 +64,10 @@ public class UnitTests {
 		Vector v2 = new Vector(0,1,0);
 		
 		Vector cross = v1.crossProduct(v2); 
-		assertTrue(cross.x == -1 && cross.y == 0 && cross.z == 0);
+		assertTrue(cross.getX() == -1 && cross.getY() == 0 && cross.getZ() == 0);
 		
 		cross = v2.crossProduct(v1);
-		assertTrue(cross.x == 1 && cross.y == 0 && cross.z == 0);
+		assertTrue(cross.getX() == 1 && cross.getY() == 0 && cross.getZ() == 0);
 	}
 	
 	@Test
@@ -119,9 +119,9 @@ public class UnitTests {
 		Vector intercept = CanvasObjectFunctions.DEFAULT.get().plotDeflectionShot(target, proj.getCentre(), 1);
 		//assertEquals(new Vector(0,1,0),intercept); //damn precision loss!!
 		DecimalFormat roundedFormat = new DecimalFormat("#.####");
-		assertEquals(roundedFormat.format(intercept.x), "0"); 
-		assertEquals(roundedFormat.format(intercept.y), "1"); 
-		assertEquals(roundedFormat.format(intercept.z), "0"); 
+		assertEquals(roundedFormat.format(intercept.getX()), "0"); 
+		assertEquals(roundedFormat.format(intercept.getY()), "1"); 
+		assertEquals(roundedFormat.format(intercept.getZ()), "0"); 
 		
 	}
 	

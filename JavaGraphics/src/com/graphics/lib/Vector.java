@@ -2,9 +2,9 @@ package com.graphics.lib;
 
 public class Vector {
 
-	public double x = 0;
-	public double y = 0;
-	public double z = 0;
+    protected double x = 0;
+    protected double y = 0;
+    protected double z = 0;
 	
 	public Vector(){}
 	
@@ -15,7 +15,43 @@ public class Vector {
 		this.z = z;
 	}
 	
-	/**
+	public double getX() {
+        return x;
+    }
+
+    public void setX(double x) {
+        this.x = x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
+    public void setY(double y) {
+        this.y = y;
+    }
+
+    public double getZ() {
+        return z;
+    }
+
+    public void setZ(double z) {
+        this.z = z;
+    }
+    
+    public void addX(double x) {
+        this.x += x;
+    }
+    
+    public void addY(double y) {
+        this.y += y;
+    }
+    
+    public void addZ(double z) {
+        this.z += z;
+    }
+
+    /**
 	 * A unit vector is one where it's magnitude is exactly 1
 	 * 
 	 * @return Unit Vector

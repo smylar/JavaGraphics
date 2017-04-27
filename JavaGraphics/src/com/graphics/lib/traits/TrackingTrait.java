@@ -9,6 +9,13 @@ import com.graphics.lib.canvas.TraitInterceptor;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ITracker;
 
+/**
+ * Trait whereby an object will completely mirror the transforms applied to another object<br/>
+ * Note this will be achieved by adding the trackers vertex list to the target's list at the draw complete phase
+ * 
+ * @author paul.brandon
+ *
+ */
 public class TrackingTrait implements ITracker  {
     private static final Map<String, Method> interceptors = new HashMap<>();
 	public static final String TRACKING_TAG = "tracking_tag";

@@ -59,9 +59,9 @@ public class OrientationTransform {
 		Vector forwardv = orientation.getForward();
 		Vector upv = orientation.getUp();
 		Vector rightv = orientation.getRight();
-		WorldCoord forward = new WorldCoord(forwardv.x, forwardv.y, forwardv.z);
-		WorldCoord up = new WorldCoord(upv.x, upv.y, upv.z);
-		WorldCoord right = new WorldCoord(rightv.x, rightv.y, rightv.z);
+		WorldCoord forward = new WorldCoord(forwardv.getX(), forwardv.getY(), forwardv.getZ());
+		WorldCoord up = new WorldCoord(upv.getX(), upv.getY(), upv.getZ());
+		WorldCoord right = new WorldCoord(rightv.getX(), rightv.getY(), rightv.getZ());
 			
 		ICanvasObject temp = new CanvasObject();
 		temp.getVertexList().add(forward);
@@ -130,9 +130,9 @@ public class OrientationTransform {
 	}
 	
 	public static List<Rotation> getRotationsForVector(Vector v){
-		List<Rotation> rots = new ArrayList<Rotation>();
+		List<Rotation> rots = new ArrayList<>();
 		Vector unit = v.getUnitVector();
-		WorldCoord wc = new WorldCoord(unit.x, unit.y, unit.z);
+		WorldCoord wc = new WorldCoord(unit.getX(), unit.getY(), unit.getZ());
 			
 		ICanvasObject temp = new CanvasObject();
 		temp.getVertexList().add(wc);

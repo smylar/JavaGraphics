@@ -76,7 +76,7 @@ public class ZBuffer implements IZBuffer{
 		
 		Vector normal = facet.getTransformedNormal(c);
 		
-		if (normal.z == 0) 
+		if (normal.getZ() == 0) 
 		    return;
 		
 		Comparator<WorldCoord> xComp = (o1, o2) -> (int)(o1.getTransformed(c).x - o2.getTransformed(c).x);
