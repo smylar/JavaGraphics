@@ -72,14 +72,14 @@ public class CanvasObject extends Observable implements ICanvasObject{
 		facetList = Lists.newArrayList();
 	}
 	
-	public CanvasObject(Supplier<Pair<List<WorldCoord>, List<Facet>>> initMesh) {
+	public CanvasObject(Supplier<Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>>> initMesh) {
 		this(initMesh, c -> {});
 	}
 	
-	public CanvasObject(Supplier<Pair<List<WorldCoord>, List<Facet>>> initMesh, Consumer<CanvasObject> postInit) {
-		Pair<List<WorldCoord>, List<Facet>> mesh = initMesh.get();
-		vertexList = ImmutableList.copyOf(mesh.getLeft());
-		facetList = ImmutableList.copyOf(mesh.getRight());
+	public CanvasObject(Supplier<Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>>> initMesh, Consumer<CanvasObject> postInit) {
+		Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>> mesh = initMesh.get();
+		vertexList = mesh.getLeft();
+		facetList = mesh.getRight();
 		postInit.accept(this);
 	}
 	

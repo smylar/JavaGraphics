@@ -1,26 +1,47 @@
 package com.graphics.shapes;
 
+import java.util.List;
+
+import org.apache.commons.lang3.tuple.Pair;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.graphics.lib.Facet;
-import com.graphics.lib.Point;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
 
 public class Ovoid extends CanvasObject{
 	private double radius = 0;
-	private int pointsPerCircle = 0;
-	private WorldCoord centre;
 	private int angleProgression = 0;
 	
 	public Ovoid(double radius, double radiusMod, int angleProgression)
 	{
-	    super();
-		this.angleProgression = angleProgression;
+	    super(() -> init(radius, radiusMod, angleProgression), c -> c.fixCentre());
+		this.angleProgression = checkAngleProgression(angleProgression);
 		this.radius = radius;
-		if (360 % angleProgression != 0) angleProgression = 10;
+	}
+	
+	public double getRadius() {
+		return radius;
+	}
+
+	public int getPointsPerCircle() {
+		return 360 / this.angleProgression;
+	}
+
+	public int getAngleProgression() {
+		return angleProgression;
+	}
+	
+	private static Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>> init(double radius, double radiusMod, int angleProgression) {
+		
+		List<WorldCoord> vertexList = Lists.newArrayList();
+		ImmutableList.Builder<Facet> facets = ImmutableList.builder();
+		
+		angleProgression = checkAngleProgression(angleProgression);
 		
 		int points = 360 / angleProgression;
 		int pointsarc = 180 / angleProgression;
-		this.pointsPerCircle = points;
 		
 		for (int i = 0 ; i < pointsarc-1 ; i++){
 			double circleRad = Math.sin(Math.toRadians((i+1)*angleProgression)) * radius;
@@ -31,7 +52,7 @@ public class Ovoid extends CanvasObject{
 			for (int j = 0 ; j < points ; j++){
 				double x = circleRad * Math.sin(Math.toRadians(j * angleProgression));
 				double z = circleRad * Math.cos(Math.toRadians(j * angleProgression));
-				this.getVertexList().add(new WorldCoord(x * radiusMod, y, z * radiusMod));
+				vertexList.add(new WorldCoord(x * radiusMod, y, z * radiusMod));
 			}
 			
 		}
@@ -49,46 +70,30 @@ public class Ovoid extends CanvasObject{
 					c++;
 					b-=(points-1);
 				}
-				this.getFacetList().add(new Facet(this.getVertexList().get(c), this.getVertexList().get(b), this.getVertexList().get(a)));
+				facets.add(new Facet(vertexList.get(c), vertexList.get(b), vertexList.get(a)));
 			}
 			//tie last points in circle to first points
-			this.getFacetList().add(new Facet(this.getVertexList().get(points*(i+2)-1), this.getVertexList().get(points*i), this.getVertexList().get((points*(i+1))-1)));
-			this.getFacetList().add(new Facet(this.getVertexList().get(points*(i+2)-1), this.getVertexList().get(points*(i+1)), this.getVertexList().get(points*i)));
+			facets.add(new Facet(vertexList.get(points*(i+2)-1), vertexList.get(points*i), vertexList.get((points*(i+1))-1)));
+			facets.add(new Facet(vertexList.get(points*(i+2)-1), vertexList.get(points*(i+1)), vertexList.get(points*i)));
 		
 		}
 		//add top and bottom
-		this.getVertexList().add(new WorldCoord(0,radius,0));
-		this.getVertexList().add(new WorldCoord(0,-radius,0));
+		vertexList.add(new WorldCoord(0,radius,0));
+		vertexList.add(new WorldCoord(0,-radius,0));
 		
 		for (int i = 0 ; i < points ; i++){
-			int addr = this.getVertexList().size() -2;
+			int addr = vertexList.size() -2;
 			int j = i+1;
 			if (i == points-1) j = 0;
 			
-			this.getFacetList().add(new Facet(this.getVertexList().get(addr), this.getVertexList().get(i), this.getVertexList().get(j)));
-			this.getFacetList().add(new Facet(this.getVertexList().get(++addr), this.getVertexList().get(j+(points*(pointsarc-2))), this.getVertexList().get(i+(points*(pointsarc-2)))));
+			facets.add(new Facet(vertexList.get(addr), vertexList.get(i), vertexList.get(j)));
+			facets.add(new Facet(vertexList.get(++addr), vertexList.get(j+(points*(pointsarc-2))), vertexList.get(i+(points*(pointsarc-2)))));
 		}
-
-		this.centre = new WorldCoord(0,0,0);
-		this.getVertexList().add(centre);//centre point
-		//this.UseAveragedNormals(90); tested as working when not using the CENTRE_TO_POINT vertex finder which is more efficient for this shape
+		
+		return Pair.of(ImmutableList.copyOf(vertexList), facets.build());
 	}
 	
-	public double getRadius() {
-		return radius;
-	}
-
-	public int getPointsPerCircle() {
-		return pointsPerCircle;
-	}
-
-	public int getAngleProgression() {
-		return angleProgression;
-	}
-
-	@Override
-	public Point getCentre()
-	{
-		return this.centre;
+	private static int checkAngleProgression(int angleProgression) {
+		return 360 % angleProgression == 0 ? angleProgression : 10;
 	}
 }

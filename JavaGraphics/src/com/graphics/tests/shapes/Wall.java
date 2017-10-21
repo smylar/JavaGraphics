@@ -1,10 +1,8 @@
 package com.graphics.tests.shapes;
 
-import java.util.List;
-
 import org.apache.commons.lang3.tuple.Pair;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableList;
 import com.graphics.lib.Facet;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
@@ -15,10 +13,10 @@ public class Wall extends CanvasObject {
 		super(() -> init(rows,cols,10));
 	}
 	
-	private static Pair<List<WorldCoord>, List<Facet>> init(int rows, int cols, int blockSize) {
+	private static Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>> init(int rows, int cols, int blockSize) {
 		WorldCoord[][] coords = new WorldCoord[rows + 1][cols + 1]; 
-		List<WorldCoord> vertexList = Lists.newArrayList();
-		List<Facet> facets = Lists.newArrayList();
+		ImmutableList.Builder<WorldCoord> vertexList = ImmutableList.builder();
+		ImmutableList.Builder<Facet> facets = ImmutableList.builder();
 		
 		for (int c = 0 ; c < cols + 1 ; c++){
 			WorldCoord coord = new WorldCoord(c * blockSize, 0, 0);
@@ -37,6 +35,6 @@ public class Wall extends CanvasObject {
 				}
 			}
 		}
-		return Pair.of(vertexList, facets);		
+		return Pair.of(vertexList.build(), facets.build());		
 	}
 }
