@@ -1,8 +1,13 @@
 package com.graphics.lib.canvas;
 
+import static com.graphics.lib.traits.TraitManager.TRAITS;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Set;
+
+import com.google.common.collect.Sets;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ITrait;
 
@@ -18,6 +23,8 @@ public class TraitInterceptor implements InvocationHandler {
     
     private final ICanvasObject proxiedObject;
     
+    private final Set<String> excludes = Sets.newHashSet("equals", "getobjecttag", "hashcode");
+    
     private TraitInterceptor (ICanvasObject proxiedObject) {
         this.proxiedObject = proxiedObject;
     }
@@ -30,10 +37,11 @@ public class TraitInterceptor implements InvocationHandler {
     
     
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {    	
-        proxiedObject.getTraits().stream().filter(trait -> trait.getInterceptors().containsKey(method.getName().toLowerCase()))
-                                          .forEach(trait -> invokeTrait(trait, trait.getInterceptors().get(method.getName().toLowerCase()), args));
-        
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {  
+    	if (!excludes.contains(method.getName().toLowerCase())) {
+    		TRAITS.getTraits(proxiedObject).stream().filter(trait -> trait.getInterceptors().containsKey(method.getName().toLowerCase()))
+                                           .forEach(trait -> invokeTrait(trait, trait.getInterceptors().get(method.getName().toLowerCase()), args));
+    	}
         return method.invoke(proxiedObject, args);
     }
     

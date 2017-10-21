@@ -3,6 +3,7 @@ package com.graphics.lib.transform;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import com.graphics.lib.Point;
@@ -19,14 +20,16 @@ public abstract class Transform {
 	private boolean completed = false;
 	private boolean cancelled = false;
 	private String name = "";
+	private Optional<Consumer<Point>> lastAction = Optional.empty();
 	protected boolean resetAfterComplete = false;
 	
 	public String getName() {
 		return name;
 	}
 
-	public void setName(String name) {
+	public Transform setName(String name) {
 		this.name = name;
+		return this;
 	}
 
 	public void setResetAfterComplete(boolean resetAfterComplete) {
@@ -45,11 +48,21 @@ public abstract class Transform {
 	
 	public final void doTransform(Collection<? extends Point> points){
 		this.beforeTransform();
-		points.stream().forEach(p -> {
-			this.doTransformSpecific().accept(p);
-		});
+		Consumer<Point> action = this.doTransformSpecific();
+		transform(points, action);
+		lastAction = Optional.of(action);
 		this.afterTransform();
 	}
+	
+	public final void replay(Collection<? extends Point> points) {
+		lastAction.ifPresent(action -> transform(points, action));
+	}
+	
+	public final void replay(Point point) {
+		lastAction.ifPresent(action -> action.accept(point));
+	}
+	
+	
 	
 	public final boolean isComplete(){
 		if (this.cancelled) return true;
@@ -72,6 +85,12 @@ public abstract class Transform {
 		this.completed = true;
 		this.cancelled = true;
 		this.resetAfterComplete = false;
+	}
+	
+	protected final void transform(Collection<? extends Point> points, Consumer<Point> action) {
+		points.stream().forEach(p -> {
+			action.accept(p);
+		});
 	}
 	
 	protected void setCompleted(boolean completed) {

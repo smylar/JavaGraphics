@@ -4,10 +4,13 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 
 import com.graphics.lib.canvas.TraitInterceptor;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ITracker;
+import com.graphics.lib.transform.Transform;
 
 /**
  * Trait whereby an object will completely mirror the transforms applied to another object<br/>
@@ -16,7 +19,7 @@ import com.graphics.lib.interfaces.ITracker;
  * @author paul.brandon
  *
  */
-public class TrackingTrait implements ITracker  {
+public class TrackingTrait implements ITracker, Observer  {
     private static final Map<String, Method> interceptors = new HashMap<>();
 	public static final String TRACKING_TAG = "tracking_tag";
 	
@@ -81,8 +84,9 @@ public class TrackingTrait implements ITracker  {
         	if (remove) {
         		target.getChildren().remove(this); //if delete parent will remove it anyway
         	}
-        	target.getVertexList().removeIf(v -> v.hasTag(parent.getObjectTag()));
-			parent.getVertexList().forEach(v -> v.removeTag(parent.getObjectTag()));
+//        	target.getVertexList().removeIf(v -> v.hasTag(parent.getObjectTag()));
+//			parent.getVertexList().forEach(v -> v.removeTag(parent.getObjectTag()));
+        	target.deleteObserver(this);
             target = null;
             parent.removeFlag(TRACKING_TAG);
         }
@@ -95,8 +99,17 @@ public class TrackingTrait implements ITracker  {
         
         target = pending;
     	
-		parent.getVertexList().forEach(v -> v.addTag(parent.getObjectTag()));
-		target.getVertexList().addAll(parent.getVertexList());
+//		parent.getVertexList().forEach(v -> v.addTag(parent.getObjectTag()));
+//		target.getVertexList().addAll(parent.getVertexList());
+        target.addObserver(this);
     }
+
+	@Override
+	public void update(Observable obs, Object payload) {
+		if (payload instanceof Transform) {
+			parent.replayTransform((Transform)payload);
+		}
+		
+	}
 
 }

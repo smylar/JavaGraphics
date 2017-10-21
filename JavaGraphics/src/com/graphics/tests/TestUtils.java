@@ -1,5 +1,7 @@
 package com.graphics.tests;
 
+import static com.graphics.lib.traits.TraitManager.TRAITS;
+
 import java.awt.Color;
 import java.awt.Graphics;
 import java.util.function.BiConsumer;
@@ -92,7 +94,7 @@ public class TestUtils {
 				
 				PluginLibrary.explode().execute(plugable).forEach(c -> {
 					Canvas3D.get().replaceShader(obj, ShaderFactory.FLAT);
-					c.getTrait(IPlugable.class).ifPresent(p -> p.registerPlugin(Events.CHECK_COLLISION, getBouncePlugin(), true));
+					TRAITS.getTrait(c, IPlugable.class).ifPresent(p -> p.registerPlugin(Events.CHECK_COLLISION, getBouncePlugin(), true));
 					if (!obj.hasFlag(SILENT_EXPLODE) && clipLibrary != null) clipLibrary.playSound("EXPLODE", -20f);
 				});
 				plugable.registerSingleAfterDrawPlugin(Events.FLASH, PluginLibrary.flash(Canvas3D.get().getLightSources()));

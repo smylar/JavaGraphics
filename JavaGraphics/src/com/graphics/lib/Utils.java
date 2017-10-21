@@ -7,6 +7,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.graphics.lib.canvas.Canvas3D;
 import com.graphics.lib.canvas.FunctionHandler;
 import com.graphics.lib.interfaces.ICanvasObject;
@@ -125,7 +127,7 @@ public class Utils {
 			//circles touch at one point
 			Vector v = p1.vectorToPoint(p2).getUnitVector();
 			Point p3 = new Point(p1.x + (v.x*r1) , p1.y + (v.y*r1), 0);
-			return Optional.of(new Pair<>(p3, p3));
+			return Optional.of(Pair.of(p3, p3));
 		}
 		
 		double a = (r1*r1 - r2*r2 + dist*dist)/(2*dist);
@@ -134,7 +136,7 @@ public class Utils {
 		double p3y = p1.y + (p2.y - p1.y)*(a/dist);
 		Point p3 = new Point(p3x, p3y, 0);
 		
-		return Optional.of(new Pair<>(
+		return Optional.of(Pair.of(
 				new Point(p3.x + h*(p2.y - p1.y)/dist, p3.y - h*(p2.x - p1.x)/dist, 0),
 				new Point(p3.x - h*(p2.y - p1.y)/dist, p3.y + h*(p2.x - p1.x)/dist, 0)
 		));

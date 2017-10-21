@@ -1,5 +1,7 @@
 package com.graphics.lib.shader;
 
+import static com.graphics.lib.traits.TraitManager.TRAITS;
+
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,9 +33,9 @@ public class TexturedGoraudShader extends GoraudShader {
         endTexture = null;
 		textures.clear();
 		
-		this.texturableParent = parent.getTrait(ITexturable.class);
+		this.texturableParent = TRAITS.getTrait(parent, ITexturable.class);
 		
-		parent.getTrait(ITexturable.class).ifPresent(tp -> 
+		TRAITS.getTrait(parent, ITexturable.class).ifPresent(tp -> 
 			textures = tp.getTextures().stream().filter(t ->
 				            facet.getAsList().stream().allMatch(v -> tp.getTextureCoord(t, v).isPresent())
 			            ).sorted((a,b) -> b.getOrder() - a.getOrder()).collect(Collectors.toList())

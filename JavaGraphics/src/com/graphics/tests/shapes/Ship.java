@@ -1,5 +1,7 @@
 package com.graphics.tests.shapes;
 
+import static com.graphics.lib.traits.TraitManager.TRAITS;
+
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +73,7 @@ public class Ship extends CanvasObject {
 		getFacetList().get(5).setColour(Color.YELLOW);
 		
 		//self registering - based on trail plugin from plugin library
-		addTrait(new PlugableTrait()).registerPlugin("TRAIL", 
+		TRAITS.addTrait(this, new PlugableTrait()).registerPlugin("TRAIL", 
 
 					plugable -> {
 					    ICanvasObject obj = plugable.getParent();

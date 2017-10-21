@@ -1,7 +1,6 @@
 package com.graphics.lib.interfaces;
 
 import java.awt.Color;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Observer;
@@ -57,7 +56,7 @@ public interface ICanvasObject {
 
 	void cancelNamedTransform(String key);
 
-	Map<Point, ArrayList<Facet>> getVertexFacetMap();
+	Map<Point, List<Facet>> getVertexFacetMap();
 
 	/**
 	 * Gets a list of transforms that are of the given type that are currently in the transform list
@@ -160,17 +159,17 @@ public interface ICanvasObject {
 	void setBaseIntensity(double intensity);
 	
 	void addObserver(Observer o);
+	
+	void deleteObserver(Observer o);
 
     void addFlag(String flag);
 
     void removeFlag(String flag);
 
-    <T extends ITrait> Optional<T> getTrait(Class<T> cl);
-
-    Set<ITrait> getTraits();
-
-	<T extends ITrait> T addTrait(T trait);
-
     <C extends ICanvasObject> Optional<C> getObjectAs(Class<C> target);
+
+	void fixCentre();
+
+	void replayTransform(Transform t);
 
 }

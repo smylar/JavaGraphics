@@ -3,7 +3,10 @@ package com.graphics.lib.traits;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IOrientable;
 import com.graphics.lib.interfaces.IOrientation;
-import com.graphics.lib.orientation.OrientationTransform;
+import com.graphics.lib.orientation.OrientationData;
+import com.graphics.lib.transform.BaseOrientationTransform;
+import com.graphics.lib.transform.ReapplyOrientationTransform;
+import com.graphics.lib.transform.Transform;
 
 /**
  * Wrapper for a canvas object providing functionality to allow the object to be aware of its orientation, 
@@ -14,9 +17,10 @@ import com.graphics.lib.orientation.OrientationTransform;
  * @param <T> Type of the CanvasObject being wrapped
  */
 public class OrientableTrait implements IOrientable {
+	//TODO refactor not to add to object vertex list, intercept and apply separately, once mechanism worked out in Trackable
 	public static final String ORIENTATION_TAG = "Orientation";
 	private IOrientation orientation;
-	private OrientationTransform oTrans = new OrientationTransform();
+	private OrientationData oTrans = new OrientationData();
 	protected ICanvasObject parent;
 	
 	
@@ -38,25 +42,33 @@ public class OrientableTrait implements IOrientable {
 		return this;
 	}
 	
+	@Override
+	public Transform toBaseOrientationTransform() {
+		return new BaseOrientationTransform(oTrans, orientation);
+	}
+	
+	@Override
+	public Transform reapplyOrientationTransform() {
+		return new ReapplyOrientationTransform(oTrans);
+	}
+	
 	/**
 	 * Revert object to the orientation it started in
 	 */
 	@Override
+	@Deprecated
 	public IOrientable toBaseOrientation(){
-		oTrans.saveCurrentTransforms(orientation);
-		oTrans.removeRotation(parent);
+//		oTrans.saveCurrentTransforms(orientation);
+//		oTrans.removeRotation(parent);
+		parent.applyTransform(toBaseOrientationTransform());
 		return this;
 	}
 	
 	@Override
+	@Deprecated
 	public IOrientable reapplyOrientation(){
-		oTrans.addRotation(parent);
-		return this;
-	}
-	
-	@Override
-	public IOrientable applyOrientation(OrientationTransform oTrans){
-		oTrans.addRotation(parent);
+//		oTrans.addRotation(parent);
+		parent.applyTransform(reapplyOrientationTransform());
 		return this;
 	}
 

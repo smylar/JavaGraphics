@@ -3,16 +3,23 @@ package com.graphics.lib.canvas;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.tuple.Pair;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.graphics.lib.Facet;
 import com.graphics.lib.GeneralPredicates;
 import com.graphics.lib.LightIntensityFinderEnum;
@@ -24,24 +31,11 @@ import com.graphics.lib.camera.Camera;
 import com.graphics.lib.collectors.CentreFinder;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ILightIntensityFinder;
-import com.graphics.lib.interfaces.ITrait;
 import com.graphics.lib.interfaces.IVertexNormalFinder;
 import com.graphics.lib.transform.Transform;
 
 /**
  * CanvasObject provides the basic functionality for representing an object and moving it around on the screen 
- * 
- * This class has been designed to be wrapped by other classes extending CanvasObject, this allows us if you wish,
- * to in effect inherit from multiple classes, so we have the flexibility to selectively add functionality to a base object.
- * <br/>
- *  e.g. We can add plugin and orientation functionality to a Sphere object without the Sphere having to provide that functionality
- *  <br>
- *  This would be done as follows (though it looks a little horrid especially if we start adding more):
- *  <br/>
- *  <code>PlugableCanvasObject&lt;?> obj = new PlugableCanvasObject&lt;CanvasObject>(new OrientableCanvasObject&lt;Ovoid>(new Sphere(20,30)));</code>
- *  <br/>
- *  <br/>
- *  However, we can still extend in the normal way so that Sphere could include this functionality
  * 
  * @author Paul Brandon
  *
@@ -49,12 +43,12 @@ import com.graphics.lib.transform.Transform;
 public class CanvasObject extends Observable implements ICanvasObject{
 	private static int nextId = 0;
 	
-	private final List<WorldCoord> vertexList = new ArrayList<>();
-    private final List<Facet> facetList = new ArrayList<>();
+	private final List<WorldCoord> vertexList;
+    private final List<Facet> facetList;
     private Color colour = new Color(255, 0, 0);
     private final List<Transform> transforms = Collections.synchronizedList(new ArrayList<>());
     private final Set<ICanvasObject> children = Collections.synchronizedSet(new HashSet<ICanvasObject>());
-    private Map<Point, ArrayList<Facet>> vertexFacetMap;
+    private Map<Point, List<Facet>> vertexFacetMap;
     private boolean processBackfaces = false;
     private boolean isVisible = true;
     private boolean isDeleted = false;
@@ -64,26 +58,34 @@ public class CanvasObject extends Observable implements ICanvasObject{
     private final Set<String> flags = new HashSet<>();
     private ILightIntensityFinder liFinder = LightIntensityFinderEnum.DEFAULT.get();    
     private IVertexNormalFinder vnFinder = VertexNormalFinderEnum.DEFAULT.get();
+    private Optional<WorldCoord> fixedCentre = Optional.empty();
     
-	private final Set<ITrait> traits = new HashSet<>(); //may move traits completely external of canvas object, possibly others too like functions
 	private final int objectId = nextId++;
 	
-	@Override
-	public final Set<ITrait> getTraits() {
-	    return traits;
+	@Deprecated
+	public CanvasObject() {
+		//TODO remove when refactored to use supplier
+		vertexList = Lists.newArrayList();
+		facetList = Lists.newArrayList();
 	}
 	
-	@Override
-	public final <T extends ITrait> T addTrait(T trait) {
-        trait.setParent(this);
-        traits.add(trait);
-        return trait;
-
+	public CanvasObject(Supplier<Pair<List<WorldCoord>, List<Facet>>> initMesh) {
+		this(initMesh, c -> {});
 	}
 	
+	public CanvasObject(Supplier<Pair<List<WorldCoord>, List<Facet>>> initMesh, Consumer<CanvasObject> postInit) {
+		Pair<List<WorldCoord>, List<Facet>> mesh = initMesh.get();
+		vertexList = ImmutableList.copyOf(mesh.getLeft());
+		facetList = ImmutableList.copyOf(mesh.getRight());
+		postInit.accept(this);
+	}
+	
+	/**
+	 * Use to save a fixed centre point so it is not recalculated every time
+	 */
 	@Override
-	public final <T extends ITrait> Optional<T> getTrait(Class<T> trait) {
-	    return traits.stream().filter(t -> trait.isAssignableFrom(t.getClass())).map(trait::cast).findFirst();
+	public void fixCentre() {
+		fixedCentre = Optional.of(generateCentre());
 	}
 	
 	@Override
@@ -224,7 +226,7 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	}
 	
 	@Override
-	public final Map<Point, ArrayList<Facet>> getVertexFacetMap() {
+	public final Map<Point, List<Facet>> getVertexFacetMap() {
 		return this.vertexFacetMap;
 	}
 
@@ -266,6 +268,7 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	public final void applyCameraTransform(Transform transform, Camera c)
 	{
 			transform.doTransform(this.vertexList.stream().map(v -> v.getTransformed(c)).collect(Collectors.toList()));
+			fixedCentre.ifPresent(centre -> transform.replay(centre.getTransformed(c)));
 	}
 	
 	/**
@@ -325,6 +328,15 @@ public class CanvasObject extends Observable implements ICanvasObject{
 		//can be called directly for singular ad-hoc adjustments, without adding to the transform list, 
 		//this should generally only be done on objects that haven't been registered to a canvas yet
 		t.doTransform(this.vertexList);
+		fixedCentre.ifPresent(t::replay);
+		doNotify(t);
+	}
+	
+	@Override
+	public final void replayTransform(Transform t)
+	{
+		t.replay(this.vertexList);
+		fixedCentre.ifPresent(t::replay);
 		doNotify(t);
 	}
 	
@@ -399,12 +411,7 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	@Override
 	public Point getCentre()
 	{
-		//default, average of all un-tagged points
-		CentreFinder centre = this.vertexList.stream()
-				.filter(GeneralPredicates.untagged(this))
-				.collect(CentreFinder::new, CentreFinder::accept, CentreFinder::combine);
-		
-		return centre.result();
+		return fixedCentre.orElse(generateCentre());
 	}
 	
 	/**
@@ -449,17 +456,17 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	public final void useAveragedNormals(int divergenceLimit)
 	{
 		//create map for getting all the facets attached to a specific vertex
-		this.vertexFacetMap = new HashMap<>();
+		Map<Point,List<Facet>> vfMap = Maps.newHashMap();
 		
 		for (Facet f : this.facetList)
 		{
 			for (WorldCoord w : f.getAsList()){
-				this.addPointFacetToMap(w, f);
+				this.addPointFacetToMap(vfMap, w, f);
 			}
 		}
 
 	 	//remove anything where the facet group is highly divergent (will then use facet normal when shading)
-	 	for (List<Facet> fl : this.vertexFacetMap.values())
+	 	for (List<Facet> fl : vfMap.values())
 	 	{
 	 		boolean isDivergent;
 	 		Vector normal = fl.get(0).getNormal();
@@ -474,6 +481,8 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	 		    fl.clear();
 	 		}
 	 	}
+	 	
+	 	this.vertexFacetMap = ImmutableMap.copyOf(vfMap);
 
 	}
 	
@@ -486,17 +495,27 @@ public class CanvasObject extends Observable implements ICanvasObject{
 		this.notifyObservers(arg);
 	}
 	
-	private void addPointFacetToMap(Point p, Facet f)
-	{
-		if (!this.vertexFacetMap.containsKey(p)){
-		    this.vertexFacetMap.put(p, new ArrayList<Facet>());
-		}
-		this.vertexFacetMap.get(p).add(f);
-	}
-	
 	@Override
 	public void setBaseIntensity(double intensity)
 	{
 		this.getFacetList().forEach(f -> f.setBaseIntensity(intensity));
+	}
+	
+	protected WorldCoord generateCentre()
+	{
+		//default, average of all un-tagged points
+		CentreFinder centre = this.vertexList.stream()
+				.filter(GeneralPredicates.untagged(this))
+				.collect(CentreFinder::new, CentreFinder::accept, CentreFinder::combine);
+		
+		return new WorldCoord(centre.result());
+	}
+	
+	private void addPointFacetToMap(Map<Point, List<Facet>> vfMap, Point p, Facet f)
+	{
+		if (!vfMap.containsKey(p)){
+			vfMap.put(p, new ArrayList<Facet>());
+		}
+		vfMap.get(p).add(f);
 	}
 }

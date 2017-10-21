@@ -1,6 +1,6 @@
 package com.graphics.lib.interfaces;
 
-import com.graphics.lib.orientation.OrientationTransform;
+import com.graphics.lib.transform.Transform;
 
 public interface IOrientable extends ITrait {
 	IOrientation getOrientation();
@@ -10,9 +10,14 @@ public interface IOrientable extends ITrait {
 	/**
 	 * Revert object to the orientation it started in
 	 */
+	@Deprecated
 	IOrientable toBaseOrientation();
 	
+	@Deprecated
 	public IOrientable reapplyOrientation();
+
 	
-	public IOrientable applyOrientation(OrientationTransform oTrans);
+	Transform toBaseOrientationTransform();
+
+	Transform reapplyOrientationTransform();
 }

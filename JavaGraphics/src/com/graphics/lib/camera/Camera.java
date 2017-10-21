@@ -1,5 +1,7 @@
 package com.graphics.lib.camera;
 
+import static com.graphics.lib.traits.TraitManager.TRAITS;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
@@ -13,8 +15,10 @@ import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IOrientable;
 import com.graphics.lib.interfaces.IOrientableCamera;
 import com.graphics.lib.interfaces.IOrientation;
-import com.graphics.lib.orientation.OrientationTransform;
-import com.graphics.lib.transform.*;
+import com.graphics.lib.orientation.OrientationData;
+import com.graphics.lib.transform.CameraTransform;
+import com.graphics.lib.transform.ReapplyOrientationTransform;
+import com.graphics.lib.transform.Translation;
 
 /**
  * Abstract camera providing base functionality of a camera, such as setting its position and moving it around.
@@ -31,7 +35,7 @@ public abstract class Camera extends Observable implements IOrientableCamera, Ob
 	private IOrientation orientation;
 	private boolean tiedObjectUpdated = false;
 	private Map<String, CameraTransform> transforms = new HashMap<String, CameraTransform>();
-	private OrientationTransform ot = new OrientationTransform();
+	private OrientationData ot = new OrientationData();
 
 	protected double dispwidth = 0;
 	protected double dispheight = 0;
@@ -59,7 +63,8 @@ public abstract class Camera extends Observable implements IOrientableCamera, Ob
 		this.tiedObjectLocator = tiedObjectLocator;
 		tiedObjectLocator.accept(tiedTo, this);
 		tiedTo.addObserver(this);
-		tiedTo.getTrait(IOrientable.class).ifPresent(o -> o.setOrientation(orientation));
+		//tiedTo.getTrait(IOrientable.class).ifPresent(o -> o.setOrientation(orientation));
+		TRAITS.getTrait(tiedTo, IOrientable.class).ifPresent(o -> o.setOrientation(orientation));
 	}
 
 	/**
@@ -159,13 +164,14 @@ public abstract class Camera extends Observable implements IOrientableCamera, Ob
 	
 	public void addCameraRotation(ICanvasObject obj)
 	{
-		ot.addRotation(obj);
+		//ot.addRotation(obj);
+		obj.applyTransform(new ReapplyOrientationTransform(ot));
 	}
 	
-	public void removeCameraRotation(ICanvasObject obj)
-	{	
-		ot.removeRotation(obj);
-	}
+//	public void removeCameraRotation(ICanvasObject obj)
+//	{	
+//		ot.removeRotation(obj);
+//	}
 	
 	public final void getView(ICanvasObject obj){
 		this.getViewSpecific(obj);

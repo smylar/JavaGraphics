@@ -1,5 +1,7 @@
 package com.graphics.tests.shapes;
 
+import static com.graphics.lib.traits.TraitManager.TRAITS;
+
 import java.awt.Color;
 
 import com.graphics.lib.texture.BmpTexture;
@@ -13,7 +15,7 @@ public class TexturedCuboid extends Cuboid {
 	public TexturedCuboid(int height, int width, int depth) {
 		super(height, width, depth);
 		
-		this.addTrait(new TexturableTrait())
+		TRAITS.addTrait(this, new TexturableTrait())
         		.addTexture(new TestTexture())
                 .addTexture(new BmpTexture("texture1", Color.white).setApplyLighting(false).setOrder(1))
                 .mapTexture(new SimpleTextureMapper());

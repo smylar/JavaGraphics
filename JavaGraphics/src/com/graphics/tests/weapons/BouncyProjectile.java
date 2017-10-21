@@ -1,5 +1,7 @@
 package com.graphics.tests.weapons;
 
+import static com.graphics.lib.traits.TraitManager.TRAITS;
+
 import java.awt.Color;
 import java.util.Date;
 
@@ -22,7 +24,7 @@ public class BouncyProjectile extends Projectile {
 	@Override
 	public CanvasObject get(Vector initialVector, double parentSpeed) {
 	    Sphere proj = new Sphere(18,20);
-		proj.addTrait(new TrackingTrait());
+		TRAITS.addTrait(proj, new TrackingTrait());
 		proj.setBaseIntensity(1);
 		proj.setColour(new Color(0, 255, 255, 80));
 		proj.setCastsShadow(false);
@@ -34,7 +36,7 @@ public class BouncyProjectile extends Projectile {
 		move.moveUntil(t -> t.getDistanceMoved() > this.getRange() || (t.getSpeed() == 0 && new Date().getTime() > delTime));
 		proj.addTransform(move);
 
-		proj.addTrait(new PlugableTrait()).registerPlugin(Events.CHECK_COLLISION, getBouncePlugin(), true)
+		TRAITS.addTrait(proj, new PlugableTrait()).registerPlugin(Events.CHECK_COLLISION, getBouncePlugin(), true)
 		                                  .registerPlugin("Trail", PluginLibrary.generateTrailParticles(Color.LIGHT_GRAY, 20, 13, 0.66), true);
 		
 		return proj;
@@ -48,7 +50,7 @@ public class BouncyProjectile extends Projectile {
 				if (impactee != null){
 					if (impactee.hasFlag(Events.STICKY)){ 
 						PluginLibrary.stop2().execute(obj);
-						obj.getParent().getTrait(ITracker.class).ifPresent(o -> o.observeAndMatch(impactee));
+						TRAITS.getTrait(obj.getParent(), ITracker.class).ifPresent(o -> o.observeAndMatch(impactee));
 						if (getClipLibrary() != null) getClipLibrary().playSound("STICK", -20f);
 					}
 					else {

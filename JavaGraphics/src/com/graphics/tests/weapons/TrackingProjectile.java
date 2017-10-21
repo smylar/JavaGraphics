@@ -1,5 +1,7 @@
 package com.graphics.tests.weapons;
 
+import static com.graphics.lib.traits.TraitManager.TRAITS;
+
 import java.awt.Color;
 
 import com.graphics.lib.Vector;
@@ -29,8 +31,8 @@ public class TrackingProjectile extends TargetedProjectile {
 		MovementTransform move = new MovementTransform(initialVector, this.getSpeed());
 		move.moveUntil(t -> t.getDistanceMoved() > this.getRange());
 		proj.addTransform(move);
-		
-		proj.addTrait(new PlugableTrait())
+
+		TRAITS.addTrait(proj, new PlugableTrait())
 		  .registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollided(TestUtils.getFilteredObjectList(), Events.EXPLODE, Events.EXPLODE), true)
 		  .registerPlugin(Events.EXPLODE, TestUtils.getExplodePlugin(this.getClipLibrary()), false)
 		  .registerPlugin("Track", PluginLibrary.track(this.getTargetFinder().find(), 1), true); 

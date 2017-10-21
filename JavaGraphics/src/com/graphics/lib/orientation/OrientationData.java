@@ -17,7 +17,7 @@ import com.graphics.lib.transform.Rotation;
  * @author Paul Brandon
  *
  */
-public class OrientationTransform {
+public class OrientationData {
 	private double xRot = 0;
 	private double yRot = 0;
 	private double zRot = 0;
@@ -110,24 +110,24 @@ public class OrientationTransform {
 	 * 
 	 * @param obj
 	 */
-	public void addRotation(ICanvasObject obj)
-	{
-		obj.applyTransform(Axis.Z.getRotation(zRot));
-		obj.applyTransform(Axis.X.getRotation(xRot));
-		obj.applyTransform(Axis.Y.getRotation(yRot));
-	}
+//	public void addRotation(ICanvasObject obj)
+//	{
+//		obj.applyTransform(Axis.Z.getRotation(zRot));
+//		obj.applyTransform(Axis.X.getRotation(xRot));
+//		obj.applyTransform(Axis.Y.getRotation(yRot));
+//	}
 	
 	/**
 	 * Remove the stored rotation from a given object
 	 * 
 	 * @param obj
 	 */
-	public void removeRotation(ICanvasObject obj)
-	{	
-		obj.applyTransform(Axis.Y.getRotation(-yRot));
-		obj.applyTransform(Axis.X.getRotation(-xRot));
-		obj.applyTransform(Axis.Z.getRotation(-zRot));
-	}
+//	public void removeRotation(ICanvasObject obj)
+//	{	
+//		obj.applyTransform(Axis.Y.getRotation(-yRot));
+//		obj.applyTransform(Axis.X.getRotation(-xRot));
+//		obj.applyTransform(Axis.Z.getRotation(-zRot));
+//	}
 	
 	public static List<Rotation> getRotationsForVector(Vector v){
 		List<Rotation> rots = new ArrayList<>();
