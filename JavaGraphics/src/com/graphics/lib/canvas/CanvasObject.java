@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.graphics.lib.Facet;
 import com.graphics.lib.GeneralPredicates;
 import com.graphics.lib.LightIntensityFinderEnum;
@@ -31,6 +32,7 @@ import com.graphics.lib.camera.Camera;
 import com.graphics.lib.collectors.CentreFinder;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ILightIntensityFinder;
+import com.graphics.lib.interfaces.ITrait;
 import com.graphics.lib.interfaces.IVertexNormalFinder;
 import com.graphics.lib.transform.Transform;
 
@@ -60,6 +62,7 @@ public class CanvasObject extends Observable implements ICanvasObject{
     private IVertexNormalFinder vnFinder = VertexNormalFinderEnum.DEFAULT.get();
     private Optional<WorldCoord> fixedCentre = Optional.empty();
     
+    private Set<ITrait> traits = Sets.newHashSet();
 	private final int objectId = nextId++;
 	
 	@Deprecated
@@ -78,6 +81,23 @@ public class CanvasObject extends Observable implements ICanvasObject{
 		vertexList = ImmutableList.copyOf(mesh.getLeft());
 		facetList = ImmutableList.copyOf(mesh.getRight());
 		postInit.accept(this);
+	}
+	
+	@Override
+	public final Set<ITrait> getTraits() {
+	    return traits;
+	}
+	
+	@Override
+	public final <T extends ITrait> T addTrait(T trait) {
+        trait.setParent(this);
+        traits.add(trait);
+        return trait;
+	}
+	
+	@Override
+	public final <T extends ITrait> Optional<T> getTrait(Class<T> trait) {
+	    return traits.stream().filter(t -> trait.isAssignableFrom(t.getClass())).map(trait::cast).findFirst();
 	}
 	
 	/**

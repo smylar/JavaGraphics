@@ -1,7 +1,5 @@
 package com.graphics.lib.camera;
 
-import static com.graphics.lib.traits.TraitManager.TRAITS;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
@@ -63,8 +61,7 @@ public abstract class Camera extends Observable implements IOrientableCamera, Ob
 		this.tiedObjectLocator = tiedObjectLocator;
 		tiedObjectLocator.accept(tiedTo, this);
 		tiedTo.addObserver(this);
-		//tiedTo.getTrait(IOrientable.class).ifPresent(o -> o.setOrientation(orientation));
-		TRAITS.getTrait(tiedTo, IOrientable.class).ifPresent(o -> o.setOrientation(orientation));
+		tiedTo.getTrait(IOrientable.class).ifPresent(o -> o.setOrientation(orientation));
 	}
 
 	/**

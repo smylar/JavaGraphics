@@ -1,5 +1,8 @@
 package com.graphics.lib.traits;
 
+import java.util.Observable;
+import java.util.Observer;
+
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IOrientable;
 import com.graphics.lib.interfaces.IOrientation;
@@ -16,29 +19,27 @@ import com.graphics.lib.transform.Transform;
  *
  * @param <T> Type of the CanvasObject being wrapped
  */
-public class OrientableTrait implements IOrientable {
-	//TODO refactor not to add to object vertex list, intercept and apply separately, once mechanism worked out in Trackable
+public class OrientableTrait implements IOrientable, Observer {
 	public static final String ORIENTATION_TAG = "Orientation";
 	private IOrientation orientation;
 	private OrientationData oTrans = new OrientationData();
 	protected ICanvasObject parent;
 	
-	
 	@Override
 	public IOrientation getOrientation() {		
 		return this.orientation;
 	}
-
+	
 	@Override
 	public IOrientable setOrientation(IOrientation orientation) {
-		if (this.orientation != null){
-			parent.getVertexList().removeIf(v -> v.hasTag(ORIENTATION_TAG));
-		}
+//		if (this.orientation != null){
+//			parent.getVertexList().removeIf(v -> v.hasTag(ORIENTATION_TAG));
+//		}
 		
 		this.orientation = orientation;
-		if (this.orientation != null){
-			parent.getVertexList().addAll(this.orientation.getRepresentation().getVertexList());
-		}
+//		if (this.orientation != null){
+//			parent.getVertexList().addAll(this.orientation.getRepresentation().getVertexList());
+//		}
 		return this;
 	}
 	
@@ -58,8 +59,6 @@ public class OrientableTrait implements IOrientable {
 	@Override
 	@Deprecated
 	public IOrientable toBaseOrientation(){
-//		oTrans.saveCurrentTransforms(orientation);
-//		oTrans.removeRotation(parent);
 		parent.applyTransform(toBaseOrientationTransform());
 		return this;
 	}
@@ -67,14 +66,31 @@ public class OrientableTrait implements IOrientable {
 	@Override
 	@Deprecated
 	public IOrientable reapplyOrientation(){
-//		oTrans.addRotation(parent);
 		parent.applyTransform(reapplyOrientationTransform());
 		return this;
 	}
 
 	@Override
 	public void setParent(ICanvasObject parent) {
-		this.parent = parent;
+		if (this.parent != null) {
+			this.parent.deleteObserver(this);
+		}
+		if (parent != null) {
+			this.parent = parent;
+			parent.addObserver(this);
+		}
+	}
+	
+	public void applyTransform(Transform transform) {
+		this.orientation.getRepresentation().replayTransform(transform);
+	}
+
+	@Override
+	public void update(Observable obs, Object args) {
+		if (args instanceof Transform) {
+			this.orientation.getRepresentation().replayTransform((Transform)args);
+		}
+		
 	}
 
 }

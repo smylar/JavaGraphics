@@ -172,4 +172,10 @@ public interface ICanvasObject {
 
 	void replayTransform(Transform t);
 
+	<T extends ITrait> T addTrait(T trait);
+
+	<T extends ITrait> Optional<T> getTrait(Class<T> trait);
+
+	Set<ITrait> getTraits();
+
 }

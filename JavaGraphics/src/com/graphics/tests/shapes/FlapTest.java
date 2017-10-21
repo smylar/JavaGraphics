@@ -1,7 +1,5 @@
 package com.graphics.tests.shapes;
 
-import static com.graphics.lib.traits.TraitManager.TRAITS;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +16,7 @@ public class FlapTest extends Bird {
 	
 	public FlapTest(){
 		super();
-		AnimatedTrait animatable = TRAITS.addTrait(this, new AnimatedTrait());
+		AnimatedTrait animatable = addTrait(new AnimatedTrait());
 		animatable.setOrientation(new SimpleOrientation(AnimatedTrait.ORIENTATION_TAG));
 		
 		SkeletonNode rootNode = new SkeletonNode();

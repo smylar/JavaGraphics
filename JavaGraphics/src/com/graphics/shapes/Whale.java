@@ -1,7 +1,5 @@
 package com.graphics.shapes;
 
-import static com.graphics.lib.traits.TraitManager.TRAITS;
-
 import java.util.stream.Collectors;
 
 import com.graphics.lib.Axis;
@@ -186,7 +184,7 @@ public class Whale extends CanvasObject {
 		tailNode.setMin(Axis.Y,-10);
 		tailNode.getAnimations().put("TAIL",  PivotSkeletonNode.getDefaultPivotAction(Axis.Y, 0.5, 0.5));
 		
-		AnimatedTrait animated = TRAITS.addTrait(this, new AnimatedTrait());
+		AnimatedTrait animated = addTrait(new AnimatedTrait());
 		
 		animated.setOrientation(new SimpleOrientation(AnimatedTrait.ORIENTATION_TAG));
 		animated.getOrientation().getRepresentation().getVertexList().get(0).z = -1;

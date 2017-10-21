@@ -1,7 +1,5 @@
 package com.graphics.tests.weapons;
 
-import static com.graphics.lib.traits.TraitManager.TRAITS;
-
 import java.awt.Color;
 
 import com.graphics.lib.Axis;
@@ -28,11 +26,11 @@ public class ExplodingProjectile extends Projectile{
 	public CanvasObject get(Vector initialVector, double parentSpeed) {
 	    Ovoid proj = new Ovoid(20,0.3,30);
 		proj.applyTransform(new Rotation(Axis.X, -90));
-		TRAITS.addTrait(proj, new OrientableTrait()).setOrientation(new SimpleOrientation());
+		proj.addTrait(new OrientableTrait()).setOrientation(new SimpleOrientation());
 		proj.setBaseIntensity(1);
 		proj.setColour(new Color(255, 0, 0, 80));
 		proj.setCastsShadow(false);
-		TRAITS.addTrait(proj, new PlugableTrait()).registerPlugin(Events.EXPLODE, TestUtils.getExplodePlugin(getClipLibrary()), false)
+		proj.addTrait(new PlugableTrait()).registerPlugin(Events.EXPLODE, TestUtils.getExplodePlugin(getClipLibrary()), false)
 		                                  .registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollidedNew(TestUtils.getFilteredObjectList(), Events.EXPLODE, Events.EXPLODE), true);
 		proj.addFlag(TestUtils.SILENT_EXPLODE);
 
@@ -51,7 +49,7 @@ public class ExplodingProjectile extends Projectile{
 		MovementTransform move = new MovementTransform(initialVector, this.getSpeed() + parentSpeed){
 			@Override
 			public void onComplete(){
-				TRAITS.getTrait(proj, PlugableTrait.class).ifPresent(p -> p.executePlugin(Events.EXPLODE));
+				proj.getTrait(PlugableTrait.class).ifPresent(p -> p.executePlugin(Events.EXPLODE));
 			}
 		};
 		
@@ -59,25 +57,13 @@ public class ExplodingProjectile extends Projectile{
 		move.moveUntil(t -> t.getDistanceMoved() >= this.getRange());
 		proj.addTransform(move);
 		
-		Rotation rot = new Rotation(Axis.Z, 20)
-		{
-			@Override
-			public void beforeTransform(){
-				super.beforeTransform();
-				TRAITS.getTrait(proj, IOrientable.class).ifPresent(o -> o.toBaseOrientation());
-			}
-			
-			@Override
-			public void afterTransform(){
-				super.afterTransform();	
-				TRAITS.getTrait(proj, IOrientable.class).ifPresent(o -> o.reapplyOrientation());
-			}
-		}
-		;
-		
-		Transform projt = new RepeatingTransform<Rotation>(rot, t -> move.isCompleteSpecific());
+		Transform projt = new RepeatingTransform<Rotation>(new Rotation(Axis.Z, 20), t -> move.isCompleteSpecific());
 
+		proj.getTrait(IOrientable.class).ifPresent(o -> proj.addTransform(o.toBaseOrientationTransform()));
+		
 		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(proj, projt);
+		
+		proj.getTrait(IOrientable.class).ifPresent(o -> proj.addTransform(o.reapplyOrientationTransform()));
 		proj.deleteAfterTransforms();
 		proj.setProcessBackfaces(true);
 		

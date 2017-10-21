@@ -1,7 +1,5 @@
 package com.graphics.lib.plugins;
 
-import static com.graphics.lib.traits.TraitManager.TRAITS;
-
 import java.awt.Color;
 import java.util.Collection;
 import java.util.HashSet;
@@ -91,7 +89,7 @@ public class PluginLibrary {
     		{
     			ICanvasObject fragment = TraitInterceptor.intercept(new CanvasObject());
     			//fragment.addTrait(new PlugableTrait());
-    			TRAITS.addTrait(fragment, new PlugableTrait());
+    			fragment.addTrait(new PlugableTrait());
     			for (WorldCoord p : f.getAsList()){
     				fragment.getVertexList().add(new WorldCoord(p.x, p.y, p.z));
     			}
@@ -158,10 +156,11 @@ public class PluginLibrary {
 				if (obj.getVertexList().stream().anyMatch(p -> FunctionHandler.getFunctions(impactee).isPointInside(impactee, p)))
 				{
 					if (impactee.equals(inCollision)) { return null;}
-					if (impactorPlugin != null) plugable.executePlugin(impactorPlugin);
-					if (impacteePlugin != null){
-						//impactee.getTrait(IPlugable.class).ifPresent(impacteePlugable -> impacteePlugable.executePlugin(impacteePlugin));
-						TRAITS.getTrait(impactee, IPlugable.class).ifPresent(impacteePlugable -> impacteePlugable.executePlugin(impacteePlugin));
+					if (impactorPlugin != null) {
+						plugable.executePlugin(impactorPlugin);
+					}
+					if (impacteePlugin != null) {
+						impactee.getTrait(IPlugable.class).ifPresent(impacteePlugable -> impacteePlugable.executePlugin(impacteePlugin));
 					}
 
 					plugable.registerPlugin(IN_COLLISION, o -> impactee, false);
@@ -204,10 +203,11 @@ public class PluginLibrary {
 						Point in = f.getIntersectionPointWithFacetPlane(prevPoint, prevPoint.vectorToPoint(p).getUnitVector(), false);
 						if (f.isPointWithin(in) && prevPoint.distanceTo(in) <= prevPoint.distanceTo(p)){
 							if (impactee.equals(inCollision)) { return null;}
-							if (impactorPlugin != null) plugable.executePlugin(impactorPlugin);
+							if (impactorPlugin != null) {
+								plugable.executePlugin(impactorPlugin);
+							}
 							if (impacteePlugin != null){
-								//impactee.getTrait(IPlugable.class).ifPresent(impacteePlugable -> impacteePlugable.executePlugin(impacteePlugin));
-								TRAITS.getTrait(impactee, IPlugable.class).ifPresent(impacteePlugable -> impacteePlugable.executePlugin(impacteePlugin));
+								impactee.getTrait(IPlugable.class).ifPresent(impacteePlugable -> impacteePlugable.executePlugin(impacteePlugin));
 							}
 
 							plugable.registerPlugin(IN_COLLISION, o -> impactee, false);

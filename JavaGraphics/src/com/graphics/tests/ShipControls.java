@@ -1,7 +1,5 @@
 package com.graphics.tests;
 
-import static com.graphics.lib.traits.TraitManager.TRAITS;
-
 import java.util.List;
 
 import com.graphics.lib.Axis;
@@ -20,7 +18,7 @@ public final class ShipControls extends ObjectInputController<Ship> {
 	
 	public ShipControls(Ship controlledObject) throws Exception {
 		super(controlledObject);
-		orientable = TRAITS.getTrait(controlledObject, IOrientable.class).get();
+		orientable = controlledObject.getTrait(IOrientable.class).get();
 	}
 
 	public void increaseSpeed(){

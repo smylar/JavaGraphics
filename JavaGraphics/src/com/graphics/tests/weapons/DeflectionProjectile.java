@@ -1,7 +1,5 @@
 package com.graphics.tests.weapons;
 
-import static com.graphics.lib.traits.TraitManager.TRAITS;
-
 import java.awt.Color;
 
 import com.graphics.lib.Point;
@@ -27,7 +25,7 @@ public class DeflectionProjectile extends TargetedProjectile {
 		proj.deleteAfterTransforms();
 		proj.setProcessBackfaces(true);
 
-		TRAITS.addTrait(proj, new PlugableTrait()).registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollided(TestUtils.getFilteredObjectList(), Events.EXPLODE, Events.EXPLODE), true)
+		proj.addTrait(new PlugableTrait()).registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollided(TestUtils.getFilteredObjectList(), Events.EXPLODE, Events.EXPLODE), true)
 		                                  .registerPlugin(Events.EXPLODE, TestUtils.getExplodePlugin(this.getClipLibrary()), false);
 		
 		ICanvasObject target = this.getTargetFinder().find();

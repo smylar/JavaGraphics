@@ -1,7 +1,5 @@
 package com.graphics.tests.weapons;
 
-import static com.graphics.lib.traits.TraitManager.TRAITS;
-
 import java.awt.Color;
 import java.util.HashSet;
 import java.util.List;
@@ -56,9 +54,9 @@ public class LaserWeapon implements IEffector {
 		lsr.setTickLife(this.duration);
 		lsr.addFlag("PHASED");
 
-		TRAITS.addTrait(lsr, new TrackingTrait());
+		lsr.addTrait(new TrackingTrait());
 		
-		TRAITS.addTrait(lsr, new PlugableTrait()).registerPlugin("LASER", 
+		lsr.addTrait(new PlugableTrait()).registerPlugin("LASER", 
 				obj -> {
 						if (lsr.getTickLife() <= 0) {
 							lsr.setDeleted(true);
@@ -84,13 +82,13 @@ public class LaserWeapon implements IEffector {
 		
 		lsr.addFlag(Events.NO_SHADE);
 		
-		TRAITS.getTrait(parent, PlugableTrait.class).ifPresent(p -> 
+		parent.getTrait(PlugableTrait.class).ifPresent(p -> 
 			p.registerSingleAfterDrawPlugin("ADD_LASER", obj -> {
 				for (Rotation r : OrientationData.getRotationsForVector(effectVector.getVector())) {
 					lsr.applyTransform(r);
 				}
 				CanvasObjectFunctions.DEFAULT.get().moveTo(lsr, origin.find());
-				TRAITS.getTrait(lsr, TrackingTrait.class).ifPresent(trait -> trait.observeAndMatch(parent));
+				lsr.getTrait(TrackingTrait.class).ifPresent(trait -> trait.observeAndMatch(parent));
 				return null;
 			})
 		);
@@ -122,7 +120,7 @@ public class LaserWeapon implements IEffector {
 	}
 	
 	private boolean markTexture(IntersectionData<ICanvasObject> intersectionData) {
-		Optional<ITexturable> texturable = TRAITS.getTrait(intersectionData.getParent(), ITexturable.class);
+		Optional<ITexturable> texturable = intersectionData.getParent().getTrait(ITexturable.class);
 		if (!texturable.isPresent()) return false;
 		
 		List<WorldCoord> coords = intersectionData.getFacet().getAsList();
