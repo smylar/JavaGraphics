@@ -1,6 +1,6 @@
 package com.graphics.lib.interfaces;
 
-import java.util.List;
+import java.awt.image.BufferedImage;
 
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.shader.ShaderFactory;
@@ -32,8 +32,12 @@ public interface IZBuffer {
 	 * <code>Map{xValue, Map{yValue, item}}</code>
 	 * @return The Z Buffer map
 	 */
-	//public Map<Integer, HashMap<Integer, ZBufferItem>> getBuffer();
-	public List<List<ZBufferItem>> getBuffer();
+	public BufferedImage getBuffer();
+	
+	/**
+	 * Refresh the image buffer with the current data
+	 */
+	public void refreshBuffer();
 	
 	
 	/**

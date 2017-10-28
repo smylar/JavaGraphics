@@ -1,6 +1,7 @@
 package com.graphics.lib.zbuffer;
 
 import java.awt.Color;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -18,6 +19,7 @@ import com.graphics.lib.shader.ShaderFactory;
 
 public class ZBuffer implements IZBuffer{
 	private List<List<ZBufferItem>> zBuffer = new ArrayList<>();
+	private BufferedImage imageBuf = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
 	private int dispWidth;
 	private int dispHeight;
 	private int skip = 2; //controls how often we do a colour calculation, a value of 1 checks all lines, whereas 3 calculates every 3rd line and intervening points use the same as the last calculated point
@@ -113,8 +115,21 @@ public class ZBuffer implements IZBuffer{
 	}
 	
 	@Override
-	public List<List<ZBufferItem>> getBuffer() {
-		return zBuffer;
+	public BufferedImage getBuffer() {
+		return imageBuf;
+	}
+	
+	@Override
+	public void refreshBuffer() {
+		zBuffer.parallelStream().forEach(line -> {
+			line.stream().forEach(item -> {
+				if (item.isActive()) {
+					imageBuf.setRGB(item.getX(), item.getY(), item.getColour().getRGB());
+				} else {
+					imageBuf.setRGB(item.getX(), item.getY(), Color.WHITE.getRGB());
+				}
+			});
+		});
 	}
 
 	private void processScanline(ScanLine scanLine, ICanvasObject parent, int x, IShader shader) {
@@ -253,6 +268,9 @@ public class ZBuffer implements IZBuffer{
 				}
 				zBuffer.add(list);
 			}
+			
+			imageBuf = new BufferedImage(width + 1, height + 1, BufferedImage.TYPE_INT_ARGB);
+			imageBuf.setAccelerationPriority(0.75f);
 		}
 	}
 

@@ -53,7 +53,6 @@ public class Canvas3D extends JPanel{
 	private List<BiConsumer<Canvas3D,Graphics>> drawPlugins = new ArrayList<>();
 	private boolean drawShadows = false;
 	private Facet floor = null;
-	private boolean okToPaint = false;
 
 	protected Canvas3D(Camera camera)
     {
@@ -153,14 +152,6 @@ public class Canvas3D extends JPanel{
 	public IZBuffer getzBuffer() {
 		return zBuffer;
 	}
-
-	public boolean isOkToPaint() {
-		return okToPaint;
-	}
-
-	public void setOkToPaint(boolean okToPaint) {
-		this.okToPaint = okToPaint;
-	}
 	
 	public ICanvasObject getObjectAt(int x, int y){
 		if (zBuffer == null) return null;
@@ -214,15 +205,11 @@ public class Canvas3D extends JPanel{
 			lightSourcesToAdd.clear();
 		}
 		
-		while(this.zBuffer != null && this.isOkToPaint()){
-			//while isOkToPaint() is true then repaint has not yet happened since the last draw cycle
-			try {
-				Thread.sleep(1);
-			} catch (InterruptedException e) {}
-		}
-		
-		if (this.zBuffer == null)
+		if (this.zBuffer == null) {
 			this.zBuffer = ZBufferEnum.DEFAULT.get();
+		} else {
+			this.zBuffer.clear();
+		}
 		
 		this.zBuffer.setDimensions(this.getWidth(), this.getHeight());
 		this.camera.setViewport(this.getWidth(), this.getHeight());
@@ -252,7 +239,7 @@ public class Canvas3D extends JPanel{
 		
 		
 		processShapes.clear();
-		this.setOkToPaint(true);
+		this.zBuffer.refreshBuffer();
 		this.repaint(); 
 
 		this.slaves.forEach(sl -> sl.update(this, null));		
@@ -341,30 +328,14 @@ public class Canvas3D extends JPanel{
 	@Override
 	public void paintComponent(Graphics g)
 	{
-		//TODO maybe find a way of not dumping all the ZBufferItem objects each cycle, there is a noticeable slow down with larger buffer
-		//every few seconds, presumably when the GC clears them up, but running GC each cycle hurts more, 
-		//ZBufferItems now reused and not dumped, think it has improved, however, the TreeMap in that item is still being cleared each cycle
-		//may also want to look at all the temporary Vector objects etc that get created too, though don't think that is as much an issue
-		
-		//did have paint synchronised as can't be sure when paint triggered, 
-		//but that takes resources, so trying to remove as many as possible - using an ok to paint flag here
-		if (this.zBuffer == null || !this.isOkToPaint()) return;
+		if (this.zBuffer == null) return;
 		super.paintComponent(g);
-		//java.util.Date then = new java.util.Date();
-		for (List<ZBufferItem> x : this.zBuffer.getBuffer()){
-			x.stream().filter(item -> item != null && item.isActive()).forEach(item -> {
-				g.setColor(item.getColour());
-				g.drawLine(item.getX(), item.getY(), item.getX(), item.getY());
-			});
-		}
-		//System.out.println(new java.util.Date().getTime() - then.getTime());
+
+		g.drawImage(this.zBuffer.getBuffer(), 0, 0, null);
+
 		for(BiConsumer<Canvas3D,Graphics> op : drawPlugins){
 			op.accept(this,g);
 		}
-		
-		this.zBuffer.clear();
-		
-		this.setOkToPaint(false);
 	}
 
 }
