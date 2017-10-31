@@ -17,7 +17,7 @@ import com.graphics.lib.interfaces.IOrientation;
  */
 public class ViewAngleCamera extends Camera {
 
-	private static final double cos45 = Math.cos(Math.toRadians(45));
+	private static final double COS45 = Math.cos(Math.toRadians(45));
 	private double viewAngle = 45;
 	private double tanViewAngle = Math.tan(Math.toRadians(45));
 	
@@ -29,9 +29,7 @@ public class ViewAngleCamera extends Camera {
 	public void getViewSpecific(ICanvasObject obj) {
 		
 		//synchronized(obj.getVertexList()){
-			obj.getVertexList().parallelStream().forEach(p -> {
-				p.resetTransformed(this);
-			});
+			obj.getVertexList().parallelStream().forEach(p -> p.resetTransformed(this));
 			
 			this.alignShapeToCamera(obj);
 			
@@ -150,7 +148,7 @@ public class ViewAngleCamera extends Camera {
 	
 	private ViewPort getViewport(double z){
 		double radius = this.tanViewAngle * z;
-		double boxWidth = (cos45 * radius) * 2;
+		double boxWidth = (COS45 * radius) * 2;
 		double boxHeight = boxWidth;
 		if (this.dispwidth > this.dispheight){
 			boxHeight = boxHeight * (this.dispheight / this.dispwidth);

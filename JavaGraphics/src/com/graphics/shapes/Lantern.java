@@ -1,8 +1,12 @@
 package com.graphics.shapes;
 
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+import org.apache.commons.lang3.tuple.Pair;
+
+import com.google.common.collect.ImmutableList;
 import com.graphics.lib.Facet;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
@@ -12,25 +16,7 @@ import com.graphics.lib.lightsource.ObjectTiedLightSource;
 public class Lantern extends CanvasObject implements Observer {
     
 	public Lantern() {
-	    super();
-		this.getVertexList().add(new WorldCoord(0, -10, 0)); //0
-		this.getVertexList().add(new WorldCoord(5, 0, 5)); //1
-		this.getVertexList().add(new WorldCoord(5, 0, -5)); //2
-		this.getVertexList().add(new WorldCoord(-5, 0, -5)); //3
-		this.getVertexList().add(new WorldCoord(-5, 0, 5)); //4
-		this.getVertexList().add(new WorldCoord(0, 10, 0)); //5
-		
-		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(3), this.getVertexList().get(2)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(5), this.getVertexList().get(2), this.getVertexList().get(3)));
-		
-		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(2), this.getVertexList().get(1)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(5), this.getVertexList().get(1), this.getVertexList().get(2)));
-		
-		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(1), this.getVertexList().get(4)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(5), this.getVertexList().get(4), this.getVertexList().get(1)));
-		
-		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(4), this.getVertexList().get(3)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(5), this.getVertexList().get(3), this.getVertexList().get(4)));
+	    super(Lantern::init);
 	}
 	
 	public void attachLightsource(ObjectTiedLightSource<?> ls){
@@ -46,4 +32,33 @@ public class Lantern extends CanvasObject implements Observer {
 			this.setColour(((LightSource)arg0).getActualColour());
 		}
 	}
+	
+	private static Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>> init() {
+        ImmutableList<WorldCoord> vertexList = generateVertexList();
+        return Pair.of(vertexList, generateFacetList(vertexList));
+    }
+	
+	private static ImmutableList<WorldCoord> generateVertexList()
+    {
+        return ImmutableList.of(new WorldCoord(0, -10, 0), //0
+                                new WorldCoord(5, 0, 5),//1
+                                new WorldCoord(5, 0, -5), //2
+                                new WorldCoord(-5, 0, -5), //3
+                                new WorldCoord(-5, 0, 5), //4
+                                new WorldCoord(0, 10, 0) //5
+                                );
+    }
+    
+    private static ImmutableList<Facet> generateFacetList(List<WorldCoord> vertexList)
+    {
+        return ImmutableList.of(new Facet(vertexList.get(0), vertexList.get(3), vertexList.get(2)),
+                                new Facet(vertexList.get(5), vertexList.get(2), vertexList.get(3)),
+                                new Facet(vertexList.get(0), vertexList.get(2), vertexList.get(1)),
+                                new Facet(vertexList.get(5), vertexList.get(1), vertexList.get(2)),
+                                new Facet(vertexList.get(0), vertexList.get(1), vertexList.get(4)),
+                                new Facet(vertexList.get(5), vertexList.get(4), vertexList.get(1)),
+                                new Facet(vertexList.get(0), vertexList.get(4), vertexList.get(3)),
+                                new Facet(vertexList.get(5), vertexList.get(3), vertexList.get(4))
+                                );
+    }
 }

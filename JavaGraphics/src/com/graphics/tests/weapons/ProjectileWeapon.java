@@ -1,5 +1,6 @@
 package com.graphics.tests.weapons;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import com.graphics.lib.Point;
@@ -17,12 +18,14 @@ import com.graphics.lib.transform.MovementTransform;
 public class ProjectileWeapon implements IEffector {
 	
 	private int ammoCount = 10;
-	private Projectile projectile;
-	private IPointFinder origin;
-	private IVectorFinder effectVector;
-	private ICanvasObject parent;
+	private int ticksBetweenShots = 20;
+	private long lastShotTick = -1000;
+	private final Projectile projectile;
+	private final IPointFinder origin;
+	private final IVectorFinder effectVector;
+	private final ICanvasObject parent;
 	
-	public ProjectileWeapon(Projectile proj, IPointFinder origin, IVectorFinder effectVector, ICanvasObject parent){
+	public ProjectileWeapon(Projectile proj, IPointFinder origin, IVectorFinder effectVector, ICanvasObject parent) {
 		this.origin = origin;
 		this.effectVector = effectVector;
 		this.parent = parent;
@@ -32,27 +35,20 @@ public class ProjectileWeapon implements IEffector {
 	
 	@Override
 	public void activate() {
-		if (ammoCount == 0 || Canvas3D.get() == null) return;
-		ammoCount--;
-		double parentSpeed = 0;
-		Optional<MovementTransform> move = parent.getTransformsOfType(MovementTransform.class)
-				.stream()
-				.filter(m -> m.getName().equals(ObjectInputController.FORWARD) )
-				.findFirst();
-		
-		if (move.isPresent()) parentSpeed = move.get().getSpeed();
-		
-		CanvasObject proj = projectile.get(effectVector.getVector(), parentSpeed);
-		
-		if (proj == null) return;
-		
-		Point pos = origin.find();
-		Canvas3D.get().registerObject(proj, pos);
-		ObjectTiedLightSource<LightSource> l = new ObjectTiedLightSource<LightSource>(LightSource.class, pos.x, pos.y, pos.z);
-		l.tieTo(proj);
-		l.setColour(proj.getColour());
-		l.getLightSource().setRange(400);
-		Canvas3D.get().addLightSource(l.getLightSource());
+		if (canFire()) {
+    		ammoCount--;
+    		lastShotTick = Canvas3D.get().getTicks();
+    		
+    		CanvasObject proj = generateProjectile();
+    		
+    		Point pos = origin.find();
+    		Canvas3D.get().registerObject(proj, pos);
+    		ObjectTiedLightSource<LightSource> l = new ObjectTiedLightSource<>(LightSource.class, pos.x, pos.y, pos.z);
+    		l.tieTo(proj);
+    		l.setColour(proj.getColour());
+    		l.getLightSource().setRange(400);
+    		Canvas3D.get().addLightSource(l.getLightSource());
+		}
 	}
 
 	public int getAmmoCount() {
@@ -67,13 +63,32 @@ public class ProjectileWeapon implements IEffector {
 		return projectile;
 	}
 
-	public void setProjectile(Projectile projectile) {
-		this.projectile = projectile;
-	}
+    public void setTicksBetweenShots(int millisecondsBetweenShots) {
+        this.ticksBetweenShots = millisecondsBetweenShots;
+    }
+    
+    protected ICanvasObject getParent() {
+        return parent;
+    }
 
-	@Override
-	public void deActivate() {
-		// TODO Auto-generated method stub
-		
-	}
+    private CanvasObject generateProjectile() {
+        double parentSpeed = 0;
+        Optional<MovementTransform> move = parent.getTransformsOfType(MovementTransform.class)
+                .stream()
+                .filter(m -> m.getName().equals(ObjectInputController.FORWARD) )
+                .findFirst();
+        
+        if (move.isPresent()) {
+            parentSpeed = move.get().getSpeed();
+        }
+        
+        return projectile.get(effectVector.getVector(), parentSpeed);
+    }
+    
+    
+    private boolean canFire() {
+        return ammoCount > 0 
+                && Objects.nonNull(Canvas3D.get()) 
+                && Canvas3D.get().getTicks() - lastShotTick > ticksBetweenShots;
+    }
 }

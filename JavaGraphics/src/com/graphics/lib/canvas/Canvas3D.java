@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
@@ -50,9 +52,10 @@ public class Canvas3D extends JPanel{
 	private IZBuffer zBuffer;
 	private double horizon = 8000;
 	private Set<ICanvasUpdateListener> slaves = new HashSet<>();
-	private List<BiConsumer<Canvas3D,Graphics>> drawPlugins = new ArrayList<>();
+	private transient List<BiConsumer<Canvas3D,Graphics>> drawPlugins = new ArrayList<>();
 	private boolean drawShadows = false;
 	private Facet floor = null;
+	private long tickCount = 0;
 
 	protected Canvas3D(Camera camera)
     {
@@ -153,14 +156,21 @@ public class Canvas3D extends JPanel{
 		return zBuffer;
 	}
 	
-	public ICanvasObject getObjectAt(int x, int y){
-		if (zBuffer == null) return null;
+	public long getTicks() {
+	    return tickCount;
+	}
+	
+	public Optional<ICanvasObject> getObjectAt(int x, int y){
+		if (Objects.nonNull(zBuffer)) {
+		    
+		    ZBufferItem item = zBuffer.getItemAt(x, y);
+	        
+	        if (Objects.nonNull(item)) {
+	            return Optional.ofNullable(item.getTopMostObject());
+	        }
+		}
 		
-		ZBufferItem item = zBuffer.getItemAt(x, y);
-		
-		if (item == null) return null;
-		
-		return item.getTopMostObject();
+		return Optional.empty();
 	}
 
 	@Override
@@ -200,18 +210,11 @@ public class Canvas3D extends JPanel{
 	 */
 	public void doDraw()
 	{
-		if (!lightSourcesToAdd.isEmpty()){
-			lightSources.addAll(lightSourcesToAdd);
-			lightSourcesToAdd.clear();
-		}
+	    tickCount++;
+		addPendingLightsources();
 		
-		if (this.zBuffer == null) {
-			this.zBuffer = ZBufferEnum.DEFAULT.get();
-		} else {
-			this.zBuffer.clear();
-		}
+		prepareZBuffer();
 		
-		this.zBuffer.setDimensions(this.getWidth(), this.getHeight());
 		this.camera.setViewport(this.getWidth(), this.getHeight());
 		
 		this.lightSources.removeIf(ILightSource::isDeleted);
@@ -224,7 +227,7 @@ public class Canvas3D extends JPanel{
 		
 		this.camera.doTransforms();
 		
-		if (this.drawShadows && this.floor != null){
+		if (this.drawShadows && Objects.nonNull(this.floor)) {
 			Set<CanvasObject> shadows = Collections.synchronizedSet(new HashSet<CanvasObject>()); 
 			processShapes.parallelStream().forEach(s -> shadows.addAll(getShadowOnFloor(s)));
 			processShapes.addAll(shadows);
@@ -244,6 +247,23 @@ public class Canvas3D extends JPanel{
 
 		this.slaves.forEach(sl -> sl.update(this, null));		
 		
+	}
+	
+	private void addPendingLightsources() {
+	    if (!lightSourcesToAdd.isEmpty()){
+            lightSources.addAll(lightSourcesToAdd);
+            lightSourcesToAdd.clear();
+        }
+	}
+	
+	private void prepareZBuffer() {
+	    if (Objects.isNull(this.zBuffer)) {
+            this.zBuffer = ZBufferEnum.DEFAULT.get();
+        } else {
+            this.zBuffer.clear();
+        }
+        
+        this.zBuffer.setDimensions(this.getWidth(), this.getHeight());
 	}
 	
 	/**
@@ -320,21 +340,22 @@ public class Canvas3D extends JPanel{
 	private WorldCoord getShadowPoint(Point start, Point end){
 		Vector lightVector = start.vectorToPoint(end).getUnitVector();
 		Point intersect = floor.getIntersectionPointWithFacetPlane(end, lightVector);
-		if (intersect == null) return null;
 		
-		return new WorldCoord(intersect);
+		return Objects.isNull(intersect) ? null
+		                                 : new WorldCoord(intersect);
 	}
 	
 	@Override
 	public void paintComponent(Graphics g)
 	{
-		if (this.zBuffer == null) return;
-		super.paintComponent(g);
-
-		g.drawImage(this.zBuffer.getBuffer(), 0, 0, null);
-
-		for(BiConsumer<Canvas3D,Graphics> op : drawPlugins){
-			op.accept(this,g);
+		if (Objects.nonNull(this.zBuffer)) {
+    		super.paintComponent(g);
+    
+    		g.drawImage(this.zBuffer.getBuffer(), 0, 0, null);
+    
+    		for(BiConsumer<Canvas3D,Graphics> op : drawPlugins){
+    			op.accept(this,g);
+    		}
 		}
 	}
 

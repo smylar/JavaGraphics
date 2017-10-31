@@ -514,8 +514,8 @@ public class GraphicsTest extends JFrame {
 			}
 			long cycleStart = new Date().getTime();
 			canvas.doDraw();
-			if (select != null){
-				setSelectedObject(canvas.getObjectAt(select.getX(), select.getY()));
+			if (select != null) {
+			    canvas.getObjectAt(select.getX(), select.getY()).ifPresent(this::setSelectedObject);
 				select = null;
 			}
 			

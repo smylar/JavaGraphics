@@ -32,14 +32,8 @@ public class OrientableTrait implements IOrientable, Observer {
 	
 	@Override
 	public IOrientable setOrientation(IOrientation orientation) {
-//		if (this.orientation != null){
-//			parent.getVertexList().removeIf(v -> v.hasTag(ORIENTATION_TAG));
-//		}
 		
 		this.orientation = orientation;
-//		if (this.orientation != null){
-//			parent.getVertexList().addAll(this.orientation.getRepresentation().getVertexList());
-//		}
 		return this;
 	}
 	

@@ -24,6 +24,7 @@ import com.google.common.collect.Sets;
 import com.graphics.lib.Facet;
 import com.graphics.lib.GeneralPredicates;
 import com.graphics.lib.LightIntensityFinderEnum;
+import com.graphics.lib.ObjectStatus;
 import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
 import com.graphics.lib.VertexNormalFinderEnum;
@@ -42,7 +43,7 @@ import com.graphics.lib.transform.Transform;
  * @author Paul Brandon
  *
  */
-public class CanvasObject extends Observable implements ICanvasObject{
+public class CanvasObject extends Observable implements ICanvasObject {
 	private static int nextId = 0;
 	
 	private final List<WorldCoord> vertexList;
@@ -173,7 +174,7 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	@Override
 	public final void setVisible(boolean isVisible) {
 		this.isVisible = isVisible;
-		doNotify();
+		doNotify(ObjectStatus.VISIBLE);
 	}
 
 	@Override
@@ -184,7 +185,7 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	@Override
 	public void setDeleted(boolean isDeleted) {
 		this.isDeleted = isDeleted;
-		this.doNotify();
+		this.doNotify(ObjectStatus.DELETED);
 	}
 
 	@Override
@@ -452,6 +453,7 @@ public class CanvasObject extends Observable implements ICanvasObject{
 			this.getChildren().removeIf(ICanvasObject::isDeleted);
 			this.getChildren().parallelStream().forEach(ICanvasObject::onDrawComplete);
 		}
+		doNotify(ObjectStatus.DRAW_COMPLETE);
 	}
 	
 	@Override
@@ -504,10 +506,6 @@ public class CanvasObject extends Observable implements ICanvasObject{
 	 	
 	 	this.vertexFacetMap = ImmutableMap.copyOf(vfMap);
 
-	}
-	
-	public void doNotify() {
-		doNotify(null);
 	}
 	
 	public void doNotify(Object arg) {
