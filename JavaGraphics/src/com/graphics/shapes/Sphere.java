@@ -4,7 +4,7 @@ import com.graphics.lib.VertexNormalFinderEnum;
 import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.canvas.FunctionHandler;
 
-public class Sphere extends Ovoid {
+public final class Sphere extends Ovoid {
 	
 	public Sphere(double radius)
 	{

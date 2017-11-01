@@ -12,13 +12,16 @@ import com.graphics.lib.canvas.CanvasObject;
 
 public class Ovoid extends CanvasObject{
 	private final double radius;
-	private int angleProgression = 0;
+	private int angleProgression;
 	
 	public Ovoid(double radius, double radiusMod, int angleProgression)
 	{
-	    super(() -> init(radius, radiusMod, angleProgression));
-	    fixCentre();
-		this.angleProgression = checkAngleProgression(angleProgression);
+	    super(c -> {
+	    	c.setAngleProgression(360 % angleProgression == 0 ? angleProgression : 10);
+	    	return init(radius, radiusMod, c.getAngleProgression());
+	    },Ovoid.class);
+	    
+	    this.fixCentre();
 		this.radius = radius;
 	}
 	
@@ -34,13 +37,15 @@ public class Ovoid extends CanvasObject{
 		return angleProgression;
 	}
 	
+	protected void setAngleProgression(int angleProgression) {
+		this.angleProgression = angleProgression;
+	}
+
 	private static Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>> init(double radius, double radiusMod, int angleProgression) {
 		
 		List<WorldCoord> vertexList = Lists.newArrayList();
 		ImmutableList.Builder<Facet> facets = ImmutableList.builder();
-		
-		angleProgression = checkAngleProgression(angleProgression);
-		
+				
 		int points = 360 / angleProgression;
 		int pointsarc = 180 / angleProgression;
 		
@@ -92,9 +97,5 @@ public class Ovoid extends CanvasObject{
 		}
 		
 		return Pair.of(ImmutableList.copyOf(vertexList), facets.build());
-	}
-	
-	private static int checkAngleProgression(int angleProgression) {
-		return 360 % angleProgression == 0 ? angleProgression : 10;
 	}
 }

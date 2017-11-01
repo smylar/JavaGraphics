@@ -48,7 +48,7 @@ public class ZBufferItem
 	 * @return
 	 */
 	public Color getColour() {
-		if (items.isEmpty()) return null;
+
 		Color first = items.firstEntry().getValue();
 		if (items.size() == 1 || first.getAlpha() == 255) return first;
 		
