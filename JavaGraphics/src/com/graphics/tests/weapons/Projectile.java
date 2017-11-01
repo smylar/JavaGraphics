@@ -16,32 +16,36 @@ public abstract class Projectile {
 		return speed;
 	}
 
-	public void setSpeed(double speed) {
+	public Projectile setSpeed(double speed) {
 		this.speed = speed;
+		return this;
 	}
 
 	public int getRange() {
 		return range;
 	}
 
-	public void setRange(int range) {
+	public Projectile setRange(int range) {
 		this.range = range;
+		return this;
 	}
 	
 	public IPointFinder getStartPoint() {
 		return startPoint;
 	}
 
-	public void setStartPoint(IPointFinder startPoint) {
+	public Projectile setStartPoint(IPointFinder startPoint) {
 		this.startPoint = startPoint;
+		return this;
 	}
 	
 	public ClipLibrary getClipLibrary() {
 		return clipLibrary;
 	}
 
-	public void setClipLibary(ClipLibrary clipLibrary) {
+	public Projectile setClipLibary(ClipLibrary clipLibrary) {
 		this.clipLibrary = clipLibrary;
+		return this;
 	}
 
 	public abstract CanvasObject get(Vector initialVector, double parentSpeed);

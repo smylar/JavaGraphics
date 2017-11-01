@@ -29,10 +29,10 @@ public class Torus extends CanvasObject {
 	
 	public Torus (double tubeRadius, double holeRadius, int arcProgression)
 	{
-	    super(c -> {
+	    super(self -> {
 	        int progression = 360 % arcProgression != 0 ? DEFAULT_PROGRESSION : arcProgression;
-	        c.setPoints(360/progression);
-	        return init(tubeRadius, holeRadius, progression, c.getPoints());
+	        self.setPoints(360/progression);
+	        return init(tubeRadius, holeRadius, progression, self.getPoints());
 	    }, Torus.class);
 	    
 	    FunctionHandler.register(this, CanvasObjectFunctions.TORUS);

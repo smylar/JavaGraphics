@@ -224,6 +224,14 @@ public class PluginLibrary {
 		};
 	}
 	
+	public static IPlugin<IPlugable, Void> delete()
+	{
+		return plugable -> {
+			plugable.getParent().setDeleted(true);
+			return null;
+		};
+	}
+	
 	public static IPlugin<IPlugable, Void> stop()
 	{
 		return plugable -> {

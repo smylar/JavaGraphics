@@ -20,7 +20,7 @@ import com.graphics.lib.transform.Transform;
 import com.graphics.shapes.Ovoid;
 import com.graphics.tests.TestUtils;
 
-public class ExplodingProjectile extends Projectile{
+public class ExplodingProjectile extends Projectile {
 
 	@Override
 	public CanvasObject get(Vector initialVector, double parentSpeed) {
@@ -46,7 +46,7 @@ public class ExplodingProjectile extends Projectile{
 			proj.applyTransform(r);
 		}
 
-		MovementTransform move = new MovementTransform(initialVector, this.getSpeed() + parentSpeed){
+		MovementTransform move = new MovementTransform(initialVector, this.getSpeed() + parentSpeed) {
 			@Override
 			public void onComplete(){
 				proj.getTrait(PlugableTrait.class).ifPresent(p -> p.executePlugin(Events.EXPLODE));

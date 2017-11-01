@@ -172,6 +172,17 @@ public final class ShipControls extends ObjectInputController<Ship> {
 		}
 	}
 	
+	public void deactivateWeapon(List<String> params){
+		if (params == null) return;
+		for (String param : params)
+		{
+			int n = Integer.parseInt(param);
+			if (this.controlledObject.getWeapons().size() > n && this.controlledObject.getWeapons().get(n) != null){
+				this.controlledObject.getWeapons().get(n).deActivate();
+			}
+		}
+	}
+	
 	private MovementTransform getMovement(String tag){
 		return this.controlledObject.getTransform(tag, MovementTransform.class).orElseGet(() -> {
 			MovementTransform transform = new MovementTransform(() -> orientable.getOrientation().getForward(), 0d);

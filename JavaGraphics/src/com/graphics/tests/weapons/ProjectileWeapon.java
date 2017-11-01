@@ -45,15 +45,15 @@ public class ProjectileWeapon implements IEffector {
     		ammoCount--;
     		lastShotTick = Canvas3D.get().getTicks();
     		
-    		CanvasObject proj = generateProjectile();
-    		
-    		Point pos = origin.find();
-    		Canvas3D.get().registerObject(proj, pos);
-    		ObjectTiedLightSource<LightSource> l = new ObjectTiedLightSource<>(LightSource.class, pos.x, pos.y, pos.z);
-    		l.tieTo(proj);
-    		l.setColour(proj.getColour());
-    		l.getLightSource().setRange(400);
-    		Canvas3D.get().addLightSource(l.getLightSource());
+    		generateProjectile().ifPresent(proj -> {
+	    		Point pos = origin.find();
+	    		Canvas3D.get().registerObject(proj, pos);
+	    		ObjectTiedLightSource<LightSource> l = new ObjectTiedLightSource<>(LightSource.class, pos.x, pos.y, pos.z);
+	    		l.tieTo(proj);
+	    		l.setColour(proj.getColour());
+	    		l.getLightSource().setRange(400);
+	    		Canvas3D.get().addLightSource(l.getLightSource());
+    		});
 		}
 	}
 
@@ -61,23 +61,25 @@ public class ProjectileWeapon implements IEffector {
 		return ammoCount;
 	}
 
-	public void setAmmoCount(int ammoCount) {
+	public ProjectileWeapon setAmmoCount(int ammoCount) {
 		this.ammoCount = ammoCount;
+		return this;
 	}
 
 	public Projectile getProjectile() {
 		return projectile;
 	}
 
-    public void setTicksBetweenShots(int millisecondsBetweenShots) {
-        this.ticksBetweenShots = millisecondsBetweenShots;
+    public ProjectileWeapon setTicksBetweenShots(int ticksBetweenShots) {
+        this.ticksBetweenShots = ticksBetweenShots;
+        return this;
     }
     
     protected ICanvasObject getParent() {
         return parent;
     }
 
-    private CanvasObject generateProjectile() {
+    private Optional<CanvasObject> generateProjectile() {
         double parentSpeed = 0;
         Optional<MovementTransform> move = parent.getTransformsOfType(MovementTransform.class)
                 .stream()
@@ -88,7 +90,7 @@ public class ProjectileWeapon implements IEffector {
             parentSpeed = move.get().getSpeed();
         }
         
-        return projectile.get(effectVector.getVector(), parentSpeed);
+        return Optional.ofNullable(projectile.get(effectVector.getVector(), parentSpeed));
     }
     
     

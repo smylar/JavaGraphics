@@ -16,9 +16,9 @@ public class Ovoid extends CanvasObject{
 	
 	public Ovoid(double radius, double radiusMod, int angleProgression)
 	{
-	    super(c -> {
-	    	c.setAngleProgression(360 % angleProgression == 0 ? angleProgression : 10);
-	    	return init(radius, radiusMod, c.getAngleProgression());
+	    super(self -> {
+	    	self.setAngleProgression(360 % angleProgression == 0 ? angleProgression : 10);
+	    	return init(radius, radiusMod, self.getAngleProgression());
 	    },Ovoid.class);
 	    
 	    this.fixCentre();

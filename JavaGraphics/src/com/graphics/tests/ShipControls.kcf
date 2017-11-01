@@ -18,7 +18,8 @@
 			{ "keyCode" : "b", "onPress" : "fireWeapon", "pressParams" : ["1"] },
 			{ "keyCode" : "u", "onPress" : "fireWeapon", "pressParams" : ["2"] },
 			{ "keyCode" : "t", "onPress" : "fireWeapon", "pressParams" : ["3"] },
-			{ "keyCode" : "f", "onPress" : "fireWeapon", "pressParams" : ["4","5"] }
+			{ "keyCode" : "f", "onPress" : "fireWeapon", "pressParams" : ["4","5"] },
+			{ "keyCode" : "g", "onPress" : "fireWeapon", "pressParams" : ["6"], "onRelease" : "deactivateWeapon", "releaseParams" : ["6"] }
 		]
 	}
 }

@@ -32,13 +32,16 @@ import com.graphics.tests.shapes.Gate;
 import com.graphics.tests.shapes.Ship;
 import com.graphics.tests.shapes.TexturedCuboid;
 import com.graphics.tests.shapes.Wall;
+import com.graphics.tests.weapons.AutoProjectileWeapon;
 import com.graphics.tests.weapons.BouncyProjectile;
 import com.graphics.tests.weapons.DeflectionProjectile;
 import com.graphics.tests.weapons.ExplodingProjectile;
+import com.graphics.tests.weapons.GattlingRound;
 import com.graphics.tests.weapons.LaserWeapon;
 import com.graphics.tests.weapons.Projectile;
 import com.graphics.tests.weapons.ProjectileWeapon;
 import com.graphics.tests.weapons.TrackingProjectile;
+import com.graphics.lib.camera.Camera;
 import com.graphics.lib.camera.ViewAngleCamera;
 import com.graphics.lib.canvas.Canvas3D;
 import com.graphics.lib.canvas.CanvasObject;
@@ -172,78 +175,9 @@ public class GraphicsTest extends JFrame {
 		cnv.addObserver(scnv);
 		this.setVisible(true);
 		
-		
-		IPointFinder leftOffset = () -> {
-			Point pos = new Point(cam.getPosition());
-			Vector right = cam.getOrientation().getRight();
-			pos.x -= right.getX() * 25;
-			pos.y -= right.getY() * 25;
-			pos.z -= right.getZ() * 25;
-			return pos;
-		};
-		
-		IPointFinder rightOffset = () -> {
-			Point pos = new Point(cam.getPosition());
-			Vector right = cam.getOrientation().getRight();
-			pos.x += right.getX() * 25;
-			pos.y += right.getY() * 25;
-			pos.z += right.getZ() * 25;
-			return pos;
-		};
-		
 		Ship ship = new Ship (100, 100, 50);
-		ship.addWeapon(new LaserWeapon(() -> {
-			Point pos = new Point(cnv.getCamera().getPosition());
-			Vector down = cam.getOrientation().getDown();
-			pos.x += down.getX() * 15;
-			pos.y += down.getY() * 15;
-			pos.z += down.getZ() * 15;
-			return pos;
-		},
-		() -> {
-			return cam.getOrientation().getForward();
-		},ship));
 		
-		Projectile bp = new BouncyProjectile();
-		bp.setClipLibary(clipLibrary);
-		ship.addWeapon(new ProjectileWeapon(bp, leftOffset, () -> {
-			return cam.getOrientation().getForward();
-		}, ship));
-		
-		DeflectionProjectile dp = new DeflectionProjectile();
-		dp.setSpeed(20);
-		dp.setRange(8000);
-		dp.setClipLibary(clipLibrary);
-		dp.setTargetFinder(() -> {
-			return this.selectedObject;
-		});
-		ship.addWeapon(new ProjectileWeapon(dp, leftOffset, () -> {
-			return cam.getOrientation().getForward();
-		}, ship));
-		
-		TrackingProjectile tp = new TrackingProjectile();
-		tp.setSpeed(20);
-		tp.setRange(8000);
-		tp.setClipLibary(clipLibrary);
-		tp.setTargetFinder(() -> {
-			return this.selectedObject;
-		});
-		ship.addWeapon(new ProjectileWeapon(tp, leftOffset, () -> {
-			return cam.getOrientation().getForward();
-		}, ship));
-		
-		ExplodingProjectile ep = new ExplodingProjectile();
-		ep.setSpeed(20);
-		ep.setRange(1200);
-		ep.setClipLibary(clipLibrary);
-
-		ship.addWeapon(new ProjectileWeapon(ep, rightOffset, () -> {
-			return cam.getOrientation().getForward();
-		}, ship));
-		
-		ship.addWeapon(new ProjectileWeapon(ep, leftOffset, () -> {
-			return cam.getOrientation().getForward();
-		}, ship));
+		addWeapons(ship, cam);
 		
 		ship.setColour(new Color(50, 50, 50));
 		ship.addTrait(new OrientableTrait()).setOrientation(new SimpleOrientation(OrientableTrait.ORIENTATION_TAG));
@@ -536,5 +470,90 @@ public class GraphicsTest extends JFrame {
 			super.dispose();
 			slave.dispose();
 		}
+	}
+	
+	private void addWeapons(Ship ship, Camera cam) {
+		IPointFinder leftOffset = () -> {
+			Point pos = new Point(cam.getPosition());
+			Vector right = cam.getOrientation().getRight();
+			pos.x -= right.getX() * 25;
+			pos.y -= right.getY() * 25;
+			pos.z -= right.getZ() * 25;
+			return pos;
+		};
+		
+		IPointFinder rightOffset = () -> {
+			Point pos = new Point(cam.getPosition());
+			Vector right = cam.getOrientation().getRight();
+			pos.x += right.getX() * 25;
+			pos.y += right.getY() * 25;
+			pos.z += right.getZ() * 25;
+			return pos;
+		};
+		
+		IPointFinder centreMount = () -> {
+			Point pos = new Point(cam.getPosition());
+			Vector down = cam.getOrientation().getDown();
+			pos.x += down.getX() * 15;
+			pos.y += down.getY() * 15;
+			pos.z += down.getZ() * 15;
+			return pos;
+		};
+		
+		
+		ship.addWeapon(new LaserWeapon(centreMount,
+				() -> {
+					return cam.getOrientation().getForward();
+				},ship));
+			
+		
+		Projectile bp = new BouncyProjectile();
+		bp.setClipLibary(clipLibrary);
+		ship.addWeapon(new ProjectileWeapon(bp, leftOffset, () -> {
+			return cam.getOrientation().getForward();
+		}, ship));
+		
+		DeflectionProjectile dp = new DeflectionProjectile();
+		dp.setSpeed(20);
+		dp.setRange(8000);
+		dp.setClipLibary(clipLibrary);
+		dp.setTargetFinder(() -> {
+			return this.selectedObject;
+		});
+		ship.addWeapon(new ProjectileWeapon(dp, leftOffset, () -> {
+			return cam.getOrientation().getForward();
+		}, ship));
+		
+		TrackingProjectile tp = new TrackingProjectile();
+		tp.setSpeed(20);
+		tp.setRange(8000);
+		tp.setClipLibary(clipLibrary);
+		tp.setTargetFinder(() -> {
+			return this.selectedObject;
+		});
+		ship.addWeapon(new ProjectileWeapon(tp, leftOffset, () -> {
+			return cam.getOrientation().getForward();
+		}, ship));
+		
+		ExplodingProjectile ep = new ExplodingProjectile();
+		ep.setSpeed(20);
+		ep.setRange(1200);
+		ep.setClipLibary(clipLibrary);
+
+		ship.addWeapon(new ProjectileWeapon(ep, rightOffset, () -> {
+			return cam.getOrientation().getForward();
+		}, ship));
+		
+		ship.addWeapon(new ProjectileWeapon(ep, leftOffset, () -> {
+			return cam.getOrientation().getForward();
+		}, ship));
+		
+		ship.addWeapon(new AutoProjectileWeapon(new GattlingRound().setRange(800).setSpeed(60),
+				centreMount,
+				() -> {
+					return cam.getOrientation().getForward();
+				}
+				,ship
+				).setAmmoCount(1000).setTicksBetweenShots(2));
 	}
 }
