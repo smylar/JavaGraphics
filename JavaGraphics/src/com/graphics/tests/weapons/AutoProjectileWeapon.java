@@ -4,11 +4,16 @@ import java.util.Observable;
 import java.util.Observer;
 
 import com.graphics.lib.ObjectStatus;
-import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IPointFinder;
 import com.graphics.lib.interfaces.IVectorFinder;
 
+/**
+ * A weapon that will repeatedly generate {@link Projectile} objects when activated until deactivated
+ * 
+ * @author paul.brandon
+ *
+ */
 public final class AutoProjectileWeapon extends ProjectileWeapon implements Observer {
     
     public AutoProjectileWeapon(Projectile proj, IPointFinder origin, IVectorFinder effectVector, ICanvasObject parent) {

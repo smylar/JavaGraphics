@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -74,15 +74,16 @@ public class CanvasObject extends Observable implements ICanvasObject {
 	}
 	
 	public CanvasObject(Supplier<Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>>> initMesh) {
-		this(initMesh, c -> {});
-	}
-	
-	public CanvasObject(Supplier<Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>>> initMesh, Consumer<CanvasObject> postInit) {
 		Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>> mesh = initMesh.get();
 		vertexList = mesh.getLeft();
 		facetList = mesh.getRight();
-		postInit.accept(this);
 	}
+	
+	public <T extends CanvasObject> CanvasObject(Function<T, Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>>> initMesh, Class<T> clazz) {
+        Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>> mesh = initMesh.apply(clazz.cast(this));
+        vertexList = mesh.getLeft();
+        facetList = mesh.getRight();
+    }
 	
 	@Override
 	public final Set<ITrait> getTraits() {
@@ -186,6 +187,7 @@ public class CanvasObject extends Observable implements ICanvasObject {
 	public void setDeleted(boolean isDeleted) {
 		this.isDeleted = isDeleted;
 		this.doNotify(ObjectStatus.DELETED);
+		this.deleteObservers();
 	}
 
 	@Override

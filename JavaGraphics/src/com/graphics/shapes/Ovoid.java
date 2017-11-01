@@ -11,12 +11,13 @@ import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
 
 public class Ovoid extends CanvasObject{
-	private double radius = 0;
+	private final double radius;
 	private int angleProgression = 0;
 	
 	public Ovoid(double radius, double radiusMod, int angleProgression)
 	{
-	    super(() -> init(radius, radiusMod, angleProgression), c -> c.fixCentre());
+	    super(() -> init(radius, radiusMod, angleProgression));
+	    fixCentre();
 		this.angleProgression = checkAngleProgression(angleProgression);
 		this.radius = radius;
 	}

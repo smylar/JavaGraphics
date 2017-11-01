@@ -14,10 +14,10 @@ public class Cuboid extends CanvasObject{
 	
 	public Cuboid (int height, int width, int depth)
 	{
-	    super(() -> init(height, width, depth), c -> {
-		    										c.applyTransform(new Translation(-width/2,-height/2,-depth/2));
-		    										c.fixCentre();
-	    										});
+	    super(() -> init(height, width, depth));
+	    
+	    applyTransform(new Translation(-width/2,-height/2,-depth/2));
+        fixCentre();
 	}
 	
 	private static Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>> init(int height, int width, int depth) {

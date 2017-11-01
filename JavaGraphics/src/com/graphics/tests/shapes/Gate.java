@@ -23,7 +23,7 @@ import com.graphics.tests.TestUtils;
  * @author Paul Brandon
  *
  */
-public class Gate extends Torus {
+public final class Gate extends Torus {
 	
 	private Map<ICanvasObject, Double> currentDotProducts = new HashMap<>();
 	private IPlugin<Gate,Void> passThroughPluginForGate;

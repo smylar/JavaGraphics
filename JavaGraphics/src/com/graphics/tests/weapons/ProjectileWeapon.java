@@ -15,6 +15,12 @@ import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.lightsource.ObjectTiedLightSource;
 import com.graphics.lib.transform.MovementTransform;
 
+/**
+ * A weapon that produces a {@link Projectile} object when activated
+ * 
+ * @author paul.brandon
+ *
+ */
 public class ProjectileWeapon implements IEffector {
 	
 	private int ammoCount = 10;
@@ -76,7 +82,7 @@ public class ProjectileWeapon implements IEffector {
         Optional<MovementTransform> move = parent.getTransformsOfType(MovementTransform.class)
                 .stream()
                 .filter(m -> m.getName().equals(ObjectInputController.FORWARD) )
-                .findFirst();
+                .findFirst(); //using dropWhile would be better than filter here (in Java 9)
         
         if (move.isPresent()) {
             parentSpeed = move.get().getSpeed();
