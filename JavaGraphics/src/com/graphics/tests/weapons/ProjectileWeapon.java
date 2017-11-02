@@ -26,6 +26,7 @@ public class ProjectileWeapon implements IEffector {
 	private int ammoCount = 10;
 	private int ticksBetweenShots = 20;
 	private long lastShotTick = -1000;
+	private boolean lightProjectile = true;
 	private final Projectile projectile;
 	private final IPointFinder origin;
 	private final IVectorFinder effectVector;
@@ -48,11 +49,10 @@ public class ProjectileWeapon implements IEffector {
     		generateProjectile().ifPresent(proj -> {
 	    		Point pos = origin.find();
 	    		Canvas3D.get().registerObject(proj, pos);
-	    		ObjectTiedLightSource<LightSource> l = new ObjectTiedLightSource<>(LightSource.class, pos.x, pos.y, pos.z);
-	    		l.tieTo(proj);
-	    		l.setColour(proj.getColour());
-	    		l.getLightSource().setRange(400);
-	    		Canvas3D.get().addLightSource(l.getLightSource());
+	    		if (lightProjectile) {
+	    		    lightProjectile(proj, pos);
+	    		}
+	    		
     		});
 		}
 	}
@@ -75,6 +75,10 @@ public class ProjectileWeapon implements IEffector {
         return this;
     }
     
+    public void setLightProjectile(boolean lightProjectile) {
+        this.lightProjectile = lightProjectile;
+    }
+
     protected ICanvasObject getParent() {
         return parent;
     }
@@ -93,6 +97,13 @@ public class ProjectileWeapon implements IEffector {
         return Optional.ofNullable(projectile.get(effectVector.getVector(), parentSpeed));
     }
     
+    private void lightProjectile(CanvasObject proj, Point pos) {
+        ObjectTiedLightSource<LightSource> l = new ObjectTiedLightSource<>(LightSource.class, pos.x, pos.y, pos.z);
+        l.tieTo(proj);
+        l.setColour(proj.getColour());
+        l.getLightSource().setRange(400);
+        Canvas3D.get().addLightSource(l.getLightSource());
+    }
     
     private boolean canFire() {
         return ammoCount > 0 

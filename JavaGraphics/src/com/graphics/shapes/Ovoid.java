@@ -49,9 +49,11 @@ public class Ovoid extends CanvasObject{
 		int points = 360 / angleProgression;
 		int pointsarc = 180 / angleProgression;
 		
-		for (int i = 0 ; i < pointsarc-1 ; i++){
+		for (int i = 0 ; i < pointsarc-1 ; i++) {
 			double circleRad = Math.sin(Math.toRadians((i+1)*angleProgression)) * radius;
-			if (circleRad < 0) circleRad = circleRad * -1 ;
+			if (circleRad < 0) {
+			    circleRad = circleRad * -1 ;
+			}
 			
 			double y = Math.cos(Math.toRadians((i+1) * angleProgression)) * radius;
 			
@@ -90,7 +92,9 @@ public class Ovoid extends CanvasObject{
 		for (int i = 0 ; i < points ; i++){
 			int addr = vertexList.size() -2;
 			int j = i+1;
-			if (i == points-1) j = 0;
+			if (i == points-1) {
+			    j = 0;
+			}
 			
 			facets.add(new Facet(vertexList.get(addr), vertexList.get(i), vertexList.get(j)));
 			facets.add(new Facet(vertexList.get(++addr), vertexList.get(j+(points*(pointsarc-2))), vertexList.get(i+(points*(pointsarc-2)))));

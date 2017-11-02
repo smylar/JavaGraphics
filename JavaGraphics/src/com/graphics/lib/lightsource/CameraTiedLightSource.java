@@ -3,11 +3,18 @@ package com.graphics.lib.lightsource;
 import java.util.Observable;
 
 import com.graphics.lib.Point;
+import com.graphics.lib.Utils;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.camera.Camera;
-import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.interfaces.ICanvasObject;
 
+/**
+ * Describes a light source that mirrors all movements of the camera
+ * 
+ * @author paul.brandon
+ *
+ * @param <L> The type of the specific light source to tie to the camera
+ */
 public class CameraTiedLightSource<L extends LightSource> extends TiedLightSource<L,Camera> {
 
 	private Point startPosition;
@@ -20,21 +27,24 @@ public class CameraTiedLightSource<L extends LightSource> extends TiedLightSourc
 
 	public void tieTo(Camera cam){
 		super.tieTo(cam);
-		this.startCamPosition = new Point (cam.getPosition().x, cam.getPosition().y, cam.getPosition().z);
+		this.startCamPosition = new Point(cam.getPosition().x, cam.getPosition().y, cam.getPosition().z);
 	}
 	
 	@Override
 	public void update(Observable o, Object arg) {
-		if (startCamPosition == null || !arg.toString().equals(Camera.CAMERA_MOVED)) return;
+		if (startCamPosition == null || !arg.toString().equals(Camera.CAMERA_MOVED)) {
+		    return;
+		}
 		
 		Camera c = this.getTiedTo();
-		ICanvasObject temp = new CanvasObject();
+		
 		WorldCoord p = new WorldCoord(this.startPosition);
 		
 		p.x = startPosition.x + (c.getPosition().x - startCamPosition.x);
 		p.y = startPosition.y + (c.getPosition().y - startCamPosition.y);
 		p.z = startPosition.z + (c.getPosition().z - startCamPosition.z);
-		temp.getVertexList().add(p);
+		
+		ICanvasObject temp = Utils.getCoordAsCanvasObject(p);
 		c.matchCameraRotation(temp);
 		this.getLightSource().setPosition(p);
 	}

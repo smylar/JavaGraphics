@@ -17,6 +17,10 @@ import java.util.stream.Collectors;
 
 import javax.swing.JPanel;
 
+import org.apache.commons.lang3.tuple.Pair;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.graphics.lib.Facet;
 import com.graphics.lib.GeneralPredicates;
 import com.graphics.lib.Point;
@@ -39,7 +43,7 @@ import com.graphics.lib.zbuffer.ZBufferItem;
  * @author Paul Brandon
  *
  */
-public class Canvas3D extends JPanel{
+public class Canvas3D extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	private static Canvas3D cnv = null;
@@ -298,36 +302,52 @@ public class Canvas3D extends JPanel{
 	 */
 	private Set<CanvasObject> getShadowOnFloor(ICanvasObject obj){	
 		Set<CanvasObject> shadows = new HashSet<>();
-		if (floor == null || !obj.getCastsShadow()) return shadows;
-		
-		for (ILightSource ls : lightSources){
-			if (!ls.isOn()) continue;
-			
-			CanvasObject shadow = new CanvasObject();
-			shadow.setColour(new Color(50,50,50));
-			shadow.setProcessBackfaces(true);
-			shadow.setVisible(true);
-			for (Facet f : obj.getFacetList()){
-				//TODO this will work out the intersection for a point several times depending on the facets and creates more points than necessary, will want rewrite for better efficiency
-				if (!obj.isVisible() || !GeneralPredicates.isLit(ls).test(f)) continue;
-				
-				List<WorldCoord> points = f.getAsList();
-				
-				WorldCoord p1 = getShadowPoint(ls.getPosition(), points.get(0));
-				if (p1 == null) continue;
-				WorldCoord p2 = getShadowPoint(ls.getPosition(), points.get(1));
-				if (p2 == null) continue;
-				WorldCoord p3 = getShadowPoint(ls.getPosition(), points.get(2));
-				if (p3 == null) continue;
-				
-				shadow.getVertexList().add(p1);
-				shadow.getVertexList().add(p2);
-				shadow.getVertexList().add(p3);
-				shadow.getFacetList().add(new Facet(p1,p2,p3));
-			}
-			if (shadow.getFacetList().size() > 0) shadows.add(shadow);
+		if (floor == null || !obj.getCastsShadow()) {
+		    return shadows;
 		}
+		
+		lightSources.stream().filter(ILightSource::isOn)
+		                     .map(ls -> 
+		                         new CanvasObject(() -> {
+		                             Builder<WorldCoord> vertexList = ImmutableList.builder();
+		                             Builder<Facet> facetList = ImmutableList.builder();
+		                             for (Facet f : obj.getFacetList()){
+		                                 //TODO this will work out the intersection for a point several times depending on the facets and creates more points than necessary, will want rewrite for better efficiency
+		                                 if (obj.isVisible() && GeneralPredicates.isLit(ls).test(f)) {
+		                                     addShadowPoints(ls, f, vertexList, facetList);
+		                                 }
+		                             }
+		                             return Pair.of(vertexList.build(), facetList.build());
+		                         })
+		                     )
+		                     .filter(shadow -> shadow.getFacetList().size() > 0)
+		                     .forEach(shadow -> {
+		                         shadow.setColour(new Color(50,50,50));
+		                         shadow.setProcessBackfaces(true);
+		                         shadow.setVisible(true);
+		                         shadows.add(shadow);
+		                     });
+
 		return shadows;
+	}
+	
+	private void addShadowPoints(ILightSource ls, Facet f, Builder<WorldCoord> vertexList, Builder<Facet> facetList) {
+	    List<WorldCoord> points = f.getAsList();
+        
+        WorldCoord p1 = getShadowPoint(ls.getPosition(), points.get(0));
+        if (p1 == null) 
+            return;
+        WorldCoord p2 = getShadowPoint(ls.getPosition(), points.get(1));
+        if (p2 == null) 
+            return;
+        WorldCoord p3 = getShadowPoint(ls.getPosition(), points.get(2));
+        if (p3 == null) 
+            return;
+        
+        vertexList.add(p1);
+        vertexList.add(p2);
+        vertexList.add(p3);
+        facetList.add(new Facet(p1,p2,p3));
 	}
 	
 	/**

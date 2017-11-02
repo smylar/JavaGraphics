@@ -9,11 +9,14 @@ import java.util.function.BiConsumer;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import com.google.common.collect.ImmutableList;
 import com.graphics.lib.canvas.Canvas3D;
+import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.FunctionHandler;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ICanvasObjectList;
 import com.graphics.lib.interfaces.ILightIntensityFinder;
+import com.graphics.lib.transform.MovementTransform;
 
 /**
  * Random orphaned utilities that need a proper home
@@ -141,5 +144,40 @@ public class Utils {
 				new Point(p3.x - h*(p2.y - p1.y)/dist, p3.y + h*(p2.x - p1.x)/dist, 0)
 		));
 	}
+	
+	public static void reflect (MovementTransform move, Vector surfaceNormal) {
+	    //I know r=d-2(d.n)n is reflection vector in 2 dimension (hopefully it'll work on 3)
+        double multiplier = move.getVector().dotProduct(surfaceNormal) * -2;
+        move.getVector().addX(surfaceNormal.getX() * multiplier);
+        move.getVector().addY(surfaceNormal.getY() * multiplier);
+        move.getVector().addZ(surfaceNormal.getZ() * multiplier);
+	}
+	
+	public static CanvasObject getParticle(final Point p, final double particleSize) {
+        return new CanvasObject(() -> {
+            ImmutableList<WorldCoord> vertexList = ImmutableList.of(new WorldCoord(p.x , p.y, p.z),
+                                                                    new WorldCoord(p.x + particleSize , p.y, p.z),
+                                                                    new WorldCoord(p.x, p.y + particleSize, p.z));
+            ImmutableList<Facet> facetList = ImmutableList.of(new Facet(vertexList.get(0), vertexList.get(1), vertexList.get(2)));
+            return Pair.of(vertexList, facetList);
+        });
+    }
+    
+    public static CanvasObject getFragment(Facet facet) {
+        return new CanvasObject(() -> {
+            ImmutableList<WorldCoord> vertexList = ImmutableList.of(new WorldCoord(facet.first().x , facet.first().y, facet.first().z),
+                                                                    new WorldCoord(facet.second().x , facet.second().y, facet.second().z),
+                                                                    new WorldCoord(facet.third().x , facet.third().y, facet.third().z));
+            ImmutableList<Facet> facetList = ImmutableList.of(new Facet(vertexList.get(0), vertexList.get(1), vertexList.get(2)));
+            return Pair.of(vertexList, facetList);
+        });
+    }
 
+    public static CanvasObject getCoordAsCanvasObject(WorldCoord coord) {
+        return new CanvasObject(() -> {
+            ImmutableList<WorldCoord> vertexList = ImmutableList.of(coord);
+            ImmutableList<Facet> facetList = ImmutableList.of();
+            return Pair.of(vertexList, facetList);
+        });
+    }
 }

@@ -13,18 +13,17 @@ import com.graphics.lib.Axis;
 import com.graphics.lib.Facet;
 import com.graphics.lib.GeneralPredicates;
 import com.graphics.lib.Point;
+import com.graphics.lib.Utils;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.canvas.FunctionHandler;
-import com.graphics.lib.canvas.TraitInterceptor;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ICanvasObjectList;
 import com.graphics.lib.interfaces.IPlugable;
 import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.lightsource.LightSource;
-import com.graphics.lib.traits.PlugableTrait;
 import com.graphics.lib.transform.MovementTransform;
 import com.graphics.lib.transform.RepeatingTransform;
 import com.graphics.lib.transform.Rotation;
@@ -33,6 +32,8 @@ import com.graphics.lib.transform.Transform;
 public class PluginLibrary {
 	
 	private static final String IN_COLLISION = "IN_COLLISION";
+	
+	private PluginLibrary() {}
 	
 	public static IPlugin<IPlugable, Void> generateTrailParticles(Color colour, int density, double exhaustVelocity, double particleSize)
 	{
@@ -54,12 +55,7 @@ public class PluginLibrary {
 			for (int i = 0 ; i < density ; i++)
 			{
 				int index = new Random().nextInt(vertices.size() - 1);
-				Point p = vertices.get(index);
-				CanvasObject fragment = new CanvasObject();
-				fragment.getVertexList().add(new WorldCoord(p.x , p.y, p.z));
-				fragment.getVertexList().add(new WorldCoord(p.x + particleSize , p.y, p.z));
-				fragment.getVertexList().add(new WorldCoord(p.x, p.y + particleSize, p.z));
-				fragment.getFacetList().add(new Facet(fragment.getVertexList().get(0), fragment.getVertexList().get(1), fragment.getVertexList().get(2)));
+				CanvasObject fragment = Utils.getParticle(vertices.get(index), particleSize);
 				fragment.setColour(colour);
 				fragment.setProcessBackfaces(true);
 				double xVector = baseVector.getX() + (Math.random()/2) - 0.25;
@@ -87,13 +83,7 @@ public class PluginLibrary {
     		Set<ICanvasObject> children = new HashSet<>();
     		for (Facet f : obj.getFacetList())
     		{
-    			ICanvasObject fragment = TraitInterceptor.intercept(new CanvasObject());
-    			//fragment.addTrait(new PlugableTrait());
-    			fragment.addTrait(new PlugableTrait());
-    			for (WorldCoord p : f.getAsList()){
-    				fragment.getVertexList().add(new WorldCoord(p.x, p.y, p.z));
-    			}
-    			fragment.getFacetList().add(new Facet(fragment.getVertexList().get(0), fragment.getVertexList().get(1), fragment.getVertexList().get(2)));
+    			ICanvasObject fragment = Utils.getFragment(f);
     			fragment.setProcessBackfaces(true);
     			fragment.setColour(f.getColour() != null ? f.getColour() : obj.getColour());
     			Vector baseVector = fragment.getFacetList().get(0).getNormal();
@@ -165,7 +155,7 @@ public class PluginLibrary {
 
 					plugable.registerPlugin(IN_COLLISION, o -> impactee, false);
 					return impactee;
-				}else if (impactee.equals(inCollision)){
+				}else if (impactee.equals(inCollision)) {
 					plugable.removePlugin(IN_COLLISION);
 				}
 			}
@@ -201,7 +191,7 @@ public class PluginLibrary {
 					for(Facet f : impactee.getFacetList())
 					{
 						Point in = f.getIntersectionPointWithFacetPlane(prevPoint, prevPoint.vectorToPoint(p).getUnitVector(), false);
-						if (f.isPointWithin(in) && prevPoint.distanceTo(in) <= prevPoint.distanceTo(p)){
+						if (f.isPointWithin(in) && prevPoint.distanceTo(in) <= prevPoint.distanceTo(p)) {
 							if (impactee.equals(inCollision)) { return null;}
 							if (impactorPlugin != null) {
 								plugable.executePlugin(impactorPlugin);
@@ -215,7 +205,7 @@ public class PluginLibrary {
 						}
 					}
 				}
-				if (impactee.equals(inCollision)){
+				if (impactee.equals(inCollision)) {
 					plugable.removePlugin(IN_COLLISION);
 				} //is slow if lots of objects using this method, might split so things like explosion fragments use the simpler point is inside method
 				
@@ -274,10 +264,10 @@ public class PluginLibrary {
 			MovementTransform move = mTrans.get(0); //just getting the first one for now (if there is more than one) 
 			Vector velocity = move.getVelocity();
 			
-			Facet curFacet = null;
+			Optional<Facet> curFacet = Optional.empty();
 			double curDist = -1;
 			
-			for(WorldCoord impactPoint : impactPoints){
+			for(WorldCoord impactPoint : impactPoints) {
 				Point prevPoint = new Point(impactPoint.x - velocity.getX(), impactPoint.y - velocity.getY(), impactPoint.z - velocity.getZ());
 
 				for(Facet f : impactee.getFacetList().stream().filter(f -> f.getDistanceFromFacetPlane(impactPoint) < move.getSpeed() + 1).collect(Collectors.toList()))
@@ -286,19 +276,12 @@ public class PluginLibrary {
 	
 					//if intersected with plane of facet check we are within the bounds of the facet
 					if (intersect != null && (prevPoint.distanceTo(intersect) < curDist || curDist == -1 ) && f.isPointWithin(intersect)){
-						curFacet = f;
+						curFacet = Optional.of(f);
 						curDist = prevPoint.distanceTo(intersect);
 					}
 				}
 			}
-			if (curFacet == null) return null;
-			Vector impactedNormal = curFacet.getNormal();
-			
-			//I know r=d-2(d.n)n is reflection vector in 2 dimension (hopefully it'll work on 3)
-			double multiplier = move.getVector().dotProduct(impactedNormal) * -2;
-			move.getVector().addX(impactedNormal.getX() * multiplier);
-			move.getVector().addY(impactedNormal.getY() * multiplier);
-			move.getVector().addZ(impactedNormal.getZ() * multiplier);
+			curFacet.ifPresent(facet -> Utils.reflect(move, facet.getNormal()));
 			
 			return null;
 		};
@@ -321,14 +304,11 @@ public class PluginLibrary {
 			double xAngleMod = xAngleDif > 0 ? rotationRate : -rotationRate;
 			
 			double yAngleDif = Math.toDegrees(Math.acos(vTrackee.getX()) - Math.acos(vMove.getUnitVector().getX()));
-			double yAngleMod = yAngleDif > 0 ? -rotationRate : rotationRate;
+			double yAngleMod = yAngleDif > 0 ? -rotationRate : rotationRate;			
 			
-			ICanvasObject temp = new CanvasObject();
-			WorldCoord tempCoord = new WorldCoord(vMove.getX(), vMove.getY(), vMove.getZ());
-			temp.getVertexList().add(tempCoord);
-			
-			temp.applyTransform(Axis.X.getRotation(xAngleMod));
-			temp.applyTransform(Axis.Y.getRotation(yAngleMod));
+			Point tempCoord = new Point(vMove.getX(), vMove.getY(), vMove.getZ());
+			Axis.X.getRotation(xAngleMod).doTransformSpecific().accept(tempCoord);
+			Axis.Y.getRotation(yAngleMod).doTransformSpecific().accept(tempCoord);
 			
 			vMove.setX(tempCoord.x);
 			vMove.setY(tempCoord.y);
