@@ -1,6 +1,9 @@
 package com.graphics.lib.orientation;
 
 
+import org.apache.commons.lang3.tuple.Pair;
+
+import com.google.common.collect.ImmutableList;
 import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
@@ -13,19 +16,19 @@ public class SimpleOrientation implements IOrientation {
 
 	private ICanvasObject orientation;
 	
-	public SimpleOrientation(){
+	public SimpleOrientation() {
 		this("");
 	}
 
-	public SimpleOrientation(String tag){
-		orientation = new CanvasObject();
-		orientation.getVertexList().add(new WorldCoord(0,0,1)); //forward
-		orientation.getVertexList().add(new WorldCoord(0,-1,0)); //up
-		orientation.getVertexList().add(new WorldCoord(1,0,0)); //right
-		orientation.getVertexList().add(new WorldCoord(0,0,0)); //anchor
+	public SimpleOrientation(String tag) {
+		orientation = new CanvasObject(() -> Pair.of(ImmutableList.of(new WorldCoord(0,0,1), //forward
+		                                                              new WorldCoord(0,-1,0), //up
+		                                                              new WorldCoord(1,0,0), //right
+		                                                              new WorldCoord(0,0,0) //anchor
+		                                                              ), 
+		                                             ImmutableList.of()));
 		
-		for (Point p : orientation.getVertexList()){
-			//p.setTag(tag);
+		for (Point p : orientation.getVertexList()) {
 			p.addTag(tag);
 		}
 	}

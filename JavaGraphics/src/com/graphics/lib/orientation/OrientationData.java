@@ -3,11 +3,10 @@ package com.graphics.lib.orientation;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
 import com.graphics.lib.Axis;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
-import com.graphics.lib.canvas.CanvasObject;
-import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IOrientation;
 import com.graphics.lib.transform.Rotation;
 
@@ -63,10 +62,7 @@ public class OrientationData {
 		WorldCoord up = new WorldCoord(upv.getX(), upv.getY(), upv.getZ());
 		WorldCoord right = new WorldCoord(rightv.getX(), rightv.getY(), rightv.getZ());
 			
-		ICanvasObject temp = new CanvasObject();
-		temp.getVertexList().add(forward);
-		temp.getVertexList().add(up);
-		temp.getVertexList().add(right);
+		ImmutableList<WorldCoord> vertexList = ImmutableList.of(forward, up, right);
 		
 		this.xRot = 0;
 		this.yRot = 0;
@@ -82,7 +78,7 @@ public class OrientationData {
 		else if (forward.x < 0)
 			this.yRot = -90;
 			
-		temp.applyTransform(Axis.Y.getRotation(-this.yRot));
+		Axis.Y.getRotation(-this.yRot).doTransform(vertexList);
 		
 		if (forward.z != 0)
 			this.xRot += Math.toDegrees(Math.atan(forward.y / forward.z)) * -1;
@@ -91,7 +87,7 @@ public class OrientationData {
 		else if (forward.y < 0)
 			this.xRot = 90;
 			
-		temp.applyTransform(Axis.X.getRotation(-this.xRot));
+		Axis.X.getRotation(-this.xRot).doTransform(vertexList);
 		
 		if (up.y > 0) 
 			this.zRot = 180;
@@ -133,9 +129,6 @@ public class OrientationData {
 		List<Rotation> rots = new ArrayList<>();
 		Vector unit = v.getUnitVector();
 		WorldCoord wc = new WorldCoord(unit.getX(), unit.getY(), unit.getZ());
-			
-		ICanvasObject temp = new CanvasObject();
-		temp.getVertexList().add(wc);
 
 		double xRot = 0;
 		double yRot = 0;
@@ -150,8 +143,7 @@ public class OrientationData {
 		else if (wc.x < 0)
 			yRot = -90;
 			
-		Rotation r = Axis.Y.getRotation(-yRot);
-		temp.applyTransform(r);
+		Axis.Y.getRotation(-yRot).doTransformSpecific().accept(wc);
 		
 		Rotation r0 = Axis.Y.getRotation(yRot);
 		
