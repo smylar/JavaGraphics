@@ -3,13 +3,17 @@ package com.graphics.lib.zbuffer;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
+import com.google.common.collect.Lists;
 import com.graphics.lib.Facet;
 import com.graphics.lib.GeneralPredicates;
 import com.graphics.lib.LineEquation;
-import com.graphics.lib.Vector;
+import com.graphics.lib.Utils;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasObject;
@@ -18,7 +22,7 @@ import com.graphics.lib.shader.IShader;
 import com.graphics.lib.shader.ShaderFactory;
 
 public class ZBuffer implements IZBuffer{
-	private List<List<ZBufferItem>> zBuffer = new ArrayList<>();
+	private ZBufferItem[][] buffer = new ZBufferItem[0][0];
 	private BufferedImage imageBuf = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
 	private int dispWidth;
 	private int dispHeight;
@@ -34,13 +38,8 @@ public class ZBuffer implements IZBuffer{
 	}
 
 	@Override
-	public ZBufferItem getItemAt(int x, int y){
-		if (zBuffer == null) return null;
-		
-		List<ZBufferItem> xCol = zBuffer.get(x);
-		if (xCol == null) return null;
-		
-		return xCol.get(y);
+	public ZBufferItem getItemAt(int x, int y) {
+	    return buffer[x][y];
 	}
 	
 	/**
@@ -59,27 +58,19 @@ public class ZBuffer implements IZBuffer{
 	
 	
 	private void add(Facet facet, ICanvasObject parent, ShaderFactory shader, Camera c)
-	{
-		if (zBuffer == null) 
-		    return;
-		
+	{	
 		List<WorldCoord> points = facet.getAsList();
-		if (points.stream().allMatch(p -> p.getTransformed(c).z <= 1)) 
+
+		if (facet.getTransformedNormal(c).getZ() == 0 ||
+		    Utils.allMatchAny(points.stream().map(p -> p.getTransformed(c)).collect(Collectors.toList()), 
+		                      Lists.newArrayList(p -> p.z <= 1,
+		                                         p -> p.x < 0,
+		                                         p -> p.x > dispWidth,
+		                                         p -> p.y < 0,
+		                                         p -> p.y > dispHeight))) 
+		{
 		    return;
-		
-		if (points.stream().allMatch(p -> p.getTransformed(c).x < 0)) 
-		    return;
-		if (points.stream().allMatch(p -> p.getTransformed(c).x > this.dispWidth))
-			return;
-		if (points.stream().allMatch(p -> p.getTransformed(c).y < 0)) 
-		    return;
-		if (points.stream().allMatch(p -> p.getTransformed(c).y > this.dispHeight)) 
-		    return;
-		
-		Vector normal = facet.getTransformedNormal(c);
-		
-		if (normal.getZ() == 0) 
-		    return;
+		}
 		
 		Comparator<WorldCoord> xComp = (o1, o2) -> (int)(o1.getTransformed(c).x - o2.getTransformed(c).x);
 
@@ -108,10 +99,7 @@ public class ZBuffer implements IZBuffer{
     			if (scanLine != null) 
     				processScanline(scanLine, parent, x, localShader);
     		}
-		} catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+		} catch (Exception e) { }
 	}
 	
 	@Override
@@ -121,15 +109,16 @@ public class ZBuffer implements IZBuffer{
 	
 	@Override
 	public void refreshBuffer() {
-		zBuffer.parallelStream().forEach(line -> {
-			line.stream().forEach(item -> {
-				if (item.isActive()) {
-					imageBuf.setRGB(item.getX(), item.getY(), item.getColour().getRGB());
+
+		for (int x = 0 ; x < buffer.length ; x++) {
+		    for (int y = 0 ; y < buffer[x].length ; y++) {
+				if (buffer[x][y].isActive()) {
+					imageBuf.setRGB(x, y, buffer[x][y].getColour().getRGB());
 				} else {
-					imageBuf.setRGB(item.getX(), item.getY(), Color.WHITE.getRGB());
+					imageBuf.setRGB(x, y, Color.WHITE.getRGB());
 				}
-			});
-		});
+			}
+		}
 	}
 
 	private void processScanline(ScanLine scanLine, ICanvasObject parent, int x, IShader shader) {
@@ -155,13 +144,12 @@ public class ZBuffer implements IZBuffer{
 	
 	private void addToBuffer(ICanvasObject parent, Integer x, Integer y, double z, Color colour)
 	{	
-		if (z < 0) return;
-		
-		try{
-			ZBufferItem bufferItem = this.zBuffer.get(x).get(y);
-			bufferItem.add(parent, z, colour);
-		}catch(Exception e){
-			//e.printStackTrace();
+		try {
+		    if (z >= 0) {
+    			ZBufferItem bufferItem = this.buffer[x][y];
+    			bufferItem.add(parent, z, colour);
+		    }
+		} catch(Exception e) {
 			//think it sometimes initially sets buffer of wrong size - JComponents taking their time to report their height etc.
 			//is nearly always sorted out in the second cycle though as canvas3d does check if the dimensions have changed
 		}
@@ -171,19 +159,17 @@ public class ZBuffer implements IZBuffer{
 	private ScanLine getScanline(int xVal, List<LineEquation> lines)
 	{
 		ScanLine scanLine = new ScanLine();
-		List<LineEquation> activeLines = new ArrayList<>();
-		for(LineEquation line : lines)
-		{
-			if (xVal >= line.getMinX() && xVal <= line.getMaxX())
-			{
-				Double y = line.getYAtX(xVal);
-				if (y == null || (y  > line.getMinY() && y < line.getMinY())) continue;
-				
-				activeLines.add(line);
-			}
-		}
 		
-		if (activeLines.size() < 2) return null;
+		List<LineEquation> activeLines = lines.stream().filter(line -> xVal >= line.getMinX() && xVal <= line.getMaxX())
+                                		               .filter(line -> {
+                                		                   Double y = line.getYAtX(xVal);
+                                		                   return Objects.nonNull(y) && y  <= line.getMaxY() && y >= line.getMinY();
+                                		               })
+                                		               .collect(Collectors.toList());
+		
+		
+		if (activeLines.size() < 2) 
+		    return null;
 		
 		if (activeLines.size() == 3){
 			double dif1 = activeLines.get(0).getYAtX(xVal) - activeLines.get(1).getYAtX(xVal);
@@ -259,15 +245,12 @@ public class ZBuffer implements IZBuffer{
 			this.dispHeight = height;
 			this.dispWidth = width;
 
-			zBuffer = new ArrayList<>();
+			buffer = new ZBufferItem[width + 1][height + 1];
 			
-			for (int x = 0 ; x < width + 1 ; x++){
-				ArrayList<ZBufferItem> list = new ArrayList<>();
-				for (int y = 0 ; y < height + 1 ; y++){
-					list.add(new ZBufferItem(x, y));
-				}
-				zBuffer.add(list);
-			}
+			Arrays.parallelSetAll(buffer, x -> {
+	            Arrays.setAll(buffer[x], y -> new ZBufferItem());
+	            return buffer[x];
+	        });
 			
 			imageBuf = new BufferedImage(width + 1, height + 1, BufferedImage.TYPE_INT_ARGB);
 			imageBuf.setAccelerationPriority(0.75f);
@@ -276,11 +259,11 @@ public class ZBuffer implements IZBuffer{
 
 	@Override
 	public void clear() {
-		this.zBuffer.parallelStream().forEach(m -> {
-			for (ZBufferItem item : m){
-				if (item.isActive()) item.clear();
-			}
-		});
+	    Arrays.parallelSetAll(buffer, x -> {
+	        Arrays.stream(buffer[x]).filter(ZBufferItem::isActive)
+	                                 .forEach(ZBufferItem::clear);
+	        return buffer[x];
+	    });
 		
 	}
 }

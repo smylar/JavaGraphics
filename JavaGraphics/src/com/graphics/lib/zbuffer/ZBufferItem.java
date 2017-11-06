@@ -11,26 +11,12 @@ import com.graphics.lib.interfaces.ICanvasObject;
  * @author Paul Brandon
  *
  */
-public class ZBufferItem
+public final class ZBufferItem
 {
-	private TreeMap<Double, Color> items = new TreeMap<Double, Color>();
+	private TreeMap<Double, Color> items = new TreeMap<>();
 	private ICanvasObject topMostObject = null;
-	private int x = 0;
-	private int y = 0;
-	private boolean active = false;
-	
-	public ZBufferItem(int x, int y){
-		this.x = x;
-		this.y = y;
-	}
-	
-	public int getX() {
-		return x;
-	}
 
-	public int getY() {
-		return y;
-	}
+	private boolean active = false;
 
 	public ICanvasObject getTopMostObject() {
 		return topMostObject;
@@ -50,7 +36,9 @@ public class ZBufferItem
 	public Color getColour() {
 
 		Color first = items.firstEntry().getValue();
-		if (items.size() == 1 || first.getAlpha() == 255) return first;
+		if (items.size() == 1 || first.getAlpha() == 255) {
+		    return first;
+		}
 		
 		//N.B. TreeMap will automatically order lowest to highest key (natural ordering)
 		int red = 0;
@@ -59,21 +47,23 @@ public class ZBufferItem
 		int alpha = 0;
 		
 		for (Color c : items.values()){
-			if (c.getAlpha() > alpha) alpha = c.getAlpha();
+			if (c.getAlpha() > alpha) {
+			    alpha = c.getAlpha();
+			}
 			red += ((double)c.getRed() / 255) * c.getAlpha();
 			blue += ((double)c.getBlue() / 255) * c.getAlpha();
 			green += ((double)c.getGreen() / 255) * c.getAlpha();
-			if (alpha == 255) break;
+			
+			if (alpha == 255) {
+			    break;
+			}
 		}
 		
-		if (red > 255) red = 255;
-		if (green > 255) green = 255;
-		if (blue > 255) blue = 255;
+		red = red > 255 ? 255 : red;
+		green = green > 255 ? 255 : green; 
+		blue = blue > 255 ? 255 : blue;
 		
 		return new Color(red, green, blue, alpha);
-		
-		//have just tried drawing the pixels with transparency on top of each other instead of working out a modified colour
-		//but does cause a bigger performance penalty when a transparent object takes up a significant portion of the screen
 	}
 	
 	/**
@@ -84,49 +74,19 @@ public class ZBufferItem
 	 */
 	public synchronized void add(ICanvasObject obj, double z, Color colour)
 	{	
-		if (items.isEmpty() || z < items.firstKey()){
+		if (items.isEmpty() || z < items.firstKey()) {
 			topMostObject = obj;
 			items.put(z, colour);
 			active = true;
-		}else if (items.firstEntry().getValue().getAlpha() < 255){
+		} else if (items.firstEntry().getValue().getAlpha() < 255) {
 			items.put(z, colour);
 		}
 	}
 	
-	public void clear(){
+	public void clear() {
 		active = false;
 		items.clear();
 		topMostObject = null;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + x;
-		result = prime * result + y;
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		ZBufferItem other = (ZBufferItem) obj;
-		/*if (items == null) {
-			if (other.items != null)
-				return false;
-		} else if (!items.equals(other.items))
-			return false;*/
-		if (x != other.x)
-			return false;
-		if (y != other.y)
-			return false;
-		return true;
 	}
 			
 }

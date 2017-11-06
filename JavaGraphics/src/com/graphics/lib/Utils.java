@@ -3,9 +3,11 @@ package com.graphics.lib;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Predicate;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -179,5 +181,15 @@ public class Utils {
             ImmutableList<Facet> facetList = ImmutableList.of();
             return Pair.of(vertexList, facetList);
         });
+    }
+    
+    public static <T> boolean allMatchAny(List<T> list, List<Predicate<T>> tests) {
+        for (Predicate<T> test : tests) {
+            if (list.stream().allMatch(test)) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 }
