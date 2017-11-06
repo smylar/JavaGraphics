@@ -1,5 +1,11 @@
 package com.graphics.shapes;
 
+import java.util.List;
+
+import org.apache.commons.lang3.tuple.Pair;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
 import com.graphics.lib.WorldCoord;
@@ -16,10 +22,20 @@ public class Cylinder extends CanvasObject {
 	
 	public Cylinder(double radius, double height, int arcProgression)
 	{
-	    super();
+	    super(() -> init(radius, height, 360 % arcProgression != 0 ? 18 : arcProgression));
 		//N.B. this is currently an open cylinder, i.e. ends are not closed like a sealed can
-		//may like option to specify if an end is open or not
-		if (360 % arcProgression != 0) arcProgression = 18;
+		//may like option to specify if an end is open or not	
+		
+		Point centre = this.getCentre();
+		this.addTransform(new Translation(-centre.x, 0, -centre.z));
+		this.applyTransforms();
+	}
+	
+	private static Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>> init(double radius, double height, int arcProgression) {
+		
+		List<WorldCoord> vertexList = Lists.newArrayList();
+		ImmutableList.Builder<Facet> facets = ImmutableList.builder();
+		
 		int points = 360/arcProgression;
 		
 		for (int i = 0 ; i < points ; i++){
@@ -27,22 +43,20 @@ public class Cylinder extends CanvasObject {
 			double x = radius - (radius*Math.sin(angle));
 			double z = radius - (radius*Math.cos(angle));
 			
-			this.getVertexList().add(new WorldCoord(x,0,z));
-			this.getVertexList().add(new WorldCoord(x,height,z));
+			vertexList.add(new WorldCoord(x,0,z));
+			vertexList.add(new WorldCoord(x,height,z));
 			if (i > 0){
-				int last = this.getVertexList().size() - 1;
-				this.getFacetList().add(new Facet(this.getVertexList().get(last - 2), this.getVertexList().get(last - 1), this.getVertexList().get(last)));
-				this.getFacetList().add(new Facet(this.getVertexList().get(last - 2), this.getVertexList().get(last - 3), this.getVertexList().get(last - 1)));
+				int last = vertexList.size() - 1;
+				facets.add(new Facet(vertexList.get(last - 2), vertexList.get(last - 1), vertexList.get(last)));
+				facets.add(new Facet(vertexList.get(last - 2), vertexList.get(last - 3), vertexList.get(last - 1)));
 			}
 		}
 		
-		int last = this.getVertexList().size() - 1;
-		this.getFacetList().add(new Facet(this.getVertexList().get(last), this.getVertexList().get(0), this.getVertexList().get(1)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(last), this.getVertexList().get(last - 1), this.getVertexList().get(0)));
+		int last = vertexList.size() - 1;
+		facets.add(new Facet(vertexList.get(last), vertexList.get(0), vertexList.get(1)));
+		facets.add(new Facet(vertexList.get(last), vertexList.get(last - 1), vertexList.get(0)));
 		
-		Point centre = this.getCentre();
-		this.addTransform(new Translation(-centre.x, 0, -centre.z));
-		this.applyTransforms();
+		return Pair.of(ImmutableList.copyOf(vertexList), facets.build());
 	}
 
 }

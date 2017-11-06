@@ -5,9 +5,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Observable;
+import java.util.Observer;
 
 import com.graphics.lib.interfaces.IAnimatable;
 import com.graphics.lib.skeleton.SkeletonNode;
+import com.graphics.lib.transform.Transform;
 
 /**
  * Handles animation of an object by intercepting the applyTransforms call to the parent object
@@ -19,7 +23,7 @@ import com.graphics.lib.skeleton.SkeletonNode;
  * @author paul.brandon
  *
  */
-public class AnimatedTrait extends OrientableTrait implements IAnimatable {
+public class AnimatedTrait extends OrientableTrait implements IAnimatable, Observer {
 	private static final Map<String, Method> interceptors = new HashMap<>();
 	
 	static {
@@ -44,12 +48,6 @@ public class AnimatedTrait extends OrientableTrait implements IAnimatable {
 	 * @param skeletonRootNode
 	 */
 	public void setSkeletonRootNode(SkeletonNode skeletonRootNode) {
-		parent.getVertexList().removeIf(v -> v.hasTag(SkeletonNode.POS_TAG));
-		
-		if (skeletonRootNode != null){
-			parent.getVertexList().addAll(skeletonRootNode.getAllNodePositions());
-		}
-		
 		this.skeletonRootNode = skeletonRootNode;
 	}
 
@@ -82,6 +80,15 @@ public class AnimatedTrait extends OrientableTrait implements IAnimatable {
 			
 			this.reapplyOrientation();
 		}
+	}
+	
+	@Override
+	public void update(Observable obs, Object args) {
+		super.update(obs, args);
+		if (Objects.nonNull(skeletonRootNode) && args instanceof Transform) {
+			((Transform)args).replay(skeletonRootNode.getAllNodePositions());
+		}
+		
 	}
 
 }

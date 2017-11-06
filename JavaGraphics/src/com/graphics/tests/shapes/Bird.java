@@ -1,5 +1,8 @@
 package com.graphics.tests.shapes;
 
+import org.apache.commons.lang3.tuple.Pair;
+
+import com.google.common.collect.ImmutableList;
 import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
 import com.graphics.lib.WorldCoord;
@@ -10,31 +13,10 @@ import com.graphics.lib.interfaces.ICanvasObject;
 
 public class Bird extends CanvasObject {
 	public Bird() {
-	    super();
+	    super(Bird::init);
 	    FunctionHandler.register(this, getFunctionsImpl());
 		
-		this.getVertexList().add(new WorldCoord(0, 0, 0));
-		this.getVertexList().add(new WorldCoord(0, 0, 60));
-		
-		//right wing
-		this.getVertexList().add(new WorldCoord(50, 0, 10));
-		this.getVertexList().add(new WorldCoord(50, 0, 50));
-		this.getVertexList().add(new WorldCoord(100, 0, 30));
-		
-		//left wing
-		this.getVertexList().add(new WorldCoord(-50, 0, 10));
-		this.getVertexList().add(new WorldCoord(-50, 0, 50));
-		this.getVertexList().add(new WorldCoord(-100, 0, 30));
-		
 		this.setProcessBackfaces(true);
-		
-		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(2), this.getVertexList().get(1)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(1), this.getVertexList().get(2), this.getVertexList().get(3)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(3), this.getVertexList().get(2), this.getVertexList().get(4)));
-		
-		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(1), this.getVertexList().get(5)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(1), this.getVertexList().get(6), this.getVertexList().get(5)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(5), this.getVertexList().get(6), this.getVertexList().get(7)));
 	}
 	
 	
@@ -53,5 +35,32 @@ public class Bird extends CanvasObject {
 				return obj.getCentre().distanceTo(obj.getVertexList().get(4));
 			}
 		};
+	}
+	
+	private static Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>> init() {
+		ImmutableList<WorldCoord> vertexList = generateVertexList();
+		return Pair.of(vertexList, generateFacetList(vertexList));
+	}
+	
+	private static ImmutableList<WorldCoord> generateVertexList() {
+		return ImmutableList.of(new WorldCoord(0, 0, 0),
+								new WorldCoord(0, 0, 60),
+								//right wing
+								new WorldCoord(50, 0, 10),
+								new WorldCoord(50, 0, 50),
+								new WorldCoord(100, 0, 30),
+								//left wing
+								new WorldCoord(-50, 0, 10),
+								new WorldCoord(-50, 0, 50),
+								new WorldCoord(-100, 0, 30));
+	}
+	
+	private static ImmutableList<Facet> generateFacetList(ImmutableList<WorldCoord> vertexList) {
+		return ImmutableList.of(new Facet(vertexList.get(0), vertexList.get(2), vertexList.get(1)),
+								new Facet(vertexList.get(1), vertexList.get(2), vertexList.get(3)),
+								new Facet(vertexList.get(3), vertexList.get(2), vertexList.get(4)),
+								new Facet(vertexList.get(0), vertexList.get(1), vertexList.get(5)),
+								new Facet(vertexList.get(1), vertexList.get(6), vertexList.get(5)),
+								new Facet(vertexList.get(5), vertexList.get(6), vertexList.get(7)));
 	}
 }

@@ -9,6 +9,7 @@ import java.util.Random;
 import com.graphics.lib.Axis;
 import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
+import com.graphics.lib.Utils;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
@@ -86,11 +87,8 @@ public class Ship extends CanvasObject {
 							int index = new Random().nextInt(5);
 							if (index == 0) index++;
 							Point p = obj.getVertexList().get(index);
-							CanvasObject fragment = new CanvasObject();
-							fragment.getVertexList().add(new WorldCoord(p.x , p.y, p.z));
-							fragment.getVertexList().add(new WorldCoord(p.x + 9 , p.y, p.z));
-							fragment.getVertexList().add(new WorldCoord(p.x, p.y + 9, p.z));
-							fragment.getFacetList().add(new Facet(fragment.getVertexList().get(0), fragment.getVertexList().get(1), fragment.getVertexList().get(2)));
+							CanvasObject fragment = Utils.getParticle(p, 9);
+
 							int colour = new Random().nextInt(3);
 							if (colour == 0) fragment.setColour(Color.PINK);
 							if (colour == 1) fragment.setColour(Color.ORANGE);
