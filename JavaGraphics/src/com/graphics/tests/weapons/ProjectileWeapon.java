@@ -101,7 +101,7 @@ public class ProjectileWeapon implements IEffector {
         ObjectTiedLightSource<LightSource> l = new ObjectTiedLightSource<>(LightSource.class, pos.x, pos.y, pos.z);
         l.tieTo(proj);
         l.setColour(proj.getColour());
-        l.getLightSource().setRange(400);
+        l.getLightSource().setRange(600);
         Canvas3D.get().addLightSource(l.getLightSource());
     }
     

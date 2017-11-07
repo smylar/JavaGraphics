@@ -1,7 +1,12 @@
 package com.graphics.shapes;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.tuple.Pair;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.graphics.lib.Axis;
 import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
@@ -15,155 +20,13 @@ import com.graphics.lib.orientation.SimpleOrientation;
 import com.graphics.lib.skeleton.PivotSkeletonNode;
 import com.graphics.lib.traits.AnimatedTrait;
 
-public class Whale extends CanvasObject {
+public final class Whale extends CanvasObject {
 	public static final String FIN_TAG = "fin";
 	public static final String FLUKE_TAG = "fluke";
 	
-	//private int multiplier = 1;
-	
 	public Whale(){
-	    super();
+	    super(Whale::init);
 	    FunctionHandler.register(this, getFunctionsImpl());
-		
-		this.getVertexList().add(new WorldCoord(62, 40, 0));
-		this.getVertexList().add(new WorldCoord(98, 40, 0));
-		
-		this.getVertexList().add(new WorldCoord(50, 0, 90));
-		this.getVertexList().add(new WorldCoord(110, 0, 90));
-		this.getVertexList().add(new WorldCoord(110, 100, 90));
-		this.getVertexList().add(new WorldCoord(50, 100, 90));
-		
-		this.getVertexList().add(new WorldCoord(21,90, 98));
-		this.getVertexList().add(new WorldCoord(2,65, 106));
-		this.getVertexList().add(new WorldCoord(2,35, 106));
-		this.getVertexList().add(new WorldCoord(21,10, 98));
-		
-		this.getVertexList().add(new WorldCoord(139,90, 98));
-		this.getVertexList().add(new WorldCoord(158,65, 106));
-		this.getVertexList().add(new WorldCoord(158,35, 106));
-		this.getVertexList().add(new WorldCoord(139,10, 98));
-		
-		this.getVertexList().add(new WorldCoord(50, 0, 170));
-		this.getVertexList().add(new WorldCoord(110, 0, 170));
-		this.getVertexList().add(new WorldCoord(110, 90, 185));
-		this.getVertexList().add(new WorldCoord(50, 90, 185));
-		
-		this.getVertexList().add(new WorldCoord(21,90, 170));
-		this.getVertexList().add(new WorldCoord(2,65, 170));
-		this.getVertexList().add(new WorldCoord(2,35, 170));
-		this.getVertexList().add(new WorldCoord(21,10, 170));
-		
-		this.getVertexList().add(new WorldCoord(139,90, 170));
-		this.getVertexList().add(new WorldCoord(158,65, 170));
-		this.getVertexList().add(new WorldCoord(158,35, 170));
-		this.getVertexList().add(new WorldCoord(139,10, 170));
-		
-		this.getVertexList().add(new WorldCoord(75, 40, 330, FLUKE_TAG));
-		this.getVertexList().add(new WorldCoord(85, 40, 330, FLUKE_TAG));
-		
-		this.getVertexList().add(new WorldCoord(150, 40, 350, FLUKE_TAG));
-		this.getVertexList().add(new WorldCoord(170, 39, 385, FLUKE_TAG));
-		this.getVertexList().add(new WorldCoord(80, 39, 365, FLUKE_TAG));
-		this.getVertexList().add(new WorldCoord(-10, 39, 385, FLUKE_TAG));
-		this.getVertexList().add(new WorldCoord(10, 40, 350, FLUKE_TAG));
-		
-		this.getVertexList().add(new WorldCoord(80, 41, 365, FLUKE_TAG));
-		
-		this.getVertexList().add(new WorldCoord(158, 50, 120));
-		this.getVertexList().add(new WorldCoord(158, 50, 170));
-		this.getVertexList().add(new WorldCoord(240, 65, 180));
-		
-		this.getVertexList().add(new WorldCoord(2, 50, 120));
-		this.getVertexList().add(new WorldCoord(2, 50, 170));
-		this.getVertexList().add(new WorldCoord(-80, 65, 180));
-		
-		
-		//snout ----------------------------------------
-		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(1), this.getVertexList().get(3)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(3), this.getVertexList().get(2)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(4), this.getVertexList().get(1)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(5), this.getVertexList().get(4)));
-		
-		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(6), this.getVertexList().get(5)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(7), this.getVertexList().get(6)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(8), this.getVertexList().get(7)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(9), this.getVertexList().get(8)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(0), this.getVertexList().get(2), this.getVertexList().get(9)));
-		
-		this.getFacetList().add(new Facet(this.getVertexList().get(1), this.getVertexList().get(4), this.getVertexList().get(10)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(1), this.getVertexList().get(10), this.getVertexList().get(11)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(1), this.getVertexList().get(11), this.getVertexList().get(12)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(1), this.getVertexList().get(12), this.getVertexList().get(13)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(1), this.getVertexList().get(13), this.getVertexList().get(3)));
-		
-		//body -------------------------------------------
-		
-		this.getFacetList().add(new Facet(this.getVertexList().get(2), this.getVertexList().get(3), this.getVertexList().get(15)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(2), this.getVertexList().get(15), this.getVertexList().get(14)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(3), this.getVertexList().get(13), this.getVertexList().get(25)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(3), this.getVertexList().get(25), this.getVertexList().get(15)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(13), this.getVertexList().get(12), this.getVertexList().get(24)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(13), this.getVertexList().get(24), this.getVertexList().get(25)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(12), this.getVertexList().get(11), this.getVertexList().get(23)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(12), this.getVertexList().get(23), this.getVertexList().get(24)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(11), this.getVertexList().get(10), this.getVertexList().get(22)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(11), this.getVertexList().get(22), this.getVertexList().get(23)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(10), this.getVertexList().get(4), this.getVertexList().get(22)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(4), this.getVertexList().get(16), this.getVertexList().get(22)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(4), this.getVertexList().get(5), this.getVertexList().get(17)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(4), this.getVertexList().get(17), this.getVertexList().get(16)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(5), this.getVertexList().get(6), this.getVertexList().get(18)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(5), this.getVertexList().get(18), this.getVertexList().get(17)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(6), this.getVertexList().get(7), this.getVertexList().get(19)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(6), this.getVertexList().get(19), this.getVertexList().get(18)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(7), this.getVertexList().get(8), this.getVertexList().get(20)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(7), this.getVertexList().get(20), this.getVertexList().get(19)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(8), this.getVertexList().get(9), this.getVertexList().get(21)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(8), this.getVertexList().get(21), this.getVertexList().get(20)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(9), this.getVertexList().get(2), this.getVertexList().get(14)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(9), this.getVertexList().get(14), this.getVertexList().get(21)));
-		
-		//tail ----------------------------------------------
-		this.getFacetList().add(new Facet(this.getVertexList().get(14), this.getVertexList().get(15), this.getVertexList().get(27)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(14), this.getVertexList().get(27), this.getVertexList().get(26)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(15), this.getVertexList().get(25), this.getVertexList().get(27)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(25), this.getVertexList().get(24), this.getVertexList().get(27)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(24), this.getVertexList().get(23), this.getVertexList().get(27)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(23), this.getVertexList().get(22), this.getVertexList().get(27)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(22), this.getVertexList().get(16), this.getVertexList().get(27)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(16), this.getVertexList().get(17), this.getVertexList().get(26)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(16), this.getVertexList().get(26), this.getVertexList().get(27)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(17), this.getVertexList().get(18), this.getVertexList().get(26)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(18), this.getVertexList().get(19), this.getVertexList().get(26)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(19), this.getVertexList().get(20), this.getVertexList().get(26)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(20), this.getVertexList().get(21), this.getVertexList().get(26)));
-		this.getFacetList().add(new Facet(this.getVertexList().get(21), this.getVertexList().get(14), this.getVertexList().get(26)));
-		
-		// tailfin (fluke) -------------------------------------
-		
-			//top
-		this.getFacetList().add(new Facet(this.getVertexList().get(27), this.getVertexList().get(28), this.getVertexList().get(29), FLUKE_TAG));
-		this.getFacetList().add(new Facet(this.getVertexList().get(27), this.getVertexList().get(29), this.getVertexList().get(30), FLUKE_TAG));
-		this.getFacetList().add(new Facet(this.getVertexList().get(32), this.getVertexList().get(26), this.getVertexList().get(30), FLUKE_TAG));
-		this.getFacetList().add(new Facet(this.getVertexList().get(31), this.getVertexList().get(32), this.getVertexList().get(30), FLUKE_TAG));
-		this.getFacetList().add(new Facet(this.getVertexList().get(26), this.getVertexList().get(27), this.getVertexList().get(30), FLUKE_TAG));
-			//bottom
-		this.getFacetList().add(new Facet(this.getVertexList().get(33), this.getVertexList().get(28), this.getVertexList().get(27), FLUKE_TAG));
-		this.getFacetList().add(new Facet(this.getVertexList().get(33), this.getVertexList().get(29), this.getVertexList().get(28), FLUKE_TAG));
-		this.getFacetList().add(new Facet(this.getVertexList().get(26), this.getVertexList().get(33), this.getVertexList().get(27), FLUKE_TAG));
-		this.getFacetList().add(new Facet(this.getVertexList().get(32), this.getVertexList().get(33), this.getVertexList().get(26), FLUKE_TAG));
-		this.getFacetList().add(new Facet(this.getVertexList().get(31), this.getVertexList().get(33), this.getVertexList().get(32), FLUKE_TAG));
-			//infill
-		this.getFacetList().add(new Facet(this.getVertexList().get(30), this.getVertexList().get(33), this.getVertexList().get(31), FLUKE_TAG));
-		this.getFacetList().add(new Facet(this.getVertexList().get(30), this.getVertexList().get(29), this.getVertexList().get(33), FLUKE_TAG));
-		
-		//fins -------------------------------------------------
-		this.getFacetList().add(new Facet(this.getVertexList().get(34), this.getVertexList().get(36), this.getVertexList().get(35), FIN_TAG));
-		this.getFacetList().add(new Facet(this.getVertexList().get(34), this.getVertexList().get(35), this.getVertexList().get(36), FIN_TAG));
-		this.getFacetList().add(new Facet(this.getVertexList().get(37), this.getVertexList().get(38), this.getVertexList().get(39), FIN_TAG));
-		this.getFacetList().add(new Facet(this.getVertexList().get(37), this.getVertexList().get(39), this.getVertexList().get(38), FIN_TAG));
-		
-		//TODO - an interface for building all this?!?!?
 		
 		this.useAveragedNormals(90);
 		
@@ -192,7 +55,7 @@ public class Whale extends CanvasObject {
 		animated.startAnimation("TAIL");
 	}
 	
-	private CanvasObjectFunctionsImpl getFunctionsImpl() {
+	private static CanvasObjectFunctionsImpl getFunctionsImpl() {
 		return new CanvasObjectFunctionsImpl() {
 			@Override
 			public boolean isPointInside(ICanvasObject obj, Point p)
@@ -205,5 +68,160 @@ public class Whale extends CanvasObject {
 						});
 			}
 		};
+	}
+	
+	private static Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>> init() {
+		ImmutableList<WorldCoord> vertexList = generateVertexList();
+		return Pair.of(vertexList, generateFacetList(vertexList));
+	}
+	
+	private static ImmutableList<WorldCoord> generateVertexList() {
+		Builder<WorldCoord> vertexList = ImmutableList.builder();
+		
+		vertexList.add(new WorldCoord(62, 40, 0));
+		vertexList.add(new WorldCoord(98, 40, 0));
+		
+		vertexList.add(new WorldCoord(50, 0, 90));
+		vertexList.add(new WorldCoord(110, 0, 90));
+		vertexList.add(new WorldCoord(110, 100, 90));
+		vertexList.add(new WorldCoord(50, 100, 90));
+		
+		vertexList.add(new WorldCoord(21,90, 98));
+		vertexList.add(new WorldCoord(2,65, 106));
+		vertexList.add(new WorldCoord(2,35, 106));
+		vertexList.add(new WorldCoord(21,10, 98));
+		
+		vertexList.add(new WorldCoord(139,90, 98));
+		vertexList.add(new WorldCoord(158,65, 106));
+		vertexList.add(new WorldCoord(158,35, 106));
+		vertexList.add(new WorldCoord(139,10, 98));
+		
+		vertexList.add(new WorldCoord(50, 0, 170));
+		vertexList.add(new WorldCoord(110, 0, 170));
+		vertexList.add(new WorldCoord(110, 90, 185));
+		vertexList.add(new WorldCoord(50, 90, 185));
+		
+		vertexList.add(new WorldCoord(21,90, 170));
+		vertexList.add(new WorldCoord(2,65, 170));
+		vertexList.add(new WorldCoord(2,35, 170));
+		vertexList.add(new WorldCoord(21,10, 170));
+		
+		vertexList.add(new WorldCoord(139,90, 170));
+		vertexList.add(new WorldCoord(158,65, 170));
+		vertexList.add(new WorldCoord(158,35, 170));
+		vertexList.add(new WorldCoord(139,10, 170));
+		
+		vertexList.add(new WorldCoord(75, 40, 330, FLUKE_TAG));
+		vertexList.add(new WorldCoord(85, 40, 330, FLUKE_TAG));
+		
+		vertexList.add(new WorldCoord(150, 40, 350, FLUKE_TAG));
+		vertexList.add(new WorldCoord(170, 39, 385, FLUKE_TAG));
+		vertexList.add(new WorldCoord(80, 39, 365, FLUKE_TAG));
+		vertexList.add(new WorldCoord(-10, 39, 385, FLUKE_TAG));
+		vertexList.add(new WorldCoord(10, 40, 350, FLUKE_TAG));
+		
+		vertexList.add(new WorldCoord(80, 41, 365, FLUKE_TAG));
+		
+		vertexList.add(new WorldCoord(158, 50, 120));
+		vertexList.add(new WorldCoord(158, 50, 170));
+		vertexList.add(new WorldCoord(240, 65, 180));
+		
+		vertexList.add(new WorldCoord(2, 50, 120));
+		vertexList.add(new WorldCoord(2, 50, 170));
+		vertexList.add(new WorldCoord(-80, 65, 180));
+		
+		return vertexList.build();
+	}
+	
+	private static ImmutableList<Facet> generateFacetList(List<WorldCoord> vertexList) {
+		
+		Builder<Facet> facetList = ImmutableList.builder();
+		//snout ----------------------------------------
+		facetList.add(new Facet(vertexList.get(0), vertexList.get(1), vertexList.get(3)));
+		facetList.add(new Facet(vertexList.get(0), vertexList.get(3), vertexList.get(2)));
+		facetList.add(new Facet(vertexList.get(0), vertexList.get(4), vertexList.get(1)));
+		facetList.add(new Facet(vertexList.get(0), vertexList.get(5), vertexList.get(4)));
+		
+		facetList.add(new Facet(vertexList.get(0), vertexList.get(6), vertexList.get(5)));
+		facetList.add(new Facet(vertexList.get(0), vertexList.get(7), vertexList.get(6)));
+		facetList.add(new Facet(vertexList.get(0), vertexList.get(8), vertexList.get(7)));
+		facetList.add(new Facet(vertexList.get(0), vertexList.get(9), vertexList.get(8)));
+		facetList.add(new Facet(vertexList.get(0), vertexList.get(2), vertexList.get(9)));
+		
+		facetList.add(new Facet(vertexList.get(1), vertexList.get(4), vertexList.get(10)));
+		facetList.add(new Facet(vertexList.get(1), vertexList.get(10), vertexList.get(11)));
+		facetList.add(new Facet(vertexList.get(1), vertexList.get(11), vertexList.get(12)));
+		facetList.add(new Facet(vertexList.get(1), vertexList.get(12), vertexList.get(13)));
+		facetList.add(new Facet(vertexList.get(1), vertexList.get(13), vertexList.get(3)));
+		
+		//body -------------------------------------------
+		
+		facetList.add(new Facet(vertexList.get(2), vertexList.get(3), vertexList.get(15)));
+		facetList.add(new Facet(vertexList.get(2), vertexList.get(15), vertexList.get(14)));
+		facetList.add(new Facet(vertexList.get(3), vertexList.get(13), vertexList.get(25)));
+		facetList.add(new Facet(vertexList.get(3), vertexList.get(25), vertexList.get(15)));
+		facetList.add(new Facet(vertexList.get(13), vertexList.get(12), vertexList.get(24)));
+		facetList.add(new Facet(vertexList.get(13), vertexList.get(24), vertexList.get(25)));
+		facetList.add(new Facet(vertexList.get(12), vertexList.get(11), vertexList.get(23)));
+		facetList.add(new Facet(vertexList.get(12), vertexList.get(23), vertexList.get(24)));
+		facetList.add(new Facet(vertexList.get(11), vertexList.get(10), vertexList.get(22)));
+		facetList.add(new Facet(vertexList.get(11), vertexList.get(22), vertexList.get(23)));
+		facetList.add(new Facet(vertexList.get(10), vertexList.get(4), vertexList.get(22)));
+		facetList.add(new Facet(vertexList.get(4), vertexList.get(16), vertexList.get(22)));
+		facetList.add(new Facet(vertexList.get(4), vertexList.get(5), vertexList.get(17)));
+		facetList.add(new Facet(vertexList.get(4), vertexList.get(17), vertexList.get(16)));
+		facetList.add(new Facet(vertexList.get(5), vertexList.get(6), vertexList.get(18)));
+		facetList.add(new Facet(vertexList.get(5), vertexList.get(18), vertexList.get(17)));
+		facetList.add(new Facet(vertexList.get(6), vertexList.get(7), vertexList.get(19)));
+		facetList.add(new Facet(vertexList.get(6), vertexList.get(19), vertexList.get(18)));
+		facetList.add(new Facet(vertexList.get(7), vertexList.get(8), vertexList.get(20)));
+		facetList.add(new Facet(vertexList.get(7), vertexList.get(20), vertexList.get(19)));
+		facetList.add(new Facet(vertexList.get(8), vertexList.get(9), vertexList.get(21)));
+		facetList.add(new Facet(vertexList.get(8), vertexList.get(21), vertexList.get(20)));
+		facetList.add(new Facet(vertexList.get(9), vertexList.get(2), vertexList.get(14)));
+		facetList.add(new Facet(vertexList.get(9), vertexList.get(14), vertexList.get(21)));
+		
+		//tail ----------------------------------------------
+		facetList.add(new Facet(vertexList.get(14), vertexList.get(15), vertexList.get(27)));
+		facetList.add(new Facet(vertexList.get(14), vertexList.get(27), vertexList.get(26)));
+		facetList.add(new Facet(vertexList.get(15), vertexList.get(25), vertexList.get(27)));
+		facetList.add(new Facet(vertexList.get(25), vertexList.get(24), vertexList.get(27)));
+		facetList.add(new Facet(vertexList.get(24), vertexList.get(23), vertexList.get(27)));
+		facetList.add(new Facet(vertexList.get(23), vertexList.get(22), vertexList.get(27)));
+		facetList.add(new Facet(vertexList.get(22), vertexList.get(16), vertexList.get(27)));
+		facetList.add(new Facet(vertexList.get(16), vertexList.get(17), vertexList.get(26)));
+		facetList.add(new Facet(vertexList.get(16), vertexList.get(26), vertexList.get(27)));
+		facetList.add(new Facet(vertexList.get(17), vertexList.get(18), vertexList.get(26)));
+		facetList.add(new Facet(vertexList.get(18), vertexList.get(19), vertexList.get(26)));
+		facetList.add(new Facet(vertexList.get(19), vertexList.get(20), vertexList.get(26)));
+		facetList.add(new Facet(vertexList.get(20), vertexList.get(21), vertexList.get(26)));
+		facetList.add(new Facet(vertexList.get(21), vertexList.get(14), vertexList.get(26)));
+		
+		// tailfin (fluke) -------------------------------------
+		
+			//top
+		facetList.add(new Facet(vertexList.get(27), vertexList.get(28), vertexList.get(29), FLUKE_TAG));
+		facetList.add(new Facet(vertexList.get(27), vertexList.get(29), vertexList.get(30), FLUKE_TAG));
+		facetList.add(new Facet(vertexList.get(32), vertexList.get(26), vertexList.get(30), FLUKE_TAG));
+		facetList.add(new Facet(vertexList.get(31), vertexList.get(32), vertexList.get(30), FLUKE_TAG));
+		facetList.add(new Facet(vertexList.get(26), vertexList.get(27), vertexList.get(30), FLUKE_TAG));
+			//bottom
+		facetList.add(new Facet(vertexList.get(33), vertexList.get(28), vertexList.get(27), FLUKE_TAG));
+		facetList.add(new Facet(vertexList.get(33), vertexList.get(29), vertexList.get(28), FLUKE_TAG));
+		facetList.add(new Facet(vertexList.get(26), vertexList.get(33), vertexList.get(27), FLUKE_TAG));
+		facetList.add(new Facet(vertexList.get(32), vertexList.get(33), vertexList.get(26), FLUKE_TAG));
+		facetList.add(new Facet(vertexList.get(31), vertexList.get(33), vertexList.get(32), FLUKE_TAG));
+			//infill
+		facetList.add(new Facet(vertexList.get(30), vertexList.get(33), vertexList.get(31), FLUKE_TAG));
+		facetList.add(new Facet(vertexList.get(30), vertexList.get(29), vertexList.get(33), FLUKE_TAG));
+		
+		//fins -------------------------------------------------
+		facetList.add(new Facet(vertexList.get(34), vertexList.get(36), vertexList.get(35), FIN_TAG));
+		facetList.add(new Facet(vertexList.get(34), vertexList.get(35), vertexList.get(36), FIN_TAG));
+		facetList.add(new Facet(vertexList.get(37), vertexList.get(38), vertexList.get(39), FIN_TAG));
+		facetList.add(new Facet(vertexList.get(37), vertexList.get(39), vertexList.get(38), FIN_TAG));
+		
+		//TODO - an interface for building all this?!?!?
+		return facetList.build();
 	}
 }

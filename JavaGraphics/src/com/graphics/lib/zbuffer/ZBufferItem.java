@@ -16,7 +16,22 @@ public final class ZBufferItem
 	private TreeMap<Double, Color> items = new TreeMap<>();
 	private ICanvasObject topMostObject = null;
 
+	private int x = 0;
+	private int y = 0;
 	private boolean active = false;
+		
+	public ZBufferItem(int x, int y){
+		this.x = x;
+		this.y = y;
+	}
+	
+	public int getX() {
+		return x;
+	}
+
+	public int getY() {
+		return y;
+	}
 
 	public ICanvasObject getTopMostObject() {
 		return topMostObject;

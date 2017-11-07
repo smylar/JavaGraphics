@@ -3,7 +3,6 @@ package com.graphics.lib.zbuffer;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -21,8 +20,8 @@ import com.graphics.lib.interfaces.IZBuffer;
 import com.graphics.lib.shader.IShader;
 import com.graphics.lib.shader.ShaderFactory;
 
-public class ZBuffer implements IZBuffer{
-	private ZBufferItem[][] buffer = new ZBufferItem[0][0];
+public class ZBuffer implements IZBuffer {
+	private List<List<ZBufferItem>> buffer = new ArrayList<>();
 	private BufferedImage imageBuf = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
 	private int dispWidth;
 	private int dispHeight;
@@ -39,7 +38,7 @@ public class ZBuffer implements IZBuffer{
 
 	@Override
 	public ZBufferItem getItemAt(int x, int y) {
-	    return buffer[x][y];
+	    return buffer.get(x).get(y);
 	}
 	
 	/**
@@ -110,15 +109,15 @@ public class ZBuffer implements IZBuffer{
 	@Override
 	public void refreshBuffer() {
 
-		for (int x = 0 ; x < buffer.length ; x++) {
-		    for (int y = 0 ; y < buffer[x].length ; y++) {
-				if (buffer[x][y].isActive()) {
-					imageBuf.setRGB(x, y, buffer[x][y].getColour().getRGB());
+		buffer.parallelStream().forEach(line -> 
+			line.stream().forEach(item -> {
+				if (item.isActive()) {
+					imageBuf.setRGB(item.getX(), item.getY(), item.getColour().getRGB());
 				} else {
-					imageBuf.setRGB(x, y, Color.WHITE.getRGB());
+					imageBuf.setRGB(item.getX(), item.getY(), Color.WHITE.getRGB());
 				}
-			}
-		}
+			})
+		);
 	}
 
 	private void processScanline(ScanLine scanLine, ICanvasObject parent, int x, IShader shader) {
@@ -146,7 +145,7 @@ public class ZBuffer implements IZBuffer{
 	{	
 		try {
 		    if (z >= 0) {
-    			ZBufferItem bufferItem = this.buffer[x][y];
+    			ZBufferItem bufferItem = getItemAt(x,y);
     			bufferItem.add(parent, z, colour);
 		    }
 		} catch(Exception e) {
@@ -163,7 +162,7 @@ public class ZBuffer implements IZBuffer{
 		List<LineEquation> activeLines = lines.stream().filter(line -> xVal >= line.getMinX() && xVal <= line.getMaxX())
                                 		               .filter(line -> {
                                 		                   Double y = line.getYAtX(xVal);
-                                		                   return Objects.nonNull(y) && y  <= line.getMaxY() && y >= line.getMinY();
+                                		                   return Objects.nonNull(y) && y <= line.getMaxY() && y >= line.getMinY();
                                 		               })
                                 		               .collect(Collectors.toList());
 		
@@ -245,12 +244,15 @@ public class ZBuffer implements IZBuffer{
 			this.dispHeight = height;
 			this.dispWidth = width;
 
-			buffer = new ZBufferItem[width + 1][height + 1];
+			buffer = new ArrayList<>();
 			
-			Arrays.parallelSetAll(buffer, x -> {
-	            Arrays.setAll(buffer[x], y -> new ZBufferItem());
-	            return buffer[x];
-	        });
+			for (int x = 0 ; x < width + 1 ; x++) {
+				ArrayList<ZBufferItem> list = new ArrayList<>();
+					for (int y = 0 ; y < height + 1 ; y++) {
+						list.add(new ZBufferItem(x, y));
+					}
+				buffer.add(list);
+			}
 			
 			imageBuf = new BufferedImage(width + 1, height + 1, BufferedImage.TYPE_INT_ARGB);
 			imageBuf.setAccelerationPriority(0.75f);
@@ -259,11 +261,9 @@ public class ZBuffer implements IZBuffer{
 
 	@Override
 	public void clear() {
-	    Arrays.parallelSetAll(buffer, x -> {
-	        Arrays.stream(buffer[x]).filter(ZBufferItem::isActive)
-	                                 .forEach(ZBufferItem::clear);
-	        return buffer[x];
-	    });
+		this.buffer.parallelStream().forEach(m -> {
+			m.stream().filter(item -> item.isActive()).forEach(item -> item.clear());
+		});
 		
 	}
 }
