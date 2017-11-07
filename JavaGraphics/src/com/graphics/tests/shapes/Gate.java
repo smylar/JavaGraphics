@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
+import com.graphics.lib.Utils;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.interfaces.ICanvasObject;
@@ -93,11 +93,7 @@ public final class Gate extends Torus {
 	private void addParticleEffect() {
 	    for (int i = offset++ ; i < innerPoints.size() ; i+=interval) {
 	        Point p = innerPoints.get(i);
-            CanvasObject fragment = new CanvasObject();
-            fragment.getVertexList().add(new WorldCoord(p.x, p.y, p.z));
-            fragment.getVertexList().add(new WorldCoord(p.x + 2, p.y, p.z));
-            fragment.getVertexList().add(new WorldCoord(p.x, p.y + 2, p.z));
-            fragment.getFacetList().add(new Facet(fragment.getVertexList().get(0), fragment.getVertexList().get(1), fragment.getVertexList().get(2)));
+            CanvasObject fragment = Utils.getParticle(p, 2);
             fragment.setColour(i % 2 == 0 ? Color.PINK : Color.BLUE);
             fragment.setProcessBackfaces(true);
             MovementTransform move = new MovementTransform(p.vectorToPoint(getCentre()).getUnitVector(), 1).moveUntil(t -> t.getDistanceMoved() >= holeRadius-2);        
