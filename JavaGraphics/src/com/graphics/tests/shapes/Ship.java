@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
+import org.apache.commons.lang3.tuple.Pair;
+
+import com.google.common.collect.ImmutableList;
 import com.graphics.lib.Axis;
 import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
@@ -23,50 +26,26 @@ import com.graphics.lib.transform.RepeatingTransform;
 import com.graphics.lib.transform.Rotation;
 import com.graphics.lib.transform.Transform;
 
-public class Ship extends CanvasObject {
+public final class Ship extends CanvasObject {
 	
-	private Facet wingFlashLeft;
-	private Facet wingFlashRight;
+	private final Facet wingFlashLeft;
+	private final Facet wingFlashRight;
 	private int cnt = 0;
 	private double acceleration = 0.2;
 	private double panRate = 4;
 	private List<IEffector> weapons = new ArrayList<>();
 	
-	public Ship(int width, int depth, int height)
+	public Ship(final int width, final int depth, final int height)
 	{
-		super();
+		super(() -> init(width,depth,height));
 		
-		getVertexList().add(new WorldCoord(0, 0, 0));
-		getVertexList().add(new WorldCoord(width/2, 0, depth));
-		getVertexList().add(new WorldCoord(-width/2, 0, depth));
-		getVertexList().add(new WorldCoord(0, height/2, depth * 0.8));
-		getVertexList().add(new WorldCoord(0, -height/2, depth * 0.8));
-		
-		getVertexList().add(new WorldCoord(0, 0, depth/2)); //centre point
-		
-		getVertexList().add(new WorldCoord(width/2, 5, depth - 5));
-		getVertexList().add(new WorldCoord(width/2, -5, depth - 5)); //wing flash left
-		
-		getVertexList().add(new WorldCoord(-width/2, 5, depth - 5));
-		getVertexList().add(new WorldCoord(-width/2, -5, depth - 5)); //wing flash left
-		
-		getFacetList().add(new Facet(getVertexList().get(0), getVertexList().get(1), getVertexList().get(4)));
-		getFacetList().add(new Facet(getVertexList().get(0), getVertexList().get(3), getVertexList().get(1)));
-		getFacetList().add(new Facet(getVertexList().get(0), getVertexList().get(4), getVertexList().get(2)));
-		getFacetList().add(new Facet(getVertexList().get(0), getVertexList().get(2), getVertexList().get(3)));
-		
-		getFacetList().add(new Facet(getVertexList().get(1), getVertexList().get(3), getVertexList().get(4)));
-		getFacetList().add(new Facet(getVertexList().get(2), getVertexList().get(4), getVertexList().get(3)));
-		
-		wingFlashLeft = new Facet(getVertexList().get(1), getVertexList().get(7), getVertexList().get(6));
+		wingFlashLeft = this.getFacetList().get(6);
 		wingFlashLeft.setColour(Color.MAGENTA);
 		wingFlashLeft.setBaseIntensity(1);
-		getFacetList().add(wingFlashLeft);
 		
-		wingFlashRight = new Facet(getVertexList().get(2), getVertexList().get(8), getVertexList().get(9));
+		wingFlashRight = this.getFacetList().get(7);
 		wingFlashRight.setColour(Color.MAGENTA);
 		wingFlashRight.setBaseIntensity(1);
-		getFacetList().add(wingFlashRight);
 		
 		getFacetList().get(4).setColour(Color.YELLOW);
 		getFacetList().get(5).setColour(Color.YELLOW);
@@ -155,5 +134,37 @@ public class Ship extends CanvasObject {
 	
 	public void addWeapon(IEffector weapon){
 		weapons.add(weapon);
+	}
+	
+	private static Pair<ImmutableList<WorldCoord>,ImmutableList<Facet>> init(final int width, final int depth, final int height) {
+	    ImmutableList<WorldCoord> vertexList = generateVertexList(width, depth, height);
+	    return Pair.of(vertexList, generateFacetList(vertexList));
+	}
+	
+	private static ImmutableList<WorldCoord> generateVertexList(final int width, final int depth, final int height) {
+	    return ImmutableList.of(new WorldCoord(0, 0, 0),
+	                            new WorldCoord(width/2, 0, depth),
+	                            new WorldCoord(-width/2, 0, depth),
+	                            new WorldCoord(0, height/2, depth * 0.8),
+	                            new WorldCoord(0, -height/2, depth * 0.8),
+        
+	                            new WorldCoord(0, 0, depth/2),//centre point
+        
+	                            new WorldCoord(width/2, 5, depth - 5),
+	                            new WorldCoord(width/2, -5, depth - 5), //wing flash left
+        
+	                            new WorldCoord(-width/2, 5, depth - 5),
+	                            new WorldCoord(-width/2, -5, depth - 5)); //wing flash left
+	}
+	
+	private static ImmutableList<Facet> generateFacetList(List<WorldCoord> vertexList) {
+	    return ImmutableList.of(new Facet(vertexList.get(0), vertexList.get(1), vertexList.get(4)),
+                                   new Facet(vertexList.get(0), vertexList.get(3), vertexList.get(1)),
+                                   new Facet(vertexList.get(0), vertexList.get(4), vertexList.get(2)),
+                                   new Facet(vertexList.get(0), vertexList.get(2), vertexList.get(3)),
+                                   new Facet(vertexList.get(1), vertexList.get(3), vertexList.get(4)),
+                                   new Facet(vertexList.get(2), vertexList.get(4), vertexList.get(3)),
+                                   new Facet(vertexList.get(1), vertexList.get(7), vertexList.get(6)),
+                                   new Facet(vertexList.get(2), vertexList.get(8), vertexList.get(9)));
 	}
 }
