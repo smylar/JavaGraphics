@@ -4,8 +4,10 @@ import static org.junit.Assert.*;
 
 import java.text.DecimalFormat;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 
+import com.google.common.collect.ImmutableList;
 import com.graphics.lib.Axis;
 import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
@@ -82,9 +84,8 @@ public class UnitTests {
 	
 	@Test
 	public void testYRotation() {
-		ICanvasObject obj = new CanvasObject();
-		WorldCoord coord = new WorldCoord(1,2,3);
-		obj.getVertexList().add(coord);
+	    WorldCoord coord = new WorldCoord(1,2,3);
+		ICanvasObject obj = new CanvasObject(() -> Pair.of(ImmutableList.of(coord), ImmutableList.of()));
 		
 		Rotation rot = new Rotation(Axis.Y, 90);
 		obj.applyTransform(rot);
@@ -95,9 +96,8 @@ public class UnitTests {
 	
 	@Test
 	public void testXRotation() {
-		ICanvasObject obj = new CanvasObject();
-		WorldCoord coord = new WorldCoord(1,2,3);
-		obj.getVertexList().add(coord);
+	    WorldCoord coord = new WorldCoord(1,2,3);
+		ICanvasObject obj = new CanvasObject(() -> Pair.of(ImmutableList.of(coord), ImmutableList.of()));
 		
 		Rotation rot = new Rotation(Axis.X, 90);
 		obj.applyTransform(rot);
@@ -107,11 +107,9 @@ public class UnitTests {
 	
 	@Test
 	public void testSameSpeedInterception() {
-		CanvasObject target = new CanvasObject();
-		target.getVertexList().add(new WorldCoord(2,2,0));
+		CanvasObject target = new CanvasObject(() -> Pair.of(ImmutableList.of(new WorldCoord(2,2,0)), ImmutableList.of()));
 		
-		ICanvasObject proj = new CanvasObject();
-		proj.getVertexList().add(new WorldCoord(4,0,0));
+		ICanvasObject proj = new CanvasObject(() -> Pair.of(ImmutableList.of(new WorldCoord(4,0,0)), ImmutableList.of()));
 		
 		MovementTransform move = new MovementTransform(new Vector(1,0,0), 1);
 		target.addTransform(move);
@@ -127,11 +125,9 @@ public class UnitTests {
 	
 	@Test
 	public void testDifferentSpeedInterception() {
-		CanvasObject target = new CanvasObject();
-		target.getVertexList().add(new WorldCoord(0,0,0));
+		CanvasObject target = new CanvasObject(() -> Pair.of(ImmutableList.of(new WorldCoord(0,0,0)), ImmutableList.of()));
 		
-		ICanvasObject proj = new CanvasObject();
-		proj.getVertexList().add(new WorldCoord(2,4,0));
+		ICanvasObject proj = new CanvasObject(() -> Pair.of(ImmutableList.of(new WorldCoord(2,4,0)), ImmutableList.of()));
 		
 		MovementTransform move = new MovementTransform(new Vector(1,0,0), 1);
 		target.addTransform(move);
@@ -143,11 +139,9 @@ public class UnitTests {
 	
 	@Test
 	public void testCannotIntercept() {
-		CanvasObject target = new CanvasObject();
-		target.getVertexList().add(new WorldCoord(0,0,0));
+		CanvasObject target = new CanvasObject(() -> Pair.of(ImmutableList.of(new WorldCoord(0,0,0)), ImmutableList.of()));
 		
-		ICanvasObject proj = new CanvasObject();
-		proj.getVertexList().add(new WorldCoord(4,0,0));
+		ICanvasObject proj = new CanvasObject(() -> Pair.of(ImmutableList.of(new WorldCoord(4,0,0)), ImmutableList.of()));
 		
 		MovementTransform move = new MovementTransform(new Vector(1,0,0), 1);
 		target.addTransform(move);
