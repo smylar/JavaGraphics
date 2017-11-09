@@ -87,19 +87,19 @@ public class SimpleOrientation implements IOrientation {
 	private Vector moveToOrigin(Vector v)
 	{
 		Point anchor = getAnchor();
-		v.addX(-anchor.x);
-		v.addY(-anchor.y);
-		v.addZ(-anchor.z);
-		return v;
+		return Vector.builder().x(v.getX() - anchor.x)
+							   .y(v.getY() - anchor.y)
+							   .z(v.getZ() - anchor.z)
+							   .build();
 	}
 	
 	private Vector moveToOriginInverted(Vector v)
 	{
 		Point anchor = getAnchor();
-		v.addX(anchor.x);
-        v.addY(anchor.y);
-        v.addZ(anchor.z);
-		return v;
+		return Vector.builder().x(v.getX() + anchor.x)
+							   .y(v.getY() + anchor.y)
+							   .z(v.getZ() + anchor.z)
+							   .build();
 	}
 
 	@Override

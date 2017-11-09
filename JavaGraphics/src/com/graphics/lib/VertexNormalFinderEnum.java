@@ -1,6 +1,7 @@
 package com.graphics.lib;
 
 import java.util.List;
+import java.util.Objects;
 
 import com.graphics.lib.interfaces.IVertexNormalFinder;
 
@@ -8,13 +9,12 @@ public enum VertexNormalFinderEnum {
 	DEFAULT((obj, p, f) -> {
 			if (obj.getVertexFacetMap() != null){
 				List<Facet> facetList = obj.getVertexFacetMap().get(p);
-				if (facetList != null && facetList.size() > 0)
+				if (Objects.nonNull(facetList) && !facetList.isEmpty())
 				{	
-					Vector normal = new Vector(0,0,0);
-					for(Facet facet : facetList){
-						normal.addVector(facet.getNormal());
-					}
-					return normal.getUnitVector(); //could possibly store for reuse between transforms
+					return facetList.stream().map(facet -> Vector.builder().from(facet.getNormal()))
+											  .reduce(Vector.builder(), (left, right) -> left.combine(right))
+							                  .build()
+											  .getUnitVector(); 
 				}
 			}
 			

@@ -140,14 +140,14 @@ public class Facet extends Triplet<WorldCoord> {
 	public Point getIntersectionPointWithFacetPlane(Point p, Vector vec, boolean includeBackfaces){
 		Vector normal = this.getNormal();
 		Vector v = vec.getUnitVector();
-		double t = (normal.x * v.x) + (normal.y * v.y) + (normal.z * v.z);
-		double tmod = (normal.x*p.x) + (normal.y*p.y) + (normal.z*p.z);
+		double t = (normal.getX() * v.getX()) + (normal.getY() * v.getY()) + (normal.getZ() * v.getZ());
+		double tmod = (normal.getX()*p.x) + (normal.getY()*p.y) + (normal.getZ()*p.z);
 		if (includeBackfaces && t == 0) 
 		    return null;
 		if (!includeBackfaces && t >= 0) 
 		    return null;
-		double tval = ((normal.x* first().x) + (normal.y* first().y) + (normal.z* first().z) - tmod) / t;
-		Point intersect =  new Point(p.x + (v.x*tval), p.y + (v.y*tval), p.z + (v.z*tval));
+		double tval = ((normal.getX()* first().x) + (normal.getY()* first().y) + (normal.getZ()* first().z) - tmod) / t;
+		Point intersect =  new Point(p.x + (v.getX()*tval), p.y + (v.getY()*tval), p.z + (v.getZ()*tval));
 		
 		Vector v2 = p.vectorToPoint(intersect).getUnitVector(); //check intersect isn't in opposite direction to vec
 		
@@ -162,9 +162,9 @@ public class Facet extends Triplet<WorldCoord> {
 	 */
 	public double getDistanceFromFacetPlane(Point p){
 		Vector normal = this.getNormal();
-		double planex = normal.x * (p.x - first().x);
-		double planey = normal.y * (p.y - first().y);
-		double planez = normal.z * (p.z - first().z);
+		double planex = normal.getX() * (p.x - first().x);
+		double planey = normal.getY() * (p.y - first().y);
+		double planez = normal.getZ() * (p.z - first().z);
 		
 		double dist = planex + planey + planez; //should not need to divide by normal length as already normalized (=1)
 		return dist < 0 ? -dist : dist;

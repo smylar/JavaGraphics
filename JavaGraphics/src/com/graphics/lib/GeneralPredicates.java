@@ -14,8 +14,8 @@ public class GeneralPredicates {
 			List<WorldCoord> points = f.getAsList();
 			if (points.get(0).getTransformed(c).z < 1 && points.get(1).getTransformed(c).z < 1 && points.get(2).getTransformed(c).z < 1) return false;
 			
-			double camVecZ = c.getOrientation().getForward().z;
-			double facetVecZ = f.getTransformedNormal(c).z;
+			double camVecZ = c.getOrientation().getForward().getZ();
+			double facetVecZ = f.getTransformedNormal(c).getZ();
 			
 			if (camVecZ < 0) camVecZ = camVecZ * -1;
 			

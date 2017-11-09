@@ -44,10 +44,11 @@ public class PluginLibrary {
 				return null;
 			}
 			
-			Vector baseVector = new Vector(0,0,0);
-			for (MovementTransform t : mTrans){
-			    baseVector.addVector(t.getVelocity());
-			}
+			Vector baseVector = mTrans.stream().map(trans -> Vector.builder().from(trans.getVelocity()))
+												.reduce(Vector.builder(), (left, right) -> left.combine(right))
+												.build(); 
+			
+			
 			double speed = baseVector.getSpeed();
 			baseVector = baseVector.getUnitVector();
 			
@@ -174,10 +175,9 @@ public class PluginLibrary {
 				return null;
 			}
 			
-			Vector baseVector = new Vector(0,0,0);
-			for (MovementTransform t : mTrans){
-			    baseVector.addVector(t.getVelocity());
-			}
+			Vector baseVector = mTrans.stream().map(trans -> Vector.builder().from(trans.getVelocity()))
+												.reduce(Vector.builder(), (left, right) -> left.combine(right))
+												.build();
 			
 			for (ICanvasObject impactee : objects.get()){
 				if (impactee.equals(obj)) continue;
@@ -298,21 +298,21 @@ public class PluginLibrary {
 			
 			//plot deflection (if target moving) and aim for that
 			Vector vTrackee = CanvasObjectFunctions.DEFAULT.get().plotDeflectionShot(objectToTrack, obj.getCentre(), move.get().getSpeed());
+			//TODO doesn't track once vectors heading away from each other
+			//need to loop around in the same direction (check dot product)
 
 			Vector vMove = move.get().getVector();
 			double xAngleDif = Math.toDegrees(Math.acos(vTrackee.getY()) - Math.acos(vMove.getUnitVector().getY()));
 			double xAngleMod = xAngleDif > 0 ? rotationRate : -rotationRate;
 			
 			double yAngleDif = Math.toDegrees(Math.acos(vTrackee.getX()) - Math.acos(vMove.getUnitVector().getX()));
-			double yAngleMod = yAngleDif > 0 ? -rotationRate : rotationRate;			
+			double yAngleMod = yAngleDif > 0 ? -rotationRate : rotationRate;	
 			
 			Point tempCoord = new Point(vMove.getX(), vMove.getY(), vMove.getZ());
 			Axis.X.getRotation(xAngleMod).doTransformSpecific().accept(tempCoord);
 			Axis.Y.getRotation(yAngleMod).doTransformSpecific().accept(tempCoord);
 			
-			vMove.setX(tempCoord.x);
-			vMove.setY(tempCoord.y);
-			vMove.setZ(tempCoord.z);
+			move.get().setVector(Vector.builder().x(tempCoord.x).y(tempCoord.y).z(tempCoord.z).build());
 			
 			return null;
 		};

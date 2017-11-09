@@ -59,12 +59,13 @@ public class CanvasObjectFunctionsImpl {
 		if (mTrans.isEmpty()) 
 		    return defaultVector;
 		
-		Vector targetVec = new Vector(0,0,0);
-		for (MovementTransform t : mTrans){
-			targetVec.addX(t.getVector().getX() * t.getSpeed());
-			targetVec.addY(t.getVector().getY() * t.getSpeed());
-			targetVec.addZ(t.getVector().getZ() * t.getSpeed());
-		}
+		
+		Vector targetVec = mTrans.stream().map(transform -> Vector.builder().x(transform.getVector().getX() * transform.getSpeed())
+			  	   															.y(transform.getVector().getY() * transform.getSpeed())
+		  	   																.z(transform.getVector().getZ() * transform.getSpeed()))
+										  .reduce(Vector.builder(), (left, right) -> left.combine(right))
+										  .build();
+		
 		double speed = targetVec.getSpeed();
 		targetVec = targetVec.getUnitVector();
 		

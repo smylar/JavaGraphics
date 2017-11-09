@@ -18,7 +18,6 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.graphics.lib.Facet;
@@ -65,13 +64,6 @@ public class CanvasObject extends Observable implements ICanvasObject {
     
     private Set<ITrait> traits = Sets.newHashSet();
 	private final int objectId = nextId++;
-	
-	@Deprecated
-	public CanvasObject() {
-		//TODO remove when refactored to use supplier
-		vertexList = Lists.newArrayList();
-		facetList = Lists.newArrayList();
-	}
 	
 	public CanvasObject(Supplier<Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>>> initMesh) {
 		Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>> mesh = initMesh.get();
