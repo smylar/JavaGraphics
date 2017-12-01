@@ -15,7 +15,7 @@ public class BmpTexture implements Texture{
 	
 	private BufferedImage bmpImage;
 	private Color transparentColour = null;
-	private Map<Integer, Color> colourMap = new HashMap<Integer, Color>(); //so we don't get a tonne of colour objects to clear up
+	private Map<Integer, Color> colourMap = new HashMap<>(); //so we don't get a tonne of colour objects to clear up
 	private boolean applyLighting = true;
 	private int order = 0;
 	
@@ -32,21 +32,21 @@ public class BmpTexture implements Texture{
 	
 	@Override
 	public Optional<Color> getColour(int x, int y){
-		if (x < 0 || y < 0 || bmpImage == null) return Optional.empty();
-		x = x % getWidth();
-		y = y % getHeight();
-		
-		int rgb = bmpImage.getRGB(x, y);
-		
-		if (transparentColour != null && rgb == transparentColour.getRGB()) return Optional.empty();
-		
-		Color c = null;
-		if (colourMap.containsKey(rgb)){
-			c = colourMap.get(rgb);
-		}else{
-			c = new Color(rgb);
-			colourMap.put(rgb, c);
+		if (x < 0 || y < 0 || bmpImage == null) {
+		    return Optional.empty(); 
 		}
+		
+		int xval = x % getWidth();
+		int yval = y % getHeight();
+		
+		int rgb = bmpImage.getRGB(xval, yval);
+		
+		if (transparentColour != null && rgb == transparentColour.getRGB()) {
+		    return Optional.empty();
+		}
+		
+		Color c = colourMap.computeIfAbsent(rgb, Color::new);
+
 		return Optional.ofNullable(c);
 	}
 	

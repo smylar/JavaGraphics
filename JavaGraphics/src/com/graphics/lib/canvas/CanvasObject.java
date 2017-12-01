@@ -18,6 +18,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.graphics.lib.Facet;
@@ -525,9 +526,6 @@ public class CanvasObject extends Observable implements ICanvasObject {
 	
 	private void addPointFacetToMap(Map<Point, List<Facet>> vfMap, Point p, Facet f)
 	{
-		if (!vfMap.containsKey(p)){
-			vfMap.put(p, new ArrayList<Facet>());
-		}
-		vfMap.get(p).add(f);
+	    vfMap.computeIfAbsent(p, key -> Lists.newArrayList()).add(f);
 	}
 }

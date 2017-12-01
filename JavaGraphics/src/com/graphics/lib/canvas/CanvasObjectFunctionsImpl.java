@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.graphics.lib.Facet;
 import com.graphics.lib.GeneralPredicates;
 import com.graphics.lib.Point;
@@ -45,7 +47,14 @@ public class CanvasObjectFunctionsImpl {
 		return true;
 	}
 	
-	public Vector plotDeflectionShot(ICanvasObject target, Point startPoint, double projSpeed){
+	/**
+	 * 
+	 * @param target
+	 * @param startPoint
+	 * @param projSpeed
+	 * @return Pair of the Vector to take and target point
+	 */
+	public Pair<Vector, Point> plotDeflectionShot(ICanvasObject target, Point startPoint, double projSpeed){
 		//deflection shot based on constant speeds (no acceleration)
 		//The following is based on the Law of Cosines: A*A + B*B - 2*A*B*cos(theta) = C*C
 		//A is distance from shot start point to target 
@@ -53,7 +62,7 @@ public class CanvasObjectFunctionsImpl {
 		//C is distance travelled by projectile until impact (speed * time)
 		//cos(theta) is also the dot product of the vectors start -> target position and the targets movement vector
 		
-		Vector defaultVector = startPoint.vectorToPoint(target.getCentre()).getUnitVector();
+	    Pair<Vector, Point> defaultVector = Pair.of(startPoint.vectorToPoint(target.getCentre()).getUnitVector(), target.getCentre());
 		
 		List<MovementTransform> mTrans = target.getTransformsOfType(MovementTransform.class);
 		if (mTrans.isEmpty()) 
@@ -112,11 +121,17 @@ public class CanvasObjectFunctionsImpl {
 		//finalProjectilePosition = finalTargetPosition so:
 		// Start + (Vector of Proj * time) = TargetPos +  (Vector of target * time), which becomes
 		//Vector of Proj = Vector of target + [(TargetPos - Start) / time ]
-		return new Vector (
-				(targetVec.getX() * speed) + ((target.getCentre().x - startPoint.x) / time),
-				(targetVec.getY() * speed) + ((target.getCentre().y - startPoint.y) / time),
-				(targetVec.getZ() * speed) + ((target.getCentre().z - startPoint.z) / time)
-				).getUnitVector();
+		return Pair.of(new Vector (
+            				(targetVec.getX() * speed) + ((target.getCentre().x - startPoint.x) / time),
+            				(targetVec.getY() * speed) + ((target.getCentre().y - startPoint.y) / time),
+            				(targetVec.getZ() * speed) + ((target.getCentre().z - startPoint.z) / time)
+            				).getUnitVector()
+    		        ,new Point(
+    		                target.getCentre().x + (targetVec.getX() * time),
+    		                target.getCentre().y + (targetVec.getY() * time),
+    		                target.getCentre().z + (targetVec.getZ() * time)
+    		               )
+    		        );
 		
 	}
 	

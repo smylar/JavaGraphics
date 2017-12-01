@@ -1,5 +1,11 @@
 package com.graphics.lib;
 
+/**
+ * Indicates direction and speed
+ * 
+ * @author paul.brandon
+ *
+ */
 public final class Vector {
 
 	public static final Vector ZERO_VECTOR = new Vector(0,0,0);

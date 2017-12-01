@@ -10,8 +10,10 @@ import java.awt.event.MouseEvent;
 
 import java.awt.BasicStroke;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.swing.JFrame;
@@ -78,11 +80,13 @@ public class GraphicsTest extends JFrame {
 	private ClipLibrary clipLibrary = new ClipLibrary("sounds.txt");
 	private ICanvasObject selectedObject = null;
 	private MouseEvent select = null;
+	private static ScheduledExecutorService runner = Executors.newSingleThreadScheduledExecutor();
 
 	public static void main (String[] args){
 		try {
 			SwingUtilities.invokeAndWait(() -> gt = new GraphicsTest());
-			gt.drawCycle();
+			runner.scheduleAtFixedRate(gt::drawCycle, 0, 50, TimeUnit.MILLISECONDS);
+			runner.awaitTermination(1, TimeUnit.DAYS);
 		} catch (InvocationTargetException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
@@ -436,37 +440,27 @@ public class GraphicsTest extends JFrame {
 	
 	public void drawCycle()
 	{
-		long sleep = 50;
-		while (go){
-
-			try {
-				//System.out.println(sleep);
-				if (sleep > 0) Thread.sleep(sleep);
-				else Thread.sleep(1);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			long cycleStart = new Date().getTime();
-			canvas.doDraw();
-			if (select != null) {
-			    canvas.getObjectAt(select.getX(), select.getY()).ifPresent(this::setSelectedObject);
-				select = null;
-			}
-			
-			sleep = 50 - (new Date().getTime() - cycleStart);
-		}
-		try {
-			clipLibrary.close();
-		} catch (Exception e) {}
-		System.out.println("Bye bye");
-		System.exit(0);
+	    if (go) {
+	        canvas.doDraw();
+            if (select != null) {
+                canvas.getObjectAt(select.getX(), select.getY()).ifPresent(this::setSelectedObject);
+                select = null;
+            }
+	    } else {	        
+	        try {
+	            clipLibrary.close();
+	            this.dispose();
+	        } catch (Exception e) {}
+	        System.out.println("Bye bye");
+	    }
 	}
 	
 	@Override
-	public void dispose(){
-		if (go){
+	public void dispose() {
+		if (go) {
 			go = false;
-		}else{
+		} else {
+		    runner.shutdown();
 			super.dispose();
 			slave.dispose();
 		}

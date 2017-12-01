@@ -48,10 +48,7 @@ public class WorldCoord extends Point {
 	}
 
 	public Point getTransformed(Camera c) {
-		if (!transformed.containsKey(c)){
-			transformed.put(c, new Point(x,y,z));
-		}
-		return transformed.get(c);
+	    return transformed.computeIfAbsent(c, key -> new Point(x,y,z));
 	}
 
 	public void resetTransformed(Camera c) {

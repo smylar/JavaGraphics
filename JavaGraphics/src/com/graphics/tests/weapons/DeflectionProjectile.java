@@ -30,7 +30,7 @@ public class DeflectionProjectile extends TargetedProjectile {
 		
 		ICanvasObject target = this.getTargetFinder().find();
 		Point startPoint = this.getStartPoint().find();
-		Vector vTrackee = (target == null || startPoint == null) ? initialVector : CanvasObjectFunctions.DEFAULT.get().plotDeflectionShot(target, startPoint, this.getSpeed());
+		Vector vTrackee = (target == null || startPoint == null) ? initialVector : CanvasObjectFunctions.DEFAULT.get().plotDeflectionShot(target, startPoint, this.getSpeed()).getLeft();
 		
 		MovementTransform move = new MovementTransform(vTrackee, 20); 
 		move.moveUntil(t -> t.getDistanceMoved() > this.getRange());

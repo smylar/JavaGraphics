@@ -71,14 +71,14 @@ public class AnimatedTrait extends OrientableTrait implements IAnimatable, Obser
 	 */
 	public void applyTransforms()
 	{
-		if (!activeAnimations.isEmpty() && skeletonRootNode != null && !parent.isDeleted() && parent.isVisible()){		
-			this.toBaseOrientation();
+		if (!activeAnimations.isEmpty() && skeletonRootNode != null && !parent.isDeleted() && parent.isVisible()){	
+		    parent.applyTransform(toBaseOrientationTransform());
 			
 			for(String animation : activeAnimations){
 				skeletonRootNode.playAnimation(animation);
 			}
 			
-			this.reapplyOrientation();
+			parent.applyTransform(reapplyOrientationTransform());
 		}
 	}
 	

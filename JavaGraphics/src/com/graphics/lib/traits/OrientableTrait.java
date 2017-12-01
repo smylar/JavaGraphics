@@ -46,23 +46,6 @@ public class OrientableTrait implements IOrientable, Observer {
 	public Transform reapplyOrientationTransform() {
 		return new ReapplyOrientationTransform(oTrans);
 	}
-	
-	/**
-	 * Revert object to the orientation it started in
-	 */
-	@Override
-	@Deprecated
-	public IOrientable toBaseOrientation(){
-		parent.applyTransform(toBaseOrientationTransform());
-		return this;
-	}
-	
-	@Override
-	@Deprecated
-	public IOrientable reapplyOrientation(){
-		parent.applyTransform(reapplyOrientationTransform());
-		return this;
-	}
 
 	@Override
 	public void setParent(ICanvasObject parent) {

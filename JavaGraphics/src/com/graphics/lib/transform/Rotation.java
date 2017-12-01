@@ -31,7 +31,11 @@ public class Rotation extends Transform{
 		this.angleProgression = angleProgression;
 	}
 	
-	public Axis getAxis() {
+	public double getAngleProgression() {
+        return angleProgression;
+    }
+
+    public Axis getAxis() {
 		return this.axis;
 	}
 	
@@ -54,7 +58,7 @@ public class Rotation extends Transform{
 		if (matrix != null) {			
 			return matrix.getMapper();
 		}
-	 return (p) -> {return;};
+	 return p -> {return;};
 	}
 	
 }
