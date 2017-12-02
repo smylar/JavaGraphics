@@ -1,7 +1,6 @@
 package com.graphics.lib.plugins;
 
 import java.awt.Color;
-import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -32,6 +31,7 @@ import com.graphics.lib.transform.MovementTransform;
 import com.graphics.lib.transform.RepeatingTransform;
 import com.graphics.lib.transform.Rotation;
 import com.graphics.lib.transform.Transform;
+import com.graphics.lib.transform.Translation;
 
 public class PluginLibrary {
 	
@@ -302,33 +302,26 @@ public class PluginLibrary {
 			
 			//plot deflection (if target moving) and aim for that
 			Pair<Vector,Point> target = CanvasObjectFunctions.DEFAULT.get().plotDeflectionShot(objectToTrack, obj.getCentre(), move.get().getSpeed());
-			//TODO doesn't track once vectors heading away from each other
-			//need to get target point, remove orientation of vector to point, check position of target point, +ive x add x rotation etc
-			OrientationData.getRotationsForVector(target.getLeft()).stream().collect(Collectors.toCollection(ArrayDeque::new))
-			                                                                .descendingIterator()
-			                                                                .forEachRemaining(transform -> {
-			                                                                    transform.setAngleProgression(-transform.getAngleProgression());
-			                                                                    transform.doTransformSpecific().accept(target.getRight());
-			                                                                });
+			Point centre = obj.getCentre();
+			new Translation(-centre.x, -centre.y, -centre.z).doTransformSpecific().accept(target.getRight());
+			Vector vMove = move.get().getVector();
 			
+			OrientationData.getRotationsForVector(vMove).stream().map(transform -> new Rotation(transform.getAxis(), -transform.getAngleProgression()))
+			                                                                .forEach(transform -> transform.doTransformSpecific().accept(target.getRight()));
+				
 			double xAngleMod = 0;
 			double yAngleMod = 0;
 			if (target.getRight().z < 0) {
-			    xAngleMod = rotationRate;
+			    //TODO still no worky, now tends to spiral away from the target, need to do a turn like ship does, 
+			    //transforms below need to take account of current orientation
+			    yAngleMod = rotationRate;
 			} else {
-			    if (target.getRight().x < 0) xAngleMod = -rotationRate;
-			    if (target.getRight().x > 0) xAngleMod = rotationRate;
-			    if (target.getRight().y < 0) yAngleMod = -rotationRate;
-                if (target.getRight().y > 0) yAngleMod = rotationRate;
+			    if (target.getRight().x < 0) yAngleMod = -rotationRate;
+			    if (target.getRight().x > 0) yAngleMod = rotationRate;
+			    if (target.getRight().y < 0) xAngleMod = rotationRate;
+                if (target.getRight().y > 0) xAngleMod = -rotationRate;
 			}			
 
-			Vector vMove = move.get().getVector();
-//			double xAngleDif = Math.toDegrees(Math.acos(target.getLeft().getY()) - Math.acos(vMove.getUnitVector().getY()));
-//			double xAngleMod = xAngleDif > 0 ? rotationRate : -rotationRate;
-//			
-//			double yAngleDif = Math.toDegrees(Math.acos(target.getLeft().getX()) - Math.acos(vMove.getUnitVector().getX()));
-//			double yAngleMod = yAngleDif > 0 ? -rotationRate : rotationRate;	
-			
 			Point tempCoord = new Point(vMove.getX(), vMove.getY(), vMove.getZ());
 			Axis.X.getRotation(xAngleMod).doTransformSpecific().accept(tempCoord);
 			Axis.Y.getRotation(yAngleMod).doTransformSpecific().accept(tempCoord);

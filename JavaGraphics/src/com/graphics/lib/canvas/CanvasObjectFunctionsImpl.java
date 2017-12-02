@@ -62,7 +62,7 @@ public class CanvasObjectFunctionsImpl {
 		//C is distance travelled by projectile until impact (speed * time)
 		//cos(theta) is also the dot product of the vectors start -> target position and the targets movement vector
 		
-	    Pair<Vector, Point> defaultVector = Pair.of(startPoint.vectorToPoint(target.getCentre()).getUnitVector(), target.getCentre());
+	    Pair<Vector, Point> defaultVector = Pair.of(startPoint.vectorToPoint(target.getCentre()).getUnitVector(), new Point(target.getCentre()));
 		
 		List<MovementTransform> mTrans = target.getTransformsOfType(MovementTransform.class);
 		if (mTrans.isEmpty()) 

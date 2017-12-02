@@ -27,10 +27,6 @@ public class Rotation extends Transform{
 		
 	}
 	
-	public void setAngleProgression(double angleProgression) {
-		this.angleProgression = angleProgression;
-	}
-	
 	public double getAngleProgression() {
         return angleProgression;
     }
