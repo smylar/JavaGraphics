@@ -108,7 +108,7 @@ public interface ICanvasObject {
 	 * 
 	 * @param t - Transform to apply
 	 */
-	void applyTransform(Transform t);
+	void applyTransform(Transform...transforms);
 
 	/**
 	 * Apply the transforms currently held within the transform list to this object.

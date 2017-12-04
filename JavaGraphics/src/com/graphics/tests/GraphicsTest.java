@@ -504,7 +504,7 @@ public class GraphicsTest extends JFrame {
 		Projectile bp = new BouncyProjectile();
 		bp.setClipLibary(clipLibrary);
 		ship.addWeapon(new ProjectileWeapon(bp, leftOffset, () -> {
-			return cam.getOrientation().getForward();
+			return cam.getOrientation().copy();
 		}, ship));
 		
 		DeflectionProjectile dp = new DeflectionProjectile();
@@ -515,7 +515,7 @@ public class GraphicsTest extends JFrame {
 			return this.selectedObject;
 		});
 		ship.addWeapon(new ProjectileWeapon(dp, leftOffset, () -> {
-			return cam.getOrientation().getForward();
+			return cam.getOrientation().copy();
 		}, ship));
 		
 		TrackingProjectile tp = new TrackingProjectile();
@@ -526,7 +526,7 @@ public class GraphicsTest extends JFrame {
 			return this.selectedObject;
 		});
 		ship.addWeapon(new ProjectileWeapon(tp, leftOffset, () -> {
-			return cam.getOrientation().getForward();
+			return cam.getOrientation().copy();
 		}, ship));
 		
 		ExplodingProjectile ep = new ExplodingProjectile();
@@ -535,17 +535,17 @@ public class GraphicsTest extends JFrame {
 		ep.setClipLibary(clipLibrary);
 
 		ship.addWeapon(new ProjectileWeapon(ep, rightOffset, () -> {
-			return cam.getOrientation().getForward();
+			return cam.getOrientation().copy();
 		}, ship));
 		
 		ship.addWeapon(new ProjectileWeapon(ep, leftOffset, () -> {
-			return cam.getOrientation().getForward();
+			return cam.getOrientation().copy();
 		}, ship));
 		
 		ship.addWeapon(new AutoProjectileWeapon(new GattlingRound().setRange(800).setSpeed(60),
 				centreMount,
 				() -> {
-					return cam.getOrientation().getForward();
+					return cam.getOrientation().copy();
 				}
 				,ship
 				).setAmmoCount(1000).setTicksBetweenShots(2));

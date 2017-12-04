@@ -7,6 +7,7 @@ import com.graphics.lib.Vector;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.interfaces.IOrientable;
+import com.graphics.lib.interfaces.IOrientation;
 import com.graphics.lib.orientation.OrientationData;
 import com.graphics.lib.orientation.SimpleOrientation;
 import com.graphics.lib.plugins.Events;
@@ -23,7 +24,7 @@ import com.graphics.tests.TestUtils;
 public class ExplodingProjectile extends Projectile {
 
 	@Override
-	public CanvasObject get(Vector initialVector, double parentSpeed) {
+	public CanvasObject get(IOrientation orientation, double parentSpeed) {
 	    Ovoid proj = new Ovoid(20,0.3,30);
 		proj.applyTransform(new Rotation(Axis.X, -90));
 		proj.addTrait(new OrientableTrait()).setOrientation(new SimpleOrientation());
@@ -34,6 +35,7 @@ public class ExplodingProjectile extends Projectile {
 		                                  .registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollidedNew(TestUtils.getFilteredObjectList(), Events.EXPLODE, Events.EXPLODE), true);
 		proj.addFlag(TestUtils.SILENT_EXPLODE);
 
+		final Vector forward = orientation.getForward();
 		for (int i = 0; i < proj.getFacetList().size() ; i++)
 		{
 			if (i % (proj.getPointsPerCircle()/3) == 1 || i % (proj.getPointsPerCircle()/3) == 0)
@@ -42,11 +44,11 @@ public class ExplodingProjectile extends Projectile {
 			}
 		}
 
-		for (Rotation r : OrientationData.getRotationsForVector(initialVector)){
+		for (Rotation r : OrientationData.getRotationsForVector(forward)){
 			proj.applyTransform(r);
 		}
 
-		MovementTransform move = new MovementTransform(initialVector, this.getSpeed() + parentSpeed) {
+		MovementTransform move = new MovementTransform(forward, this.getSpeed() + parentSpeed) {
 			@Override
 			public void onComplete(){
 				proj.getTrait(PlugableTrait.class).ifPresent(p -> p.executePlugin(Events.EXPLODE));

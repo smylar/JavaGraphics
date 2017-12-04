@@ -2,6 +2,7 @@ package com.graphics.tests.weapons;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import com.graphics.lib.Point;
 import com.graphics.lib.canvas.Canvas3D;
@@ -9,8 +10,8 @@ import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.control.ObjectInputController;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IEffector;
+import com.graphics.lib.interfaces.IOrientation;
 import com.graphics.lib.interfaces.IPointFinder;
-import com.graphics.lib.interfaces.IVectorFinder;
 import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.lightsource.ObjectTiedLightSource;
 import com.graphics.lib.transform.MovementTransform;
@@ -29,10 +30,10 @@ public class ProjectileWeapon implements IEffector {
 	private boolean lightProjectile = true;
 	private final Projectile projectile;
 	private final IPointFinder origin;
-	private final IVectorFinder effectVector;
+	private final Supplier<IOrientation> effectVector;
 	private final ICanvasObject parent;
 	
-	public ProjectileWeapon(Projectile proj, IPointFinder origin, IVectorFinder effectVector, ICanvasObject parent) {
+	public ProjectileWeapon(Projectile proj, IPointFinder origin, Supplier<IOrientation> effectVector, ICanvasObject parent) {
 		this.origin = origin;
 		this.effectVector = effectVector;
 		this.parent = parent;
@@ -94,7 +95,7 @@ public class ProjectileWeapon implements IEffector {
             parentSpeed = move.get().getSpeed();
         }
         
-        return Optional.ofNullable(projectile.get(effectVector.getVector(), parentSpeed));
+        return Optional.ofNullable(projectile.get(effectVector.get(), parentSpeed));
     }
     
     private void lightProjectile(CanvasObject proj, Point pos) {

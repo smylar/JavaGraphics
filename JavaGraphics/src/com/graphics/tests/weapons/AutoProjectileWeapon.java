@@ -2,11 +2,12 @@ package com.graphics.tests.weapons;
 
 import java.util.Observable;
 import java.util.Observer;
+import java.util.function.Supplier;
 
 import com.graphics.lib.ObjectStatus;
 import com.graphics.lib.interfaces.ICanvasObject;
+import com.graphics.lib.interfaces.IOrientation;
 import com.graphics.lib.interfaces.IPointFinder;
-import com.graphics.lib.interfaces.IVectorFinder;
 
 /**
  * A weapon that will repeatedly generate {@link Projectile} objects when activated until deactivated
@@ -16,7 +17,7 @@ import com.graphics.lib.interfaces.IVectorFinder;
  */
 public final class AutoProjectileWeapon extends ProjectileWeapon implements Observer {
     
-    public AutoProjectileWeapon(Projectile proj, IPointFinder origin, IVectorFinder effectVector, ICanvasObject parent) {
+    public AutoProjectileWeapon(Projectile proj, IPointFinder origin, Supplier<IOrientation> effectVector, ICanvasObject parent) {
         super(proj, origin, effectVector, parent);
     }
 

@@ -339,13 +339,16 @@ public class CanvasObject extends Observable implements ICanvasObject {
 	 * @param t - Transform to apply
 	 */
 	@Override
-	public final void applyTransform(Transform t)
+	public final void applyTransform(Transform...transforms)
 	{
 		//can be called directly for singular ad-hoc adjustments, without adding to the transform list, 
 		//this should generally only be done on objects that haven't been registered to a canvas yet
-		t.doTransform(this.vertexList);
-		fixedCentre.ifPresent(t::replay);
-		doNotify(t);
+	    Lists.newArrayList(transforms).forEach(t -> {
+	        t.doTransform(this.vertexList);
+	        fixedCentre.ifPresent(t::replay);
+	        doNotify(t);
+	    });
+		
 	}
 	
 	@Override

@@ -1,7 +1,7 @@
 package com.graphics.tests.weapons;
 
-import com.graphics.lib.Vector;
 import com.graphics.lib.canvas.CanvasObject;
+import com.graphics.lib.interfaces.IOrientation;
 import com.graphics.lib.interfaces.IPointFinder;
 import com.sound.ClipLibrary;
 
@@ -48,5 +48,5 @@ public abstract class Projectile {
 		return this;
 	}
 
-	public abstract CanvasObject get(Vector initialVector, double parentSpeed);
+	public abstract CanvasObject get(IOrientation orientation, double parentSpeed);
 }

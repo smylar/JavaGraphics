@@ -118,11 +118,9 @@ public class OrientationData {
 	 * 
 	 * @param obj
 	 */
-//	public void removeRotation(ICanvasObject obj)
+//	public List<Rotation> removeRotation()
 //	{	
-//		obj.applyTransform(Axis.Y.getRotation(-yRot));
-//		obj.applyTransform(Axis.X.getRotation(-xRot));
-//		obj.applyTransform(Axis.Z.getRotation(-zRot));
+//	    return ImmutableList.of(Axis.Y.getRotation(-yRot), Axis.X.getRotation(-xRot), Axis.Z.getRotation(-zRot));
 //	}
 	
 	public static List<Rotation> getRotationsForVector(Vector v){

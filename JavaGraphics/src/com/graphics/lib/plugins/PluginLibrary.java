@@ -23,10 +23,10 @@ import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.canvas.FunctionHandler;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ICanvasObjectList;
+import com.graphics.lib.interfaces.IOrientable;
 import com.graphics.lib.interfaces.IPlugable;
 import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.lightsource.LightSource;
-import com.graphics.lib.orientation.OrientationData;
 import com.graphics.lib.transform.MovementTransform;
 import com.graphics.lib.transform.RepeatingTransform;
 import com.graphics.lib.transform.Rotation;
@@ -300,36 +300,41 @@ public class PluginLibrary {
 			Optional<MovementTransform> move = obj.getTransformsOfType(MovementTransform.class).stream().findFirst();
 			if (!move.isPresent()) return null;
 			
-			//plot deflection (if target moving) and aim for that
-			Pair<Vector,Point> target = CanvasObjectFunctions.DEFAULT.get().plotDeflectionShot(objectToTrack, obj.getCentre(), move.get().getSpeed());
-			Point centre = obj.getCentre();
-			new Translation(-centre.x, -centre.y, -centre.z).doTransformSpecific().accept(target.getRight());
-			Vector vMove = move.get().getVector();
-			
-			OrientationData.getRotationsForVector(vMove).stream().map(transform -> new Rotation(transform.getAxis(), -transform.getAngleProgression()))
-			                                                                .forEach(transform -> transform.doTransformSpecific().accept(target.getRight()));
-				
-			double xAngleMod = 0;
-			double yAngleMod = 0;
-			if (target.getRight().z < 0) {
-			    //TODO still no worky, now tends to spiral away from the target, need to do a turn like ship does, 
-			    //transforms below need to take account of current orientation
-			    yAngleMod = rotationRate;
-			} else {
-			    if (target.getRight().x < 0) yAngleMod = -rotationRate;
-			    if (target.getRight().x > 0) yAngleMod = rotationRate;
-			    if (target.getRight().y < 0) xAngleMod = rotationRate;
-                if (target.getRight().y > 0) xAngleMod = -rotationRate;
-			}			
-
-			Point tempCoord = new Point(vMove.getX(), vMove.getY(), vMove.getZ());
-			Axis.X.getRotation(xAngleMod).doTransformSpecific().accept(tempCoord);
-			Axis.Y.getRotation(yAngleMod).doTransformSpecific().accept(tempCoord);
-			
-			move.get().setVector(Vector.builder().x(tempCoord.x).y(tempCoord.y).z(tempCoord.z).build());
+			obj.getTrait(IOrientable.class).ifPresent(o -> track(o, obj, objectToTrack, rotationRate));
 			
 			return null;
 		};
+	}
+	
+	private static void track(IOrientable orientable, ICanvasObject parent, ICanvasObject objectToTrack, double rotationRate) {
+	  //plot deflection (if target moving) and aim for that
+	    Point centre = parent.getCentre();
+        Pair<Vector,Point> target = CanvasObjectFunctions.DEFAULT.get().plotDeflectionShot(objectToTrack, centre, orientable.getOrientation().getForward().getSpeed());
+        
+        new Translation(-centre.x, -centre.y, -centre.z).doTransformSpecific().accept(target.getRight());
+        
+        Transform toBase = orientable.toBaseOrientationTransform();
+        orientable.getOrientation().getRepresentation().applyTransform(orientable.toBaseOrientationTransform());
+        toBase.replay(target.getRight());
+            
+        double xAngleMod = 0;
+        double yAngleMod = 0;
+        if (target.getRight().z < 0) {
+            
+            //TODO gah still not there
+            yAngleMod = rotationRate;
+        } else {
+            if (target.getRight().x < 0) yAngleMod = -rotationRate;
+            if (target.getRight().x > 0) yAngleMod = rotationRate;
+            
+        }   
+        
+        if (target.getRight().y < 0) xAngleMod = rotationRate;
+        if (target.getRight().y > 0) xAngleMod = -rotationRate;
+
+        orientable.getOrientation().getRepresentation().applyTransform(Axis.X.getRotation(xAngleMod), 
+                                                                       Axis.Y.getRotation(yAngleMod),
+                                                                       orientable.reapplyOrientationTransform());
 	}
 
 }
