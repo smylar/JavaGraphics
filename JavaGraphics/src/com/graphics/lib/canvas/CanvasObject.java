@@ -391,6 +391,7 @@ public class CanvasObject extends Observable implements ICanvasObject {
 		}
 		
 		this.afterTransforms();
+		doNotify(ObjectStatus.TRANSFORMS_APPLIED);
 	}
 	
 	

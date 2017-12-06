@@ -205,7 +205,7 @@ public class Canvas3D extends JPanel {
 	{
 		if (Objects.nonNull(obj) && !this.shapes.containsKey(obj)) {
 		    CanvasObjectFunctions.DEFAULT.get().moveTo(obj, position);
-    		this.shapes.put(TraitInterceptor.intercept(obj), shaderFactory);
+    		this.shapes.put(obj, shaderFactory);
 		}
 	}
 	

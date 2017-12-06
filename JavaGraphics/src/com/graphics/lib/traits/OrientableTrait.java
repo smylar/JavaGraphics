@@ -1,8 +1,6 @@
 package com.graphics.lib.traits;
 
 import java.util.Observable;
-import java.util.Observer;
-
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IOrientable;
 import com.graphics.lib.interfaces.IOrientation;
@@ -19,7 +17,7 @@ import com.graphics.lib.transform.Transform;
  *
  * @param <T> Type of the CanvasObject being wrapped
  */
-public class OrientableTrait implements IOrientable, Observer {
+public class OrientableTrait implements IOrientable {
 	public static final String ORIENTATION_TAG = "Orientation";
 	private IOrientation orientation;
 	private OrientationData oTrans = new OrientationData();

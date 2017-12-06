@@ -1,37 +1,21 @@
 package com.graphics.lib.traits;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
-import com.graphics.lib.canvas.TraitInterceptor;
+import com.graphics.lib.ObjectStatus;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ITracker;
 import com.graphics.lib.transform.Transform;
 
 /**
  * Trait whereby an object will completely mirror the transforms applied to another object<br/>
- * Note this will be achieved by adding the trackers vertex list to the target's list at the draw complete phase
  * 
  * @author paul.brandon
  *
  */
 public class TrackingTrait implements ITracker, Observer  {
-    private static final Map<String, Method> interceptors = new HashMap<>();
 	public static final String TRACKING_TAG = "tracking_tag";
-	
-	static {
-	    try {
-	        //could make this attribute based, can then ensure correct spellings for the target and lowercase for the key
-	        interceptors.put("setdeleted", TrackingTrait.class.getMethod("setDeleted", boolean.class));
-	        interceptors.put("ondrawcomplete", TrackingTrait.class.getMethod("onDrawComplete"));
-	    } catch (Exception ex) {
-	        System.out.println(ex.getMessage());
-	    }
-	}
 	
 	private ICanvasObject parent; //the object this trait belongs to
 	
@@ -39,11 +23,9 @@ public class TrackingTrait implements ITracker, Observer  {
     
     private ICanvasObject pending;
     
-    public void setDeleted(boolean isDeleted){
-    	if (isDeleted) {
+    public void setDeleted(){
     		pending = null;
     		doStop(false);
-    	}
     }
     
     @Override
@@ -51,8 +33,7 @@ public class TrackingTrait implements ITracker, Observer  {
         pending = target;
         synchronized(pending.getChildren()) {
         	parent.addFlag(TRACKING_TAG);
-        	pending.getChildren().add(Proxy.isProxyClass(parent.getClass()) ? parent : TraitInterceptor.intercept(parent)); 
-        	//may need to check proxy is the trait interceptor, but that is the only proxy we have at the moment
+        	pending.getChildren().add(parent); 
         }
     }
     
@@ -74,18 +55,12 @@ public class TrackingTrait implements ITracker, Observer  {
         
     }
     
-    @Override
-    public Map<String, Method> getInterceptors() {
-        return interceptors;
-    }
-    
     private void doStop(boolean remove) {
         if (target != null && pending == null) {
         	if (remove) {
         		target.getChildren().remove(this); //if delete parent will remove it anyway
         	}
-//        	target.getVertexList().removeIf(v -> v.hasTag(parent.getObjectTag()));
-//			parent.getVertexList().forEach(v -> v.removeTag(parent.getObjectTag()));
+
         	target.deleteObserver(this);
             target = null;
             parent.removeFlag(TRACKING_TAG);
@@ -99,8 +74,6 @@ public class TrackingTrait implements ITracker, Observer  {
         
         target = pending;
     	
-//		parent.getVertexList().forEach(v -> v.addTag(parent.getObjectTag()));
-//		target.getVertexList().addAll(parent.getVertexList());
         target.addObserver(this);
     }
 
@@ -108,6 +81,10 @@ public class TrackingTrait implements ITracker, Observer  {
 	public void update(Observable obs, Object payload) {
 		if (payload instanceof Transform) {
 			parent.replayTransform((Transform)payload);
+		} else if (payload == ObjectStatus.DELETED) {
+		    setDeleted();
+		} else if (payload == ObjectStatus.DRAW_COMPLETE) {
+		    onDrawComplete();
 		}
 		
 	}

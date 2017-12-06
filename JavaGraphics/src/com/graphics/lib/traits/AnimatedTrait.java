@@ -1,14 +1,10 @@
 package com.graphics.lib.traits;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Observable;
-import java.util.Observer;
-
+import com.graphics.lib.ObjectStatus;
 import com.graphics.lib.interfaces.IAnimatable;
 import com.graphics.lib.skeleton.SkeletonNode;
 import com.graphics.lib.transform.Transform;
@@ -23,15 +19,8 @@ import com.graphics.lib.transform.Transform;
  * @author paul.brandon
  *
  */
-public class AnimatedTrait extends OrientableTrait implements IAnimatable, Observer {
-	private static final Map<String, Method> interceptors = new HashMap<>();
-	
-	static {
-	    try{
-	        interceptors.put("applytransforms", AnimatedTrait.class.getMethod("applyTransforms"));
-	    } catch (Exception ex) {}
-	}
-	
+public class AnimatedTrait extends OrientableTrait implements IAnimatable {
+
 	private SkeletonNode skeletonRootNode;
 	
 	private List<String> activeAnimations = new ArrayList<>();
@@ -61,11 +50,6 @@ public class AnimatedTrait extends OrientableTrait implements IAnimatable, Obser
 		activeAnimations.remove(key);
 	}
 	
-	@Override
-    public Map<String, Method> getInterceptors() {
-        return interceptors;
-    }
-	
 	/**
 	 * Apply animation transforms
 	 */
@@ -85,9 +69,14 @@ public class AnimatedTrait extends OrientableTrait implements IAnimatable, Obser
 	@Override
 	public void update(Observable obs, Object args) {
 		super.update(obs, args);
-		if (Objects.nonNull(skeletonRootNode) && args instanceof Transform) {
-			((Transform)args).replay(skeletonRootNode.getAllNodePositions());
+		if (Objects.nonNull(skeletonRootNode)) {
+		    if (args instanceof Transform) {
+	            ((Transform)args).replay(skeletonRootNode.getAllNodePositions());
+	        } else if (args == ObjectStatus.TRANSFORMS_APPLIED) {
+	            applyTransforms();
+	        }
 		}
+		
 		
 	}
 

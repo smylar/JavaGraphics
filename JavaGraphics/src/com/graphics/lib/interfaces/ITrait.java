@@ -1,13 +1,7 @@
 package com.graphics.lib.interfaces;
 
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Observer;
 
-public interface ITrait {
-    default Map<String, Method> getInterceptors() {
-        return new HashMap<>();
-    }
-    
+public interface ITrait extends Observer {
     void setParent(ICanvasObject parent);
 }

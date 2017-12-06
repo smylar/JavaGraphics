@@ -3,6 +3,7 @@ package com.graphics.lib.traits;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Observable;
 import java.util.Optional;
 import java.util.Set;
 
@@ -64,6 +65,12 @@ public class TexturableTrait implements ITexturable {
     @Override
     public void setParent(ICanvasObject parent) {
         this.parent = parent;
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        // not required
+        
     }
 
 }

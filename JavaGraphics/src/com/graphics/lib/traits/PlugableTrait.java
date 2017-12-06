@@ -1,11 +1,12 @@
 package com.graphics.lib.traits;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
 
+import com.graphics.lib.ObjectStatus;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IPlugable;
 import com.graphics.lib.plugins.IPlugin;
@@ -19,19 +20,10 @@ import com.graphics.lib.plugins.IPlugin;
  * @param <T> Type of the CanvasObject being wrapped
  */
 public class PlugableTrait implements IPlugable {
-    private static final Map<String, Method> interceptors = new HashMap<>();
 	private Map<String,IPlugin<IPlugable,?>> plugins = new HashMap<>();
 	private List<String> afterDrawPlugins = new ArrayList<>();
 	private List<String> singleAfterDrawPlugins = new ArrayList<>();
 	private ICanvasObject parent;
-	    
-    static {
-        try {
-            interceptors.put("ondrawcomplete", PlugableTrait.class.getMethod("onDrawComplete"));
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
-        }
-    }
 	
 	public void onDrawComplete()
 	{	
@@ -97,15 +89,18 @@ public class PlugableTrait implements IPlugable {
     @Override
     public void setParent(ICanvasObject parent) {
         this.parent = parent;
+        parent.addObserver(this);
     }
 
     @Override
     public ICanvasObject getParent() {
         return this.parent;
     }
-    
+
     @Override
-    public Map<String, Method> getInterceptors() {
-        return interceptors;
+    public void update(Observable o, Object arg) {
+        if (arg == ObjectStatus.DRAW_COMPLETE) {
+            onDrawComplete();
+        }
     }
 }
