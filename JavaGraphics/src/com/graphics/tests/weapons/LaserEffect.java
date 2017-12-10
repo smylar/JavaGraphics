@@ -56,11 +56,9 @@ public final class LaserEffect extends CanvasObject {
 	
 	@Override
 	public void onDrawComplete(){
-		if (tickLife > 0) {
-			super.onDrawComplete();
-			for (Facet f : subCylinder.getFacetList()){
-				f.setColour(new Color(255, 255/tickLifeStart * tickLife ,0, 200));
-			}
+		super.onDrawComplete();
+		for (Facet f : subCylinder.getFacetList()){
+			f.setColour(new Color(255, 255/tickLifeStart * tickLife ,0, 200));
 		}
 	}
 

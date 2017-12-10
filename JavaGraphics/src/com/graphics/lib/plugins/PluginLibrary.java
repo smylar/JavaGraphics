@@ -312,16 +312,15 @@ public class PluginLibrary {
         Pair<Vector,Point> target = CanvasObjectFunctions.DEFAULT.get().plotDeflectionShot(objectToTrack, centre, orientable.getOrientation().getForward().getSpeed());
         
         new Translation(-centre.x, -centre.y, -centre.z).doTransformSpecific().accept(target.getRight());
-        
+        ICanvasObject rep = orientable.getOrientation().getRepresentation();
+
         Transform toBase = orientable.toBaseOrientationTransform();
-        orientable.getOrientation().getRepresentation().applyTransform(orientable.toBaseOrientationTransform());
+        rep.applyTransform(toBase);
         toBase.replay(target.getRight());
             
         double xAngleMod = 0;
         double yAngleMod = 0;
         if (target.getRight().z < 0) {
-            
-            //TODO gah still not there
             yAngleMod = rotationRate;
         } else {
             if (target.getRight().x < 0) yAngleMod = -rotationRate;
@@ -332,9 +331,8 @@ public class PluginLibrary {
         if (target.getRight().y < 0) xAngleMod = rotationRate;
         if (target.getRight().y > 0) xAngleMod = -rotationRate;
 
-        orientable.getOrientation().getRepresentation().applyTransform(Axis.X.getRotation(xAngleMod), 
-                                                                       Axis.Y.getRotation(yAngleMod),
-                                                                       orientable.reapplyOrientationTransform());
+        rep.applyTransform(Axis.X.getRotation(xAngleMod), Axis.Y.getRotation(yAngleMod), orientable.reapplyOrientationTransform());
+
 	}
 
 }

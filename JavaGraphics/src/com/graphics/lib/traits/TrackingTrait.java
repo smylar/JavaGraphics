@@ -35,6 +35,7 @@ public class TrackingTrait implements ITracker, Observer  {
         	parent.addFlag(TRACKING_TAG);
         	pending.getChildren().add(parent); 
         }
+        doObserve();
     }
     
     @Override
