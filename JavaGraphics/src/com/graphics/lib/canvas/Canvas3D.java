@@ -33,6 +33,7 @@ import com.graphics.lib.interfaces.ICanvasUpdateListener;
 import com.graphics.lib.interfaces.IZBuffer;
 import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.lightsource.LightSource;
+import com.graphics.lib.shader.IShaderFactory;
 import com.graphics.lib.shader.ShaderFactory;
 import com.graphics.lib.traits.TrackingTrait;
 import com.graphics.lib.zbuffer.ZBufferItem;
@@ -48,7 +49,7 @@ public class Canvas3D extends JPanel {
 	private static final long serialVersionUID = 1L;
 	private static Canvas3D cnv = null;
 	
-	private Map<ICanvasObject, ShaderFactory> shapes = Collections.synchronizedMap(new HashMap<ICanvasObject, ShaderFactory>());
+	private Map<ICanvasObject, IShaderFactory> shapes = Collections.synchronizedMap(new HashMap<ICanvasObject, IShaderFactory>());
 	
 	private Set<ILightSource> lightSources = new HashSet<>(); 
 	private Set<ILightSource> lightSourcesToAdd = Collections.synchronizedSet(new HashSet<ILightSource>()); 
@@ -128,11 +129,11 @@ public class Canvas3D extends JPanel {
 		return shapes.keySet();
 	}
 	
-	public ShaderFactory getShader(ICanvasObject obj){
+	public IShaderFactory getShader(ICanvasObject obj) {
 		return shapes.get(obj) == null ? ShaderFactory.NONE : shapes.get(obj);
 	}
 	
-	public void replaceShader(ICanvasObject obj, ShaderFactory shader){
+	public void replaceShader(ICanvasObject obj, IShaderFactory shader) {
 		this.shapes.replace(obj, shader);
 	}
 
@@ -201,7 +202,7 @@ public class Canvas3D extends JPanel {
 	 * @param position	Position to draw the centre of the object at
 	 * @param shader	Shader to draw the object with
 	 */
-	public void registerObject(ICanvasObject obj, Point position, ShaderFactory shaderFactory)
+	public void registerObject(ICanvasObject obj, Point position, IShaderFactory shaderFactory)
 	{
 		if (Objects.nonNull(obj) && !this.shapes.containsKey(obj)) {
 		    CanvasObjectFunctions.DEFAULT.get().moveTo(obj, position);
@@ -277,7 +278,7 @@ public class Canvas3D extends JPanel {
 	 * @param zBuf	Z Buffer to update
 	 * @param shader	Shader to draw pixels with
 	 */
-	private void processShape(ICanvasObject obj, IZBuffer zBuf, ShaderFactory shader)
+	private void processShape(ICanvasObject obj, IZBuffer zBuf, IShaderFactory shader)
 	{
 		if (obj.isVisible() && !obj.isDeleted())
 		{

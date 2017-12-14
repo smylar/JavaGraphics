@@ -28,7 +28,7 @@ import javax.sound.sampled.Line;
  *
  */
 public class ClipLibrary implements AutoCloseable {
-	private Map<String,Clip> clips = new HashMap<String,Clip>();
+	private Map<String,Clip> clips = new HashMap<>();
 	
 	public ClipLibrary(String soundFile){
 		URL soundList = getClass().getResource(soundFile);
@@ -104,7 +104,9 @@ public class ClipLibrary implements AutoCloseable {
 				FloatControl gainControl =  (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
 				gainControl.setValue(gain);
 				clip.start();
-				if (wait) clip.drain();
+				if (wait) {
+				    clip.drain();
+				}
 			}
 		}
 		catch(Exception ex)

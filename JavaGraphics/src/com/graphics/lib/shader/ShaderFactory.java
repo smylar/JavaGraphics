@@ -10,7 +10,7 @@ import java.util.function.Supplier;
  * @author Paul Brandon
  *
  */
-public enum ShaderFactory{
+public enum ShaderFactory implements IShaderFactory{
 		GORAUD(GoraudShader::new, 8), 
 		TEXGORAUD(TexturedGoraudShader::new, 8), 
 		FLAT(FlatShader::new, 8), 
@@ -27,12 +27,13 @@ public enum ShaderFactory{
         }
 	}
 	
+	@Override
 	public IShader getShader() {	 
-		//System.out.println(pool.size());
 	    try {
             return pool.take();
         } catch (InterruptedException e) {
-            return null;
+            Thread.currentThread().interrupt();
         }
+	    return null;
 	}
 }

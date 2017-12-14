@@ -6,7 +6,7 @@ import com.graphics.lib.ZBufferEnum;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ICanvasUpdateListener;
-import com.graphics.lib.shader.ShaderFactory;
+import com.graphics.lib.shader.IShaderFactory;
 
 /**
  * Provides another view of the same scene in the parent
@@ -23,7 +23,7 @@ public class SlaveCanvas3D extends Canvas3D implements ICanvasUpdateListener {
 		super(camera);	
 	}
 
-	private void processShape(Canvas3D source, ICanvasObject obj, ShaderFactory shader)
+	private void processShape(Canvas3D source, ICanvasObject obj, IShaderFactory shader)
 	{
 		
 		if (this.getzBuffer() == null) {

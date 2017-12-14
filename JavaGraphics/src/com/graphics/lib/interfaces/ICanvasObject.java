@@ -176,6 +176,4 @@ public interface ICanvasObject {
 
 	<T extends ITrait> Optional<T> getTrait(Class<T> trait);
 
-	Set<ITrait> getTraits();
-
 }

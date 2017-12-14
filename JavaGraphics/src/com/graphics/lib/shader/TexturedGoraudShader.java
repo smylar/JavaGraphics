@@ -33,7 +33,7 @@ public class TexturedGoraudShader extends GoraudShader {
 		
 		this.texturableParent = parent.getTrait(ITexturable.class);
 		
-		parent.getTrait(ITexturable.class).ifPresent(tp -> 
+		this.texturableParent.ifPresent(tp -> 
 			textures = tp.getTextures().stream().filter(t ->
 				            facet.getAsList().stream().allMatch(v -> tp.getTextureCoord(t, v).isPresent())
 			            ).sorted((a,b) -> b.getOrder() - a.getOrder()).collect(Collectors.toList())

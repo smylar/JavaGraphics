@@ -18,7 +18,7 @@ import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IZBuffer;
 import com.graphics.lib.shader.IShader;
-import com.graphics.lib.shader.ShaderFactory;
+import com.graphics.lib.shader.IShaderFactory;
 
 public class ZBuffer implements IZBuffer {
 	private List<List<ZBufferItem>> buffer = new ArrayList<>();
@@ -47,7 +47,7 @@ public class ZBuffer implements IZBuffer {
 	 * Override notes: A null shader here will mean that the facets specified colour will be used
 	 */
 	@Override
-	public void add(ICanvasObject obj, ShaderFactory shader, Camera c, double horizon)
+	public void add(ICanvasObject obj, IShaderFactory shader, Camera c, double horizon)
 	{
 		obj.getFacetList().parallelStream().filter(f -> (obj.isProcessBackfaces() || GeneralPredicates.isFrontface(c).test(f)) && !GeneralPredicates.isOverHorizon(c, horizon).test(f)).forEach(f ->{
 			f.setFrontFace(GeneralPredicates.isFrontface(c).test(f));
@@ -56,7 +56,7 @@ public class ZBuffer implements IZBuffer {
 	}
 	
 	
-	private void add(Facet facet, ICanvasObject parent, ShaderFactory shader, Camera c)
+	private void add(Facet facet, ICanvasObject parent, IShaderFactory shader, Camera c)
 	{	
 		List<WorldCoord> points = facet.getAsList();
 
@@ -261,9 +261,9 @@ public class ZBuffer implements IZBuffer {
 
 	@Override
 	public void clear() {
-		this.buffer.parallelStream().forEach(m -> {
-			m.stream().filter(item -> item.isActive()).forEach(item -> item.clear());
-		});
+		this.buffer.parallelStream().forEach(m -> 
+			m.stream().filter(ZBufferItem::isActive).forEach(ZBufferItem::clear)
+		);
 		
 	}
 }
