@@ -73,7 +73,9 @@ public final class LaserEffect extends CanvasObject {
 		for(int i = 1 ; i < this.getVertexList().size() ; i+=2)
 		{
 			WorldCoord wc = this.getVertexList().get(i);
-			if (wc.hasTag("laserEndMarker")) continue;
+			if (wc.hasTag("laserEndMarker")) {
+			    continue;
+			}
 			
 			WorldCoord wcprev = this.getVertexList().get(i-1);
 			wc.x = wcprev.x + (v.getX() * length);
@@ -83,7 +85,9 @@ public final class LaserEffect extends CanvasObject {
 	}
 
 	public void resetLength() {
-		if (curLength != this.length) setCurLength(this.length);
+		if (curLength != this.length) {
+		    setCurLength(this.length);
+		}
 		
 	}
 
@@ -96,14 +100,11 @@ public final class LaserEffect extends CanvasObject {
 			facets.addAll(main.getFacetList());
 			
 			self.subCylinder = new Cylinder(1,length,36);
-			
 			vertexList.addAll(self.subCylinder.getVertexList());
 			facets.addAll(self.subCylinder.getFacetList());
 			
-			main.applyTransform(Axis.X.getRotation(90));
-			main.applyTransform(Axis.Z.getRotation(5)); 
-			self.subCylinder.applyTransform(Axis.X.getRotation(90));
-			self.subCylinder.applyTransform(Axis.Z.getRotation(5)); 
+			main.applyTransform(Axis.X.getRotation(90), Axis.Z.getRotation(5));
+			self.subCylinder.applyTransform(Axis.X.getRotation(90), Axis.Z.getRotation(5));
 			
 			self.startPoint = new WorldCoord(0,0,0);
 			self.endPoint = new WorldCoord(0,0,length);

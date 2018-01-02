@@ -58,7 +58,7 @@ public class TexturedGoraudShader extends GoraudShader {
 		
 		Color pointColour = colour;
 		
-		for (Texture t : textures){
+		for (Texture t : textures) {
 			startTexture = this.getTexturePosition(x, scanLine.startY, scanLine.startLine, t);
 			endTexture = this.getTexturePosition(x, scanLine.endY, scanLine.endLine, t);
 			double ux = (1 - percentDistCovered) * (startTexture.x/startTexture.z) + (percentDistCovered * (endTexture.x/endTexture.z));
@@ -71,20 +71,16 @@ public class TexturedGoraudShader extends GoraudShader {
 			
 			Optional<Color> c = t.getColour(tx, ty);
 
-			if (c.isPresent()){
-				if (!t.applyLighting()) return c.get();
+			if (c.isPresent()) {
+				if (!t.applyLighting()) 
+				    return c.get();
 					
 				pointColour = c.get();
 				break;
 			}
 		}
 		
-		pointIntensity.setRed(startIntensity.getRed() + ((endIntensity.getRed() - startIntensity.getRed()) * percentDistCovered));
-		pointIntensity.setGreen(startIntensity.getGreen() + ((endIntensity.getGreen() - startIntensity.getGreen()) * percentDistCovered));
-		pointIntensity.setBlue(startIntensity.getBlue() + ((endIntensity.getBlue() - startIntensity.getBlue()) * percentDistCovered));
-		facet.checkIntensity(pointIntensity);
-		
-		return pointIntensity.applyIntensities(pointColour);
+		return super.generateColour(pointColour, percentDistCovered);
 	}
 	
 	

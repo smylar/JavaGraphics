@@ -11,6 +11,7 @@ import java.awt.event.MouseEvent;
 import java.awt.BasicStroke;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -154,7 +155,7 @@ public class GraphicsTest extends JFrame {
 		slave.setSize(300, 300);
 		slave.setLocation(750, 50);
 		
-		IPlugin<IPlugable, Void> explode = TestUtils.getExplodePlugin(clipLibrary);
+		IPlugin<IPlugable, Void> explode = TestUtils.getExplodePlugin(Optional.ofNullable(clipLibrary));
 		
 		CanvasObject camcube = new Cuboid(20,20,20);
 		cnv.registerObject(camcube, new Point(1560, 200, 350), ShaderFactory.FLAT);

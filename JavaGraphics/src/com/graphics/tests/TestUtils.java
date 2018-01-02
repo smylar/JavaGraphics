@@ -2,6 +2,7 @@ package com.graphics.tests;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import com.graphics.lib.Utils;
 import com.graphics.lib.camera.ViewAngleCamera;
@@ -75,7 +76,7 @@ public class TestUtils {
 		return () -> Canvas3D.get().getShapes(s -> s.isVisible() && !s.isDeleted() && !s.hasFlag(Events.PHASED));
 	}
 	
-	public static IPlugin<IPlugable,Void> getExplodePlugin(ClipLibrary clipLibrary)
+	public static IPlugin<IPlugable,Void> getExplodePlugin(Optional<ClipLibrary> clipLibrary)
 	{
 		return new IPlugin<IPlugable,Void>(){
 			@Override
@@ -93,7 +94,9 @@ public class TestUtils {
 				PluginLibrary.explode().execute(plugable).forEach(c -> {
 					Canvas3D.get().replaceShader(obj, ShaderFactory.FLAT);
 					c.getTrait(IPlugable.class).ifPresent(p -> p.registerPlugin(Events.CHECK_COLLISION, getBouncePlugin(), true));
-					if (!obj.hasFlag(SILENT_EXPLODE) && clipLibrary != null) clipLibrary.playSound("EXPLODE", -20f);
+					if (!obj.hasFlag(SILENT_EXPLODE)) {
+					    clipLibrary.ifPresent(cl -> cl.playSound("EXPLODE", -20f));
+					}
 				});
 				plugable.registerSingleAfterDrawPlugin(Events.FLASH, PluginLibrary.flash(Canvas3D.get().getLightSources()));
 				return null;

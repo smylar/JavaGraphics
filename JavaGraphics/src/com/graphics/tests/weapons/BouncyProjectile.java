@@ -40,24 +40,21 @@ public class BouncyProjectile extends Projectile {
 		return proj;
 	}
 	
-	private IPlugin<IPlugable,Void> getBouncePlugin(){
-		return new IPlugin<IPlugable,Void>(){
-			@Override
-			public Void execute(IPlugable obj) {	
+	private IPlugin<IPlugable,Void> getBouncePlugin() {
+		return obj -> {	
 				ICanvasObject impactee = PluginLibrary.hasCollidedNew(TestUtils.getFilteredObjectList(),null, null).execute(obj);
 				if (impactee != null){
 					if (impactee.hasFlag(Events.STICKY)){ 
 						PluginLibrary.stop2().execute(obj);
 						obj.getParent().getTrait(ITracker.class).ifPresent(o -> o.observeAndMatch(impactee));
-						if (getClipLibrary() != null) getClipLibrary().playSound("STICK", -20f);
+						getClipLibrary().ifPresent(cl -> cl.playSound("STICK", -20f));
 					}
 					else {
 						PluginLibrary.bounce(impactee).execute(obj);
-						if (getClipLibrary() != null)getClipLibrary().playSound("BOUNCE", -20f);
+						getClipLibrary().ifPresent(cl -> cl.playSound("BOUNCE", -20f));
 					}
 				}
-				return null;
-			}			
+				return null;		
 		};
 	}
 

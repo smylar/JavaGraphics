@@ -41,9 +41,7 @@ public class BasicLightSource implements ILightSource {
 	@Override
 	public IntensityComponents getIntensityComponents(Point p) {
 		IntensityComponents comps = new IntensityComponents();
-		comps.setBlue(1);
-		comps.setGreen(1);
-		comps.setRed(1);
+        IntensityComponents.forEach(comp -> comps.set(comp, 1));
 		return comps;
 	}
 

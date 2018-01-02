@@ -3,6 +3,7 @@ package com.graphics.lib.shader;
 import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import com.graphics.lib.Facet;
 import com.graphics.lib.IntensityComponents;
@@ -23,13 +24,13 @@ import com.graphics.lib.zbuffer.ScanLine;
  *
  */
 public class GoraudShader extends DefaultShader {
+    protected static final Color DEFAULT = new Color(255,255,255);
     
 	protected Color colour;
 	protected Facet facet;
 	protected ScanLine curScanline;
 	protected IntensityComponents startIntensity;
 	protected IntensityComponents endIntensity;
-	protected IntensityComponents pointIntensity = new IntensityComponents();
 	
 	protected double lineLength = 0;
 	protected Map<Point, IntensityComponents> pointLight = new HashMap<>();
@@ -42,11 +43,10 @@ public class GoraudShader extends DefaultShader {
 		curScanline = null;
 		startIntensity = null;
 		endIntensity = null;
-		pointIntensity = new IntensityComponents();
 	    
 		colour = facet.getColour() == null ? parent.getColour() : facet.getColour();
 		if (colour == null) {
-		    colour = new Color(255,255,255);
+		    colour = DEFAULT;
 		}
 		
 		if (parent.hasFlag(Events.NO_SHADE)) {
@@ -73,20 +73,14 @@ public class GoraudShader extends DefaultShader {
 			lineLength = Math.ceil(scanLine.endY) - Math.floor(scanLine.startY);
 		}
 		
-		if (lineLength == 0) 
+		if (lineLength <= 0) 
 		    return colour;
 
 		double percentDistCovered = (y - Math.floor(scanLine.startY)) / lineLength;
 		
-		Color pointColour = colour;
-		
 		//TODO something is off, mesh lines appear brighter
-		pointIntensity.setRed(startIntensity.getRed() + ((endIntensity.getRed() - startIntensity.getRed()) * percentDistCovered));
-		pointIntensity.setGreen(startIntensity.getGreen() + ((endIntensity.getGreen() - startIntensity.getGreen()) * percentDistCovered));
-		pointIntensity.setBlue(startIntensity.getBlue() + ((endIntensity.getBlue() - startIntensity.getBlue()) * percentDistCovered));
-		facet.checkIntensity(pointIntensity);
 		
-		return pointIntensity.applyIntensities(pointColour);
+		return generateColour(colour, percentDistCovered);
 	}
 	
 	protected IntensityComponents getIntensities(double xVal, double yVal, LineEquation line)
@@ -100,13 +94,23 @@ public class GoraudShader extends DefaultShader {
 		IntensityComponents startComponents = pointLight.get(line.getStart());
 		IntensityComponents endComponents = pointLight.get(line.getEnd());
 		
-		IntensityComponents pointComponents = new IntensityComponents();
-		
-		pointComponents.setRed(startComponents.getRed() + ((endComponents.getRed() - startComponents.getRed()) * percentLength));
-		pointComponents.setGreen(startComponents.getGreen() + ((endComponents.getGreen() - startComponents.getGreen()) * percentLength));
-		pointComponents.setBlue(startComponents.getBlue() + ((endComponents.getBlue() - startComponents.getBlue()) * percentLength));
-		
-		return pointComponents;
+		return interpolateIntensityComponent(startComponents, endComponents, percentLength);
+	}
+	
+	protected IntensityComponents interpolateIntensityComponent(IntensityComponents start, IntensityComponents end, double percentFromStart) {
+	    IntensityComponents iComponents = new IntensityComponents();
+	    IntensityComponents.forEach(comp -> {
+	        double val = start.get(comp) + ((end.get(comp) - start.get(comp)) * percentFromStart);
+	        iComponents.set(comp, val);
+	    });
+	    return iComponents;
+	}
+	
+	protected Color generateColour(final Color colour, final double percentDistCovered) {
+	    return Optional.of(interpolateIntensityComponent(startIntensity, endIntensity, percentDistCovered))
+                .map(facet::checkIntensity)
+                .map(i -> i.apply(colour))
+                .orElse(DEFAULT);
 	}
 
 }

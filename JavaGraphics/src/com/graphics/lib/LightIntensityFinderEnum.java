@@ -28,12 +28,13 @@ public enum LightIntensityFinderEnum {
 					percent = (90-deg) / 90;
 				}
 				
-				double intensity = intComps.getRed() * percent;
-				if (intensity > maxIntensity.getRed()) maxIntensity.setRed(intensity);
-				intensity = intComps.getGreen() * percent;
-				if (intensity > maxIntensity.getGreen()) maxIntensity.setGreen(intensity);
-				intensity = intComps.getBlue() * percent;
-				if (intensity > maxIntensity.getBlue()) maxIntensity.setBlue(intensity);
+				final double pc = percent;
+				IntensityComponents.forEach(comp -> {
+				    double intensity = intComps.get(comp) * pc;
+	                if (intensity > maxIntensity.get(comp)) 
+	                    maxIntensity.set(comp, intensity);
+		        });
+				
 			});
 			return maxIntensity;
 	});

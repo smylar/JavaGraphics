@@ -1,6 +1,7 @@
 package com.graphics.lib;
 
 import java.awt.Color;
+
 import com.graphics.lib.camera.Camera;
 
 /**
@@ -62,21 +63,15 @@ public class Facet extends Triplet<WorldCoord> {
 		    this.baseIntensity = baseIntensity;
 	}
 	
-	public void checkIntensity(IntensityComponents intensity){
-		if (intensity.getRed() > maxIntensity) 
-		    intensity.setRed(maxIntensity);
-		else if (intensity.getRed() < baseIntensity) 
-		    intensity.setRed(baseIntensity);
-		
-		if (intensity.getGreen() > maxIntensity) 
-		    intensity.setGreen(maxIntensity);
-		else if (intensity.getGreen() < baseIntensity) 
-		    intensity.setGreen(baseIntensity);
-		
-		if (intensity.getBlue() > maxIntensity) 
-		    intensity.setBlue(maxIntensity);
-		else if (intensity.getBlue() < baseIntensity) 
-		    intensity.setBlue(baseIntensity);
+	public IntensityComponents checkIntensity(IntensityComponents intensity) {
+	    IntensityComponents.forEach(comp -> {
+	        if (intensity.get(comp) > maxIntensity) 
+                intensity.set(comp, maxIntensity);
+            else if (intensity.get(comp) < baseIntensity) 
+                intensity.set(comp, baseIntensity);
+	    });
+	    
+	    return intensity;
 	}
 	
 	public Color getColour() {

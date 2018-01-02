@@ -6,6 +6,8 @@ import java.util.Observable;
 import com.graphics.lib.IntensityComponents;
 import com.graphics.lib.Point;
 
+import static com.graphics.lib.IntensityComponents.ColourComponent.*;
+
 public class LightSource extends Observable implements ILightSource{
 	public static final String ONOFFCHANGE = "ONOFF";
 	public static final String POSITIONCHANGE = "POS";
@@ -80,8 +82,8 @@ public class LightSource extends Observable implements ILightSource{
 	 * @see com.graphics.lib.lightsource.ILightSource#getActualColour()
 	 */
 	@Override
-	public Color getActualColour(){
-		return (isOn() ? actualColour : Color.black);
+	public Color getActualColour() {
+		return isOn() ? actualColour : Color.black;
 	}
 	
 	protected void setActualColour() {
@@ -137,17 +139,21 @@ public class LightSource extends Observable implements ILightSource{
 		IntensityComponents components = new IntensityComponents();
 		if (this.on){
 			double intensity = this.getIntensity(p);
-			components.setRed(((double)this.colour.getRed() / 255) * intensity);
-			components.setGreen(((double)this.colour.getGreen() / 255) * intensity);
-			components.setBlue(((double)this.colour.getBlue() / 255) * intensity);
+			components.set(RED, ((double)this.colour.getRed() / 255) * intensity);
+			components.set(GREEN, ((double)this.colour.getGreen() / 255) * intensity);
+			components.set(BLUE,((double)this.colour.getBlue() / 255) * intensity);
 		}
 		return components;
 	}
 	
 	protected double getIntensity(Point p) {
-		if (this.range < 1) return this.intensity;
+		if (this.range < 1) {
+		    return this.intensity;
+		}
 		double distanceAway = this.position.distanceTo(p);
-		if (distanceAway > this.range || distanceAway < 0) return 0;
+		if (distanceAway > this.range || distanceAway < 0) {
+		    return 0;
+		}
 		return this.intensity - ((intensity/range) * distanceAway);
 	}
 

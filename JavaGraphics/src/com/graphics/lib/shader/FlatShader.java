@@ -2,10 +2,10 @@ package com.graphics.lib.shader;
 
 import java.awt.Color;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import com.graphics.lib.Facet;
-import com.graphics.lib.IntensityComponents;
 import com.graphics.lib.Point;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.camera.Camera;
@@ -21,8 +21,9 @@ import com.graphics.lib.zbuffer.ScanLine;
  *
  */
 public class FlatShader extends DefaultShader {
-
-	private Color colour = new Color(255,255,255);
+    private static final Color DEFAULT = new Color(255,255,255);
+    
+	private Color colour = DEFAULT;
 	
 	@Override
 	public void init(ICanvasObject obj, Facet f, Camera c) {
@@ -34,13 +35,10 @@ public class FlatShader extends DefaultShader {
 				(points.get(0).y + points.get(1).y + points.get(2).y)/3, 
 				(points.get(0).z + points.get(1).z + points.get(2).z)/3);
 		
-		IntensityComponents pointLight = obj.getLightIntensityFinder().getLightIntensity(ls, obj, p, f.getNormal(), !f.isFrontFace());
-		
-		this.colour = new Color((int)((double)newColour.getRed() * pointLight.getRed()), 
-				(int)((double)newColour.getGreen() * pointLight.getGreen()), 
-				(int)((double)newColour.getBlue() * pointLight.getBlue()),
-				newColour.getAlpha());
-		
+		colour = Optional.ofNullable(obj.getLightIntensityFinder().getLightIntensity(ls, obj, p, f.getNormal(), !f.isFrontFace()))
+        		         .map(i -> i.apply(newColour))
+        		         .orElse(DEFAULT);
+
 	}
 
 	@Override

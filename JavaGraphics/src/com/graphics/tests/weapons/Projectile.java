@@ -1,5 +1,7 @@
 package com.graphics.tests.weapons;
 
+import java.util.Optional;
+
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.interfaces.IOrientation;
 import com.graphics.lib.interfaces.IPointFinder;
@@ -39,8 +41,8 @@ public abstract class Projectile {
 		return this;
 	}
 	
-	public ClipLibrary getClipLibrary() {
-		return clipLibrary;
+	public Optional<ClipLibrary> getClipLibrary() {
+		return Optional.ofNullable(clipLibrary);
 	}
 
 	public Projectile setClipLibary(ClipLibrary clipLibrary) {
