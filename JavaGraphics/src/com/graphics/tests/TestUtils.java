@@ -14,6 +14,7 @@ import com.graphics.lib.plugins.Events;
 import com.graphics.lib.plugins.IPlugin;
 import com.graphics.lib.plugins.PluginLibrary;
 import com.graphics.lib.shader.ShaderFactory;
+import com.graphics.lib.traits.PlugableTrait;
 import com.sound.ClipLibrary;
 
 public class TestUtils {
@@ -93,7 +94,7 @@ public class TestUtils {
 				
 				PluginLibrary.explode().execute(plugable).forEach(c -> {
 					Canvas3D.get().replaceShader(obj, ShaderFactory.FLAT);
-					c.getTrait(IPlugable.class).ifPresent(p -> p.registerPlugin(Events.CHECK_COLLISION, getBouncePlugin(), true));
+					c.addTrait(new PlugableTrait().registerPlugin(Events.CHECK_COLLISION, getBouncePlugin(), true));
 					if (!obj.hasFlag(SILENT_EXPLODE)) {
 					    clipLibrary.ifPresent(cl -> cl.playSound("EXPLODE", -20f));
 					}

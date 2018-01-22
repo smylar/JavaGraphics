@@ -109,15 +109,15 @@ public class ZBuffer implements IZBuffer {
 	@Override
 	public void refreshBuffer() {
 
-		buffer.parallelStream().forEach(line -> 
-			line.stream().forEach(item -> {
-				if (item.isActive()) {
-					imageBuf.setRGB(item.getX(), item.getY(), item.getColour().getRGB());
-				} else {
-					imageBuf.setRGB(item.getX(), item.getY(), Color.WHITE.getRGB());
-				}
-			})
-		);
+	    buffer.parallelStream()
+	          .flatMap(line -> line.parallelStream())
+	          .forEach(item -> {
+	                if (item.isActive()) {
+	                    imageBuf.setRGB(item.getX(), item.getY(), item.getColour().getRGB());
+	                } else {
+	                    imageBuf.setRGB(item.getX(), item.getY(), Color.WHITE.getRGB());
+	                }
+	           });
 	}
 
 	private void processScanline(ScanLine scanLine, ICanvasObject parent, int x, IShader shader) {
@@ -261,9 +261,9 @@ public class ZBuffer implements IZBuffer {
 
 	@Override
 	public void clear() {
-		this.buffer.parallelStream().forEach(m -> 
-			m.stream().filter(ZBufferItem::isActive).forEach(ZBufferItem::clear)
-		);
-		
+	    buffer.parallelStream()
+	          .flatMap(item -> item.stream())
+	          .filter(ZBufferItem::isActive)
+	          .forEach(ZBufferItem::clear);
 	}
 }

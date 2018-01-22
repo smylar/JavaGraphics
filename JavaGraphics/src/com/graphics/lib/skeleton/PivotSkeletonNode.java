@@ -1,7 +1,6 @@
 package com.graphics.lib.skeleton;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +8,6 @@ import java.util.Set;
 
 import com.graphics.lib.Axis;
 import com.graphics.lib.WorldCoord;
-import com.graphics.lib.transform.Rotation;
 import com.graphics.lib.transform.Translation;
 
 /**
@@ -22,9 +20,9 @@ import com.graphics.lib.transform.Translation;
  */
 public class PivotSkeletonNode extends SkeletonNode {
 
-	private Map<String, PivotAction> animations = new HashMap<String, PivotAction>();
+	private Map<String, PivotAction> animations = new HashMap<>();
 	
-	private Map<Axis, PivotInfo> pivotInfo = new HashMap<Axis, PivotInfo>();
+	private Map<Axis, PivotInfo> pivotInfo = new HashMap<>();
 	
 	/**
 	 * Gets a default pivot action that pivots back and forth between the pivot limits
@@ -36,8 +34,8 @@ public class PivotSkeletonNode extends SkeletonNode {
 	 */
 	public static PivotAction getDefaultPivotAction(Axis direction, double upAmount, double downAmount)
 	{
-		return (n) ->{
-			List<PivotDetail> p = new ArrayList<PivotDetail>();
+		return n -> {
+			List<PivotDetail> p = new ArrayList<>();
 			PivotDetail d = new PivotDetail();
 			d.setDirection(direction);
 			
@@ -61,8 +59,8 @@ public class PivotSkeletonNode extends SkeletonNode {
 	 */
 	public static PivotAction getUniDirectionalPivotAction(Axis direction, double amount, boolean toMax)
 	{
-		return (n) ->{
-			List<PivotDetail> p = new ArrayList<PivotDetail>();
+		return n -> {
+			List<PivotDetail> p = new ArrayList<>();
 			if ((n.getCur(direction) >= n.getMax(direction) && toMax) || (n.getCur(direction) <= n.getMin(direction) && !toMax)) return p;
 			
 			PivotDetail d = new PivotDetail();
@@ -140,10 +138,7 @@ public class PivotSkeletonNode extends SkeletonNode {
 			
 			to.doTransform(coords);
 			
-			Collection<PivotDetail> details = action.get(this);
-			for(PivotDetail detail : details){
-				doMotionNow(detail);
-			}
+			action.get(this).forEach(this::doMotionNow);
 			
 			away.doTransform(coords);
 		}
@@ -164,12 +159,8 @@ public class PivotSkeletonNode extends SkeletonNode {
 		
 		if (detail.getAmount() == 0) return;
 		
-		Rotation rot = detail.getDirection().getRotation(detail.getAmount());
+		detail.getDirection().getRotation(detail.getAmount()).doTransform(coords);
 		
-		if (rot != null)
-		{
-			rot.doTransform(coords);
-		}
 		//update current position etc.
 		double curAmount = this.getCur(direction);
 		this.setCur(direction, curAmount + detail.getAmount());

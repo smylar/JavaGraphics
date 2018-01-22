@@ -15,7 +15,6 @@ import com.graphics.lib.transform.Transform;
  * 
  * @author Paul Brandon
  *
- * @param <T> Type of the CanvasObject being wrapped
  */
 public class OrientableTrait implements IOrientable {
 	public static final String ORIENTATION_TAG = "Orientation";

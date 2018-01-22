@@ -10,6 +10,7 @@ import java.util.Set;
  *
  */
 public class Point {
+    //TODO refactor
 	public double x = 0;
 	public double y = 0;
 	public double z = 0;

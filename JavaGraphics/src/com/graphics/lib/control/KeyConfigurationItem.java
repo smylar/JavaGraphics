@@ -4,6 +4,11 @@ import java.awt.event.KeyEvent;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
+import java.util.Optional;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.google.common.collect.Lists;
 
 public class KeyConfigurationItem {
 
@@ -17,9 +22,9 @@ public class KeyConfigurationItem {
 	
 	private List<String> releaseParams;
 	
-	private Method onPressMethod;
+	private Optional<Method> onPressMethod;
 	
-	private Method onReleaseMethod;
+	private Optional<Method> onReleaseMethod;
 
 	public int getKeyCode() {
 		return keyCode;
@@ -50,19 +55,19 @@ public class KeyConfigurationItem {
 	}
 
 	public void setOnPressMethod(Class<?> cl) {
-		this.onPressMethod = this.getMethod(cl, onPress);
+		this.onPressMethod = getMethod(cl, onPress);
 	}
 
 	public void setOnReleaseMethod(Class<?> cl) {
-		this.onReleaseMethod = this.getMethod(cl, onRelease);
+		this.onReleaseMethod = getMethod(cl, onRelease);
 	}
 	
-	public void invokePress(Object obj){
-		this.invoke(obj, onPressMethod, pressParams);
+	public void invokePress(Object obj) {
+	    onPressMethod.ifPresent(m -> invoke(obj, m, pressParams));
 	}
 	
-	public void invokeRelease(Object obj){
-		this.invoke(obj, onReleaseMethod, releaseParams);
+	public void invokeRelease(Object obj) {
+	    onReleaseMethod.ifPresent(m -> invoke(obj, m, releaseParams));
 	}
 	
 	private void invoke(Object obj, Method method, List<String> params){
@@ -78,20 +83,23 @@ public class KeyConfigurationItem {
 		}
 	}
 	
-	private Method getMethod(Class<?> cl, String name){
-		if (name == null || name.length() == 0) return null;
-		
-		Method[] methods = cl.getMethods();
-		for (int i = 0 ; i < methods.length ; i++) //allow for case-less match
-		{
-			if (methods[i].getName().toLowerCase().equals(name.toLowerCase()) && (methods[i].getParameterCount() == 0 ||
-					(methods[i].getParameterCount() == 1 && List.class.isAssignableFrom(methods[i].getParameters()[0].getType())
-							&& methods[i].getGenericParameterTypes().length == 1 && String.class.isAssignableFrom((Class<?>)((ParameterizedType)methods[i].getGenericParameterTypes()[0]).getActualTypeArguments()[0])))){
-				return methods[i];
-			}
+	private Optional<Method> getMethod(final Class<?> cl, final String name) {
+		if (StringUtils.isEmpty(name)) {
+		    return Optional.empty();
 		}
-		
-		return null;
+	    
+		return Lists.newArrayList(cl.getMethods())
+        		    .stream()
+        		    .filter(method -> matchMethod(method, name))
+        		    .findFirst();
+
+	}
+	
+	private boolean matchMethod(Method method, String name) {
+	  //allow for case-less match
+	    return method.getName().toLowerCase().equals(name.toLowerCase()) && (method.getParameterCount() == 0 ||
+                    (method.getParameterCount() == 1 && List.class.isAssignableFrom(method.getParameters()[0].getType())
+                            && method.getGenericParameterTypes().length == 1 && String.class.isAssignableFrom((Class<?>)((ParameterizedType)method.getGenericParameterTypes()[0]).getActualTypeArguments()[0])));
 	}
 
 	
