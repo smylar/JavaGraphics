@@ -46,21 +46,21 @@ public class TexturedGoraudShader extends GoraudShader {
 		if (scanLine == null) return colour;
 		
 		if (scanLine != this.curScanline){
-			startIntensity = this.getIntensities(x, scanLine.startY, scanLine.startLine);
-			endIntensity = this.getIntensities(x, scanLine.endY, scanLine.endLine);
+			startIntensity = this.getIntensities(x, scanLine.getStartY(), scanLine.getStartLine());
+			endIntensity = this.getIntensities(x, scanLine.getEndY(), scanLine.getEndLine());
 			curScanline = scanLine;
-			lineLength = Math.ceil(scanLine.endY) - Math.floor(scanLine.startY);
+			lineLength = Math.ceil(scanLine.getEndY()) - Math.floor(scanLine.getStartY());
 		}
 		
 		if (lineLength == 0) return colour;
 
-		double percentDistCovered = (y - Math.floor(scanLine.startY)) / lineLength;
+		double percentDistCovered = (y - Math.floor(scanLine.getStartY())) / lineLength;
 		
 		Color pointColour = colour;
 		
 		for (Texture t : textures) {
-			startTexture = this.getTexturePosition(x, scanLine.startY, scanLine.startLine, t);
-			endTexture = this.getTexturePosition(x, scanLine.endY, scanLine.endLine, t);
+			startTexture = this.getTexturePosition(x, scanLine.getStartY(), scanLine.getStartLine(), t);
+			endTexture = this.getTexturePosition(x, scanLine.getEndY(), scanLine.getEndLine(), t);
 			double ux = (1 - percentDistCovered) * (startTexture.x/startTexture.z) + (percentDistCovered * (endTexture.x/endTexture.z));
 			double uy = (1 - percentDistCovered) * (startTexture.y/startTexture.z) + (percentDistCovered * (endTexture.y/endTexture.z));
 			double r = (1 - percentDistCovered) * (1/startTexture.z) + (percentDistCovered * (1/endTexture.z));

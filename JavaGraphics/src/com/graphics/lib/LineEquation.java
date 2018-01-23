@@ -8,15 +8,15 @@ import com.graphics.lib.camera.Camera;
  * @author Paul Brandon
  *
  */
-public class LineEquation {
-	private Double x;
-	private Double y;
-	private Double c;
-	private Double m;
-	private Point start;
-	private Point end;
-	private WorldCoord worldStart;
-	private WorldCoord worldEnd;
+public final class LineEquation {
+	private final Double x;
+	private final Double y;
+	private final Double c;
+	private final Double m;
+	private final Point start;
+	private final Point end;
+	private final WorldCoord worldStart;
+	private final WorldCoord worldEnd;
 	
 	public LineEquation (WorldCoord worldStart, WorldCoord worldEnd, Camera cam)
 	{
@@ -27,14 +27,21 @@ public class LineEquation {
 		double dx = end.x - start.x;
 		if (dx == 0){
 			x = start.x;
-		}else{
+			c = null;
+			y = null;
+			m = null;
+		} else {
+		    x = null;
 			double dy = end.y - start.y;
 			if (dy == 0)
 			{
 				y = end.y;
+				m = null;
+				c = null;
 			}
 			else
 			{
+			    y = null;
 				m = dy/dx;
 				c = start.y - (m*start.x);
 			}

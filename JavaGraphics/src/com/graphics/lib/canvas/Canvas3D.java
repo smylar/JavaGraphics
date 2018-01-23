@@ -21,6 +21,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
+import com.google.common.collect.Sets;
 import com.graphics.lib.Facet;
 import com.graphics.lib.GeneralPredicates;
 import com.graphics.lib.Point;
@@ -76,16 +77,16 @@ public class Canvas3D extends JPanel {
 		return cnv;
 	}
 	
-	public static Canvas3D get(){
+	public static Canvas3D get() {
 		return cnv;
 	}
 	
 	/**
-	 * Allows anonymous functions to be registered in order the customise the display
+	 * Allows anonymous functions to be registered in order to customise the display
 	 * 
 	 * @param operation A paint operation
 	 */
-	public void addDrawOperation(BiConsumer<Canvas3D,Graphics> operation){
+	public void addDrawOperation(BiConsumer<Canvas3D,Graphics> operation) {
 		drawPlugins.add(operation);
 	}
 	
@@ -165,17 +166,11 @@ public class Canvas3D extends JPanel {
 	    return tickCount;
 	}
 	
-	public Optional<ICanvasObject> getObjectAt(int x, int y){
-		if (Objects.nonNull(zBuffer)) {
-		    
-		    ZBufferItem item = zBuffer.getItemAt(x, y);
-	        
-	        if (Objects.nonNull(item)) {
-	            return Optional.ofNullable(item.getTopMostObject());
-	        }
-		}
-		
-		return Optional.empty();
+	public Optional<ICanvasObject> getObjectAt(final int x, final int y) {
+	    
+	    return Optional.ofNullable(zBuffer)
+	                   .map(zBuf -> zBuf.getItemAt(x, y))
+	                   .map(ZBufferItem::getTopMostObject);
 	}
 
 	@Override
@@ -233,9 +228,12 @@ public class Canvas3D extends JPanel {
 		this.camera.doTransforms();
 		
 		if (this.drawShadows && Objects.nonNull(this.floor)) {
-			Set<CanvasObject> shadows = Collections.synchronizedSet(new HashSet<CanvasObject>()); 
-			processShapes.parallelStream().forEach(s -> shadows.addAll(getShadowOnFloor(s)));
-			processShapes.addAll(shadows);
+//			Set<CanvasObject> shadows = Collections.synchronizedSet(new HashSet<CanvasObject>()); 
+//			processShapes.parallelStream().forEach(s -> shadows.addAll(getShadowOnFloor(s)));
+//			processShapes.addAll(shadows);
+		    processShapes.addAll(processShapes.parallelStream()
+		                                      .flatMap(s -> getShadowOnFloor(s).stream())
+		                                      .collect(Collectors.toSet()));
 		}
 
 		processShapes.forEach(ICanvasObject::onDrawComplete); //cross object updates can happen here safer not to be parallel
@@ -255,7 +253,7 @@ public class Canvas3D extends JPanel {
 	}
 	
 	private void addPendingLightsources() {
-	    if (!lightSourcesToAdd.isEmpty()){
+	    if (!lightSourcesToAdd.isEmpty()) {
             lightSources.addAll(lightSourcesToAdd);
             lightSourcesToAdd.clear();
         }
@@ -302,34 +300,33 @@ public class Canvas3D extends JPanel {
 	 * @return		Set of generated shadow objects
 	 */
 	private Set<CanvasObject> getShadowOnFloor(ICanvasObject obj){	
-		Set<CanvasObject> shadows = new HashSet<>();
+
 		if (floor == null || !obj.getCastsShadow()) {
-		    return shadows;
+		    return Sets.newHashSet();
 		}
 		
-		lightSources.stream().filter(ILightSource::isOn)
-		                     .map(ls -> 
-		                         new CanvasObject(() -> {
-		                             Builder<WorldCoord> vertexList = ImmutableList.builder();
-		                             Builder<Facet> facetList = ImmutableList.builder();
-		                             for (Facet f : obj.getFacetList()){
-		                                 //TODO this will work out the intersection for a point several times depending on the facets and creates more points than necessary, will want rewrite for better efficiency
-		                                 if (obj.isVisible() && GeneralPredicates.isLit(ls).test(f)) {
-		                                     addShadowPoints(ls, f, vertexList, facetList);
-		                                 }
-		                             }
-		                             return Pair.of(vertexList.build(), facetList.build());
-		                         })
-		                     )
-		                     .filter(shadow -> shadow.getFacetList().size() > 0)
-		                     .forEach(shadow -> {
-		                         shadow.setColour(new Color(50,50,50));
-		                         shadow.setProcessBackfaces(true);
-		                         shadow.setVisible(true);
-		                         shadows.add(shadow);
-		                     });
-
-		return shadows;
+		return lightSources.stream()
+		                   .filter(ILightSource::isOn)
+		                   .map(ls -> 
+		                       new CanvasObject(() -> {
+		                           Builder<WorldCoord> vertexList = ImmutableList.builder();
+		                           Builder<Facet> facetList = ImmutableList.builder();
+		                           for (Facet f : obj.getFacetList()){
+		                               //TODO this will work out the intersection for a point several times depending on the facets and creates more points than necessary, will want rewrite for better efficiency
+		                               if (obj.isVisible() && GeneralPredicates.isLit(ls).test(f)) {
+		                                   addShadowPoints(ls, f, vertexList, facetList);
+		                               }
+		                           }
+		                           return Pair.of(vertexList.build(), facetList.build());
+		                       })
+		                   )
+		                   .filter(shadow -> shadow.getFacetList().size() > 0)
+		                   .peek(shadow -> {
+		                       shadow.setColour(new Color(50,50,50));
+                               shadow.setProcessBackfaces(true);
+                               shadow.setVisible(true);
+		                   })
+		                   .collect(Collectors.toSet());
 	}
 	
 	private void addShadowPoints(ILightSource ls, Facet f, Builder<WorldCoord> vertexList, Builder<Facet> facetList) {
@@ -362,8 +359,7 @@ public class Canvas3D extends JPanel {
 		Vector lightVector = start.vectorToPoint(end).getUnitVector();
 		Point intersect = floor.getIntersectionPointWithFacetPlane(end, lightVector);
 		
-		return Objects.isNull(intersect) ? null
-		                                 : new WorldCoord(intersect);
+		return Optional.ofNullable(intersect).map(WorldCoord::new).orElse(null);
 	}
 	
 	@Override
@@ -374,9 +370,7 @@ public class Canvas3D extends JPanel {
     
     		g.drawImage(this.zBuffer.getBuffer(), 0, 0, null);
     
-    		for(BiConsumer<Canvas3D,Graphics> op : drawPlugins){
-    			op.accept(this,g);
-    		}
+    		drawPlugins.forEach(op -> op.accept(this, g));
 		}
 	}
 

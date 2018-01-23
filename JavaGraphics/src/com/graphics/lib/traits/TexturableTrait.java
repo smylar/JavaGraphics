@@ -1,11 +1,12 @@
 package com.graphics.lib.traits;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Observable;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.graphics.lib.Point;
 import com.graphics.lib.WorldCoord;
@@ -52,14 +53,11 @@ public class TexturableTrait implements ITexturable {
 	}
 
 	@Override
-	public Set<Texture> getTextures(WorldCoord vertex) {
-		Set<Texture> textures = new HashSet<>();
-		textureMap.forEach((t, coords) -> {
-			if (coords.containsKey(vertex)) {
-				textures.add(t);
-			}
-		});
-		return textures;
+	public Set<Texture> getTextures(final WorldCoord vertex) {
+	    return textureMap.entrySet().stream()
+	                                .filter(entry -> entry.getValue().containsKey(vertex))
+	                                .map(Entry::getKey)
+	                                .collect(Collectors.toSet());
 	}
 
     @Override
