@@ -49,10 +49,12 @@ public class ZBuffer implements IZBuffer {
 	@Override
 	public void add(ICanvasObject obj, IShaderFactory shader, Camera c, double horizon)
 	{
-		obj.getFacetList().parallelStream().filter(f -> (obj.isProcessBackfaces() || GeneralPredicates.isFrontface(c).test(f)) && !GeneralPredicates.isOverHorizon(c, horizon).test(f)).forEach(f ->{
-			f.setFrontFace(GeneralPredicates.isFrontface(c).test(f));
-			add(f, obj, shader, c);
-		});
+		obj.getFacetList().parallelStream()
+		                  .filter(f -> (obj.isProcessBackfaces() || GeneralPredicates.isFrontface(c).test(f)) && !GeneralPredicates.isOverHorizon(c, horizon).test(f))
+		                  .forEach(f -> {
+                                f.setFrontFace(GeneralPredicates.isFrontface(c).test(f));
+                                add(f, obj, shader, c);
+		                  });
 	}
 	
 	
@@ -110,7 +112,7 @@ public class ZBuffer implements IZBuffer {
 	public void refreshBuffer() {
 
 	    buffer.parallelStream()
-	          .flatMap(line -> line.parallelStream())
+	          .flatMap(List::parallelStream)
 	          .forEach(item -> {
 	                if (item.isActive()) {
 	                    imageBuf.setRGB(item.getX(), item.getY(), item.getColour().getRGB());
@@ -121,20 +123,20 @@ public class ZBuffer implements IZBuffer {
 	}
 
 	private void processScanline(ScanLine scanLine, ICanvasObject parent, int x, IShader shader) {
-		double scanLineLength = Math.floor(scanLine.endY) - Math.floor(scanLine.startY);
+		double scanLineLength = Math.floor(scanLine.getEndY()) - Math.floor(scanLine.getStartY());
 		double percentDistCovered = 0;
 		Color colour = null;
-		for (int y = (int)Math.floor(scanLine.startY < 0 ? 0 : scanLine.startY) ; y < Math.floor(scanLine.endY > this.dispHeight ? this.dispHeight : scanLine.endY ) ; y++)
+		for (int y = (int)Math.floor(scanLine.getStartY() < 0 ? 0 : scanLine.getStartY()) ; y < Math.floor(scanLine.getEndY() > this.dispHeight ? this.dispHeight : scanLine.getEndY() ) ; y++)
 		{
 			
 			if (scanLineLength != 0)
 			{
-				percentDistCovered = (y - Math.floor(scanLine.startY)) / scanLineLength;
+				percentDistCovered = (y - Math.floor(scanLine.getStartY())) / scanLineLength;
 			}
 			
-			double z = this.interpolateZ(scanLine.startZ, scanLine.endZ, percentDistCovered);
+			double z = this.interpolateZ(scanLine.getStartZ(), scanLine.getEndZ(), percentDistCovered);
 			
-			if (skip == 1 || y % skip == 0 || colour == null){	
+			if (skip == 1 || y % skip == 0 || colour == null) {	
 				colour = shader.getColour(scanLine, x, y);
 			}
 			this.addToBuffer(parent, x, y, z, colour);
@@ -157,7 +159,7 @@ public class ZBuffer implements IZBuffer {
 
 	private ScanLine getScanline(int xVal, List<LineEquation> lines)
 	{
-		ScanLine scanLine = new ScanLine();
+		ScanLine.Builder builder = ScanLine.builder();
 		
 		List<LineEquation> activeLines = lines.stream().filter(line -> xVal >= line.getMinX() && xVal <= line.getMaxX())
                                 		               .filter(line -> {
@@ -170,17 +172,17 @@ public class ZBuffer implements IZBuffer {
 		if (activeLines.size() < 2) 
 		    return null;
 		
-		if (activeLines.size() == 3){
+		if (activeLines.size() == 3) {
 			double dif1 = activeLines.get(0).getYAtX(xVal) - activeLines.get(1).getYAtX(xVal);
 	    	double dif2 = activeLines.get(1).getYAtX(xVal) - activeLines.get(2).getYAtX(xVal);
 	    	double dif3 = activeLines.get(0).getYAtX(xVal) - activeLines.get(2).getYAtX(xVal);
-	    	if (dif1 < 0) dif1 = dif1 * -1 ;
-	    	if (dif2 < 0) dif2 = dif2 * -1 ;
-	    	if (dif3 < 0) dif3 = dif3 * -1 ;
+	    	if (dif1 < 0) dif1 = -dif1;
+	    	if (dif2 < 0) dif2 = -dif2;
+	    	if (dif3 < 0) dif3 = -dif3;
 	    	 		
-			if ((dif1 < dif2 && dif1 < dif3) || (dif3 < dif2 && dif3 < dif1)){
+			if ((dif1 < dif2 && dif1 < dif3) || (dif3 < dif2 && dif3 < dif1)) {
 			 	activeLines.remove(0);
-			}else{
+			} else {
 				 activeLines.remove(2);
 			}
 		}	
@@ -190,29 +192,29 @@ public class ZBuffer implements IZBuffer {
 			Double y = line.getYAtX(xVal);
 			Double z = this.getZValue(xVal, y, line);
 			
-			if (scanLine.startY == null){
-				scanLine.startY = y;
-				scanLine.startLine = line;
-				scanLine.startZ = z;
+			if (builder.startY == null){
+			    builder.startY = y;
+			    builder.startLine = line;
+			    builder.startZ = z;
 			}
-			else if (y < scanLine.startY)
+			else if (y < builder.startY)
 			{
-				scanLine.endY = scanLine.startY ;
-				scanLine.endLine = scanLine.startLine;
-				scanLine.endZ = scanLine.startZ ;
-				scanLine.startY = y;
-				scanLine.startLine = line;
-				scanLine.startZ = z;
+			    builder.endY = builder.startY ;
+			    builder.endLine = builder.startLine;
+			    builder.endZ = builder.startZ ;
+			    builder.startY = y;
+			    builder.startLine = line;
+			    builder.startZ = z;
 			}
 			else
 			{
-				scanLine.endY = y;
-				scanLine.endLine = line;
-				scanLine.endZ = z;
+			    builder.endY = y;
+			    builder.endLine = line;
+			    builder.endZ = z;
 			}
 		}
 		
-		return scanLine;
+		return builder.build();
 	}
 	
 	private double getZValue(double xVal, double yVal, LineEquation line)
@@ -262,7 +264,7 @@ public class ZBuffer implements IZBuffer {
 	@Override
 	public void clear() {
 	    buffer.parallelStream()
-	          .flatMap(item -> item.stream())
+	          .flatMap(List::parallelStream)
 	          .filter(ZBufferItem::isActive)
 	          .forEach(ZBufferItem::clear);
 	}

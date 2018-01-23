@@ -144,7 +144,7 @@ public class GraphicsTest extends JFrame {
 		l3.getLightSource().setLightConeAngle(40);
 		lantern3.attachLightsource(l3);
 		lantern3.getFacetList().stream().filter(f -> f.getNormal().getZ() <= 0).forEach(f -> f.setColour(Color.BLACK));
-		Transform l3spin = new RepeatingTransform<Rotation>(Axis.X.getRotation(4), 0);
+		Transform l3spin = new RepeatingTransform<>(Axis.X.getRotation(4), 0);
 		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(lantern3, l3spin);
 		
 		this.add(cnv, BorderLayout.CENTER);
@@ -168,7 +168,7 @@ public class GraphicsTest extends JFrame {
 		FlapTest flap = new FlapTest(); 
 		flap.setColour(Color.ORANGE);
 		cnv.registerObject(flap, new Point(1000, 500, 200), ShaderFactory.GORAUD);
-		CanvasObjectFunctions.DEFAULT.get().addTransformAboutPoint(flap, new Point(1200, 500, 200), new RepeatingTransform<Rotation>(Axis.Y.getRotation(2),0));
+		CanvasObjectFunctions.DEFAULT.get().addTransformAboutPoint(flap, new Point(1200, 500, 200), new RepeatingTransform<>(Axis.Y.getRotation(2),0));
 		
 		ViewAngleCamera slaveCam = new ViewAngleCamera(new SimpleOrientation(OrientableTrait.ORIENTATION_TAG));
 		slaveCam.setPosition(new Point(1550, 200, 350));
@@ -194,8 +194,8 @@ public class GraphicsTest extends JFrame {
 		torus.setColour(new Color(250, 250, 250));
 		//torus.setLightIntensityFinder(Utils.getShadowLightIntensityFinder(() -> { return cnv.getShapes();})); //for testing shadows falling on the torus
 		cnv.registerObject(torus, new Point(200,200,450), ShaderFactory.GORAUD);
-		Transform torust1 = new RepeatingTransform<Rotation>(Axis.Y.getRotation(3), 60);
-		Transform torust2 = new RepeatingTransform<Rotation>(Axis.X.getRotation(3), 60);
+		Transform torust1 = new RepeatingTransform<>(Axis.Y.getRotation(3), 60);
+		Transform torust2 = new RepeatingTransform<>(Axis.X.getRotation(3), 60);
 		SequenceTransform torust = new SequenceTransform();
 		torust.add(torust1).add(torust2);
 		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(torus, torust);
@@ -203,7 +203,7 @@ public class GraphicsTest extends JFrame {
 		//torus.setCastsShadow(false);
 		
 		torus.setPassThroughPluginForGate((obj) -> {
-		    Transform rot = new RepeatingTransform<Rotation>(Axis.X.getRotation(3), 60);
+		    Transform rot = new RepeatingTransform<>(Axis.X.getRotation(3), 60);
 		    CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(obj, rot);
 			return null;
 		});
@@ -216,7 +216,7 @@ public class GraphicsTest extends JFrame {
 		TexturedCuboid cube = new TexturedCuboid(200,200,200);
 		TraitHandler.INSTANCE.registerTrait(cube, new PlugableTrait());
 		cnv.registerObject(cube, new Point(500,500,500), ShaderFactory.TEXGORAUD);
-		Transform cubet2 = new RepeatingTransform<Rotation>(Axis.Z.getRotation(3), 30);
+		Transform cubet2 = new RepeatingTransform<>(Axis.Z.getRotation(3), 30);
 		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(cube, cubet2);
 		cube.addFlag(Events.STICKY);
 		

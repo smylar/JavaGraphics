@@ -67,16 +67,16 @@ public class GoraudShader extends DefaultShader {
 		    return colour;
 		
 		if (scanLine != this.curScanline){
-			startIntensity = this.getIntensities(x, scanLine.startY, scanLine.startLine);
-			endIntensity = this.getIntensities(x, scanLine.endY, scanLine.endLine);
+			startIntensity = this.getIntensities(x, scanLine.getStartY(), scanLine.getStartLine());
+			endIntensity = this.getIntensities(x, scanLine.getEndY(), scanLine.getEndLine());
 			curScanline = scanLine;
-			lineLength = Math.ceil(scanLine.endY) - Math.floor(scanLine.startY);
+			lineLength = Math.ceil(scanLine.getEndY()) - Math.floor(scanLine.getStartY());
 		}
 		
 		if (lineLength <= 0) 
 		    return colour;
 
-		double percentDistCovered = (y - Math.floor(scanLine.startY)) / lineLength;
+		double percentDistCovered = (y - Math.floor(scanLine.getStartY())) / lineLength;
 		
 		//TODO something is off, mesh lines appear brighter
 		
