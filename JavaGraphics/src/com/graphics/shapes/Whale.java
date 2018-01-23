@@ -19,6 +19,7 @@ import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.orientation.SimpleOrientation;
 import com.graphics.lib.skeleton.PivotSkeletonNode;
 import com.graphics.lib.traits.AnimatedTrait;
+import com.graphics.lib.traits.TraitHandler;
 
 public final class Whale extends CanvasObject {
 	public static final String FIN_TAG = "fin";
@@ -47,7 +48,7 @@ public final class Whale extends CanvasObject {
 		tailNode.setMin(Axis.Y,-10);
 		tailNode.getAnimations().put("TAIL",  PivotSkeletonNode.getDefaultPivotAction(Axis.Y, 0.5, 0.5));
 		
-		AnimatedTrait animated = addTrait(new AnimatedTrait());
+		AnimatedTrait animated = TraitHandler.INSTANCE.registerTrait(this, new AnimatedTrait());
 		
 		animated.setOrientation(new SimpleOrientation(AnimatedTrait.ORIENTATION_TAG));
 		animated.getOrientation().getRepresentation().getVertexList().get(0).z = -1;

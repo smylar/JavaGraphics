@@ -13,6 +13,7 @@ import com.graphics.lib.plugins.IPlugin;
 import com.graphics.lib.plugins.PluginLibrary;
 import com.graphics.lib.traits.PlugableTrait;
 import com.graphics.lib.traits.TrackingTrait;
+import com.graphics.lib.traits.TraitHandler;
 import com.graphics.lib.transform.MovementTransform;
 import com.graphics.shapes.Sphere;
 import com.graphics.tests.TestUtils;
@@ -22,7 +23,7 @@ public class BouncyProjectile extends Projectile {
 	@Override
 	public CanvasObject get(IOrientation orientation, double parentSpeed) {
 	    Sphere proj = new Sphere(18,20);
-	    proj.addTrait(new TrackingTrait());
+	    TraitHandler.INSTANCE.registerTrait(proj, new TrackingTrait());
 		proj.setBaseIntensity(1);
 		proj.setColour(new Color(0, 255, 255, 80));
 		proj.setCastsShadow(false);
@@ -34,8 +35,9 @@ public class BouncyProjectile extends Projectile {
 		move.moveUntil(t -> t.getDistanceMoved() > this.getRange() || (t.getSpeed() == 0 && new Date().getTime() > delTime));
 		proj.addTransform(move);
 
-		proj.addTrait(new PlugableTrait()).registerPlugin(Events.CHECK_COLLISION, getBouncePlugin(), true)
-		                                  .registerPlugin("Trail", PluginLibrary.generateTrailParticles(Color.LIGHT_GRAY, 20, 13, 0.66), true);
+		TraitHandler.INSTANCE.registerTrait(proj, new PlugableTrait())
+		                     .registerPlugin(Events.CHECK_COLLISION, getBouncePlugin(), true)
+		                     .registerPlugin("Trail", PluginLibrary.generateTrailParticles(Color.LIGHT_GRAY, 20, 13, 0.66), true);
 		
 		return proj;
 	}
@@ -46,7 +48,7 @@ public class BouncyProjectile extends Projectile {
 				if (impactee != null){
 					if (impactee.hasFlag(Events.STICKY)){ 
 						PluginLibrary.stop2().execute(obj);
-						obj.getParent().getTrait(ITracker.class).ifPresent(o -> o.observeAndMatch(impactee));
+						TraitHandler.INSTANCE.getTrait(obj.getParent(), ITracker.class).ifPresent(o -> o.observeAndMatch(impactee));
 						getClipLibrary().ifPresent(cl -> cl.playSound("STICK", -20f));
 					}
 					else {

@@ -6,6 +6,7 @@ import com.graphics.lib.Axis;
 import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.control.ObjectInputController;
 import com.graphics.lib.interfaces.IOrientable;
+import com.graphics.lib.traits.TraitHandler;
 import com.graphics.lib.transform.MovementTransform;
 import com.graphics.lib.transform.RepeatingTransform;
 import com.graphics.lib.transform.Rotation;
@@ -18,7 +19,7 @@ public final class ShipControls extends ObjectInputController<Ship> {
 	
 	public ShipControls(Ship controlledObject) throws Exception {
 		super(controlledObject);
-		orientable = controlledObject.getTrait(IOrientable.class).get();
+		orientable = TraitHandler.INSTANCE.getTrait(controlledObject, IOrientable.class).get();
 	}
 
 	public void increaseSpeed(){

@@ -14,6 +14,7 @@ import com.graphics.lib.interfaces.IOrientable;
 import com.graphics.lib.interfaces.IOrientableCamera;
 import com.graphics.lib.interfaces.IOrientation;
 import com.graphics.lib.orientation.OrientationData;
+import com.graphics.lib.traits.TraitHandler;
 import com.graphics.lib.transform.CameraTransform;
 import com.graphics.lib.transform.ReapplyOrientationTransform;
 import com.graphics.lib.transform.Translation;
@@ -61,7 +62,7 @@ public abstract class Camera extends Observable implements IOrientableCamera, Ob
 		this.tiedObjectLocator = tiedObjectLocator;
 		tiedObjectLocator.accept(tiedTo, this);
 		tiedTo.addObserver(this);
-		tiedTo.getTrait(IOrientable.class).ifPresent(o -> o.setOrientation(orientation));
+		TraitHandler.INSTANCE.getTrait(tiedTo, IOrientable.class).ifPresent(o -> o.setOrientation(orientation));
 	}
 
 	/**

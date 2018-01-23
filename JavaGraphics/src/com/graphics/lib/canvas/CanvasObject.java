@@ -32,9 +32,7 @@ import com.graphics.lib.camera.Camera;
 import com.graphics.lib.collectors.CentreFinder;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ILightIntensityFinder;
-import com.graphics.lib.interfaces.ITrait;
 import com.graphics.lib.interfaces.IVertexNormalFinder;
-import com.graphics.lib.traits.TraitHandler;
 import com.graphics.lib.transform.Transform;
 
 /**
@@ -63,7 +61,6 @@ public class CanvasObject extends Observable implements ICanvasObject {
     private IVertexNormalFinder vnFinder = VertexNormalFinderEnum.DEFAULT.get();
     private Optional<WorldCoord> fixedCentre = Optional.empty();
     
-    //private Set<ITrait> traits = Sets.newHashSet();
 	private final int objectId = nextId++;
 	
 	public CanvasObject(Supplier<Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>>> initMesh) {
@@ -77,20 +74,6 @@ public class CanvasObject extends Observable implements ICanvasObject {
         vertexList = mesh.getLeft();
         facetList = mesh.getRight();
     }
-	
-	@Override
-	public final <T extends ITrait> T addTrait(T trait) {
-//        trait.setParent(this);
-//        traits.add(trait);
-//        return trait;
-	    return TraitHandler.INSTANCE.registerTrait(this, trait); //this will be moved out externally if works, saves refactoring for testing
-	}
-	
-	@Override
-	public final <T extends ITrait> Optional<T> getTrait(Class<T> trait) {
-	    //return traits.stream().filter(t -> trait.isAssignableFrom(t.getClass())).map(trait::cast).findFirst();
-	    return TraitHandler.INSTANCE.getTrait(this, trait);
-	}
 	
 	/**
 	 * Use to save a fixed centre point so it is not recalculated every time

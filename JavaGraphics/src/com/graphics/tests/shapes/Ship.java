@@ -21,6 +21,7 @@ import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IEffector;
 import com.graphics.lib.plugins.Events;
 import com.graphics.lib.traits.PlugableTrait;
+import com.graphics.lib.traits.TraitHandler;
 import com.graphics.lib.transform.MovementTransform;
 import com.graphics.lib.transform.RepeatingTransform;
 import com.graphics.lib.transform.Rotation;
@@ -51,7 +52,7 @@ public final class Ship extends CanvasObject {
 		getFacetList().get(5).setColour(Color.YELLOW);
 		
 		//self registering - based on trail plugin from plugin library
-		addTrait(new PlugableTrait()).registerPlugin("TRAIL", 
+		TraitHandler.INSTANCE.registerTrait(this, new PlugableTrait()).registerPlugin("TRAIL", 
 
 					plugable -> {
 					    ICanvasObject obj = plugable.getParent();

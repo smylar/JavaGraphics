@@ -8,6 +8,7 @@ import com.graphics.lib.plugins.Events;
 import com.graphics.lib.plugins.PluginLibrary;
 import com.graphics.lib.traits.OrientableTrait;
 import com.graphics.lib.traits.PlugableTrait;
+import com.graphics.lib.traits.TraitHandler;
 import com.graphics.lib.transform.MovementTransform;
 import com.graphics.shapes.Sphere;
 import com.graphics.tests.TestUtils;
@@ -31,12 +32,12 @@ public class TrackingProjectile extends TargetedProjectile {
 		move.moveUntil(t -> t.getDistanceMoved() > this.getRange());
 		proj.addTransform(move);
 
-		proj.addTrait(new PlugableTrait())
+		TraitHandler.INSTANCE.registerTrait(proj, new PlugableTrait())
 		  .registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollided(TestUtils.getFilteredObjectList(), Events.EXPLODE, Events.EXPLODE), true)
 		  .registerPlugin(Events.EXPLODE, TestUtils.getExplodePlugin(this.getClipLibrary()), false)
 		  .registerPlugin("Track", PluginLibrary.track(this.getTargetFinder().find(), 2), true);
 
-		proj.addTrait(new OrientableTrait().setOrientation(orientation));
+		TraitHandler.INSTANCE.registerTrait(proj, new OrientableTrait()).setOrientation(orientation);
 		return proj;
 	}
 

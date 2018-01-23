@@ -17,14 +17,17 @@ import com.graphics.lib.canvas.Canvas3D;
 import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IEffector;
+import com.graphics.lib.interfaces.IPlugable;
 import com.graphics.lib.interfaces.IPointFinder;
 import com.graphics.lib.interfaces.ITexturable;
+import com.graphics.lib.interfaces.ITracker;
 import com.graphics.lib.interfaces.IVectorFinder;
 import com.graphics.lib.orientation.OrientationData;
 import com.graphics.lib.plugins.Events;
 import com.graphics.lib.texture.Texture;
 import com.graphics.lib.traits.PlugableTrait;
 import com.graphics.lib.traits.TrackingTrait;
+import com.graphics.lib.traits.TraitHandler;
 import com.graphics.lib.transform.Rotation;
 import com.graphics.lib.collectors.NearestIntersectedFacetFinder;
 import com.graphics.lib.collectors.IntersectionData;
@@ -54,9 +57,9 @@ public class LaserWeapon implements IEffector {
 		lsr.setTickLife(this.duration);
 		lsr.addFlag("PHASED");
 
-		lsr.addTrait(new TrackingTrait());
+		TraitHandler.INSTANCE.registerTrait(lsr, new TrackingTrait());
 		
-		lsr.addTrait(new PlugableTrait()).registerPlugin("LASER", 
+		TraitHandler.INSTANCE.registerTrait(lsr, new PlugableTrait()).registerPlugin("LASER", 
 				obj -> {
 						if (lsr.getTickLife() <= 0) {
 							lsr.setDeleted(true);
@@ -82,13 +85,13 @@ public class LaserWeapon implements IEffector {
 		
 		lsr.addFlag(Events.NO_SHADE);
 		
-		parent.getTrait(PlugableTrait.class).ifPresent(p -> 
+		TraitHandler.INSTANCE.getTrait(parent, IPlugable.class).ifPresent(p -> 
 			p.registerSingleAfterDrawPlugin("ADD_LASER", obj -> {
 				for (Rotation r : OrientationData.getRotationsForVector(effectVector.getVector())) {
 					lsr.applyTransform(r);
 				}
 				CanvasObjectFunctions.DEFAULT.get().moveTo(lsr, origin.find());
-				lsr.getTrait(TrackingTrait.class).ifPresent(trait -> trait.observeAndMatch(parent));
+				TraitHandler.INSTANCE.getTrait(lsr, ITracker.class).ifPresent(trait -> trait.observeAndMatch(parent));
 				return null;
 			})
 		);
@@ -120,7 +123,7 @@ public class LaserWeapon implements IEffector {
 	}
 	
 	private boolean markTexture(IntersectionData<ICanvasObject> intersectionData) {
-		Optional<ITexturable> texturable = intersectionData.getParent().getTrait(ITexturable.class);
+		Optional<ITexturable> texturable = TraitHandler.INSTANCE.getTrait(intersectionData.getParent(), ITexturable.class);
 		if (!texturable.isPresent()) return false;
 		
 		List<WorldCoord> coords = intersectionData.getFacet().getAsList();

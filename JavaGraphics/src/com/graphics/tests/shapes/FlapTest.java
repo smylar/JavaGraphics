@@ -10,13 +10,14 @@ import com.graphics.lib.skeleton.PivotDetail;
 import com.graphics.lib.skeleton.PivotSkeletonNode;
 import com.graphics.lib.skeleton.SkeletonNode;
 import com.graphics.lib.traits.AnimatedTrait;
+import com.graphics.lib.traits.TraitHandler;
 
 public class FlapTest extends Bird {
 	private String tipAnimation = "";
 	
 	public FlapTest(){
 		super();
-		AnimatedTrait animatable = addTrait(new AnimatedTrait());
+		AnimatedTrait animatable = TraitHandler.INSTANCE.registerTrait(this, new AnimatedTrait());
 		animatable.setOrientation(new SimpleOrientation(AnimatedTrait.ORIENTATION_TAG));
 		
 		SkeletonNode rootNode = new SkeletonNode();

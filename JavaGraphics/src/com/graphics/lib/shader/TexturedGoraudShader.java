@@ -14,6 +14,7 @@ import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ITexturable;
 import com.graphics.lib.texture.Texture;
+import com.graphics.lib.traits.TraitHandler;
 import com.graphics.lib.zbuffer.ScanLine;
 
 public class TexturedGoraudShader extends GoraudShader {
@@ -31,7 +32,7 @@ public class TexturedGoraudShader extends GoraudShader {
         endTexture = null;
 		textures.clear();
 		
-		this.texturableParent = parent.getTrait(ITexturable.class);
+		this.texturableParent = TraitHandler.INSTANCE.getTrait(parent, ITexturable.class);
 		
 		this.texturableParent.ifPresent(tp -> 
 			textures = tp.getTextures().stream().filter(t ->

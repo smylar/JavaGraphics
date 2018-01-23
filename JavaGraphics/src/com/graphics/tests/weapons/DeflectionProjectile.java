@@ -11,6 +11,7 @@ import com.graphics.lib.interfaces.IOrientation;
 import com.graphics.lib.plugins.Events;
 import com.graphics.lib.plugins.PluginLibrary;
 import com.graphics.lib.traits.PlugableTrait;
+import com.graphics.lib.traits.TraitHandler;
 import com.graphics.lib.transform.MovementTransform;
 import com.graphics.shapes.Sphere;
 import com.graphics.tests.TestUtils;
@@ -26,8 +27,9 @@ public class DeflectionProjectile extends TargetedProjectile {
 		proj.deleteAfterTransforms();
 		proj.setProcessBackfaces(true);
 
-		proj.addTrait(new PlugableTrait()).registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollided(TestUtils.getFilteredObjectList(), Events.EXPLODE, Events.EXPLODE), true)
-		                                  .registerPlugin(Events.EXPLODE, TestUtils.getExplodePlugin(this.getClipLibrary()), false);
+		TraitHandler.INSTANCE.registerTrait(proj, new PlugableTrait())
+		                     .registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollided(TestUtils.getFilteredObjectList(), Events.EXPLODE, Events.EXPLODE), true)
+		                     .registerPlugin(Events.EXPLODE, TestUtils.getExplodePlugin(this.getClipLibrary()), false);
 		
 		ICanvasObject target = this.getTargetFinder().find();
 		Point startPoint = this.getStartPoint().find();

@@ -8,12 +8,14 @@ import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.interfaces.IOrientable;
 import com.graphics.lib.interfaces.IOrientation;
+import com.graphics.lib.interfaces.IPlugable;
 import com.graphics.lib.orientation.OrientationData;
 import com.graphics.lib.orientation.SimpleOrientation;
 import com.graphics.lib.plugins.Events;
 import com.graphics.lib.plugins.PluginLibrary;
 import com.graphics.lib.traits.OrientableTrait;
 import com.graphics.lib.traits.PlugableTrait;
+import com.graphics.lib.traits.TraitHandler;
 import com.graphics.lib.transform.MovementTransform;
 import com.graphics.lib.transform.RepeatingTransform;
 import com.graphics.lib.transform.Rotation;
@@ -27,12 +29,13 @@ public class ExplodingProjectile extends Projectile {
 	public CanvasObject get(IOrientation orientation, double parentSpeed) {
 	    Ovoid proj = new Ovoid(20,0.3,30);
 		proj.applyTransform(new Rotation(Axis.X, -90));
-		proj.addTrait(new OrientableTrait()).setOrientation(new SimpleOrientation());
+		TraitHandler.INSTANCE.registerTrait(proj, new OrientableTrait()).setOrientation(new SimpleOrientation());
 		proj.setBaseIntensity(1);
 		proj.setColour(new Color(255, 0, 0, 80));
 		proj.setCastsShadow(false);
-		proj.addTrait(new PlugableTrait()).registerPlugin(Events.EXPLODE, TestUtils.getExplodePlugin(getClipLibrary()), false)
-		                                  .registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollidedNew(TestUtils.getFilteredObjectList(), Events.EXPLODE, Events.EXPLODE), true);
+		TraitHandler.INSTANCE.registerTrait(proj, new PlugableTrait())
+		                     .registerPlugin(Events.EXPLODE, TestUtils.getExplodePlugin(getClipLibrary()), false)
+		                     .registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollidedNew(TestUtils.getFilteredObjectList(), Events.EXPLODE, Events.EXPLODE), true);
 		proj.addFlag(TestUtils.SILENT_EXPLODE);
 
 		final Vector forward = orientation.getForward();
@@ -51,7 +54,7 @@ public class ExplodingProjectile extends Projectile {
 		MovementTransform move = new MovementTransform(forward, this.getSpeed() + parentSpeed) {
 			@Override
 			public void onComplete(){
-				proj.getTrait(PlugableTrait.class).ifPresent(p -> p.executePlugin(Events.EXPLODE));
+			    TraitHandler.INSTANCE.getTrait(proj, IPlugable.class).ifPresent(p -> p.executePlugin(Events.EXPLODE));
 			}
 		};
 		
@@ -61,11 +64,11 @@ public class ExplodingProjectile extends Projectile {
 		
 		Transform projt = new RepeatingTransform<Rotation>(new Rotation(Axis.Z, 20), t -> move.isCompleteSpecific());
 
-		proj.getTrait(IOrientable.class).ifPresent(o -> proj.addTransform(o.toBaseOrientationTransform()));
+		TraitHandler.INSTANCE.getTrait(proj, IOrientable.class).ifPresent(o -> proj.addTransform(o.toBaseOrientationTransform()));
 		
 		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(proj, projt);
 		
-		proj.getTrait(IOrientable.class).ifPresent(o -> proj.addTransform(o.reapplyOrientationTransform()));
+		TraitHandler.INSTANCE.getTrait(proj, IOrientable.class).ifPresent(o -> proj.addTransform(o.reapplyOrientationTransform()));
 		proj.deleteAfterTransforms();
 		proj.setProcessBackfaces(true);
 		

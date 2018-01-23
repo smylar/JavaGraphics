@@ -27,6 +27,7 @@ import com.graphics.lib.interfaces.IOrientable;
 import com.graphics.lib.interfaces.IPlugable;
 import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.lightsource.LightSource;
+import com.graphics.lib.traits.TraitHandler;
 import com.graphics.lib.transform.MovementTransform;
 import com.graphics.lib.transform.RepeatingTransform;
 import com.graphics.lib.transform.Rotation;
@@ -155,7 +156,7 @@ public class PluginLibrary {
 						plugable.executePlugin(impactorPlugin);
 					}
 					if (impacteePlugin != null) {
-						impactee.getTrait(IPlugable.class).ifPresent(impacteePlugable -> impacteePlugable.executePlugin(impacteePlugin));
+					    TraitHandler.INSTANCE.getTrait(impactee, IPlugable.class).ifPresent(impacteePlugable -> impacteePlugable.executePlugin(impacteePlugin));
 					}
 
 					plugable.registerPlugin(IN_COLLISION, o -> impactee, false);
@@ -201,7 +202,7 @@ public class PluginLibrary {
 								plugable.executePlugin(impactorPlugin);
 							}
 							if (impacteePlugin != null){
-								impactee.getTrait(IPlugable.class).ifPresent(impacteePlugable -> impacteePlugable.executePlugin(impacteePlugin));
+							    TraitHandler.INSTANCE.getTrait(impactee, IPlugable.class).ifPresent(impacteePlugable -> impacteePlugable.executePlugin(impacteePlugin));
 							}
 
 							plugable.registerPlugin(IN_COLLISION, o -> impactee, false);
@@ -300,7 +301,7 @@ public class PluginLibrary {
 			Optional<MovementTransform> move = obj.getTransformsOfType(MovementTransform.class).stream().findFirst();
 			if (!move.isPresent()) return null;
 			
-			obj.getTrait(IOrientable.class).ifPresent(o -> track(o, obj, objectToTrack, rotationRate));
+			TraitHandler.INSTANCE.getTrait(obj, IOrientable.class).ifPresent(o -> track(o, obj, objectToTrack, rotationRate));
 			
 			return null;
 		};
