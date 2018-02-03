@@ -293,15 +293,14 @@ public class PluginLibrary {
 	}
 	
 	
-	public static IPlugin<IPlugable, Void> track(ICanvasObject objectToTrack, double rotationRate){
+	public static IPlugin<IPlugable, Void> track(final ICanvasObject objectToTrack, final double rotationRate){
 		return plugable -> {
-		    ICanvasObject obj = plugable.getParent();
-			if (objectToTrack == null) return null;
-
-			Optional<MovementTransform> move = obj.getTransformsOfType(MovementTransform.class).stream().findFirst();
-			if (!move.isPresent()) return null;
-			
-			TraitHandler.INSTANCE.getTrait(obj, IOrientable.class).ifPresent(o -> track(o, obj, objectToTrack, rotationRate));
+		    Optional.ofNullable(plugable.getParent()).ifPresent(obj -> 
+		        obj.getTransformsOfType(MovementTransform.class).stream()
+		                                                        .findFirst()
+		                                                        .flatMap(m -> TraitHandler.INSTANCE.getTrait(obj, IOrientable.class))
+		                                                        .ifPresent(o -> track(o, obj, objectToTrack, rotationRate))
+		    );
 			
 			return null;
 		};

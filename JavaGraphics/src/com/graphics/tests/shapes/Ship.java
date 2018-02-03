@@ -3,6 +3,7 @@ package com.graphics.tests.shapes;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 
@@ -55,39 +56,13 @@ public final class Ship extends CanvasObject {
 		TraitHandler.INSTANCE.registerTrait(this, new PlugableTrait()).registerPlugin("TRAIL", 
 
 					plugable -> {
-					    ICanvasObject obj = plugable.getParent();
-						Optional<MovementTransform> movement = obj.getTransformsOfType(MovementTransform.class).stream().findFirst();
-						if (!movement.isPresent() || movement.get().getAcceleration() == 0) return null; //no point if it isn't moving
-						Vector baseVector = movement.get().getVector();
-						if (baseVector == null) return null; 
+					    Optional.ofNullable(plugable.getParent()).ifPresent(obj -> 
+					        obj.getTransformsOfType(MovementTransform.class).stream()
+					                                                        .filter(m -> m.getAcceleration() != 0 && Objects.nonNull(m.getVector()))
+					                                                        .findFirst()
+					                                                        .ifPresent(m -> generateTrail(obj, m))
+					    );
 						
-						for (int i = 0 ; i < 50 ; i++)
-						{
-
-							int index = new Random().nextInt(5);
-							if (index == 0) index++;
-							Point p = obj.getVertexList().get(index);
-							CanvasObject fragment = Utils.getParticle(p, 9);
-
-							int colour = new Random().nextInt(3);
-							if (colour == 0) fragment.setColour(Color.PINK);
-							if (colour == 1) fragment.setColour(Color.ORANGE);
-							if (colour == 2) fragment.setColour(Color.YELLOW);
-							fragment.setProcessBackfaces(true);
-							double xVector = baseVector.getX() + (Math.random()/2) - 0.25;
-							double yVector = baseVector.getY() + (Math.random()/2) - 0.25;
-							double zVector = baseVector.getZ() + (Math.random()/2) - 0.25;
-							Transform rot1 = new RepeatingTransform<Rotation>(new Rotation(Axis.Y, Math.random() * 10), 15);
-							MovementTransform move = new MovementTransform(new Vector(xVector, yVector, zVector), movement.get().getAcceleration() > 0 ? -20 : 20);
-							move.moveUntil(t -> rot1.isCompleteSpecific());
-							Transform rot2 = new RepeatingTransform<Rotation>(new Rotation(Axis.X, Math.random() * 10), t -> rot1.isCompleteSpecific());				
-							CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(fragment, rot1, rot2);
-							fragment.addTransform(move);
-							fragment.deleteAfterTransforms();	
-							fragment.addFlag(Events.PHASED);
-							fragment.addFlag(Events.NO_SHADE);
-							obj.getChildren().add(fragment);
-						}
 						return null;
 					}
 				, true);
@@ -99,14 +74,14 @@ public final class Ship extends CanvasObject {
 	}
 	
 	@Override
-	public void onDrawComplete(){
+	public void onDrawComplete() {
 		super.onDrawComplete();
-		if (++cnt > 10){
+		if (++cnt > 10) {
 			cnt = 0;
-			if (wingFlashRight.getColour().equals(Color.MAGENTA)){
+			if (wingFlashRight.getColour().equals(Color.MAGENTA)) {
 				wingFlashRight.setColour(Color.GREEN);
 				wingFlashLeft.setColour(Color.GREEN);
-			}else{
+			} else {
 				wingFlashRight.setColour(Color.MAGENTA);
 				wingFlashLeft.setColour(Color.MAGENTA);
 			}
@@ -133,8 +108,39 @@ public final class Ship extends CanvasObject {
 		return weapons;
 	}
 	
-	public void addWeapon(IEffector weapon){
+	public void addWeapon(IEffector weapon) {
 		weapons.add(weapon);
+	}
+	
+	private void generateTrail(final ICanvasObject obj, final MovementTransform movement) {
+	    Vector baseVector = movement.getVector();
+        
+        for (int i = 0 ; i < 50 ; i++)
+        {
+            int index = new Random().nextInt(5);
+            if (index == 0) index++;
+            Point p = obj.getVertexList().get(index);
+            CanvasObject fragment = Utils.getParticle(p, 9);
+
+            int colour = new Random().nextInt(3);
+            if (colour == 0) fragment.setColour(Color.PINK);
+            if (colour == 1) fragment.setColour(Color.ORANGE);
+            if (colour == 2) fragment.setColour(Color.YELLOW);
+            fragment.setProcessBackfaces(true);
+            double xVector = baseVector.getX() + (Math.random()/2) - 0.25;
+            double yVector = baseVector.getY() + (Math.random()/2) - 0.25;
+            double zVector = baseVector.getZ() + (Math.random()/2) - 0.25;
+            Transform rot1 = new RepeatingTransform<Rotation>(new Rotation(Axis.Y, Math.random() * 10), 15);
+            MovementTransform move = new MovementTransform(new Vector(xVector, yVector, zVector), movement.getAcceleration() > 0 ? -20 : 20);
+            move.moveUntil(t -> rot1.isCompleteSpecific());
+            Transform rot2 = new RepeatingTransform<Rotation>(new Rotation(Axis.X, Math.random() * 10), t -> rot1.isCompleteSpecific());                
+            CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(fragment, rot1, rot2);
+            fragment.addTransform(move);
+            fragment.deleteAfterTransforms();   
+            fragment.addFlag(Events.PHASED);
+            fragment.addFlag(Events.NO_SHADE);
+            obj.getChildren().add(fragment);
+        }
 	}
 	
 	private static Pair<ImmutableList<WorldCoord>,ImmutableList<Facet>> init(final int width, final int depth, final int height) {

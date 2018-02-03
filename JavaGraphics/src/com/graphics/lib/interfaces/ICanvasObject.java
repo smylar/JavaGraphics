@@ -166,7 +166,9 @@ public interface ICanvasObject {
 
     void removeFlag(String flag);
 
-    <C extends ICanvasObject> Optional<C> getObjectAs(Class<C> target);
+    default <C extends ICanvasObject> Optional<C> getObjectAs(Class<C> target) {
+        return target.isAssignableFrom(this.getClass()) ? Optional.of(target.cast(this)) : Optional.empty();
+    }
 
 	void fixCentre();
 

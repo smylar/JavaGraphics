@@ -95,11 +95,6 @@ public class CanvasObject extends Observable implements ICanvasObject {
 		result = prime * result + objectId;
 		return result;
 	}
-
-	@Override
-	public <C extends ICanvasObject> Optional<C> getObjectAs(Class<C> target) {
-        return target.isAssignableFrom(this.getClass()) ? Optional.of(target.cast(this)) : Optional.empty();
-    }
 	
 	@Override
 	public final String getObjectTag(){
