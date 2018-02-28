@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 
 import com.graphics.lib.Axis;
@@ -29,11 +30,11 @@ import com.graphics.lib.transform.Translation;
 public abstract class Camera extends Observable implements IOrientableCamera, Observer {
 	public static final String CAMERA_MOVED = "cameraMoved";
 	private Point position = new Point(0,0,0);
-	private ICanvasObject tiedTo = null;
+	private Optional<ICanvasObject> tiedTo = Optional.empty();
 	private BiConsumer<ICanvasObject, Camera> tiedObjectLocator;
 	private IOrientation orientation;
 	private boolean tiedObjectUpdated = false;
-	private Map<String, CameraTransform> transforms = new HashMap<String, CameraTransform>();
+	private Map<String, CameraTransform> transforms = new HashMap<>();
 	private OrientationData ot = new OrientationData();
 
 	protected double dispwidth = 0;
@@ -47,7 +48,7 @@ public abstract class Camera extends Observable implements IOrientableCamera, Ob
 		return this.transforms.get(key);
 	}
 	
-	public ICanvasObject getTiedTo() {
+	public Optional<ICanvasObject> getTiedTo() {
 		return tiedTo;
 	}
 
@@ -58,7 +59,7 @@ public abstract class Camera extends Observable implements IOrientableCamera, Ob
 	 * @param tiedObjectLocator		Anonymous function defining the camera's position in relation to the tied object
 	 */
 	public void setTiedTo(ICanvasObject tiedTo, BiConsumer<ICanvasObject, Camera> tiedObjectLocator) {
-		this.tiedTo = tiedTo;
+		this.tiedTo = Optional.of(tiedTo);
 		this.tiedObjectLocator = tiedObjectLocator;
 		tiedObjectLocator.accept(tiedTo, this);
 		tiedTo.addObserver(this);
@@ -102,7 +103,7 @@ public abstract class Camera extends Observable implements IOrientableCamera, Ob
 	}
 	
 	public Point getPosition() {
-		return this.position;
+		return position;
 	}
 	public void setPosition(Point position) {
 		this.position = position;
@@ -116,12 +117,12 @@ public abstract class Camera extends Observable implements IOrientableCamera, Ob
 	
 	public synchronized void addTransform(String key, CameraTransform transform)
 	{
-		this.transforms.put(key, transform);
+		transforms.put(key, transform);
 	}
 	
 	public synchronized void removeTransform(String key)
 	{
-		this.transforms.remove(key);
+		transforms.remove(key);
 	}
 	
 	/**
@@ -129,27 +130,23 @@ public abstract class Camera extends Observable implements IOrientableCamera, Ob
 	 */
 	public synchronized void doTransforms()
 	{
-		if (this.tiedObjectUpdated){
-			tiedObjectLocator.accept(tiedTo, this);
-			this.tiedObjectUpdated = false;
+		if (tiedObjectUpdated && tiedTo.isPresent()) {
+			tiedObjectLocator.accept(tiedTo.get(), this);
+			tiedObjectUpdated = false;
 		}
-		else if (transforms.size() == 0) return;
 		
-		for (CameraTransform t : this.transforms.values())
-		{
-			t.doTransform(this);
-		}
+		transforms.values().forEach(t -> t.doTransform(this));
 
 		ot.saveCurrentTransforms(orientation);
 		
-		this.setChanged();
-		this.notifyObservers(CAMERA_MOVED);
+		setChanged();
+		notifyObservers(CAMERA_MOVED);
 	}
 	
 	public void alignShapeToCamera(ICanvasObject obj)
 	{
 		obj.applyCameraTransform(new Translation(-position.x, -position.y, -position.z), this);
-		this.matchCameraRotation(obj);
+		matchCameraRotation(obj);
 		obj.applyCameraTransform(new Translation(position.x, position.y, position.z), this);
 	}
 	
@@ -162,25 +159,16 @@ public abstract class Camera extends Observable implements IOrientableCamera, Ob
 	
 	public void addCameraRotation(ICanvasObject obj)
 	{
-		//ot.addRotation(obj);
 		obj.applyTransform(new ReapplyOrientationTransform(ot));
 	}
 	
-//	public void removeCameraRotation(ICanvasObject obj)
-//	{	
-//		ot.removeRotation(obj);
-//	}
-	
-	public final void getView(ICanvasObject obj){
-		this.getViewSpecific(obj);
+	public final void getView(ICanvasObject obj) {
+		getViewSpecific(obj);
 	}
 	
 	@Override
 	public void update(Observable arg0, Object arg1) {
-		if (arg0 == tiedTo){
-			this.tiedObjectUpdated = true;
-		}
-		
+			tiedObjectUpdated = arg0 == tiedTo.orElse(null);
 	}
 	
 	/**
@@ -189,10 +177,5 @@ public abstract class Camera extends Observable implements IOrientableCamera, Ob
 	 * @param obj - Canvas Object to generate coordinates for
 	 */
 	public abstract void getViewSpecific(ICanvasObject obj);
-	
-	/**
-	 * Called before a every new draw cycle, for setting up anything that applies to the whole cycle but may have changed between cycles
-	 */
-	//public abstract void init();
 	
 }

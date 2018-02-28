@@ -114,22 +114,22 @@ public class CameraControls implements KeyListener{
 		}
 		else if (!this.upKeyDown && key.getKeyCode() == 38)
 		{
-			this.camera.addTransform(UP, new CameraMovementTransform(() -> camera.getOrientation().getUp(), 5));
+			this.camera.addTransform(UP, new CameraMovementTransform(camera.getOrientation()::getUp, 5));
 			this.upKeyDown = true;
 		}
 		else if (!this.rightKeyDown && key.getKeyCode() == 39)
 		{
-			this.camera.addTransform(RIGHT, new CameraMovementTransform(() -> camera.getOrientation().getRight(), 5));
+			this.camera.addTransform(RIGHT, new CameraMovementTransform(camera.getOrientation()::getRight, 5));
 			this.rightKeyDown = true;
 		}
 		else if (!this.downKeyDown && key.getKeyCode() == 40)
 		{
-			this.camera.addTransform(DOWN, new CameraMovementTransform(() -> camera.getOrientation().getDown(), 5));
+			this.camera.addTransform(DOWN, new CameraMovementTransform(camera.getOrientation()::getDown, 5));
 			this.downKeyDown = true;
 		}
 		else if (!this.leftKeyDown && key.getKeyCode() == 37)
 		{
-			this.camera.addTransform(LEFT, new CameraMovementTransform(() -> camera.getOrientation().getLeft(), 5));
+			this.camera.addTransform(LEFT, new CameraMovementTransform(camera.getOrientation()::getLeft, 5));
 			this.leftKeyDown = true;
 		}
 	}
