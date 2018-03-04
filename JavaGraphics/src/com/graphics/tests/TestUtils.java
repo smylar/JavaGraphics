@@ -68,9 +68,8 @@ public class TestUtils {
 
 			Utils.drawCircle(middleWidth, middleHeight, 20, new Color(255,0,0), new Color(0,255,0,0)).accept(c, g);
 			
-			if (c.getCamera() instanceof ViewAngleCamera){	
-				g.drawString(""+((ViewAngleCamera)c.getCamera()).getViewAngle() , c.getWidth() - 30, c.getHeight() - 5);
-			}
+			Utils.cast(c.getCamera(), ViewAngleCamera.class)
+			     .ifPresent(vac ->  g.drawString(""+vac.getViewAngle() , c.getWidth() - 30, c.getHeight() - 5));
 		};
 	}
 	

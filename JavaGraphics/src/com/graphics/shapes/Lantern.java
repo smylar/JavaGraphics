@@ -8,6 +8,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
 import com.graphics.lib.Facet;
+import com.graphics.lib.Utils;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.lightsource.LightSource;
@@ -28,9 +29,8 @@ public class Lantern extends CanvasObject implements Observer {
 	
 	@Override
 	public synchronized void update(Observable arg0, Object arg1) {
-		if (arg0 instanceof LightSource){
-			this.setColour(((LightSource)arg0).getActualColour());
-		}
+		Utils.cast(arg0, LightSource.class)
+		     .ifPresent(l -> setColour(l.getActualColour()));
 	}
 	
 	private static Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>> init() {

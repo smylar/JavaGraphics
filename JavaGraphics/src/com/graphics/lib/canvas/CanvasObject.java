@@ -25,6 +25,7 @@ import com.graphics.lib.GeneralPredicates;
 import com.graphics.lib.LightIntensityFinderEnum;
 import com.graphics.lib.ObjectStatus;
 import com.graphics.lib.Point;
+import com.graphics.lib.Utils;
 import com.graphics.lib.Vector;
 import com.graphics.lib.VertexNormalFinderEnum;
 import com.graphics.lib.WorldCoord;
@@ -85,7 +86,10 @@ public class CanvasObject extends Observable implements ICanvasObject {
 	
 	@Override
 	public boolean equals(Object obj) {
-		return (obj != null && obj instanceof ICanvasObject) ? getObjectTag().equals(((ICanvasObject) obj).getObjectTag()) : false;
+	    return Utils.cast(obj, ICanvasObject.class)
+        	         .map(o -> getObjectTag().equals(o.getObjectTag()))
+        	         .orElse(false);
+
 	}
 	
 	@Override

@@ -399,11 +399,15 @@ public class GraphicsTest extends JFrame {
 		});*/
 		cnv.addDrawOperation((c, g) -> {
 			//more messing with collectors for ammo counts
-			Map<String, Integer> ammoCounts = ship.getWeapons().stream().filter(w -> w instanceof ProjectileWeapon)
-					.map(w -> (ProjectileWeapon)w).collect(
-						Collectors.groupingBy(w -> w.getProjectile().getClass().getSimpleName(), 
-								Collectors.summingInt(ProjectileWeapon::getAmmoCount))
-					);	
+			Map<String, Integer> ammoCounts = ship.getWeapons()
+			                                      .stream()
+			                                      .map(w -> Utils.cast(w, ProjectileWeapon.class))
+			                                      .filter(w -> w.isPresent())
+			                                      .map(w -> w.get())
+			                                      .collect(
+                                						Collectors.groupingBy(w -> w.getProjectile().getClass().getSimpleName(), 
+                                								Collectors.summingInt(ProjectileWeapon::getAmmoCount))
+			                                      );	
 			g.setColor(new Color(0,0,0,150));
 			g.fillRect(0, c.getHeight() - 20, c.getWidth(), 20);
 			g.setColor(Color.WHITE);

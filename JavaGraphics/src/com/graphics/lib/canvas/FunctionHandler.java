@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
+import com.graphics.lib.Utils;
 import com.graphics.lib.interfaces.ICanvasObject;
 
 /**
@@ -49,11 +50,12 @@ public class FunctionHandler implements Observer {
     }
     
     @Override
-    public void update(Observable o, Object arg) {
-        if (o instanceof ICanvasObject && ((ICanvasObject)o).isDeleted()) {
+    public void update(Observable obs, Object arg) {
+        Utils.cast(obs, ICanvasObject.class)
+             .filter(o -> o.isDeleted())
+             .ifPresent(o -> {
                 functions.remove(o);
                 o.deleteObserver(this);
-        }
-        
+             });
     }
 }

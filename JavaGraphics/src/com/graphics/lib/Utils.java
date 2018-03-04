@@ -196,4 +196,10 @@ public class Utils {
         
         return false;
     }
+    
+    public static <T> Optional<T> cast(Object obj, Class<T> clazz) {
+        return Optional.ofNullable(obj)
+                       .filter(o -> clazz.isAssignableFrom(o.getClass()))
+                       .map(clazz::cast);
+    }
 }
