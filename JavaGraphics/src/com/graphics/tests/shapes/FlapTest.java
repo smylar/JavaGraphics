@@ -20,18 +20,15 @@ public class FlapTest extends Bird {
 		AnimatedTrait animatable = TraitHandler.INSTANCE.registerTrait(this, new AnimatedTrait());
 		animatable.setOrientation(new SimpleOrientation(AnimatedTrait.ORIENTATION_TAG));
 		
-		SkeletonNode rootNode = new SkeletonNode();
-		rootNode.setPosition(new WorldCoord(0, 0, 30));
+		SkeletonNode rootNode = new SkeletonNode(new WorldCoord(0, 0, 30));
 		
-		PivotSkeletonNode rightWingPivot = new PivotSkeletonNode();
-		rightWingPivot.setPosition(new WorldCoord(1, 0, 30));
+		PivotSkeletonNode rightWingPivot = new PivotSkeletonNode(new WorldCoord(1, 0, 30));
 		rightWingPivot.setMin(Axis.Z, -75);
 		rightWingPivot.setMax(Axis.Z, 10);
 		rightWingPivot.setMin(Axis.X, -8);
 		rightWingPivot.setMax(Axis.X, 12);
 		
-		PivotSkeletonNode rightWingJointPivot = new PivotSkeletonNode();
-		rightWingJointPivot.setPosition(new WorldCoord(50, 0, 30));
+		PivotSkeletonNode rightWingJointPivot = new PivotSkeletonNode(new WorldCoord(50, 0, 30));;
 		rightWingJointPivot.setMax(Axis.Z, 100);
 		
 		rightWingJointPivot.getAttachedMeshCoords().add(this.getVertexList().get(2));
@@ -89,16 +86,14 @@ public class FlapTest extends Bird {
 			return p;
 		});
 		
-		PivotSkeletonNode leftWingPivot = new PivotSkeletonNode();
-		leftWingPivot.setPosition(new WorldCoord(-1, 0, 30));
+		PivotSkeletonNode leftWingPivot = new PivotSkeletonNode(new WorldCoord(-1, 0, 30));
 		leftWingPivot.setMax(Axis.Z, 75);
 		leftWingPivot.setMin(Axis.Z, -10);
 		leftWingPivot.setMin(Axis.X, -12);
 		leftWingPivot.setMax(Axis.X, 12);
 		leftWingPivot.setTravelPositive(Axis.Z, false);
 		
-		PivotSkeletonNode leftWingJointPivot = new PivotSkeletonNode();
-		leftWingJointPivot.setPosition(new WorldCoord(-50, 0, 30));
+		PivotSkeletonNode leftWingJointPivot = new PivotSkeletonNode(new WorldCoord(-50, 0, 30));
 		leftWingJointPivot.setMin(Axis.Z, -100);
 		
 		leftWingJointPivot.getAttachedMeshCoords().add(this.getVertexList().get(5));

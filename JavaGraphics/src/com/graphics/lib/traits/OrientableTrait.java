@@ -1,6 +1,8 @@
 package com.graphics.lib.traits;
 
 import java.util.Observable;
+
+import com.graphics.lib.Utils;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IOrientable;
 import com.graphics.lib.interfaces.IOrientation;
@@ -61,10 +63,8 @@ public class OrientableTrait implements IOrientable {
 
 	@Override
 	public void update(Observable obs, Object args) {
-		if (args instanceof Transform) {
-			this.orientation.getRepresentation().replayTransform((Transform)args);
-		}
-		
+		Utils.cast(args, Transform.class)
+		     .ifPresent(orientation.getRepresentation()::replayTransform);
 	}
 
 }

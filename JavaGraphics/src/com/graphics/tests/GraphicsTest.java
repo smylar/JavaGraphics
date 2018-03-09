@@ -79,7 +79,7 @@ public class GraphicsTest extends JFrame {
 	private JFrame slave;
 	private Canvas3D canvas;
 	private static GraphicsTest gt;
-	private ClipLibrary clipLibrary = new ClipLibrary("sounds.txt");
+	private ClipLibrary clipLibrary = new ClipLibrary("sounds.txt", "music.txt");
 	private ICanvasObject selectedObject = null;
 	private MouseEvent select = null;
 	private static ScheduledExecutorService runner = Executors.newSingleThreadScheduledExecutor();

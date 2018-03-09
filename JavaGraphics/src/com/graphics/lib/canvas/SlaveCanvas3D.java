@@ -38,10 +38,11 @@ public class SlaveCanvas3D extends Canvas3D implements ICanvasUpdateListener {
 			
 			this.getzBuffer().add(obj, shader, this.getCamera(), source.getHorizon());
 		}
+		
 		for (ICanvasObject child : new HashSet<ICanvasObject>(obj.getChildren()))
 		{
 			this.processShape(source, child, shader);
-		};
+		}
 	}
 
 	@Override

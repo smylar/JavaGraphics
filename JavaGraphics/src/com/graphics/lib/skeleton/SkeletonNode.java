@@ -8,20 +8,19 @@ import com.graphics.lib.WorldCoord;
 public class SkeletonNode {
 	public static final String POS_TAG = "SkeletonNodePosition";
 	
-	private WorldCoord position;
+	private final WorldCoord position;
 	
-	private Set<WorldCoord> attachedMeshCoords = new HashSet<WorldCoord>();
+	private Set<WorldCoord> attachedMeshCoords = new HashSet<>();
 	
-	private Set<SkeletonNode> attachedNodes = new HashSet<SkeletonNode>();
+	private Set<SkeletonNode> attachedNodes = new HashSet<>();
 
+	public SkeletonNode(WorldCoord position) {
+        position.addTag(POS_TAG);
+        this.position = position;
+    }
+	
 	public WorldCoord getPosition() {
 		return position;
-	}
-
-	public void setPosition(WorldCoord position) {
-		//position.setTag(POS_TAG);
-		position.addTag(POS_TAG);
-		this.position = position;
 	}
 
 	public Set<WorldCoord> getAttachedMeshCoords() {
@@ -40,12 +39,12 @@ public class SkeletonNode {
 		this.attachedNodes = attachedNodes;
 	}
 	
-	public void addNode(SkeletonNode node){
+	public void addNode(SkeletonNode node) {
 		this.attachedNodes.add(node);
 	}
 	
-	public Set<WorldCoord> getAllNodePositions(){
-		Set<WorldCoord> positions = new HashSet<WorldCoord>();
+	public Set<WorldCoord> getAllNodePositions() {
+		Set<WorldCoord> positions = new HashSet<>();
 		this.getAllNodePositions(positions);
 		return positions;
 	}
@@ -67,7 +66,7 @@ public class SkeletonNode {
 	 */
 	protected Set<WorldCoord> getAllSubCoords()
 	{
-		Set<WorldCoord> coords = new HashSet<WorldCoord>();
+		Set<WorldCoord> coords = new HashSet<>();
 		getAllSubCoords(coords);
 		return coords;
 	}
@@ -88,14 +87,5 @@ public class SkeletonNode {
 		{
 			node.playAnimation(id);
 		}
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-				+ ((position == null) ? 0 : position.hashCode());
-		return result;
 	}	
 }

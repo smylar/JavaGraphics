@@ -31,11 +31,9 @@ public final class Whale extends CanvasObject {
 		
 		this.useAveragedNormals(90);
 		
-		PivotSkeletonNode rootNode = new PivotSkeletonNode();
-		rootNode.setPosition(new WorldCoord(this.getCentre()));
+		PivotSkeletonNode rootNode = new PivotSkeletonNode(new WorldCoord(this.getCentre()));
 		
-		PivotSkeletonNode tailNode = new PivotSkeletonNode();
-		tailNode.setPosition(new WorldCoord(this.getVertexList().get(26)));
+		PivotSkeletonNode tailNode = new PivotSkeletonNode(new WorldCoord(this.getVertexList().get(26)));
 		tailNode.getAttachedMeshCoords().addAll(this.getVertexList().stream().filter(v -> FLUKE_TAG.equals(v.getGroup())).collect(Collectors.toSet()));
 		
 		rootNode.addNode(tailNode);

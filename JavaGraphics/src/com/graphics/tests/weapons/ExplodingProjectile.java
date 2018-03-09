@@ -47,9 +47,7 @@ public class ExplodingProjectile extends Projectile {
 			}
 		}
 
-		for (Rotation r : OrientationData.getRotationsForVector(forward)){
-			proj.applyTransform(r);
-		}
+		OrientationData.getRotationsForVector(forward).forEach(proj::applyTransform);
 
 		MovementTransform move = new MovementTransform(forward, this.getSpeed() + parentSpeed) {
 			@Override

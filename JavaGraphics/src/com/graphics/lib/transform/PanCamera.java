@@ -17,9 +17,7 @@ public class PanCamera implements CameraTransform {
 		try{
 			IOrientation o = c.getOrientation().getClass().newInstance();
 			rot.beforeTransform();
-			o.getRepresentation().getVertexList().stream().forEach(p -> {
-				rot.doTransformSpecific().accept(p);
-			});
+			o.getRepresentation().getVertexList().forEach(rot.doTransformSpecific()::accept);
 			rot.afterTransform();
 			c.addCameraRotation(o.getRepresentation());
 			

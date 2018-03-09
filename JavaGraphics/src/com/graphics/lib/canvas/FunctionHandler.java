@@ -52,7 +52,7 @@ public class FunctionHandler implements Observer {
     @Override
     public void update(Observable obs, Object arg) {
         Utils.cast(obs, ICanvasObject.class)
-             .filter(o -> o.isDeleted())
+             .filter(ICanvasObject::isDeleted)
              .ifPresent(o -> {
                 functions.remove(o);
                 o.deleteObserver(this);

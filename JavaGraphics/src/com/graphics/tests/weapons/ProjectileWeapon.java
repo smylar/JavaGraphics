@@ -85,17 +85,14 @@ public class ProjectileWeapon implements IEffector {
     }
 
     private Optional<CanvasObject> generateProjectile() {
-        double parentSpeed = 0;
-        Optional<MovementTransform> move = parent.getTransformsOfType(MovementTransform.class)
+        double parentSpeed = parent.getTransformsOfType(MovementTransform.class)
                 .stream()
                 .filter(m -> m.getName().equals(ObjectInputController.FORWARD) )
-                .findFirst(); //using dropWhile would be better than filter here (in Java 9)
+                .findFirst() //using dropWhile would be better than filter here (in Java 9)
+                .map(MovementTransform::getSpeed)
+                .orElse(0d);
         
-        if (move.isPresent()) {
-            parentSpeed = move.get().getSpeed();
-        }
-        
-        return Optional.ofNullable(projectile.get(effectVector.get(), parentSpeed));
+       return Optional.ofNullable(projectile.get(effectVector.get(), parentSpeed));
     }
     
     private void lightProjectile(CanvasObject proj, Point pos) {

@@ -1,10 +1,12 @@
 package com.graphics.lib.skeleton;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.graphics.lib.Axis;
 import com.graphics.lib.WorldCoord;
@@ -22,7 +24,13 @@ public class PivotSkeletonNode extends SkeletonNode {
 
 	private Map<String, PivotAction> animations = new HashMap<>();
 	
-	private Map<Axis, PivotInfo> pivotInfo = new HashMap<>();
+	private final Map<Axis, PivotInfo> pivotInfo;
+	
+	public PivotSkeletonNode(WorldCoord position) {
+        super(position);
+        
+        pivotInfo = Arrays.stream(Axis.values()).collect(Collectors.toMap(a -> a, a -> new PivotInfo()));
+    }
 	
 	/**
 	 * Gets a default pivot action that pivots back and forth between the pivot limits
@@ -71,13 +79,6 @@ public class PivotSkeletonNode extends SkeletonNode {
 			p.add(d);
 			return p;
 		};
-	}
-	
-	public PivotSkeletonNode(){
-		super();
-		for (Axis a : Axis.values()){
-			pivotInfo.put(a, new PivotInfo());
-		}
 	}
 	
 	public double getMax(Axis direction){
