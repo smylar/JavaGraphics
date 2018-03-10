@@ -1,116 +1,57 @@
 package com.sound;
 
-import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.File;
-import java.io.FileReader;
-import java.io.UnsupportedEncodingException;
-import java.net.URL;
+import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.FloatControl;
 
+import org.apache.commons.io.IOUtils;
+
+import com.google.common.base.Charsets;
+import com.graphics.lib.Utils;
+
 /**
- * Pre-loads sound clips that can be played repeatedly on demand.
- * <br/>
- * Will automatically load sounds detailed in sounds.txt on instantiation, which will refer to sound resources in the same com.sound package
- * <br/>
- * sounds.txt simply consists of a key name and a file name separated by a colon (:)
+ * Class for hanlding various sounds
  * 
  * @author Paul Brandon
  *
  */
 public class ClipLibrary implements AutoCloseable {
-	//private Map<String,Clip> clips = new HashMap<>();
 	private Map<String,Supplier<Optional<Clip>>> clipSupplier = new HashMap<>();
+	private ExecutorService musicExecutor = Executors.newSingleThreadExecutor();
 	
-	public ClipLibrary(String soundFile, String musicFile) {
-	    loadClips(soundFile, PreloadedClip.class);
-	    loadClips(musicFile, OndemandClip.class);
+	public ClipLibrary(String soundResource, String musicResource) {
+	    loadClips(soundResource, PreloadedClip.class);
+	    loadClips(musicResource, OndemandClip.class);
 	}
 	
-	private <T extends Supplier<Optional<Clip>>> void loadClips(String soundFile, Class<T> clazz) {
-	    URL soundList = getClass().getResource(soundFile);
-        if (soundList == null) 
-            return;
-        
-        try (BufferedReader br = new BufferedReader(new FileReader(URLDecoder.decode(soundList.getFile(),"UTF-8"))))
-        {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] split = line.split(":");
-                if (split.length != 2) 
-                    continue;
-                
-                parseSound(split[1]).ifPresent(sound -> addClip(split[0].trim(), sound, clazz));
-            }
-        }
-        catch (Exception ex)
-        {
-            System.out.println("ClipLibrary:: " + ex.getMessage());
-        }
+	public void playMusic() {
+	    //TODO stop music
+	    clipSupplier.values()
+                    .stream()
+                    .filter(supplier -> OndemandClip.class.isAssignableFrom(supplier.getClass()))
+                    .map(OndemandClip.class::cast)
+                    .forEach(odc -> {
+                        odc.addObserver((o,a) -> musicExecutor.execute(() -> playRandomTrack())); //currently only a track ending should cause this
+                    });
+                    
+	    musicExecutor.execute(() -> playRandomTrack());
 	}
 	
-//	public ClipLibrary(String soundFile) {
-//		URL soundList = getClass().getResource(soundFile);
-//		if (soundList == null) return;
-//		
-//		try (BufferedReader br = new BufferedReader(new FileReader(URLDecoder.decode(soundList.getFile(),"UTF-8"))))
-//		{
-//			String line;
-//			while ((line = br.readLine()) != null){
-//				String[] split = line.split(":");
-//				if (split.length != 2) continue;
-//				
-//				URL sound = getClass().getResource(split[1].trim());
-//				if (sound == null) continue;
-//				
-//				addSound(split[0].trim(), new File(URLDecoder.decode(sound.getFile(),"UTF-8")));
-//			}
-//		}
-//		catch (Exception ex)
-//		{
-//			System.out.println("ClipLibrary:: " + ex.getMessage());
-//		}
-//	}
-
-//	/**
-//	 * Add a sound to the library
-//	 * 
-//	 * @param key	Key of the new sound
-//	 * @param file	File containing the sound
-//	 * @return		<code>True</code> if sound was successfully added <code>False</code> otherwise
-//	 */
-//	public boolean addSound(String key, File file){
-//		try{
-//			Clip clip = (Clip)AudioSystem.getLine(new Line.Info(Clip.class));			
-//			
-//			clip.open(AudioSystem.getAudioInputStream(file));
-//			
-//			clips.put(key, clip);
-//		}
-//		catch(Exception ex)
-//		{
-//			System.out.println("ClipLibrary::addSound:: " + ex.getMessage());
-//			return false;
-//		}
-//		return true;
-//	}
-	
-	public void playSound(String key){
-		playSound(key, false, 0);
-	}
-	
-	public void playSound(String key, float gain){
-		playSound(key, false, gain);
-	}
-	
-	public void playSound(String key, boolean wait){
-		playSound(key, wait, 0);
+	public Optional<Clip> playSound(String key){
+		return playSound(key, 0);
 	}
 	
 	/**
@@ -120,30 +61,34 @@ public class ClipLibrary implements AutoCloseable {
 	 * @param wait	Flag indicating whether method should wait for sound to finish before returning
 	 * @param gain	Decibel modification
 	 */
-	public void playSound(String key, boolean wait, float gain){
+	public Optional<Clip> playSound(String key, float gain){
 		try{		
-			Clip clip = clipSupplier.get(key).get().orElse(null); //TODO complete refactor for optional
-			 
-			if (clip != null && clip.isOpen()){
-				clip.stop();
-				clip.setFramePosition(0);
-				FloatControl gainControl =  (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-				gainControl.setValue(gain);
-				clip.start();
-				if (wait) {
-				    clip.drain();
-				}
-			}
+			return clipSupplier.getOrDefault(key, () -> Optional.empty())
+			                   .get()
+			                   .filter(Clip::isOpen)
+			                   .map(clip -> {
+			                       clip.stop();
+			                       clip.setFramePosition(0);
+			                       FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+			                       gainControl.setValue(gain);
+			                       clip.start();
+			                       return clip;
+			                   });
 		}
 		catch(Exception ex)
 		{
 			System.out.println("ClipLibrary::playSound:: " + ex.getMessage());
 		}
+		return Optional.empty();
 	}
 	
-	public void loopSound(String key){
-		loopSound(key,0);
+	public Optional<Clip> loopSound(String key){
+		return loopSound(key, 0, Clip.LOOP_CONTINUOUSLY);
 	}
+	
+	public Optional<Clip> loopSound(String key, float gain){
+        return loopSound(key, gain, Clip.LOOP_CONTINUOUSLY);
+    }
 	
 	/**
 	 * Play sound continuously until stopped, if this sound is already playing it will not attempt to start it again
@@ -151,20 +96,24 @@ public class ClipLibrary implements AutoCloseable {
 	 * @param key	Key of the sound to play
 	 * @param gain	Decibel modification
 	 */
-	public void loopSound(String key, float gain){
-		try{
-		    Clip clip = clipSupplier.get(key).get().orElse(null);
-			if (clip != null && clip.isOpen() && !clip.isRunning()){
-				clip.setFramePosition(0);
-				FloatControl gainControl =  (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-				gainControl.setValue(gain);
-				clip.loop(Clip.LOOP_CONTINUOUSLY);
-			}
+	public Optional<Clip> loopSound(String key, float gain, int loops) {
+		try {
+		    return clipSupplier.getOrDefault(key, () -> Optional.empty())
+		                       .get()
+		                       .filter(clip -> clip.isOpen() && !clip.isRunning())
+		                       .map(clip -> {
+		                           clip.setFramePosition(0);
+		                           FloatControl gainControl =  (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+		                           gainControl.setValue(gain);
+		                           clip.loop(loops);
+		                           return clip;
+		                       });
 		}
 		catch(Exception ex)
 		{
 			System.out.println("ClipLibrary::loopSound:: " + ex.getMessage());
 		}
+		return Optional.empty();
 	}
 	
 	/**
@@ -173,10 +122,10 @@ public class ClipLibrary implements AutoCloseable {
 	 * @param key	Key of the sound to stop
 	 */
 	public void stopSound(String key){
-		Clip clip = clipSupplier.get(key).get().orElse(null);
-		if (clip != null && clip.isRunning()){
-			clip.stop();
-		}
+		clipSupplier.getOrDefault(key, () -> Optional.empty())
+		            .get()
+		            .filter(Clip::isRunning)
+		            .ifPresent(Clip::stop);
 	}
 	
 	/**
@@ -187,11 +136,11 @@ public class ClipLibrary implements AutoCloseable {
 	 * @param key	Key of the sound to resume
 	 */
 	public void resumeSound(String key){
-		try{
-		    Clip clip = clipSupplier.get(key).get().orElse(null);
-			if (clip != null && clip.isOpen() && !clip.isRunning()){
-				clip.start();
-			}
+		try {
+		    clipSupplier.getOrDefault(key, () -> Optional.empty())
+            .get()
+            .filter(clip -> clip.isOpen() && !clip.isRunning())
+            .ifPresent(Clip::start);
 		}
 		catch(Exception ex)
 		{
@@ -201,33 +150,49 @@ public class ClipLibrary implements AutoCloseable {
 	
 	@Override
 	public void close() throws Exception {
-//		for(Clip clip : clip.values()){
-//			clip.close();
-//		}
-//		clips.clear();
-		
+	    musicExecutor.shutdown();
 	    clipSupplier.values().stream()
-	                         .map(Supplier::get)
+	                         .map(obj -> Utils.cast(obj, Closeable.class))
 	                         .filter(Optional::isPresent)
 	                         .map(Optional::get)
-	                         .forEach(Clip::close);
+	                         .forEach(c -> {
+                                try {
+                                    c.close();
+                                } catch (IOException e) { }
+                            });
 	    clipSupplier.clear();
 	}
 	
-	private Optional<String> parseSound(String line) throws UnsupportedEncodingException {
+	private <T extends Supplier<Optional<Clip>>> void loadClips(String resource, Class<T> clazz) {
         
-        URL sound = getClass().getResource(line.trim());
-        if (sound == null) 
-            return Optional.empty();
-        
-        return Optional.of(URLDecoder.decode(sound.getFile(),"UTF-8"));
-	}
+        try {
+            IOUtils.readLines(getClass().getClassLoader()
+                    .getResourceAsStream(resource), Charsets.UTF_8)
+                    .forEach(line -> {
+                        addClip(line.replaceAll("^(.*?)\\..*$", "$1"), resource + line, clazz);
+                    });
+        } catch (Exception ex) {
+            System.out.println("ClipLibrary:: " + ex.getMessage());
+        }
+    }
 	
 	private <T extends Supplier<Optional<Clip>>> void addClip(String name, String sound, Class<T> clazz) {
 	    try {
-            clipSupplier.put(name, clazz.getDeclaredConstructor(File.class).newInstance(new File(sound)));
+            clipSupplier.put(name, clazz.getDeclaredConstructor(File.class)
+                                        .newInstance(new File(URLDecoder.decode(getClass().getClassLoader().getResource(sound).getFile(), "UTF-8"))));
         } catch (Exception e) {
             e.printStackTrace();
         }
+	}
+	
+	private void playRandomTrack() {
+	    //TODO might be nice to take a custom selector
+	    List<String> keys = clipSupplier.entrySet()
+                    	                .stream()
+                    	                .filter(entry -> OndemandClip.class.isAssignableFrom(entry.getValue().getClass()))
+                    	                .map(entry -> entry.getKey())
+                    	                .collect(Collectors.toList());
+	    
+	    playSound(keys.get(new Random().nextInt(keys.size())), -25f);
 	}
 }

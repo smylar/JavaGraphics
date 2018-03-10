@@ -1,6 +1,8 @@
 package com.sound;
 
+import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -15,7 +17,7 @@ import javax.sound.sampled.Line;
  * @author paul.brandon
  *
  */
-public final class PreloadedClip implements Supplier<Optional<Clip>> {
+public final class PreloadedClip implements Supplier<Optional<Clip>>, Closeable {
 
     private final Optional<Clip> clip;
     
@@ -38,6 +40,11 @@ public final class PreloadedClip implements Supplier<Optional<Clip>> {
     @Override
     public Optional<Clip> get() {
         return clip;
+    }
+
+    @Override
+    public void close() throws IOException {
+        clip.ifPresent(Clip::close);
     }
 
 }

@@ -1,7 +1,10 @@
 package com.sound;
 
+import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
 import java.util.Objects;
+import java.util.Observable;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -17,7 +20,7 @@ import javax.sound.sampled.LineEvent.Type;
  * @author paul.brandon
  *
  */
-public class OndemandClip implements Supplier<Optional<Clip>> {
+public class OndemandClip extends Observable implements Supplier<Optional<Clip>>, Closeable {
 
     private final File file;
     private Clip clip;
@@ -38,6 +41,8 @@ public class OndemandClip implements Supplier<Optional<Clip>> {
                     if (l.getType() == Type.STOP) {
                         clip.close();
                         clip = null;
+                        this.setChanged();
+                        this.notifyObservers();
                     }
                  });
                 clip.open(AudioSystem.getAudioInputStream(file));
@@ -48,6 +53,14 @@ public class OndemandClip implements Supplier<Optional<Clip>> {
             }
             
             return Optional.empty();
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (Objects.nonNull(clip)) {
+            clip.close();
+        }
+        this.deleteObservers();
     }
 
 }

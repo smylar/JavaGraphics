@@ -74,12 +74,12 @@ import com.sound.ClipLibrary;
 public class GraphicsTest extends JFrame {
 
 	private static final long serialVersionUID = 1L;
-	
+	private static GraphicsTest gt;
+    private static ClipLibrary clipLibrary = new ClipLibrary("sounds/", "music/");
+    
 	private boolean go = true;
 	private JFrame slave;
 	private Canvas3D canvas;
-	private static GraphicsTest gt;
-	private ClipLibrary clipLibrary = new ClipLibrary("sounds.txt", "music.txt");
 	private ICanvasObject selectedObject = null;
 	private MouseEvent select = null;
 	private static ScheduledExecutorService runner = Executors.newSingleThreadScheduledExecutor();
@@ -87,6 +87,7 @@ public class GraphicsTest extends JFrame {
 	public static void main (String[] args){
 		try {
 			SwingUtilities.invokeAndWait(() -> gt = new GraphicsTest());
+			clipLibrary.playMusic();
 			runner.scheduleAtFixedRate(gt::drawCycle, 0, 50, TimeUnit.MILLISECONDS);
 			runner.awaitTermination(1, TimeUnit.DAYS);
 		} catch (InvocationTargetException e) {
