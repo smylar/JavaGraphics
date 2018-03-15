@@ -12,7 +12,7 @@ import java.util.Arrays;
  */
 public aspect PropertyAspect {
 
-    after() returning(Object obj) : call(@PropertyInject *.new(..)) {
+    after() returning(Object obj) : call((@PropertyInject *).new(..)) {
         //gets object after construction if class annotated with @PropertyInject
         insertProperties(obj);
     }
