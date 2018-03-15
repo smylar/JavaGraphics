@@ -16,6 +16,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -246,9 +247,9 @@ public class Canvas3D extends JPanel {
 		
 		processShapes.clear();
 		this.zBuffer.refreshBuffer();
-		this.repaint(); 
-
-		this.slaves.forEach(sl -> sl.update(this, null));		
+		SwingUtilities.invokeLater(() -> repaint()); //might squeeze some extra performance, may need to be careful, may need to synchronise the refreshBuffer call
+		
+		slaves.forEach(sl -> sl.update(this, null));
 		
 	}
 	

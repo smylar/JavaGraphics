@@ -75,7 +75,7 @@ public class GraphicsTest extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private static GraphicsTest gt;
-    private static ClipLibrary clipLibrary = new ClipLibrary("sounds/", "music/");
+    private static ClipLibrary clipLibrary = new ClipLibrary();
     
 	private boolean go = true;
 	private JFrame slave;

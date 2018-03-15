@@ -21,21 +21,23 @@ import org.apache.commons.io.IOUtils;
 
 import com.google.common.base.Charsets;
 import com.graphics.lib.Utils;
+import com.graphics.lib.properties.Property;
+import com.graphics.lib.properties.PropertyInjected;
 
 /**
- * Class for hanlding various sounds
+ * Class for handling various sounds
  * 
  * @author Paul Brandon
  *
  */
-public class ClipLibrary implements AutoCloseable {
+public class ClipLibrary implements AutoCloseable, PropertyInjected {
 	private Map<String,Supplier<Optional<Clip>>> clipSupplier = new HashMap<>();
 	private ExecutorService musicExecutor = Executors.newSingleThreadExecutor();
 	
-	public ClipLibrary(String soundResource, String musicResource) {
-	    loadClips(soundResource, PreloadedClip.class);
-	    loadClips(musicResource, OndemandClip.class);
-	}
+	@Property(name="sounds.effects.location", defaultValue="sounds/")
+	private String soundResource;
+	@Property(name="sounds.music.location", defaultValue="music/")
+	private String musicResource;
 	
 	public void playMusic() {
 	    //TODO stop music
@@ -195,4 +197,10 @@ public class ClipLibrary implements AutoCloseable {
 	    
 	    playSound(keys.get(new Random().nextInt(keys.size())), -25f);
 	}
+
+    @Override
+    public void afterPropertiesSet() {
+        loadClips(soundResource, PreloadedClip.class);
+        loadClips(musicResource, OndemandClip.class);
+    }
 }
