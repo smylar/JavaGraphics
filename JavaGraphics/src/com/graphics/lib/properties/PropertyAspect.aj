@@ -33,7 +33,7 @@ public aspect PropertyAspect {
                   //will need converters for different types
                   try {
                       f.setAccessible(true);
-                      f.set(obj, prop.defaultValue());
+                      f.set(obj, Converters.convert(f.getType(), prop.defaultValue()));
                       f.setAccessible(false);
                   } catch (Exception e) {
                     // TODO Auto-generated catch block

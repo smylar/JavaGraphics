@@ -247,9 +247,15 @@ public class Canvas3D extends JPanel {
 		
 		processShapes.clear();
 		this.zBuffer.refreshBuffer();
-		SwingUtilities.invokeLater(() -> repaint()); //might squeeze some extra performance, may need to be careful, may need to synchronise the refreshBuffer call
+		SwingUtilities.invokeLater(() -> {
+		    repaint();
+		    slaves.forEach(sl -> sl.update(this, null));
+		}); 
+		//may start the next processing cycle while drawing
+		//might squeeze some extra performance, may need to be careful, may need to synchronise the refreshBuffer call
+		//TODO - confirmed using slower system, need to prevent buffer refresh and wait if still drawing - noticeable on slave - might use a monitor for this
 		
-		slaves.forEach(sl -> sl.update(this, null));
+		
 		
 	}
 	

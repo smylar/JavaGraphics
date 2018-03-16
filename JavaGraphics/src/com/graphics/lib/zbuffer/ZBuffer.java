@@ -17,24 +17,20 @@ import com.graphics.lib.WorldCoord;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IZBuffer;
+import com.graphics.lib.properties.Property;
+import com.graphics.lib.properties.PropertyInject;
 import com.graphics.lib.shader.IShader;
 import com.graphics.lib.shader.IShaderFactory;
 
+@PropertyInject
 public class ZBuffer implements IZBuffer {
 	private List<List<ZBufferItem>> buffer = new ArrayList<>();
 	private BufferedImage imageBuf = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
 	private int dispWidth;
 	private int dispHeight;
-	private int skip = 2; //controls how often we do a colour calculation, a value of 1 checks all lines, whereas 3 calculates every 3rd line and intervening points use the same as the last calculated point
-
 	
-	public int getSkip() {
-		return skip;
-	}
-
-	public void setSkip(int skip) {
-		this.skip = skip;
-	}
+	@Property(name="zbuffer.skip", defaultValue="2")
+	private Integer skip; //controls how often we do a colour calculation, a value of 1 checks all lines, whereas 3 calculates every 3rd line and intervening points use the same as the last calculated point
 
 	@Override
 	public ZBufferItem getItemAt(int x, int y) {
@@ -135,7 +131,7 @@ public class ZBuffer implements IZBuffer {
 			}
 			
 			double z = this.interpolateZ(scanLine.getStartZ(), scanLine.getEndZ(), percentDistCovered);
-			
+
 			if (skip == 1 || y % skip == 0 || colour == null) {	
 				colour = shader.getColour(scanLine, x, y);
 			}

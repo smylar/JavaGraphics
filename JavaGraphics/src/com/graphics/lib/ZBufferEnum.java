@@ -6,7 +6,8 @@ import com.graphics.lib.interfaces.IZBuffer;
 import com.graphics.lib.zbuffer.ZBuffer;
 
 public enum ZBufferEnum {
-	DEFAULT(ZBuffer::new);
+	DEFAULT(() -> new ZBuffer()); 
+    //interesting - when using method reference for the constructor, pointcut in aspect only gets run once, whereas this triggers it the correct number of times
 	
 	private Supplier<IZBuffer> supplier;
 	
