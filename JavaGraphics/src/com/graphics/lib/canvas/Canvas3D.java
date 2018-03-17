@@ -229,9 +229,7 @@ public class Canvas3D extends JPanel {
 		this.camera.doTransforms();
 		
 		if (this.drawShadows && Objects.nonNull(this.floor)) {
-//			Set<CanvasObject> shadows = Collections.synchronizedSet(new HashSet<CanvasObject>()); 
-//			processShapes.parallelStream().forEach(s -> shadows.addAll(getShadowOnFloor(s)));
-//			processShapes.addAll(shadows);
+
 		    processShapes.addAll(processShapes.parallelStream()
 		                                      .flatMap(s -> getShadowOnFloor(s).stream())
 		                                      .collect(Collectors.toSet()));
@@ -247,10 +245,9 @@ public class Canvas3D extends JPanel {
 		
 		processShapes.clear();
 		this.zBuffer.refreshBuffer();
-		SwingUtilities.invokeLater(() -> {
-		    repaint();
-		    slaves.forEach(sl -> sl.update(this, null));
-		}); 
+		SwingUtilities.invokeLater(this::repaint);
+		slaves.forEach(sl -> sl.update(this, null));
+
 		//may start the next processing cycle while drawing
 		//might squeeze some extra performance, may need to be careful, may need to synchronise the refreshBuffer call
 		//TODO - confirmed using slower system, need to prevent buffer refresh and wait if still drawing - noticeable on slave - might use a monitor for this

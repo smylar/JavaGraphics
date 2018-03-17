@@ -2,6 +2,8 @@ package com.graphics.lib.canvas;
 
 import java.util.HashSet;
 
+import javax.swing.SwingUtilities;
+
 import com.graphics.lib.ZBufferEnum;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasObject;
@@ -49,9 +51,10 @@ public class SlaveCanvas3D extends Canvas3D implements ICanvasUpdateListener {
 	public void update(Canvas3D source, ICanvasObject obj) {
 		if (obj == null) {
 			this.getzBuffer().refreshBuffer();
-		    repaint();
-		    getzBuffer().clear();
-			
+			SwingUtilities.invokeLater(() -> {
+			    repaint();
+	            getzBuffer().clear();
+			});
 		}
 		else{
 			this.processShape(source, obj, source.getShader(obj));
