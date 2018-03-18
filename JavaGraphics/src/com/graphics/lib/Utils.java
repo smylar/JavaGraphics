@@ -12,7 +12,7 @@ import java.util.function.Predicate;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
-import com.graphics.lib.canvas.Canvas3D;
+import com.graphics.lib.canvas.AbstractCanvas;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.FunctionHandler;
 import com.graphics.lib.interfaces.ICanvasObject;
@@ -77,7 +77,7 @@ public class Utils {
 		};
 	}
 	
-	public static BiConsumer<Canvas3D, Graphics> drawCircle(int x, int y, int radius, Color startColour, Color endColour){
+	public static BiConsumer<AbstractCanvas, Graphics> drawCircle(int x, int y, int radius, Color startColour, Color endColour){
 		//drawing a circle without using drawCircle, just because :)
 		return (c,g) ->{
 			double rs = Math.pow(radius,2);

@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import com.graphics.lib.Utils;
 import com.graphics.lib.camera.ViewAngleCamera;
+import com.graphics.lib.canvas.AbstractCanvas;
 import com.graphics.lib.canvas.Canvas3D;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ICanvasObjectList;
@@ -21,7 +22,7 @@ import com.sound.ClipLibrary;
 public class TestUtils {
 	public static final String SILENT_EXPLODE = "sexpl";
 	
-	public static BiConsumer<Canvas3D,Graphics> showMarkers(){
+	public static BiConsumer<AbstractCanvas,Graphics> showMarkers(){
 		return (c, g) -> {
 			double pixelsPerDegree = (double)c.getHeight() / 180;
 			int middleHeight = c.getHeight() / 2;

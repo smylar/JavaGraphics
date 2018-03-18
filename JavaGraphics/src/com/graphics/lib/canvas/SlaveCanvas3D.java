@@ -1,10 +1,8 @@
 package com.graphics.lib.canvas;
 
 import java.util.HashSet;
-
 import javax.swing.SwingUtilities;
 
-import com.graphics.lib.ZBufferEnum;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ICanvasUpdateListener;
@@ -17,7 +15,7 @@ import com.graphics.lib.shader.IShaderFactory;
  * @author paul
  *
  */
-public class SlaveCanvas3D extends Canvas3D implements ICanvasUpdateListener {
+public class SlaveCanvas3D extends AbstractCanvas implements ICanvasUpdateListener {
 	private static final long serialVersionUID = 1L;
 	
 	public SlaveCanvas3D(Camera camera)
@@ -27,12 +25,6 @@ public class SlaveCanvas3D extends Canvas3D implements ICanvasUpdateListener {
 
 	private void processShape(Canvas3D source, ICanvasObject obj, IShaderFactory shader)
 	{
-		
-		if (this.getzBuffer() == null) {
-			this.setzBuffer(ZBufferEnum.DEFAULT.get());
-		}
-
-		this.getzBuffer().setDimensions(this.getWidth(), this.getHeight());
 		
 		if (obj.isVisible())
 		{
@@ -46,18 +38,18 @@ public class SlaveCanvas3D extends Canvas3D implements ICanvasUpdateListener {
 			this.processShape(source, child, shader);
 		}
 	}
-
+	
 	@Override
-	public void update(Canvas3D source, ICanvasObject obj) {
-		if (obj == null) {
-			this.getzBuffer().refreshBuffer();
-			SwingUtilities.invokeLater(() -> {
-			    repaint();
-	            getzBuffer().clear();
-			});
-		}
-		else{
-			this.processShape(source, obj, source.getShader(obj));
-		}
-	}
+    public void update(Canvas3D source, CanvasEvent event, ICanvasObject obj) {
+        if (event.equals(CanvasEvent.PAINT)) {
+            this.getzBuffer().refreshBuffer();
+            SwingUtilities.invokeLater(this::repaint);
+        }
+        else if (event.equals(CanvasEvent.PREPARE_BUFFER)) {
+            prepareZBuffer();
+        }
+        else {
+            this.processShape(source, obj, source.getShader(obj));
+        }
+    }
 }

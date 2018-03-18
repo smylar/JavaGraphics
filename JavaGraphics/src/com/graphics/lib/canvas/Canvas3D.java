@@ -1,8 +1,8 @@
 package com.graphics.lib.canvas;
 
+import static com.graphics.lib.canvas.CanvasEvent.*;
+
 import java.awt.Color;
-import java.awt.Graphics;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,11 +11,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -28,7 +26,6 @@ import com.graphics.lib.GeneralPredicates;
 import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
-import com.graphics.lib.ZBufferEnum;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ICanvasUpdateListener;
@@ -46,7 +43,7 @@ import com.graphics.lib.zbuffer.ZBufferItem;
  * @author Paul Brandon
  *
  */
-public class Canvas3D extends JPanel {
+public class Canvas3D extends AbstractCanvas {
 
 	private static final long serialVersionUID = 1L;
 	private static Canvas3D cnv = null;
@@ -55,18 +52,15 @@ public class Canvas3D extends JPanel {
 	
 	private Set<ILightSource> lightSources = new HashSet<>(); 
 	private Set<ILightSource> lightSourcesToAdd = Collections.synchronizedSet(new HashSet<ILightSource>()); 
-	private Camera camera;
-	private IZBuffer zBuffer;
 	private double horizon = 8000;
 	private Set<ICanvasUpdateListener> slaves = new HashSet<>();
-	private transient List<BiConsumer<Canvas3D,Graphics>> drawPlugins = new ArrayList<>();
 	private boolean drawShadows = false;
 	private Facet floor = null;
 	private long tickCount = 0;
 
 	protected Canvas3D(Camera camera)
     {
-        this.camera = camera;   
+        super(camera);   
     }
 	
 	public static Canvas3D get(Camera camera){
@@ -80,15 +74,6 @@ public class Canvas3D extends JPanel {
 	
 	public static Canvas3D get() {
 		return cnv;
-	}
-	
-	/**
-	 * Allows anonymous functions to be registered in order to customise the display
-	 * 
-	 * @param operation A paint operation
-	 */
-	public void addDrawOperation(BiConsumer<Canvas3D,Graphics> operation) {
-		drawPlugins.add(operation);
 	}
 	
 	public double getHorizon() {
@@ -142,25 +127,9 @@ public class Canvas3D extends JPanel {
 	public Set<ILightSource> getLightSources() {
 		return lightSources;
 	}
-
-	public Camera getCamera() {
-		return camera;
-	}
-
-	public void setCamera(Camera camera) {
-		this.camera = camera;
-	}
 	
 	public void addObserver(ICanvasUpdateListener l){
 		this.slaves.add(l);
-	}
-	
-	public void setzBuffer(IZBuffer zBuffer) {
-		this.zBuffer = zBuffer;
-	}
-	
-	public IZBuffer getzBuffer() {
-		return zBuffer;
 	}
 	
 	public long getTicks() {
@@ -169,16 +138,9 @@ public class Canvas3D extends JPanel {
 	
 	public Optional<ICanvasObject> getObjectAt(final int x, final int y) {
 	    
-	    return Optional.ofNullable(zBuffer)
+	    return Optional.ofNullable(getzBuffer())
 	                   .map(zBuf -> zBuf.getItemAt(x, y))
 	                   .map(ZBufferItem::getTopMostObject);
-	}
-
-	@Override
-	public void setVisible(boolean flag)
-	{
-		super.setVisible(flag);
-		this.camera.setViewport(this.getWidth(), this.getHeight());
 	}
 
 	/**
@@ -214,9 +176,7 @@ public class Canvas3D extends JPanel {
 	    tickCount++;
 		addPendingLightsources();
 		
-		prepareZBuffer();
-		
-		this.camera.setViewport(this.getWidth(), this.getHeight());
+		getCamera().setViewport(this.getWidth(), this.getHeight());
 		
 		this.lightSources.removeIf(ILightSource::isDeleted);
 		
@@ -226,34 +186,45 @@ public class Canvas3D extends JPanel {
 
 		processShapes.parallelStream().forEach(ICanvasObject::applyTransforms);
 		
-		this.camera.doTransforms();
+		getCamera().doTransforms();
 		
 		if (this.drawShadows && Objects.nonNull(this.floor)) {
 
-		    processShapes.addAll(processShapes.parallelStream()
-		                                      .flatMap(s -> getShadowOnFloor(s).stream())
+		    processShapes.addAll(processShapes.stream() 
+		                                      .flatMap(s -> getShadowOnFloor(s).parallelStream())
 		                                      .collect(Collectors.toSet()));
 		}
 
 		processShapes.forEach(ICanvasObject::onDrawComplete); //cross object updates can happen here safer not to be parallel
+				
+		prepareZBuffer();
 		
 		processShapes.parallelStream().forEach(s -> {
-			this.processShape(s, this.zBuffer, getShader(s));
-			this.slaves.forEach(sl -> sl.update(this, s));
+			this.processShape(s, getzBuffer(), getShader(s));
+			notifyEvent(PROCESS, s);
 		});
 		
 		
 		processShapes.clear();
-		this.zBuffer.refreshBuffer();
+		
+		getzBuffer().refreshBuffer();
 		SwingUtilities.invokeLater(this::repaint);
-		slaves.forEach(sl -> sl.update(this, null));
-
-		//may start the next processing cycle while drawing
-		//might squeeze some extra performance, may need to be careful, may need to synchronise the refreshBuffer call
-		//TODO - confirmed using slower system, need to prevent buffer refresh and wait if still drawing - noticeable on slave - might use a monitor for this
+		notifyEvent(PAINT);		
 		
-		
-		
+	}
+	
+	@Override
+	protected void prepareZBuffer() {
+        super.prepareZBuffer();
+        notifyEvent(PREPARE_BUFFER);
+    }
+	
+	private void notifyEvent(CanvasEvent event) {
+        notifyEvent(event, null);
+    }
+	
+	private void notifyEvent(CanvasEvent event, ICanvasObject object) {
+	    slaves.forEach(sl -> sl.update(this, event, object));
 	}
 	
 	private void addPendingLightsources() {
@@ -263,15 +234,6 @@ public class Canvas3D extends JPanel {
         }
 	}
 	
-	private void prepareZBuffer() {
-	    if (Objects.isNull(this.zBuffer)) {
-            this.zBuffer = ZBufferEnum.DEFAULT.get();
-        } else {
-            this.zBuffer.clear();
-        }
-        
-        this.zBuffer.setDimensions(this.getWidth(), this.getHeight());
-	}
 	
 	/**
 	 * Process a shape into z buffer entries using the given shader
@@ -284,9 +246,9 @@ public class Canvas3D extends JPanel {
 	{
 		if (obj.isVisible() && !obj.isDeleted())
 		{
-			this.camera.getView(obj);
+		    getCamera().getView(obj);
 			
-			zBuf.add(obj, shader, this.camera, this.horizon);
+			zBuf.add(obj, shader, getCamera(), this.horizon);
 		}
 		
 		obj.getChildren().forEach(child -> this.processShape(child, zBuf, shapes.containsKey(child) ? getShader(child) : shader));
@@ -364,18 +326,6 @@ public class Canvas3D extends JPanel {
 		Point intersect = floor.getIntersectionPointWithFacetPlane(end, lightVector);
 		
 		return Optional.ofNullable(intersect).map(WorldCoord::new).orElse(null);
-	}
-	
-	@Override
-	public void paintComponent(Graphics g)
-	{
-		if (Objects.nonNull(this.zBuffer)) {
-    		super.paintComponent(g);
-    
-    		g.drawImage(this.zBuffer.getBuffer(), 0, 0, null);
-    
-    		drawPlugins.forEach(op -> op.accept(this, g));
-		}
 	}
 
 }

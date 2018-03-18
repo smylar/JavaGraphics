@@ -100,12 +100,12 @@ public class ZBuffer implements IZBuffer {
 	}
 	
 	@Override
-	public BufferedImage getBuffer() {
+	public synchronized BufferedImage getBuffer() {
 		return imageBuf;
 	}
 	
 	@Override
-	public void refreshBuffer() {
+	public synchronized void refreshBuffer() {
 
 	    buffer.parallelStream()
 	          .flatMap(List::parallelStream)
