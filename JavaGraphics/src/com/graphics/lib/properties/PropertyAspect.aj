@@ -29,11 +29,10 @@ public aspect PropertyAspect {
               .filter(f -> f.isAnnotationPresent(Property.class))
               .forEach(f -> {
                   Property prop = f.getAnnotation(Property.class);
-                  //TODO create property file and attempt retrieval - for now get the default
-                  //will need converters for different types
+                  //TODO will need converters for different types
                   try {
                       f.setAccessible(true);
-                      f.set(obj, Converters.convert(f.getType(), prop.defaultValue()));
+                      f.set(obj, Converters.convert(f.getType(), PropertyHolder.getProperty(prop.name()).orElse(prop.defaultValue())));
                       f.setAccessible(false);
                   } catch (Exception e) {
                     // TODO Auto-generated catch block

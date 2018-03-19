@@ -31,10 +31,11 @@ public abstract class ObjectInputController<T extends ICanvasObject> implements 
 	public static final String PAN_DOWN = "PAN_DOWN";
 	public static final String ROLL_LEFT = "ROLL_LEFT";
 	public static final String ROLL_RIGHT = "ROLL_RIGHT";
+	protected static final String KEYMAP_RESOURCE_FORMAT = "keymapping/%s.kcf";
 	
 	protected T controlledObject;
 
-	protected Map<Integer,KeyConfigurationItem> keyMap = new HashMap<Integer,KeyConfigurationItem>();
+	protected Map<Integer,KeyConfigurationItem> keyMap = new HashMap<>();
 	
 	/**
 	 * Create controller for the controlled object using a given key mappings resource
@@ -50,14 +51,14 @@ public abstract class ObjectInputController<T extends ICanvasObject> implements 
 	
 	/**
 	 * Create controller for the controlled object using default resource
-	 * (class name of the concrete ObjectInputController).kcf within the same package as that class
+	 * (class name of the concrete ObjectInputController).kcf within the keymapping resource folder
 	 * 
 	 * @param controlledObject - The object being controlled
 	 * @throws Exception
 	 */
 	public ObjectInputController(T controlledObject) throws Exception{
 		this.controlledObject = controlledObject;
-		this.readResource(this.getClass().getSimpleName() + ".kcf");
+		this.readResource(String.format(KEYMAP_RESOURCE_FORMAT, this.getClass().getSimpleName()));
 	}
 	
 	/**
@@ -68,7 +69,7 @@ public abstract class ObjectInputController<T extends ICanvasObject> implements 
 	 */
 	public void readResource(String resource) throws Exception{
 		ObjectMapper mapper = new ObjectMapper();
-		JsonNode root = mapper.readTree(this.getClass().getResourceAsStream(resource));
+		JsonNode root = mapper.readTree(this.getClass().getClassLoader().getResourceAsStream(resource));
 		KeyConfiguration config = mapper.readValue(root.at("/config").toString(), KeyConfiguration.class);
 		
 		for (KeyConfigurationItem item : config.getKeyList()){

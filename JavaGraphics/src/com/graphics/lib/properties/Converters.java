@@ -3,6 +3,12 @@ package com.graphics.lib.properties;
 import java.util.Arrays;
 import java.util.function.Function;
 
+/**
+ * Converters for translating property values into their required type
+ * 
+ * @author paul.brandon
+ *
+ */
 public enum Converters {
     STRING(String.class, s -> s),
     INT(Integer.class, Integer::valueOf);
