@@ -1,6 +1,5 @@
 package com.graphics.lib.properties;
 
-import java.io.IOException;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -16,8 +15,8 @@ public class PropertyHolder {
     static {
         try {
             props.load(PropertyHolder.class.getClassLoader().getResourceAsStream("application.properties"));
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
+        } catch (Exception e) {
+            System.out.println("No property file, will use defaults");
             e.printStackTrace();
         }
     }
