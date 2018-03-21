@@ -122,9 +122,15 @@ public class LaserWeapon implements IEffector {
 		
 	}
 	
+	@Override
+    public ICanvasObject getParent() {
+        return this.parent;
+    }
+	
 	private boolean markTexture(IntersectionData<ICanvasObject> intersectionData) {
 		Optional<ITexturable> texturable = TraitHandler.INSTANCE.getTrait(intersectionData.getParent(), ITexturable.class);
-		if (!texturable.isPresent()) return false;
+		if (!texturable.isPresent()) 
+		    return false;
 		
 		List<WorldCoord> coords = intersectionData.getFacet().getAsList();
 		Set<Texture> textures = new HashSet<>(texturable.get().getTextures());
@@ -147,34 +153,30 @@ public class LaserWeapon implements IEffector {
 			double d1 = coords.get(0).distanceTo(intersectionData.getIntersection());
 			double d2 = coords.get(1).distanceTo(intersectionData.getIntersection());
 			
-			Consumer<Point> process = p -> {
-				int x = (int)Math.round(p.x);
-				int y = (int)Math.round(p.y);
-				Color current = active.getColour(x, y).orElse(intersectionData.getParent().getColour());
-				
-				if (current != null) {
-					current = new Color((int)(current.getRed() * 0.8), (int)(current.getBlue() * 0.8), (int)(current.getGreen() * 0.8));
-				} else {
-					current = Color.BLACK;
-				}
-				active.setColour(x, y, current);
-			};
 			
-			
-			Utils.getPointFromKnownPoints(tp1, tp2, d1 * ratio, d2 * ratio).ifPresent(points -> {	
-				Utils.getPointFromKnownPoints(coords.get(0), coords.get(1), d1, d2).ifPresent(p -> {	
-					if (intersectionData.getFacet().isPointWithin(p.getLeft())) {
-						process.accept(points.getLeft());
-					} else {
-						process.accept(points.getRight());
-					}
-				});
-			});
+			Utils.getPointFromKnownPoints(tp1, tp2, d1 * ratio, d2 * ratio).ifPresent(points -> 
+				Utils.getPointFromKnownPoints(coords.get(0), coords.get(1), d1, d2)
+				    .map(p -> intersectionData.getFacet().isPointWithin(p.getLeft()) ? p.getLeft() : p.getRight() )
+				    .ifPresent(processTextureMark(active, intersectionData)::accept)
+			);
 			
 			return true;
 		}
 		
 		return false;
+	}
+	
+	private Consumer<Point> processTextureMark(Texture active, IntersectionData<ICanvasObject> intersectionData) {
+	    return p -> {
+            int x = (int)Math.round(p.x);
+            int y = (int)Math.round(p.y);
+            
+            Color current = Optional.ofNullable(active.getColour(x, y).orElse(intersectionData.getParent().getColour()))
+                                    .map(c -> new Color((int)(c.getRed() * 0.8), (int)(c.getBlue() * 0.8), (int)(c.getGreen() * 0.8)))
+                                    .orElse(Color.BLACK);
+            
+            active.setColour(x, y, current);
+        };
 	}
 
 }

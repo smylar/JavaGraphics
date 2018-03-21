@@ -80,7 +80,8 @@ public class ProjectileWeapon implements IEffector {
         this.lightProjectile = lightProjectile;
     }
 
-    protected ICanvasObject getParent() {
+    @Override
+    public ICanvasObject getParent() {
         return parent;
     }
 

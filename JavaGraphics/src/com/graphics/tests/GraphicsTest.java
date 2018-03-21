@@ -35,8 +35,11 @@ import com.graphics.tests.shapes.Gate;
 import com.graphics.tests.shapes.Ship;
 import com.graphics.tests.shapes.TexturedCuboid;
 import com.graphics.tests.shapes.Wall;
+import com.graphics.tests.weapons.AmmoHandler;
+import com.graphics.tests.weapons.AmmoProxy;
 import com.graphics.tests.weapons.AutoProjectileWeapon;
 import com.graphics.tests.weapons.BouncyProjectile;
+import com.graphics.tests.weapons.DefaultAmmoHandler;
 import com.graphics.tests.weapons.DeflectionProjectile;
 import com.graphics.tests.weapons.ExplodingProjectile;
 import com.graphics.tests.weapons.GattlingRound;
@@ -51,6 +54,7 @@ import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.canvas.SlaveCanvas3D;
 import com.graphics.lib.interfaces.ICanvasObject;
+import com.graphics.lib.interfaces.IEffector;
 import com.graphics.lib.interfaces.IOrientable;
 import com.graphics.lib.interfaces.IPlugable;
 import com.graphics.lib.interfaces.IPointFinder;
@@ -555,5 +559,13 @@ public class GraphicsTest extends JFrame {
 				}
 				,ship
 				).setAmmoCount(1000).setTicksBetweenShots(2));
+		
+//		AmmoHandler ah = new DefaultAmmoHandler();
+//		IEffector proxyTest = AmmoProxy.weaponWithAmmo(new ProjectileWeapon(ep, rightOffset, () -> {
+//            return cam.getOrientation().copy();
+//        }, ship), ah);
+//		System.out.println(ah.getAmmoCount());
+//		proxyTest.activate();
+//		System.out.println(ah.getAmmoCount());
 	}
 }
