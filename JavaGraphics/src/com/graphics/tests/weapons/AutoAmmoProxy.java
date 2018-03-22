@@ -9,6 +9,13 @@ import java.util.Observer;
 import com.graphics.lib.ObjectStatus;
 import com.graphics.lib.interfaces.IEffector;
 
+/**
+ * Modifies firing logic so that it will attempt to fire multiple times while the weapon is active
+ * governed by the provided ammunition rules
+ * 
+ * @author paul
+ *
+ */
 public class AutoAmmoProxy implements InvocationHandler, Observer {
 
     private final AmmoHandler ammoHandler;
@@ -20,6 +27,7 @@ public class AutoAmmoProxy implements InvocationHandler, Observer {
     }
     
     public static IEffector weaponWithAmmo(IEffector weapon, AmmoHandler ammoHandler) {
+        AmmoTracker.INSTANCE.add(weapon, ammoHandler);
         return (IEffector)Proxy.newProxyInstance(IEffector.class.getClassLoader(),
                             new Class[] {IEffector.class },
                             new AutoAmmoProxy(weapon, ammoHandler));
@@ -28,6 +36,7 @@ public class AutoAmmoProxy implements InvocationHandler, Observer {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         if (method.getName().equals("activate")) {
+            weapon.getParent().addObserver(this);
             activate();
         } else if (method.getName().equals("deActivate")) {
             deActivate();
@@ -41,7 +50,7 @@ public class AutoAmmoProxy implements InvocationHandler, Observer {
     public void update(Observable o, Object arg) {
         if (o == weapon.getParent()) {
             if (arg == ObjectStatus.DRAW_COMPLETE) {
-                weapon.activate();
+                activate();
             } else if (arg == ObjectStatus.DELETED) {
                 deActivate();
             }
@@ -49,8 +58,7 @@ public class AutoAmmoProxy implements InvocationHandler, Observer {
     }
     
     private void activate() {
-        if (ammoHandler.canFire()) {
-            weapon.getParent().addObserver(this);
+        if (ammoHandler.canFire()) { 
             weapon.activate();
         }
     }

@@ -156,7 +156,7 @@ public class LaserWeapon implements IEffector {
 			
 			Utils.getPointFromKnownPoints(tp1, tp2, d1 * ratio, d2 * ratio).ifPresent(points -> 
 				Utils.getPointFromKnownPoints(coords.get(0), coords.get(1), d1, d2)
-				    .map(p -> intersectionData.getFacet().isPointWithin(p.getLeft()) ? p.getLeft() : p.getRight() )
+				    .map(p -> intersectionData.getFacet().isPointWithin(p.getLeft()) ? points.getLeft() : points.getRight() )
 				    .ifPresent(processTextureMark(active, intersectionData)::accept)
 			);
 			

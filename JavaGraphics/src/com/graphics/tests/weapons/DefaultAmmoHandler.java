@@ -4,6 +4,12 @@ import java.util.Optional;
 
 import com.graphics.lib.canvas.Canvas3D;
 
+/**
+ * Decides whether a weapon can fire based on rate of fire and available ammo
+ * 
+ * @author paul
+ *
+ */
 public class DefaultAmmoHandler implements AmmoHandler {
 
     private int ammoCount = 10;
@@ -35,7 +41,6 @@ public class DefaultAmmoHandler implements AmmoHandler {
                     lastShotTick = ticks;
                     ammoCount--;
                 });
-        
         return ammoCount < curAmmo;
     }
 

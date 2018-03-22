@@ -1,6 +1,5 @@
 package com.graphics.tests.weapons;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -24,9 +23,6 @@ import com.graphics.lib.transform.MovementTransform;
  */
 public class ProjectileWeapon implements IEffector {
 	
-	private int ammoCount = 10;
-	private int ticksBetweenShots = 20;
-	private long lastShotTick = -1000;
 	private boolean lightProjectile = true;
 	private final Projectile projectile;
 	private final IPointFinder origin;
@@ -43,38 +39,19 @@ public class ProjectileWeapon implements IEffector {
 	
 	@Override
 	public void activate() {
-		if (canFire()) {
-    		ammoCount--;
-    		lastShotTick = Canvas3D.get().getTicks();
+		generateProjectile().ifPresent(proj -> {
+    		Point pos = origin.find();
+    		Canvas3D.get().registerObject(proj, pos);
+    		if (lightProjectile) {
+    		    lightProjectile(proj, pos);
+    		}
     		
-    		generateProjectile().ifPresent(proj -> {
-	    		Point pos = origin.find();
-	    		Canvas3D.get().registerObject(proj, pos);
-	    		if (lightProjectile) {
-	    		    lightProjectile(proj, pos);
-	    		}
-	    		
-    		});
-		}
-	}
-
-	public int getAmmoCount() {
-		return ammoCount;
-	}
-
-	public ProjectileWeapon setAmmoCount(int ammoCount) {
-		this.ammoCount = ammoCount;
-		return this;
+		});
 	}
 
 	public Projectile getProjectile() {
 		return projectile;
 	}
-
-    public ProjectileWeapon setTicksBetweenShots(int ticksBetweenShots) {
-        this.ticksBetweenShots = ticksBetweenShots;
-        return this;
-    }
     
     public void setLightProjectile(boolean lightProjectile) {
         this.lightProjectile = lightProjectile;
@@ -83,6 +60,11 @@ public class ProjectileWeapon implements IEffector {
     @Override
     public ICanvasObject getParent() {
         return parent;
+    }
+    
+    @Override
+    public Optional<Class<?>> getEffectClass() {
+        return Optional.of(projectile.getClass());
     }
 
     private Optional<CanvasObject> generateProjectile() {
@@ -102,11 +84,5 @@ public class ProjectileWeapon implements IEffector {
         l.setColour(proj.getColour());
         l.getLightSource().setRange(600);
         Canvas3D.get().addLightSource(l.getLightSource());
-    }
-    
-    private boolean canFire() {
-        return ammoCount > 0 
-                && Objects.nonNull(Canvas3D.get()) 
-                && Canvas3D.get().getTicks() - lastShotTick > ticksBetweenShots;
     }
 }

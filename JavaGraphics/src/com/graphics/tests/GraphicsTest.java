@@ -35,9 +35,9 @@ import com.graphics.tests.shapes.Gate;
 import com.graphics.tests.shapes.Ship;
 import com.graphics.tests.shapes.TexturedCuboid;
 import com.graphics.tests.shapes.Wall;
-import com.graphics.tests.weapons.AmmoHandler;
 import com.graphics.tests.weapons.AmmoProxy;
-import com.graphics.tests.weapons.AutoProjectileWeapon;
+import com.graphics.tests.weapons.AmmoTracker;
+import com.graphics.tests.weapons.AutoAmmoProxy;
 import com.graphics.tests.weapons.BouncyProjectile;
 import com.graphics.tests.weapons.DefaultAmmoHandler;
 import com.graphics.tests.weapons.DeflectionProjectile;
@@ -54,7 +54,6 @@ import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.canvas.SlaveCanvas3D;
 import com.graphics.lib.interfaces.ICanvasObject;
-import com.graphics.lib.interfaces.IEffector;
 import com.graphics.lib.interfaces.IOrientable;
 import com.graphics.lib.interfaces.IPlugable;
 import com.graphics.lib.interfaces.IPointFinder;
@@ -404,14 +403,12 @@ public class GraphicsTest extends JFrame {
 		});*/
 		cnv.addDrawOperation((c, g) -> {
 			//more messing with collectors for ammo counts
-			Map<String, Integer> ammoCounts = ship.getWeapons()
+			Map<String, Integer> ammoCounts = AmmoTracker.INSTANCE.getTracked()
+			                                      .entrySet()
 			                                      .stream()
-			                                      .map(w -> Utils.cast(w, ProjectileWeapon.class))
-			                                      .filter(w -> w.isPresent())
-			                                      .map(w -> w.get())
 			                                      .collect(
-                                						Collectors.groupingBy(w -> w.getProjectile().getClass().getSimpleName(), 
-                                								Collectors.summingInt(ProjectileWeapon::getAmmoCount))
+                                						Collectors.groupingBy(t -> t.getKey().getEffectClass().orElse(t.getKey().getClass()).getSimpleName(), 
+                                								Collectors.summingInt(t -> t.getValue().getAmmoCount()))
 			                                      );	
 			g.setColor(new Color(0,0,0,150));
 			g.fillRect(0, c.getHeight() - 20, c.getWidth(), 20);
@@ -513,9 +510,9 @@ public class GraphicsTest extends JFrame {
 		
 		Projectile bp = new BouncyProjectile();
 		bp.setClipLibary(clipLibrary);
-		ship.addWeapon(new ProjectileWeapon(bp, leftOffset, () -> {
+		ship.addWeapon(AmmoProxy.weaponWithAmmo(new ProjectileWeapon(bp, leftOffset, () -> {
 			return cam.getOrientation().copy();
-		}, ship));
+		}, ship), new DefaultAmmoHandler()));
 		
 		DeflectionProjectile dp = new DeflectionProjectile();
 		dp.setSpeed(20);
@@ -524,9 +521,9 @@ public class GraphicsTest extends JFrame {
 		dp.setTargetFinder(() -> {
 			return this.selectedObject;
 		});
-		ship.addWeapon(new ProjectileWeapon(dp, leftOffset, () -> {
+		ship.addWeapon(AmmoProxy.weaponWithAmmo(new ProjectileWeapon(dp, leftOffset, () -> {
 			return cam.getOrientation().copy();
-		}, ship));
+		}, ship), new DefaultAmmoHandler()));
 		
 		TrackingProjectile tp = new TrackingProjectile();
 		tp.setSpeed(20);
@@ -535,37 +532,29 @@ public class GraphicsTest extends JFrame {
 		tp.setTargetFinder(() -> {
 			return this.selectedObject;
 		});
-		ship.addWeapon(new ProjectileWeapon(tp, leftOffset, () -> {
+		ship.addWeapon(AmmoProxy.weaponWithAmmo(new ProjectileWeapon(tp, leftOffset, () -> {
 			return cam.getOrientation().copy();
-		}, ship));
+		}, ship), new DefaultAmmoHandler()));
 		
 		ExplodingProjectile ep = new ExplodingProjectile();
 		ep.setSpeed(20);
 		ep.setRange(1200);
 		ep.setClipLibary(clipLibrary);
 
-		ship.addWeapon(new ProjectileWeapon(ep, rightOffset, () -> {
+		ship.addWeapon(AmmoProxy.weaponWithAmmo(new ProjectileWeapon(ep, rightOffset, () -> {
 			return cam.getOrientation().copy();
-		}, ship));
+		}, ship), new DefaultAmmoHandler()));
 		
-		ship.addWeapon(new ProjectileWeapon(ep, leftOffset, () -> {
+		ship.addWeapon(AmmoProxy.weaponWithAmmo(new ProjectileWeapon(ep, leftOffset, () -> {
 			return cam.getOrientation().copy();
-		}, ship));
+		}, ship), new DefaultAmmoHandler()));
 		
-		ship.addWeapon(new AutoProjectileWeapon(new GattlingRound().setRange(800).setSpeed(60),
+		ship.addWeapon(AutoAmmoProxy.weaponWithAmmo(new ProjectileWeapon(new GattlingRound().setRange(800).setSpeed(60),
 				centreMount,
 				() -> {
 					return cam.getOrientation().copy();
 				}
 				,ship
-				).setAmmoCount(1000).setTicksBetweenShots(2));
-		
-//		AmmoHandler ah = new DefaultAmmoHandler();
-//		IEffector proxyTest = AmmoProxy.weaponWithAmmo(new ProjectileWeapon(ep, rightOffset, () -> {
-//            return cam.getOrientation().copy();
-//        }, ship), ah);
-//		System.out.println(ah.getAmmoCount());
-//		proxyTest.activate();
-//		System.out.println(ah.getAmmoCount());
+				), new DefaultAmmoHandler().setAmmoCount(1000).setTicksBetweenShots(2)));
 	}
 }
