@@ -22,6 +22,7 @@ import org.apache.commons.io.IOUtils;
 import com.google.common.base.Charsets;
 import com.graphics.lib.Utils;
 import com.graphics.lib.properties.Property;
+import com.graphics.lib.properties.PropertyInject;
 import com.graphics.lib.properties.PropertyInjected;
 
 /**
@@ -30,6 +31,7 @@ import com.graphics.lib.properties.PropertyInjected;
  * @author Paul Brandon
  *
  */
+@PropertyInject
 public class ClipLibrary implements AutoCloseable, PropertyInjected {
 	private Map<String,Supplier<Optional<Clip>>> clipSupplier = new HashMap<>();
 	private ExecutorService musicExecutor = Executors.newSingleThreadExecutor();
@@ -45,11 +47,11 @@ public class ClipLibrary implements AutoCloseable, PropertyInjected {
                     .stream()
                     .filter(supplier -> OndemandClip.class.isAssignableFrom(supplier.getClass()))
                     .map(OndemandClip.class::cast)
-                    .forEach(odc -> {
-                        odc.addObserver((o,a) -> musicExecutor.execute(() -> playRandomTrack())); //currently only a track ending should cause this
-                    });
+                    .forEach(odc -> 
+                        odc.addObserver((o,a) -> musicExecutor.execute(this::playRandomTrack)) //currently only a track ending should cause this
+                    );
                     
-	    musicExecutor.execute(() -> playRandomTrack());
+	    musicExecutor.execute(this::playRandomTrack);
 	}
 	
 	public Optional<Clip> playSound(String key){
@@ -63,9 +65,9 @@ public class ClipLibrary implements AutoCloseable, PropertyInjected {
 	 * @param wait	Flag indicating whether method should wait for sound to finish before returning
 	 * @param gain	Decibel modification
 	 */
-	public Optional<Clip> playSound(String key, float gain){
-		try{		
-			return clipSupplier.getOrDefault(key, () -> Optional.empty())
+	public Optional<Clip> playSound(String key, float gain) {
+		try {		
+			return clipSupplier.getOrDefault(key, Optional::empty)
 			                   .get()
 			                   .filter(Clip::isOpen)
 			                   .map(clip -> {

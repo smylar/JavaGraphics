@@ -2,6 +2,9 @@ package com.graphics.lib.properties;
 
 import java.util.Arrays;
 
+import com.graphics.lib.Utils;
+
+
 /**
  * An aspect for adding values from properties into Object fields on construction
  * Could use Spring for it but don't really want to bring all that in for this project
@@ -15,13 +18,9 @@ public aspect PropertyAspect {
     after() returning(Object obj) : call((@PropertyInject *).new(..)) {
         //gets object after construction if class annotated with @PropertyInject
         insertProperties(obj);
-    }
-    
-    after() returning(PropertyInjected obj) : call(*.new(..)) {
-        //gets object after construction if it implements the PropertyInjected interface
-        //annoyingly flags all constructors on cross-reference even though it only works on classes with the correct interface
-        insertProperties(obj);
-        obj.afterPropertiesSet();
+        Utils.cast(obj, PropertyInjected.class)
+             .ifPresent(PropertyInjected::afterPropertiesSet);
+                
     }
     
     private void insertProperties(Object obj) {
