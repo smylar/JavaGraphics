@@ -7,6 +7,8 @@ import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
@@ -33,13 +35,23 @@ import com.graphics.lib.properties.PropertyInjected;
  */
 @PropertyInject
 public class ClipLibrary implements AutoCloseable, PropertyInjected {
-	private Map<String,Supplier<Optional<Clip>>> clipSupplier = new HashMap<>();
-	private ExecutorService musicExecutor = Executors.newSingleThreadExecutor();
+    private static ClipLibrary INSTANCE = null;
+	private final Map<String,Supplier<Optional<Clip>>> clipSupplier = new HashMap<>();
+	private final ExecutorService musicExecutor = Executors.newSingleThreadExecutor();
 	
 	@Property(name="sounds.effects.location", defaultValue="sounds/")
 	private String soundResource;
 	@Property(name="sounds.music.location", defaultValue="music/")
 	private String musicResource;
+	
+	private ClipLibrary() {}
+	
+	public static ClipLibrary getInstance() {
+	    if (Objects.isNull(INSTANCE)) {
+	        INSTANCE = new ClipLibrary();
+	    }
+	    return INSTANCE;
+	}
 	
 	public void playMusic() {
 	    //TODO stop music
@@ -67,17 +79,16 @@ public class ClipLibrary implements AutoCloseable, PropertyInjected {
 	 */
 	public Optional<Clip> playSound(String key, float gain) {
 		try {		
-			return clipSupplier.getOrDefault(key, Optional::empty)
-			                   .get()
-			                   .filter(Clip::isOpen)
-			                   .map(clip -> {
-			                       clip.stop();
-			                       clip.setFramePosition(0);
-			                       FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-			                       gainControl.setValue(gain);
-			                       clip.start();
-			                       return clip;
-			                   });
+			return getClip(key)
+                       .filter(Clip::isOpen)
+                       .map(clip -> {
+                           clip.stop();
+                           clip.setFramePosition(0);
+                           FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+                           gainControl.setValue(gain);
+                           clip.start();
+                           return clip;
+                       });
 		}
 		catch(Exception ex)
 		{
@@ -102,16 +113,15 @@ public class ClipLibrary implements AutoCloseable, PropertyInjected {
 	 */
 	public Optional<Clip> loopSound(String key, float gain, int loops) {
 		try {
-		    return clipSupplier.getOrDefault(key, () -> Optional.empty())
-		                       .get()
-		                       .filter(clip -> clip.isOpen() && !clip.isRunning())
-		                       .map(clip -> {
-		                           clip.setFramePosition(0);
-		                           FloatControl gainControl =  (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-		                           gainControl.setValue(gain);
-		                           clip.loop(loops);
-		                           return clip;
-		                       });
+		    return getClip(key)
+                       .filter(clip -> clip.isOpen() && !clip.isRunning())
+                       .map(clip -> {
+                           clip.setFramePosition(0);
+                           FloatControl gainControl =  (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+                           gainControl.setValue(gain);
+                           clip.loop(loops);
+                           return clip;
+                       });
 		}
 		catch(Exception ex)
 		{
@@ -125,11 +135,10 @@ public class ClipLibrary implements AutoCloseable, PropertyInjected {
 	 * 
 	 * @param key	Key of the sound to stop
 	 */
-	public void stopSound(String key){
-		clipSupplier.getOrDefault(key, () -> Optional.empty())
-		            .get()
-		            .filter(Clip::isRunning)
-		            .ifPresent(Clip::stop);
+	public void stopSound(String key) {
+	    getClip(key)
+        .filter(Clip::isRunning)
+        .ifPresent(Clip::stop);
 	}
 	
 	/**
@@ -139,10 +148,9 @@ public class ClipLibrary implements AutoCloseable, PropertyInjected {
 	 * 
 	 * @param key	Key of the sound to resume
 	 */
-	public void resumeSound(String key){
+	public void resumeSound(String key) {
 		try {
-		    clipSupplier.getOrDefault(key, () -> Optional.empty())
-            .get()
+		    getClip(key)
             .filter(clip -> clip.isOpen() && !clip.isRunning())
             .ifPresent(Clip::start);
 		}
@@ -165,6 +173,11 @@ public class ClipLibrary implements AutoCloseable, PropertyInjected {
                                 } catch (IOException e) { }
                             });
 	    clipSupplier.clear();
+	    INSTANCE = null;
+	}
+	
+	private Optional<Clip> getClip(String key) {
+	    return clipSupplier.getOrDefault(key.toUpperCase(), () -> Optional.empty()).get();
 	}
 	
 	private <T extends Supplier<Optional<Clip>>> void loadClips(String resource, Class<T> clazz) {
@@ -172,9 +185,9 @@ public class ClipLibrary implements AutoCloseable, PropertyInjected {
         try {
             IOUtils.readLines(getClass().getClassLoader()
                     .getResourceAsStream(resource), Charsets.UTF_8)
-                    .forEach(line -> {
-                        addClip(line.replaceAll("^(.*?)\\..*$", "$1"), resource + line, clazz);
-                    });
+                    .forEach(line -> 
+                        addClip(line.replaceAll("^(.*?)\\..*$", "$1").toUpperCase(), resource + line, clazz)
+                    );
         } catch (Exception ex) {
             System.out.println("ClipLibrary:: " + ex.getMessage());
         }
@@ -194,7 +207,7 @@ public class ClipLibrary implements AutoCloseable, PropertyInjected {
 	    List<String> keys = clipSupplier.entrySet()
                     	                .stream()
                     	                .filter(entry -> OndemandClip.class.isAssignableFrom(entry.getValue().getClass()))
-                    	                .map(entry -> entry.getKey())
+                    	                .map(Entry::getKey)
                     	                .collect(Collectors.toList());
 	    
 	    playSound(keys.get(new Random().nextInt(keys.size())), -25f);

@@ -32,7 +32,7 @@ public class AmmoProxy implements InvocationHandler {
     
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        if (method.getName().equals("activate")) {
+        if ("activate".equals(method.getName())) {
             if (ammoHandler.canFire()) {
                 weapon.activate();
             }

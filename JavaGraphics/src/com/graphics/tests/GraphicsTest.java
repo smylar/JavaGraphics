@@ -9,7 +9,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import java.awt.BasicStroke;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executors;
@@ -78,30 +77,28 @@ public class GraphicsTest extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private static GraphicsTest gt;
-    private static ClipLibrary clipLibrary = new ClipLibrary();
+	private static ClipLibrary clipLibrary;
+	private static ScheduledExecutorService runner = Executors.newSingleThreadScheduledExecutor();
     
 	private boolean go = true;
 	private JFrame slave;
 	private Canvas3D canvas;
 	private ICanvasObject selectedObject = null;
-	private MouseEvent select = null;
-	private static ScheduledExecutorService runner = Executors.newSingleThreadScheduledExecutor();
+	private MouseEvent select = null;	
 
-	public static void main (String[] args){
-		try {
+	public static void main (String[] args) {
+		try (ClipLibrary cl = ClipLibrary.getInstance()) {
+		    clipLibrary = cl;
 			SwingUtilities.invokeAndWait(() -> gt = new GraphicsTest());
 			clipLibrary.playMusic();
 			runner.scheduleAtFixedRate(gt::drawCycle, 0, 50, TimeUnit.MILLISECONDS);
-			runner.awaitTermination(1, TimeUnit.DAYS);
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		} catch (Exception e1) {
+            e1.printStackTrace();
+        }
 		
 	}
 	
-	public GraphicsTest(){
+	public GraphicsTest() {
 		super("Graphics Test");
 		this.setLayout(new BorderLayout());
 		this.setSize(700, 700);
@@ -454,10 +451,7 @@ public class GraphicsTest extends JFrame {
                 select = null;
             }
 	    } else {	        
-	        try {
-	            clipLibrary.close();
-	            this.dispose();
-	        } catch (Exception e) {}
+	        this.dispose();
 	        System.out.println("Bye bye");
 	    }
 	}

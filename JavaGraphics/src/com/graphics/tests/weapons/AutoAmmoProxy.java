@@ -35,10 +35,10 @@ public class AutoAmmoProxy implements InvocationHandler, Observer {
     
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        if (method.getName().equals("activate")) {
+        if ("activate".equals(method.getName())) {
             weapon.getParent().addObserver(this);
             activate();
-        } else if (method.getName().equals("deActivate")) {
+        } else if ("deActivate".equals(method.getName())) {
             deActivate();
         } else {
             method.invoke(weapon, args);
