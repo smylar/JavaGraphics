@@ -8,10 +8,13 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.graphics.lib.Facet;
+import com.graphics.lib.ObjectStatus;
 import com.graphics.lib.Point;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.transform.Transform;
+
+import io.reactivex.subjects.Subject;
 
 /**
  * Currently a straight extract from CanvasObject, not all of these will be needed here.
@@ -158,8 +161,10 @@ public interface ICanvasObject {
 
 	void setBaseIntensity(double intensity);
 	
+	@Deprecated //moving to reactive streams
 	void addObserver(Observer o);
 	
+	@Deprecated //moving to reactive streams
 	void deleteObserver(Observer o);
 
     void addFlag(String flag);
@@ -173,5 +178,9 @@ public interface ICanvasObject {
 	void fixCentre();
 
 	void replayTransform(Transform t);
+
+    Subject<Transform> observeTransforms();
+
+    Subject<ObjectStatus> observeStatus();
 
 }

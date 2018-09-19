@@ -39,6 +39,18 @@ public class TraitHandler implements Observer {
         return trait;
     }
     
+    public <T extends ITrait> T registerTrait(ICanvasObject obj, Class<T> traitClass) {
+        T trait = null;
+        try {
+            trait = traitClass.getConstructor(ICanvasObject.class).newInstance(obj);
+            traitMap.computeIfAbsent(obj, key -> Sets.newConcurrentHashSet()).add(trait);
+            obj.addObserver(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return trait;
+    }
+    
     /**
      * Retrieve a trait from an object
      * 

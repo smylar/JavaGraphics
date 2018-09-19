@@ -50,14 +50,16 @@ public class LaserWeapon implements IEffector {
 	
 	@Override
 	public void activate() {
-		if (Canvas3D.get() == null || effectVector == null) 
+		if (Canvas3D.get() == null || effectVector == null
+		    || laserEffect != null && !laserEffect.isDeleted()) { 
 		    return;
+		}
 		
 		LaserEffect lsr = new LaserEffect(range);
 		lsr.setTickLife(this.duration);
 		lsr.addFlag("PHASED");
 
-		TraitHandler.INSTANCE.registerTrait(lsr, new TrackingTrait());
+		TraitHandler.INSTANCE.registerTrait(lsr, TrackingTrait.class);
 		
 		TraitHandler.INSTANCE.registerTrait(lsr, new PlugableTrait()).registerPlugin("LASER", 
 				obj -> {

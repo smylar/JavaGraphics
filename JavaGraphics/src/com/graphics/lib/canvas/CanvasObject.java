@@ -36,6 +36,9 @@ import com.graphics.lib.interfaces.ILightIntensityFinder;
 import com.graphics.lib.interfaces.IVertexNormalFinder;
 import com.graphics.lib.transform.Transform;
 
+import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.Subject;
+
 /**
  * CanvasObject provides the basic functionality for representing an object and moving it around on the screen 
  * 
@@ -61,6 +64,10 @@ public class CanvasObject extends Observable implements ICanvasObject {
     private ILightIntensityFinder liFinder = LightIntensityFinderEnum.DEFAULT.get();    
     private IVertexNormalFinder vnFinder = VertexNormalFinderEnum.DEFAULT.get();
     private Optional<WorldCoord> fixedCentre = Optional.empty();
+    
+    //eventually want to refactor away from Observable and use reactive streams, both will coexist until refactoring complete
+    private final Subject<Transform> transformSubject = PublishSubject.create();
+    private final Subject<ObjectStatus> statusSubject = PublishSubject.create();
     
 	private final int objectId = nextId++;
 	
@@ -148,6 +155,7 @@ public class CanvasObject extends Observable implements ICanvasObject {
 	public final void setVisible(boolean isVisible) {
 		this.isVisible = isVisible;
 		doNotify(ObjectStatus.VISIBLE);
+		statusSubject.onNext(ObjectStatus.VISIBLE);
 	}
 
 	@Override
@@ -161,6 +169,8 @@ public class CanvasObject extends Observable implements ICanvasObject {
 		if (isDeleted) {
 		    this.doNotify(ObjectStatus.DELETED);
 		    this.deleteObservers();
+		    transformSubject.onComplete();
+		    statusSubject.onComplete();
 		}
 	}
 
@@ -328,6 +338,7 @@ public class CanvasObject extends Observable implements ICanvasObject {
 	        t.doTransform(this.vertexList);
 	        fixedCentre.ifPresent(t::replay);
 	        doNotify(t);
+	        transformSubject.onNext(t);
 	    });
 		
 	}
@@ -338,6 +349,7 @@ public class CanvasObject extends Observable implements ICanvasObject {
 		t.replay(this.vertexList);
 		fixedCentre.ifPresent(t::replay);
 		doNotify(t);
+		transformSubject.onNext(t);
 	}
 	
 	/**
@@ -373,6 +385,7 @@ public class CanvasObject extends Observable implements ICanvasObject {
 		
 		this.afterTransforms();
 		doNotify(ObjectStatus.TRANSFORMS_APPLIED);
+		statusSubject.onNext(ObjectStatus.TRANSFORMS_APPLIED);
 	}
 	
 	
@@ -434,6 +447,7 @@ public class CanvasObject extends Observable implements ICanvasObject {
 			this.getChildren().parallelStream().forEach(ICanvasObject::onDrawComplete);
 		}
 		doNotify(ObjectStatus.DRAW_COMPLETE);
+		statusSubject.onNext(ObjectStatus.DRAW_COMPLETE);
 	}
 	
 	@Override
@@ -488,9 +502,20 @@ public class CanvasObject extends Observable implements ICanvasObject {
 
 	}
 	
+	@Deprecated //moving to reactive streams
 	public void doNotify(Object arg) {
 		this.setChanged();
 		this.notifyObservers(arg);
+	}
+	
+	@Override
+	public Subject<Transform> observeTransforms() {
+	    return transformSubject;
+	}
+	
+	@Override
+	public Subject<ObjectStatus> observeStatus() {
+	    return statusSubject;
 	}
 	
 	@Override

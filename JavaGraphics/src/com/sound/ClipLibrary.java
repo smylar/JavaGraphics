@@ -210,7 +210,9 @@ public class ClipLibrary implements AutoCloseable, PropertyInjected {
                     	                .map(Entry::getKey)
                     	                .collect(Collectors.toList());
 	    
-	    playSound(keys.get(new Random().nextInt(keys.size())), -25f);
+	    if (!keys.isEmpty()) {
+	        playSound(keys.get(new Random().nextInt(keys.size())), -25f);
+	    }
 	}
 
     @Override

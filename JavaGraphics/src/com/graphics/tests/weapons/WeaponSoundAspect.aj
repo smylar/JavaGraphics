@@ -12,9 +12,10 @@ public aspect WeaponSoundAspect {
         makeSound(weapon.getProjectile().getClass().getName());
     }
     
-    after(LaserWeapon weapon) : call(void IEffector.activate()) && target(weapon) {
+    after() returning(LaserEffect effect) : call(LaserEffect.new(..)) {
         System.out.println("Fired laser");
         makeSound("laser");
+                
     }
     
     private void makeSound(String key) {

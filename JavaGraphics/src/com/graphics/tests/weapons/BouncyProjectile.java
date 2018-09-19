@@ -23,7 +23,7 @@ public class BouncyProjectile extends Projectile {
 	@Override
 	public CanvasObject get(IOrientation orientation, double parentSpeed) {
 	    Sphere proj = new Sphere(18,20);
-	    TraitHandler.INSTANCE.registerTrait(proj, new TrackingTrait());
+	    TraitHandler.INSTANCE.registerTrait(proj, TrackingTrait.class);
 		proj.setBaseIntensity(1);
 		proj.setColour(new Color(0, 255, 255, 80));
 		proj.setCastsShadow(false);

@@ -37,6 +37,8 @@ import com.graphics.lib.shader.ShaderFactory;
 import com.graphics.lib.traits.TrackingTrait;
 import com.graphics.lib.zbuffer.ZBufferItem;
 
+import io.reactivex.Observable;
+
 /**
  * Responsible for output to the screen
  * 
@@ -195,21 +197,22 @@ public class Canvas3D extends AbstractCanvas {
 		                                      .collect(Collectors.toSet()));
 		}
 
-		processShapes.forEach(ICanvasObject::onDrawComplete); //cross object updates can happen here safer not to be parallel
-				
-		prepareZBuffer();
-		
-		processShapes.parallelStream().forEach(s -> {
-			this.processShape(s, getzBuffer(), getShader(s));
-			notifyEvent(PROCESS, s);
-		});
-		
-		
-		processShapes.clear();
-		
-		getzBuffer().refreshBuffer();
-		SwingUtilities.invokeLater(this::repaint);
-		notifyEvent(PAINT);		
+		renderShapes(processShapes);
+//		processShapes.forEach(ICanvasObject::onDrawComplete); //cross object updates can happen here safer not to be parallel
+//				
+//		prepareZBuffer();
+//		
+//		processShapes.parallelStream().forEach(s -> {
+//			this.processShape(s, getzBuffer(), getShader(s));
+//			notifyEvent(PROCESS, s);
+//		});
+//		
+//		
+//		processShapes.clear();
+//		
+//		getzBuffer().refreshBuffer();
+//		SwingUtilities.invokeLater(this::repaint);
+//		notifyEvent(PAINT);		
 		
 	}
 	
@@ -218,6 +221,22 @@ public class Canvas3D extends AbstractCanvas {
         super.prepareZBuffer();
         notifyEvent(PREPARE_BUFFER);
     }
+	
+	private void renderShapes(Set<ICanvasObject> shapes) {
+	    Observable.fromIterable(shapes)
+	              .doOnSubscribe(d -> prepareZBuffer())
+	              .doOnNext(s -> {
+	                  s.onDrawComplete();  //cross object updates can happen here safer not to be parallel
+	                  processShape(s, getzBuffer(), getShader(s));
+	                  notifyEvent(PROCESS, s);
+	              })
+	              .doFinally(() -> {
+	                  getzBuffer().refreshBuffer();
+	                  SwingUtilities.invokeLater(this::repaint);
+	                  notifyEvent(PAINT);
+	              })
+	              .subscribe();
+	}
 	
 	private void notifyEvent(CanvasEvent event) {
         notifyEvent(event, null);
