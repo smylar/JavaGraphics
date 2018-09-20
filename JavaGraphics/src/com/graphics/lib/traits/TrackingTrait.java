@@ -25,7 +25,7 @@ public class TrackingTrait implements ITracker {
     }
     
     public void setDeleted() {
-        System.out.println("TrackingTrait::setDeleted");
+        //System.out.println("TrackingTrait::setDeleted");
 		pending = null;
 		doStop(false);
     }
@@ -47,7 +47,7 @@ public class TrackingTrait implements ITracker {
     
     public void onDrawComplete() {
         //do in draw complete phase to minimise any conflicts (may be better in a before stage which doesn't currently exist)
-        System.out.println("TrackingTrait::onDrawComplete");
+        //System.out.println("TrackingTrait::onDrawComplete");
         doStop(true);
         doObserve();
     }
@@ -83,14 +83,13 @@ public class TrackingTrait implements ITracker {
 
 
         target.observeTransforms()
-                  .takeUntil(t -> thisTarget != target || parent.isDeleted())
+                  .takeUntil(parent.observeDeath())
+                  .takeWhile(t -> thisTarget == target)
                   .subscribe(parent::replayTransform); 
-        //this can leave the subscription in place if the target doesn't move as the condition is checked after an emission
-        //though it will complete as soon as it does move
-        //may need to combine with an existence stream on the parent
         
         target.observeStatus()
-                .takeUntil(s -> thisTarget != target || parent.isDeleted())
+                .takeUntil(parent.observeDeath())
+                .takeWhile(t -> thisTarget == target)
                 .filter(s -> s == ObjectStatus.DRAW_COMPLETE)
                 .doFinally(this::setDeleted)
                 .subscribe(s -> onDrawComplete());

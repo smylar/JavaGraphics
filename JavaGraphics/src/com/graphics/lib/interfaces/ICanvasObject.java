@@ -183,4 +183,6 @@ public interface ICanvasObject {
 
     Subject<ObjectStatus> observeStatus();
 
+    Subject<Boolean> observeDeath();
+
 }

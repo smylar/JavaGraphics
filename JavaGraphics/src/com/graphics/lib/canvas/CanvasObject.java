@@ -68,6 +68,7 @@ public class CanvasObject extends Observable implements ICanvasObject {
     //eventually want to refactor away from Observable and use reactive streams, both will coexist until refactoring complete
     private final Subject<Transform> transformSubject = PublishSubject.create();
     private final Subject<ObjectStatus> statusSubject = PublishSubject.create();
+    private final Subject<Boolean> deathSubject = PublishSubject.create();
     
 	private final int objectId = nextId++;
 	
@@ -171,6 +172,8 @@ public class CanvasObject extends Observable implements ICanvasObject {
 		    this.deleteObservers();
 		    transformSubject.onComplete();
 		    statusSubject.onComplete();
+		    deathSubject.onNext(true);
+		    deathSubject.onComplete();
 		}
 	}
 
@@ -517,6 +520,11 @@ public class CanvasObject extends Observable implements ICanvasObject {
 	public Subject<ObjectStatus> observeStatus() {
 	    return statusSubject;
 	}
+	
+	@Override
+    public Subject<Boolean> observeDeath() {
+        return deathSubject;
+    }
 	
 	@Override
 	public void setBaseIntensity(double intensity)
