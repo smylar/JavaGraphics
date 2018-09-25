@@ -29,11 +29,11 @@ public class ExplodingProjectile extends Projectile {
 	public CanvasObject get(IOrientation orientation, double parentSpeed) {
 	    Ovoid proj = new Ovoid(20,0.3,30);
 		proj.applyTransform(new Rotation(Axis.X, -90));
-		TraitHandler.INSTANCE.registerTrait(proj, new OrientableTrait()).setOrientation(new SimpleOrientation());
+		TraitHandler.INSTANCE.registerTrait(proj, OrientableTrait.class).setOrientation(new SimpleOrientation());
 		proj.setBaseIntensity(1);
 		proj.setColour(new Color(255, 0, 0, 80));
 		proj.setCastsShadow(false);
-		TraitHandler.INSTANCE.registerTrait(proj, new PlugableTrait())
+		TraitHandler.INSTANCE.registerTrait(proj, PlugableTrait.class)
 		                     .registerPlugin(Events.EXPLODE, TestUtils.getExplodePlugin(getClipLibrary()), false)
 		                     .registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollidedNew(TestUtils.getFilteredObjectList(), Events.EXPLODE, Events.EXPLODE), true);
 		proj.addFlag(TestUtils.SILENT_EXPLODE);

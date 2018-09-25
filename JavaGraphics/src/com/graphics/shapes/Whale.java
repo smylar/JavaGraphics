@@ -46,7 +46,7 @@ public final class Whale extends CanvasObject {
 		tailNode.setMin(Axis.Y,-10);
 		tailNode.getAnimations().put("TAIL",  PivotSkeletonNode.getDefaultPivotAction(Axis.Y, 0.5, 0.5));
 		
-		AnimatedTrait animated = TraitHandler.INSTANCE.registerTrait(this, new AnimatedTrait());
+		AnimatedTrait animated = TraitHandler.INSTANCE.registerTrait(this, AnimatedTrait.class);
 		
 		animated.setOrientation(new SimpleOrientation(AnimatedTrait.ORIENTATION_TAG));
 		animated.getOrientation().getRepresentation().getVertexList().get(0).z = -1;

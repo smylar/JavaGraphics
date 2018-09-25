@@ -24,7 +24,11 @@ import com.graphics.lib.texture.TextureMapper;
 public class TexturableTrait implements ITexturable {
 	//note currently can't apply textures on a per facet (or set of facets) basis, though may be able to achieve that with the mapper used
 	private Map<Texture, Map<WorldCoord, Point>> textureMap = new HashMap<>();
-	private ICanvasObject parent;
+	private final ICanvasObject parent;
+	
+	public TexturableTrait(ICanvasObject parent) {
+        this.parent = parent;
+    }
 	
 	@Override
 	public ITexturable addTexture(Texture texture) {
@@ -59,11 +63,6 @@ public class TexturableTrait implements ITexturable {
 	                                .map(Entry::getKey)
 	                                .collect(Collectors.toSet());
 	}
-
-    @Override
-    public void setParent(ICanvasObject parent) {
-        this.parent = parent;
-    }
 
     @Override
     public void update(Observable o, Object arg) {

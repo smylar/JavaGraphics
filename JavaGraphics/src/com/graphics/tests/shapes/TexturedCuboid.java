@@ -14,7 +14,7 @@ public class TexturedCuboid extends Cuboid {
 	public TexturedCuboid(int height, int width, int depth) {
 		super(height, width, depth);
 		
-		TraitHandler.INSTANCE.registerTrait(this, new TexturableTrait())
+		TraitHandler.INSTANCE.registerTrait(this, TexturableTrait.class)
         		.addTexture(new TestTexture())
                 .addTexture(new BmpTexture("texture1", Color.white).setApplyLighting(false).setOrder(1))
                 .mapTexture(new SimpleTextureMapper());

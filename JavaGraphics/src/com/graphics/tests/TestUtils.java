@@ -95,7 +95,7 @@ public class TestUtils {
 				
 				PluginLibrary.explode().execute(plugable).forEach(c -> {
 					Canvas3D.get().replaceShader(obj, ShaderFactory.FLAT);
-					TraitHandler.INSTANCE.registerTrait(c, new PlugableTrait()).registerPlugin(Events.CHECK_COLLISION, getBouncePlugin(), true);
+					TraitHandler.INSTANCE.registerTrait(c, PlugableTrait.class).registerPlugin(Events.CHECK_COLLISION, getBouncePlugin(), true);
 					if (!obj.hasFlag(SILENT_EXPLODE)) {
 					    clipLibrary.ifPresent(cl -> cl.playSound("EXPLODE", -20f));
 					}

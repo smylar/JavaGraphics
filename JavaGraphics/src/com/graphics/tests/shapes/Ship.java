@@ -53,7 +53,7 @@ public final class Ship extends CanvasObject {
 		getFacetList().get(5).setColour(Color.YELLOW);
 		
 		//self registering - based on trail plugin from plugin library
-		TraitHandler.INSTANCE.registerTrait(this, new PlugableTrait()).registerPlugin("TRAIL", 
+		TraitHandler.INSTANCE.registerTrait(this, PlugableTrait.class).registerPlugin("TRAIL", 
 
 					plugable -> {
 					    Optional.ofNullable(plugable.getParent()).ifPresent(obj -> 

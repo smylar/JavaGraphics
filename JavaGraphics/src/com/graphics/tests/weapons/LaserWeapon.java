@@ -61,7 +61,7 @@ public class LaserWeapon implements IEffector {
 
 		TraitHandler.INSTANCE.registerTrait(lsr, TrackingTrait.class);
 		
-		TraitHandler.INSTANCE.registerTrait(lsr, new PlugableTrait()).registerPlugin("LASER", 
+		TraitHandler.INSTANCE.registerTrait(lsr, PlugableTrait.class).registerPlugin("LASER", 
 				obj -> {
 						if (lsr.getTickLife() <= 0) {
 							lsr.setDeleted(true);

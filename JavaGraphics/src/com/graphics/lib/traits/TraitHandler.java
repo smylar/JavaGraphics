@@ -21,24 +21,17 @@ import com.graphics.lib.interfaces.ITrait;
 public class TraitHandler implements Observer {
     public static final TraitHandler INSTANCE = new TraitHandler();
     
-    private Map<ICanvasObject,Set<ITrait>> traitMap = Maps.newHashMap();
+    private final Map<ICanvasObject,Set<ITrait>> traitMap = Maps.newHashMap();
     
     private TraitHandler() {}
-
+    
     /**
      * Associate an object with a trait
      * 
      * @param obj   Object to gain trait
-     * @param trait Trait to give to object
+     * @param trait Class of trait to give to object
      * @return      The trait
      */
-    public <T extends ITrait> T registerTrait(ICanvasObject obj, T trait) {
-        traitMap.computeIfAbsent(obj, key -> Sets.newConcurrentHashSet()).add(trait);
-        trait.setParent(obj);
-        obj.addObserver(this);
-        return trait;
-    }
-    
     public <T extends ITrait> T registerTrait(ICanvasObject obj, Class<T> traitClass) {
         T trait = null;
         try {

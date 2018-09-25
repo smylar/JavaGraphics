@@ -27,7 +27,7 @@ public class DeflectionProjectile extends TargetedProjectile {
 		proj.deleteAfterTransforms();
 		proj.setProcessBackfaces(true);
 
-		TraitHandler.INSTANCE.registerTrait(proj, new PlugableTrait())
+		TraitHandler.INSTANCE.registerTrait(proj, PlugableTrait.class)
 		                     .registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollided(TestUtils.getFilteredObjectList(), Events.EXPLODE, Events.EXPLODE), true)
 		                     .registerPlugin(Events.EXPLODE, TestUtils.getExplodePlugin(this.getClipLibrary()), false);
 		

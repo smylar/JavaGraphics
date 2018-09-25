@@ -32,12 +32,12 @@ public class TrackingProjectile extends TargetedProjectile {
 		move.moveUntil(t -> t.getDistanceMoved() > this.getRange());
 		proj.addTransform(move);
 
-		TraitHandler.INSTANCE.registerTrait(proj, new PlugableTrait())
+		TraitHandler.INSTANCE.registerTrait(proj, PlugableTrait.class)
 		  .registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollided(TestUtils.getFilteredObjectList(), Events.EXPLODE, Events.EXPLODE), true)
 		  .registerPlugin(Events.EXPLODE, TestUtils.getExplodePlugin(this.getClipLibrary()), false)
 		  .registerPlugin("Track", PluginLibrary.track(this.getTargetFinder().find(), 2), true);
 
-		TraitHandler.INSTANCE.registerTrait(proj, new OrientableTrait()).setOrientation(orientation);
+		TraitHandler.INSTANCE.registerTrait(proj, OrientableTrait.class).setOrientation(orientation);
 		return proj;
 	}
 

@@ -139,7 +139,7 @@ public class GraphicsTest extends JFrame {
 		cnv.addLightSource(l3.getLightSource());
 		Lantern lantern3 = new Lantern();
 				
-		TraitHandler.INSTANCE.registerTrait(lantern3, new OrientableTrait()).setOrientation(new SimpleOrientation(OrientableTrait.ORIENTATION_TAG));
+		TraitHandler.INSTANCE.registerTrait(lantern3, OrientableTrait.class).setOrientation(new SimpleOrientation(OrientableTrait.ORIENTATION_TAG));
 		cnv.registerObject(lantern3, new Point(400,100,100), ShaderFactory.NONE);
 		l3.getLightSource().setDirection(() -> {return TraitHandler.INSTANCE.getTrait(lantern3, IOrientable.class).get().getOrientation().getForward();});
 		l3.getLightSource().setLightConeAngle(40);
@@ -162,7 +162,7 @@ public class GraphicsTest extends JFrame {
 		cnv.registerObject(camcube, new Point(1560, 200, 350), ShaderFactory.FLAT);
 		
 		Whale whale = new Whale(); 
-		TraitHandler.INSTANCE.registerTrait(whale, new PlugableTrait()).registerPlugin(Events.EXPLODE, explode, false);
+		TraitHandler.INSTANCE.registerTrait(whale, PlugableTrait.class).registerPlugin(Events.EXPLODE, explode, false);
 		whale.setColour(Color.cyan);
 		cnv.registerObject(whale, new Point(1515, 300, 400), ShaderFactory.GORAUD);
 		
@@ -186,12 +186,12 @@ public class GraphicsTest extends JFrame {
 		addWeapons(ship, cam);
 		
 		ship.setColour(new Color(50, 50, 50));
-		TraitHandler.INSTANCE.registerTrait(ship, new OrientableTrait()).setOrientation(new SimpleOrientation(OrientableTrait.ORIENTATION_TAG));
+		TraitHandler.INSTANCE.registerTrait(ship, OrientableTrait.class).setOrientation(new SimpleOrientation(OrientableTrait.ORIENTATION_TAG));
 		ship.applyTransform(Axis.Y.getRotation(180));
 		cnv.registerObject(ship, new Point(350, 350, -50), ShaderFactory.GORAUD);
 
 		Gate torus = new Gate(50,50,20);
-		TraitHandler.INSTANCE.registerTrait(torus, new PlugableTrait()).registerPlugin(Events.EXPLODE, explode, false);
+		TraitHandler.INSTANCE.registerTrait(torus, PlugableTrait.class).registerPlugin(Events.EXPLODE, explode, false);
 		torus.setColour(new Color(250, 250, 250));
 		//torus.setLightIntensityFinder(Utils.getShadowLightIntensityFinder(() -> { return cnv.getShapes();})); //for testing shadows falling on the torus
 		cnv.registerObject(torus, new Point(200,200,450), ShaderFactory.GORAUD);
@@ -215,7 +215,7 @@ public class GraphicsTest extends JFrame {
         });
 		
 		TexturedCuboid cube = new TexturedCuboid(200,200,200);
-		TraitHandler.INSTANCE.registerTrait(cube, new PlugableTrait());
+		TraitHandler.INSTANCE.registerTrait(cube, PlugableTrait.class);
 		cnv.registerObject(cube, new Point(500,500,500), ShaderFactory.TEXGORAUD);
 		Transform cubet2 = new RepeatingTransform<>(Axis.Z.getRotation(3), 30);
 		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(cube, cubet2);
@@ -227,8 +227,8 @@ public class GraphicsTest extends JFrame {
 		cube.addTransform(cubet);
 		
 		Sphere ball = new Sphere(100,15);
-		TraitHandler.INSTANCE.registerTrait(ball, new TexturableTrait()).addTexture(new BmpTexture("smily")).mapTexture(new OvoidTextureMapper());
-		TraitHandler.INSTANCE.registerTrait(ball, new PlugableTrait()).registerPlugin(Events.EXPLODE, explode, false);
+		TraitHandler.INSTANCE.registerTrait(ball, TexturableTrait.class).addTexture(new BmpTexture("smily")).mapTexture(new OvoidTextureMapper());
+		TraitHandler.INSTANCE.registerTrait(ball, PlugableTrait.class).registerPlugin(Events.EXPLODE, explode, false);
 		ball.setColour(new Color(255, 255, 0));
 		ball.addFlag(Events.EXPLODE_PERSIST);
 		cnv.registerObject(ball, new Point(500,200,450), ShaderFactory.TEXGORAUD);
@@ -288,7 +288,7 @@ public class GraphicsTest extends JFrame {
 					movingTarget.addTransform(move);
 					movingTarget.setCastsShadow(false);
 					movingTarget.deleteAfterTransforms();
-					TraitHandler.INSTANCE.registerTrait(movingTarget, new PlugableTrait()).registerPlugin(Events.EXPLODE, explode, false);
+					TraitHandler.INSTANCE.registerTrait(movingTarget, PlugableTrait.class).registerPlugin(Events.EXPLODE, explode, false);
 					cnv.registerObject(movingTarget , new Point(0, 0, 0), ShaderFactory.FLAT);
 				}
 				

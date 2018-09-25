@@ -23,7 +23,12 @@ public class PlugableTrait implements IPlugable {
 	private Map<String,IPlugin<IPlugable,?>> plugins = new HashMap<>();
 	private List<String> afterDrawPlugins = new ArrayList<>();
 	private List<String> singleAfterDrawPlugins = new ArrayList<>();
-	private ICanvasObject parent;
+	private final ICanvasObject parent;
+	
+	public PlugableTrait(ICanvasObject parent) {
+        this.parent = parent;
+        parent.addObserver(this);
+    }
 	
 	public void onDrawComplete()
 	{	
@@ -85,12 +90,6 @@ public class PlugableTrait implements IPlugable {
 		}
 		return null;
 	}
-
-    @Override
-    public void setParent(ICanvasObject parent) {
-        this.parent = parent;
-        parent.addObserver(this);
-    }
 
     @Override
     public ICanvasObject getParent() {

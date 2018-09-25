@@ -35,7 +35,7 @@ public class BouncyProjectile extends Projectile {
 		move.moveUntil(t -> t.getDistanceMoved() > this.getRange() || (t.getSpeed() == 0 && new Date().getTime() > delTime));
 		proj.addTransform(move);
 
-		TraitHandler.INSTANCE.registerTrait(proj, new PlugableTrait())
+		TraitHandler.INSTANCE.registerTrait(proj, PlugableTrait.class)
 		                     .registerPlugin(Events.CHECK_COLLISION, getBouncePlugin(), true)
 		                     .registerPlugin("Trail", PluginLibrary.generateTrailParticles(Color.LIGHT_GRAY, 20, 13, 0.66), true);
 		

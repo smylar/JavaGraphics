@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.Observable;
 import com.graphics.lib.ObjectStatus;
 import com.graphics.lib.interfaces.IAnimatable;
+import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.skeleton.SkeletonNode;
 import com.graphics.lib.transform.Transform;
 
@@ -21,9 +22,13 @@ import com.graphics.lib.transform.Transform;
  */
 public class AnimatedTrait extends OrientableTrait implements IAnimatable {
 
-	private SkeletonNode skeletonRootNode;
+    private SkeletonNode skeletonRootNode;
 	
 	private List<String> activeAnimations = new ArrayList<>();
+	
+	public AnimatedTrait(ICanvasObject parent) {
+        super(parent);
+    }
 	
 	public SkeletonNode getSkeletonRootNode() {
 		return skeletonRootNode;

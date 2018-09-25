@@ -22,7 +22,12 @@ public class OrientableTrait implements IOrientable {
 	public static final String ORIENTATION_TAG = "Orientation";
 	private IOrientation orientation;
 	private OrientationData oTrans = new OrientationData();
-	protected ICanvasObject parent;
+	protected final ICanvasObject parent;
+	
+	public OrientableTrait(ICanvasObject parent) {
+            this.parent = parent;
+            parent.addObserver(this);
+    }
 	
 	@Override
 	public IOrientation getOrientation() {		
@@ -44,17 +49,6 @@ public class OrientableTrait implements IOrientable {
 	@Override
 	public Transform reapplyOrientationTransform() {
 		return new ReapplyOrientationTransform(oTrans);
-	}
-
-	@Override
-	public void setParent(ICanvasObject parent) {
-		if (this.parent != null) {
-			this.parent.deleteObserver(this);
-		}
-		if (parent != null) {
-			this.parent = parent;
-			parent.addObserver(this);
-		}
 	}
 	
 	public void applyTransform(Transform transform) {

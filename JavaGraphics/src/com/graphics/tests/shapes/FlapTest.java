@@ -15,9 +15,9 @@ import com.graphics.lib.traits.TraitHandler;
 public class FlapTest extends Bird {
 	private String tipAnimation = "";
 	
-	public FlapTest(){
+	public FlapTest() {
 		super();
-		AnimatedTrait animatable = TraitHandler.INSTANCE.registerTrait(this, new AnimatedTrait());
+		AnimatedTrait animatable = TraitHandler.INSTANCE.registerTrait(this, AnimatedTrait.class);
 		animatable.setOrientation(new SimpleOrientation(AnimatedTrait.ORIENTATION_TAG));
 		
 		SkeletonNode rootNode = new SkeletonNode(new WorldCoord(0, 0, 30));
