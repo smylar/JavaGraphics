@@ -2,10 +2,6 @@ package com.graphics.lib.canvas;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
-
-import com.graphics.lib.Utils;
 import com.graphics.lib.interfaces.ICanvasObject;
 
 /**
@@ -16,18 +12,18 @@ import com.graphics.lib.interfaces.ICanvasObject;
  * @author Paul Brandon
  *
  */
-public class FunctionHandler implements Observer {
+public class FunctionHandler {
     private static final FunctionHandler INSTANCE = new FunctionHandler();
     
     private final Map<ICanvasObject, CanvasObjectFunctionsImpl> functions = new HashMap<>();
     
     private FunctionHandler() { }
     
-    public static void register(ICanvasObject obj, CanvasObjectFunctionsImpl impl) {
+    public static void register(final ICanvasObject obj, final CanvasObjectFunctionsImpl impl) {
         INSTANCE.doRegister(obj, impl);
     }
     
-    public static void register(ICanvasObject obj, CanvasObjectFunctions impl) {
+    public static void register(final ICanvasObject obj, final CanvasObjectFunctions impl) {
         INSTANCE.doRegister(obj, impl.get());
     }
     
@@ -36,26 +32,17 @@ public class FunctionHandler implements Observer {
      * @param obj
      * @return
      */
-    public static CanvasObjectFunctionsImpl getFunctions(ICanvasObject obj) {
+    public static CanvasObjectFunctionsImpl getFunctions(final ICanvasObject obj) {
         return INSTANCE.doGetFunctions(obj);
     }
     
-    public void doRegister(ICanvasObject obj, CanvasObjectFunctionsImpl impl) {
-        obj.addObserver(this);
+    public void doRegister(final ICanvasObject obj, final CanvasObjectFunctionsImpl impl) {
         functions.put(obj, impl);
+        obj.observeDeath()
+            .subscribe(d -> functions.remove(obj));
     }
 
-    public CanvasObjectFunctionsImpl doGetFunctions(ICanvasObject obj) {
+    public CanvasObjectFunctionsImpl doGetFunctions(final ICanvasObject obj) {
         return functions.getOrDefault(obj, CanvasObjectFunctions.DEFAULT.get());
-    }
-    
-    @Override
-    public void update(Observable obs, Object arg) {
-        Utils.cast(obs, ICanvasObject.class)
-             .filter(ICanvasObject::isDeleted)
-             .ifPresent(o -> {
-                functions.remove(o);
-                o.deleteObserver(this);
-             });
     }
 }

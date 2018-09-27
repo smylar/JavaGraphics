@@ -37,6 +37,7 @@ import com.graphics.lib.interfaces.IVertexNormalFinder;
 import com.graphics.lib.transform.Transform;
 
 import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.ReplaySubject;
 import io.reactivex.subjects.Subject;
 
 /**
@@ -68,7 +69,7 @@ public class CanvasObject extends Observable implements ICanvasObject {
     //eventually want to refactor away from Observable and use reactive streams, both will coexist until refactoring complete
     private final Subject<Transform> transformSubject = PublishSubject.create();
     private final Subject<ObjectStatus> statusSubject = PublishSubject.create();
-    private final Subject<Boolean> deathSubject = PublishSubject.create();
+    private final Subject<Boolean> deathSubject = ReplaySubject.create();
     
 	private final int objectId = nextId++;
 	

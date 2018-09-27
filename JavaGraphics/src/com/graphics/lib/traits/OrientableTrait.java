@@ -1,8 +1,5 @@
 package com.graphics.lib.traits;
 
-import java.util.Observable;
-
-import com.graphics.lib.Utils;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IOrientable;
 import com.graphics.lib.interfaces.IOrientation;
@@ -26,7 +23,9 @@ public class OrientableTrait implements IOrientable {
 	
 	public OrientableTrait(ICanvasObject parent) {
             this.parent = parent;
-            parent.addObserver(this);
+            parent.observeTransforms()
+                  .takeUntil(parent.observeDeath())
+                  .subscribe(this::applyTransform);
     }
 	
 	@Override
@@ -52,13 +51,9 @@ public class OrientableTrait implements IOrientable {
 	}
 	
 	public void applyTransform(Transform transform) {
-		this.orientation.getRepresentation().replayTransform(transform);
-	}
-
-	@Override
-	public void update(Observable obs, Object args) {
-		Utils.cast(args, Transform.class)
-		     .ifPresent(orientation.getRepresentation()::replayTransform);
+	    if (orientation != null) {
+	        orientation.getRepresentation().replayTransform(transform);
+	    }
 	}
 
 }

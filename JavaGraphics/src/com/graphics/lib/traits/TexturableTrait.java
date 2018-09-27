@@ -3,7 +3,6 @@ package com.graphics.lib.traits;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Observable;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -63,11 +62,5 @@ public class TexturableTrait implements ITexturable {
 	                                .map(Entry::getKey)
 	                                .collect(Collectors.toSet());
 	}
-
-    @Override
-    public void update(Observable o, Object arg) {
-        // not required
-        
-    }
 
 }

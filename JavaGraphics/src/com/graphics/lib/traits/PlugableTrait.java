@@ -1,10 +1,11 @@
 package com.graphics.lib.traits;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Observable;
+import java.util.stream.Stream;
 
 import com.graphics.lib.ObjectStatus;
 import com.graphics.lib.interfaces.ICanvasObject;
@@ -27,22 +28,19 @@ public class PlugableTrait implements IPlugable {
 	
 	public PlugableTrait(ICanvasObject parent) {
         this.parent = parent;
-        parent.addObserver(this);
+        
+        parent.observeStatus()
+              .takeUntil(parent.observeDeath())
+              .filter(s -> s == ObjectStatus.DRAW_COMPLETE)
+              .subscribe(s -> onDrawComplete());
     }
 	
 	public void onDrawComplete()
 	{	
-		List<String> pluginList = new ArrayList<>(this.afterDrawPlugins);
-		for (String key : pluginList)
-		{
-			this.executePlugin(key);
-		}
-		
-		pluginList = new ArrayList<>(this.singleAfterDrawPlugins);
-		for (String key : pluginList)
-		{
-			this.executePlugin(key);
-		}
+	    Stream.of(afterDrawPlugins, singleAfterDrawPlugins)
+	          .flatMap(Collection::stream)
+	          .forEach(this::executePlugin);
+	    
 		this.singleAfterDrawPlugins.clear();
 	}
 	
@@ -94,12 +92,5 @@ public class PlugableTrait implements IPlugable {
     @Override
     public ICanvasObject getParent() {
         return this.parent;
-    }
-
-    @Override
-    public void update(Observable o, Object arg) {
-        if (arg == ObjectStatus.DRAW_COMPLETE) {
-            onDrawComplete();
-        }
     }
 }

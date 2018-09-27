@@ -2,13 +2,10 @@ package com.graphics.lib.traits;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.Observable;
 import com.graphics.lib.ObjectStatus;
 import com.graphics.lib.interfaces.IAnimatable;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.skeleton.SkeletonNode;
-import com.graphics.lib.transform.Transform;
 
 /**
  * Handles animation of an object by intercepting the applyTransforms call to the parent object
@@ -28,6 +25,14 @@ public class AnimatedTrait extends OrientableTrait implements IAnimatable {
 	
 	public AnimatedTrait(ICanvasObject parent) {
         super(parent);
+        parent.observeTransforms()
+              .takeUntil(parent.observeDeath())
+              .subscribe(t -> t.replay(skeletonRootNode.getAllNodePositions()));
+        
+        parent.observeStatus()
+              .takeUntil(parent.observeDeath())
+              .filter(s -> s == ObjectStatus.TRANSFORMS_APPLIED)
+              .subscribe(s -> applyTransforms());
     }
 	
 	public SkeletonNode getSkeletonRootNode() {
@@ -69,20 +74,6 @@ public class AnimatedTrait extends OrientableTrait implements IAnimatable {
 			
 			parent.applyTransform(reapplyOrientationTransform());
 		}
-	}
-	
-	@Override
-	public void update(Observable obs, Object args) {
-		super.update(obs, args);
-		if (Objects.nonNull(skeletonRootNode)) {
-		    if (args instanceof Transform) {
-	            ((Transform)args).replay(skeletonRootNode.getAllNodePositions());
-	        } else if (args == ObjectStatus.TRANSFORMS_APPLIED) {
-	            applyTransforms();
-	        }
-		}
-		
-		
 	}
 
 }

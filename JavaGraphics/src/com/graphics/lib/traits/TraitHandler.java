@@ -1,14 +1,11 @@
 package com.graphics.lib.traits;
 
 import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.Optional;
 import java.util.Set;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.graphics.lib.ObjectStatus;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ITrait;
 
@@ -18,7 +15,7 @@ import com.graphics.lib.interfaces.ITrait;
  * @author paul.brandon
  *
  */
-public class TraitHandler implements Observer {
+public class TraitHandler {
     public static final TraitHandler INSTANCE = new TraitHandler();
     
     private final Map<ICanvasObject,Set<ITrait>> traitMap = Maps.newHashMap();
@@ -32,12 +29,13 @@ public class TraitHandler implements Observer {
      * @param trait Class of trait to give to object
      * @return      The trait
      */
-    public <T extends ITrait> T registerTrait(ICanvasObject obj, Class<T> traitClass) {
+    public <T extends ITrait> T registerTrait(final ICanvasObject obj, final Class<T> traitClass) {
         T trait = null;
         try {
             trait = traitClass.getConstructor(ICanvasObject.class).newInstance(obj);
             traitMap.computeIfAbsent(obj, key -> Sets.newConcurrentHashSet()).add(trait);
-            obj.addObserver(this);
+            obj.observeDeath()
+               .subscribe(d -> traitMap.remove(obj));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -57,13 +55,6 @@ public class TraitHandler implements Observer {
         }
         
         return Optional.empty();
-    }
-    
-    @Override
-    public void update(Observable o, Object arg) {
-        if (arg == ObjectStatus.DELETED) {
-            traitMap.remove(o);
-        }
     }
 
 }
