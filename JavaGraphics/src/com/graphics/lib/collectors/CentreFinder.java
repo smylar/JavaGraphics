@@ -4,7 +4,14 @@ import java.util.function.Consumer;
 
 import com.graphics.lib.Point;
 
-public class CentreFinder implements Consumer<Point>{
+/**
+ * Used to collect a set of points and generate a centre point 
+ * that is the centre of a cube encompassing all points
+ * 
+ * @author paul
+ *
+ */
+public class CentreFinder implements Consumer<Point> {
 	
 	private Double maxX = null;
 	private Double maxY = null;
@@ -15,26 +22,34 @@ public class CentreFinder implements Consumer<Point>{
 
 	@Override
 	public void accept(Point p) {
-		if (maxX == null || p.x > maxX) maxX = p.x;
-		if (minX == null || p.x < minX) minX = p.x;
-		if (maxY == null || p.y > maxY) maxY = p.y;
-		if (minY == null || p.y < minY) minY = p.y;
-		if (maxZ == null || p.z > maxZ) maxZ = p.z;
-		if (minZ == null || p.z < minZ) minZ = p.z;
+	    maxX = max(maxX, p.x);
+	    minX = min(minX, p.x);
+	    maxY = max(maxY, p.y);
+        minY = min(minY, p.y);
+        maxZ = max(maxZ, p.z);
+        minZ = min(minZ, p.z);
 	}
 	
-	public void combine(CentreFinder other){
-		if (maxX == null || other.maxX > maxX) maxX = other.maxX;
-		if (minX == null || other.minX < minX) minX = other.minX;
-		if (maxY == null || other.maxY > maxY) maxY = other.maxY;
-		if (minY == null || other.minY < minY) minY = other.minY;
-		if (maxZ == null || other.maxZ > maxZ) maxZ = other.maxZ;
-		if (minZ == null || other.minZ < minZ) minZ = other.minZ;
+	public void combine(CentreFinder other) {
+	    maxX = max(maxX, other.maxX);
+        minX = min(minX, other.minX);
+        maxY = max(maxY, other.maxY);
+        minY = min(minY, other.minY);
+        maxZ = max(maxZ, other.maxZ);
+        minZ = min(minZ, other.minZ);
 	}
 	
-	public Point result(){
+	public Point result() {
 		//NULLS ??
 		return new Point(minX + ((maxX - minX)/2), minY + ((maxY - minY)/2), minZ + ((maxZ - minZ)/2));
 	}
+	
+	private Double min(Double current, Double other) {
+	    return (current == null || other < current) ? other : current;
+	}
+	
+	private Double max(Double current, Double other) {
+        return (current == null || other > current) ? other : current;
+    }
 
 }

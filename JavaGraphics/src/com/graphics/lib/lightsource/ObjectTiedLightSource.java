@@ -1,5 +1,6 @@
 package com.graphics.lib.lightsource;
 
+import com.graphics.lib.ObjectStatus;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.transform.Transform;
@@ -26,6 +27,8 @@ public class ObjectTiedLightSource<L extends LightSource> extends TiedLightSourc
 	    
 	    obj.observeStatus()
             .takeWhile(s -> obj == getTiedTo())
+            .filter(s -> s == ObjectStatus.VISIBLE)
+            .doFinally(() -> getLightSource().setDeleted(true))
             .subscribe(s -> checkStatus()); 
 	}
 	
@@ -38,17 +41,14 @@ public class ObjectTiedLightSource<L extends LightSource> extends TiedLightSourc
 	}
 	
 	private void checkStatus() {
-	    if (this.getTiedTo().isDeleted())
+
+	    if (getTiedTo().isVisible())
         {
-            this.getLightSource().setDeleted(true);
-        }
-        else if (!this.getTiedTo().isVisible())
-        {
-            this.getLightSource().turnOff();
+            getLightSource().turnOn();
         }
         else
         {
-            this.getLightSource().turnOn();
+            getLightSource().turnOff();
         }
 	}
 

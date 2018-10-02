@@ -115,7 +115,7 @@ public class LightSource extends Observable implements ILightSource{
 	
 	public void toggle()
 	{
-		this.on = this.on ? false : true;
+		this.on = !this.on;
 		this.flagChange(ONOFFCHANGE);
 	}
 	

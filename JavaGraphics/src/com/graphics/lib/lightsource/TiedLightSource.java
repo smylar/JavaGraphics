@@ -29,7 +29,7 @@ public abstract class TiedLightSource<L extends LightSource, T> {
 		
 	}
 
-	public void tieTo(T obj){
+	public void tieTo(T obj) {
 		this.tiedTo = obj;
 	}
 
@@ -49,7 +49,7 @@ public abstract class TiedLightSource<L extends LightSource, T> {
 	}
 	
 	public void toggle() {
-		if (this.lightSource != null){
+		if (this.lightSource != null) {
 			this.lightSource.toggle();
 		}
 		
