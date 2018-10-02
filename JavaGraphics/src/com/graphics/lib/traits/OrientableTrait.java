@@ -24,7 +24,6 @@ public class OrientableTrait implements IOrientable {
 	public OrientableTrait(ICanvasObject parent) {
             this.parent = parent;
             parent.observeTransforms()
-                  .takeUntil(parent.observeDeath())
                   .subscribe(this::applyTransform);
     }
 	

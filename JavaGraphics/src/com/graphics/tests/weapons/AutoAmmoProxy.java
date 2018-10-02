@@ -3,9 +3,6 @@ package com.graphics.tests.weapons;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.Observable;
-import java.util.Observer;
-
 import com.graphics.lib.ObjectStatus;
 import com.graphics.lib.interfaces.IEffector;
 
@@ -16,14 +13,17 @@ import com.graphics.lib.interfaces.IEffector;
  * @author paul
  *
  */
-public class AutoAmmoProxy implements InvocationHandler, Observer {
+public class AutoAmmoProxy implements InvocationHandler {
 
-    private final AmmoHandler ammoHandler;
     private final IEffector weapon;
+    private boolean activated = false;
     
     public AutoAmmoProxy (IEffector weapon, AmmoHandler ammoHandler) {
-        this.ammoHandler = ammoHandler;
         this.weapon = weapon;
+        weapon.getParent().observeStatus()
+                          .doFinally(this::deActivate)
+                          .filter(s -> s == ObjectStatus.DRAW_COMPLETE && activated && ammoHandler.canFire())
+                          .subscribe(s -> weapon.activate());
     }
     
     public static IEffector weaponWithAmmo(IEffector weapon, AmmoHandler ammoHandler) {
@@ -36,8 +36,7 @@ public class AutoAmmoProxy implements InvocationHandler, Observer {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         if ("activate".equals(method.getName())) {
-            weapon.getParent().addObserver(this);
-            activate();
+            activated = true;
         } else if ("deActivate".equals(method.getName())) {
             deActivate();
         } else {
@@ -45,26 +44,9 @@ public class AutoAmmoProxy implements InvocationHandler, Observer {
         }
         return null;
     }
-
-    @Override
-    public void update(Observable o, Object arg) {
-        if (o == weapon.getParent()) {
-            if (arg == ObjectStatus.DRAW_COMPLETE) {
-                activate();
-            } else if (arg == ObjectStatus.DELETED) {
-                deActivate();
-            }
-        }
-    }
-    
-    private void activate() {
-        if (ammoHandler.canFire()) { 
-            weapon.activate();
-        }
-    }
     
     private void deActivate() {
-        weapon.getParent().deleteObserver(this);
+        activated = false;
         weapon.deActivate();
     }
 

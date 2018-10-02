@@ -30,7 +30,6 @@ public class PlugableTrait implements IPlugable {
         this.parent = parent;
         
         parent.observeStatus()
-              .takeUntil(parent.observeDeath())
               .filter(s -> s == ObjectStatus.DRAW_COMPLETE)
               .subscribe(s -> onDrawComplete());
     }

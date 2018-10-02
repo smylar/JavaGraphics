@@ -26,11 +26,9 @@ public class AnimatedTrait extends OrientableTrait implements IAnimatable {
 	public AnimatedTrait(ICanvasObject parent) {
         super(parent);
         parent.observeTransforms()
-              .takeUntil(parent.observeDeath())
               .subscribe(t -> t.replay(skeletonRootNode.getAllNodePositions()));
         
         parent.observeStatus()
-              .takeUntil(parent.observeDeath())
               .filter(s -> s == ObjectStatus.TRANSFORMS_APPLIED)
               .subscribe(s -> applyTransforms());
     }

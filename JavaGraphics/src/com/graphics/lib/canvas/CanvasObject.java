@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Observable;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -25,7 +24,6 @@ import com.graphics.lib.GeneralPredicates;
 import com.graphics.lib.LightIntensityFinderEnum;
 import com.graphics.lib.ObjectStatus;
 import com.graphics.lib.Point;
-import com.graphics.lib.Utils;
 import com.graphics.lib.Vector;
 import com.graphics.lib.VertexNormalFinderEnum;
 import com.graphics.lib.WorldCoord;
@@ -36,6 +34,7 @@ import com.graphics.lib.interfaces.ILightIntensityFinder;
 import com.graphics.lib.interfaces.IVertexNormalFinder;
 import com.graphics.lib.transform.Transform;
 
+import io.reactivex.Observable;
 import io.reactivex.subjects.PublishSubject;
 import io.reactivex.subjects.ReplaySubject;
 import io.reactivex.subjects.Subject;
@@ -46,7 +45,7 @@ import io.reactivex.subjects.Subject;
  * @author Paul Brandon
  *
  */
-public class CanvasObject extends Observable implements ICanvasObject {
+public class CanvasObject implements ICanvasObject {
 	private static int nextId = 0;
 	
 	private final List<WorldCoord> vertexList;
@@ -66,7 +65,6 @@ public class CanvasObject extends Observable implements ICanvasObject {
     private IVertexNormalFinder vnFinder = VertexNormalFinderEnum.DEFAULT.get();
     private Optional<WorldCoord> fixedCentre = Optional.empty();
     
-    //eventually want to refactor away from Observable and use reactive streams, both will coexist until refactoring complete
     private final Subject<Transform> transformSubject = PublishSubject.create();
     private final Subject<ObjectStatus> statusSubject = PublishSubject.create();
     private final Subject<Boolean> deathSubject = ReplaySubject.create();
@@ -88,25 +86,8 @@ public class CanvasObject extends Observable implements ICanvasObject {
 	/**
 	 * Use to save a fixed centre point so it is not recalculated every time
 	 */
-	@Override
 	public void fixCentre() {
 		fixedCentre = Optional.of(generateCentre());
-	}
-	
-	@Override
-	public boolean equals(Object obj) {
-	    return Utils.cast(obj, ICanvasObject.class)
-        	         .map(o -> getObjectTag().equals(o.getObjectTag()))
-        	         .orElse(false);
-
-	}
-	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + objectId;
-		return result;
 	}
 	
 	@Override
@@ -156,7 +137,6 @@ public class CanvasObject extends Observable implements ICanvasObject {
 	@Override
 	public final void setVisible(boolean isVisible) {
 		this.isVisible = isVisible;
-		doNotify(ObjectStatus.VISIBLE);
 		statusSubject.onNext(ObjectStatus.VISIBLE);
 	}
 
@@ -169,8 +149,6 @@ public class CanvasObject extends Observable implements ICanvasObject {
 	public void setDeleted(boolean isDeleted) {
 		this.isDeleted = isDeleted;
 		if (isDeleted) {
-		    this.doNotify(ObjectStatus.DELETED);
-		    this.deleteObservers();
 		    transformSubject.onComplete();
 		    statusSubject.onComplete();
 		    deathSubject.onNext(true);
@@ -341,7 +319,6 @@ public class CanvasObject extends Observable implements ICanvasObject {
 	    Lists.newArrayList(transforms).forEach(t -> {
 	        t.doTransform(this.vertexList);
 	        fixedCentre.ifPresent(t::replay);
-	        doNotify(t);
 	        transformSubject.onNext(t);
 	    });
 		
@@ -352,7 +329,6 @@ public class CanvasObject extends Observable implements ICanvasObject {
 	{
 		t.replay(this.vertexList);
 		fixedCentre.ifPresent(t::replay);
-		doNotify(t);
 		transformSubject.onNext(t);
 	}
 	
@@ -388,16 +364,18 @@ public class CanvasObject extends Observable implements ICanvasObject {
 		}
 		
 		this.afterTransforms();
-		doNotify(ObjectStatus.TRANSFORMS_APPLIED);
 		statusSubject.onNext(ObjectStatus.TRANSFORMS_APPLIED);
 	}
 	
 	
-	@Override
-	public void afterTransforms(){
+	public void afterTransforms() {
 		synchronized(this.children) {
 			this.children.parallelStream().forEach(ICanvasObject::applyTransforms);
 		}
+	}
+	
+	public void beforeTransforms() {
+	    //does nothing by default
 	}
 	
 	/**
@@ -450,7 +428,6 @@ public class CanvasObject extends Observable implements ICanvasObject {
 			this.getChildren().removeIf(ICanvasObject::isDeleted);
 			this.getChildren().parallelStream().forEach(ICanvasObject::onDrawComplete);
 		}
-		doNotify(ObjectStatus.DRAW_COMPLETE);
 		statusSubject.onNext(ObjectStatus.DRAW_COMPLETE);
 	}
 	
@@ -506,24 +483,18 @@ public class CanvasObject extends Observable implements ICanvasObject {
 
 	}
 	
-	@Deprecated //moving to reactive streams
-	public void doNotify(Object arg) {
-		this.setChanged();
-		this.notifyObservers(arg);
+	@Override
+	public Observable<Transform> observeTransforms() {
+	    return transformSubject.takeUntil(deathSubject);
 	}
 	
 	@Override
-	public Subject<Transform> observeTransforms() {
-	    return transformSubject;
+	public Observable<ObjectStatus> observeStatus() {
+	    return statusSubject.takeUntil(deathSubject);
 	}
 	
 	@Override
-	public Subject<ObjectStatus> observeStatus() {
-	    return statusSubject;
-	}
-	
-	@Override
-    public Subject<Boolean> observeDeath() {
+    public Observable<Boolean> observeDeath() {
         return deathSubject;
     }
 	

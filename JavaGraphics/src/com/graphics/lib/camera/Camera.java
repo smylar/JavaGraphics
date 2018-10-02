@@ -3,7 +3,6 @@ package com.graphics.lib.camera;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
-import java.util.Observer;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
@@ -27,7 +26,7 @@ import com.graphics.lib.transform.Translation;
  * @author Paul Brandon
  *
  */
-public abstract class Camera extends Observable implements IOrientableCamera, Observer {
+public abstract class Camera extends Observable implements IOrientableCamera {
 	public static final String CAMERA_MOVED = "cameraMoved";
 	private Point position = new Point(0,0,0);
 	private Optional<ICanvasObject> tiedTo = Optional.empty();
@@ -58,11 +57,14 @@ public abstract class Camera extends Observable implements IOrientableCamera, Ob
 	 * @param tiedTo				Canvas Object the camera is tied to
 	 * @param tiedObjectLocator		Anonymous function defining the camera's position in relation to the tied object
 	 */
-	public void setTiedTo(ICanvasObject tiedTo, BiConsumer<ICanvasObject, Camera> tiedObjectLocator) {
+	public void setTiedTo(final ICanvasObject tiedTo, BiConsumer<ICanvasObject, Camera> tiedObjectLocator) {
 		this.tiedTo = Optional.of(tiedTo);
 		this.tiedObjectLocator = tiedObjectLocator;
 		tiedObjectLocator.accept(tiedTo, this);
-		tiedTo.addObserver(this);
+		tiedTo.observeStatus()
+              .takeUntil(s -> !this.tiedTo.isPresent() || this.tiedTo.get() != tiedTo)
+              .subscribe(s -> tiedObjectUpdated = true);
+		
 		TraitHandler.INSTANCE.getTrait(tiedTo, IOrientable.class).ifPresent(o -> o.setOrientation(orientation));
 	}
 
@@ -166,10 +168,6 @@ public abstract class Camera extends Observable implements IOrientableCamera, Ob
 		getViewSpecific(obj);
 	}
 	
-	@Override
-	public void update(Observable arg0, Object arg1) {
-			tiedObjectUpdated = arg0 == tiedTo.orElse(null);
-	}
 	
 	/**
 	 * Must be implemented to provide the screen coordinates for the scene, i.e. Set the transformed coordinate for the vertices in the given object

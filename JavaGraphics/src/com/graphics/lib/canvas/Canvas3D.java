@@ -198,22 +198,6 @@ public class Canvas3D extends AbstractCanvas {
 		}
 
 		renderShapes(processShapes);
-//		processShapes.forEach(ICanvasObject::onDrawComplete); //cross object updates can happen here safer not to be parallel
-//				
-//		prepareZBuffer();
-//		
-//		processShapes.parallelStream().forEach(s -> {
-//			this.processShape(s, getzBuffer(), getShader(s));
-//			notifyEvent(PROCESS, s);
-//		});
-//		
-//		
-//		processShapes.clear();
-//		
-//		getzBuffer().refreshBuffer();
-//		SwingUtilities.invokeLater(this::repaint);
-//		notifyEvent(PAINT);		
-		
 	}
 	
 	@Override

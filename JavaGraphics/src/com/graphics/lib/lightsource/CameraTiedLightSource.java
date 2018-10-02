@@ -1,6 +1,7 @@
 package com.graphics.lib.lightsource;
 
 import java.util.Observable;
+import java.util.Observer;
 
 import com.graphics.lib.Point;
 import com.graphics.lib.Utils;
@@ -15,7 +16,7 @@ import com.graphics.lib.interfaces.ICanvasObject;
  *
  * @param <L> The type of the specific light source to tie to the camera
  */
-public class CameraTiedLightSource<L extends LightSource> extends TiedLightSource<L,Camera> {
+public class CameraTiedLightSource<L extends LightSource> extends TiedLightSource<L,Camera> implements Observer {
 
 	private Point startPosition;
 	private Point startCamPosition;
@@ -25,8 +26,10 @@ public class CameraTiedLightSource<L extends LightSource> extends TiedLightSourc
 		this.startPosition = new Point(x, y, z);
 	}
 
+	@Override
 	public void tieTo(Camera cam){
 		super.tieTo(cam);
+		cam.addObserver(this);
 		this.startCamPosition = new Point(cam.getPosition().x, cam.getPosition().y, cam.getPosition().z);
 	}
 	

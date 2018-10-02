@@ -3,7 +3,6 @@ package com.graphics.lib.interfaces;
 import java.awt.Color;
 import java.util.List;
 import java.util.Map;
-import java.util.Observer;
 import java.util.Optional;
 import java.util.Set;
 
@@ -14,7 +13,7 @@ import com.graphics.lib.WorldCoord;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.transform.Transform;
 
-import io.reactivex.subjects.Subject;
+import io.reactivex.Observable;
 
 /**
  * Currently a straight extract from CanvasObject, not all of these will be needed here.
@@ -121,10 +120,6 @@ public interface ICanvasObject {
 	 */
 	void applyTransforms();
 
-	void afterTransforms();
-
-	default void beforeTransforms(){ };
-
 	/**
 	 * Describes how to generate a normal vector for a Vertex 
 	 * 
@@ -160,12 +155,6 @@ public interface ICanvasObject {
 	void setLightIntensityFinder(ILightIntensityFinder liFinder);
 
 	void setBaseIntensity(double intensity);
-	
-	@Deprecated //moving to reactive streams
-	void addObserver(Observer o);
-	
-	@Deprecated //moving to reactive streams
-	void deleteObserver(Observer o);
 
     void addFlag(String flag);
 
@@ -175,14 +164,12 @@ public interface ICanvasObject {
         return target.isAssignableFrom(this.getClass()) ? Optional.of(target.cast(this)) : Optional.empty();
     }
 
-	void fixCentre();
-
 	void replayTransform(Transform t);
 
-    Subject<Transform> observeTransforms();
+	Observable<Transform> observeTransforms();
 
-    Subject<ObjectStatus> observeStatus();
+	Observable<ObjectStatus> observeStatus();
 
-    Subject<Boolean> observeDeath();
+	Observable<Boolean> observeDeath();
 
 }

@@ -71,12 +71,10 @@ public class TrackingTrait implements ITracker {
 
 
         target.observeTransforms()
-                  .takeUntil(parent.observeDeath())
                   .takeWhile(t -> thisTarget == target)
                   .subscribe(parent::replayTransform); 
         
         target.observeStatus()
-                .takeUntil(parent.observeDeath())
                 .takeWhile(t -> thisTarget == target)
                 .filter(s -> s == ObjectStatus.DRAW_COMPLETE)
                 .doFinally(this::setDeleted)
