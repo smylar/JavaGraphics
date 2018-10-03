@@ -22,10 +22,6 @@ import io.reactivex.Observable;
  */
 public interface ICanvasObject {
 
-	String getObjectTag();
-
-	void setAnchorPoint(Point p);
-
 	Point getAnchorPoint();
 
 	boolean hasFlag(String flag);
@@ -151,8 +147,6 @@ public interface ICanvasObject {
 	void onDrawComplete();
 
 	ILightIntensityFinder getLightIntensityFinder();
-
-	void setLightIntensityFinder(ILightIntensityFinder liFinder);
 
 	void setBaseIntensity(double intensity);
 

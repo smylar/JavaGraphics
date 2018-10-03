@@ -46,13 +46,12 @@ import io.reactivex.subjects.Subject;
  *
  */
 public class CanvasObject implements ICanvasObject {
-	private static int nextId = 0;
 	
 	private final List<WorldCoord> vertexList;
     private final List<Facet> facetList;
     private Color colour = new Color(255, 0, 0);
     private final List<Transform> transforms = Collections.synchronizedList(new ArrayList<>());
-    private final Set<ICanvasObject> children = Collections.synchronizedSet(new HashSet<ICanvasObject>());
+    private final Set<ICanvasObject> children = Collections.synchronizedSet(new HashSet<>());
     private Map<Point, List<Facet>> vertexFacetMap;
     private boolean processBackfaces = false;
     private boolean isVisible = true;
@@ -68,8 +67,6 @@ public class CanvasObject implements ICanvasObject {
     private final Subject<Transform> transformSubject = PublishSubject.create();
     private final Subject<ObjectStatus> statusSubject = PublishSubject.create();
     private final Subject<Boolean> deathSubject = ReplaySubject.create();
-    
-	private final int objectId = nextId++;
 	
 	public CanvasObject(Supplier<Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>>> initMesh) {
 		Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>> mesh = initMesh.get();
@@ -90,37 +87,28 @@ public class CanvasObject implements ICanvasObject {
 		fixedCentre = Optional.of(generateCentre());
 	}
 	
-	@Override
-	public final String getObjectTag(){
-		return "object"+objectId;
-	}
-	
-	@Override
 	public final void setAnchorPoint(Point p)
 	{
 		this.anchorPoint = Optional.ofNullable(p);
 	}
 	
 	@Override
-	public Point getAnchorPoint(){
+	public Point getAnchorPoint() {
 	    return this.anchorPoint.orElse(getCentre());
 	}
 	
 	@Override
-	public final void addFlag(String flag)
-	{
+	public final void addFlag(String flag) {
 		this.flags.add(flag);
 	}
 	
 	@Override
-	public final void removeFlag(String flag)
-	{
+	public final void removeFlag(String flag) {
 	    this.flags.remove(flag);
 	}
 	
 	@Override
-	public final boolean hasFlag(String flag)
-	{
+	public final boolean hasFlag(String flag) {
 		return this.flags.contains(flag);
 	}
 	
@@ -423,7 +411,7 @@ public class CanvasObject implements ICanvasObject {
 	 * This method will be executed once all draw operations (across all objects) are complete
 	 */
 	@Override
-	public void onDrawComplete(){
+	public void onDrawComplete() {
 		synchronized(this.getChildren()) {
 			this.getChildren().removeIf(ICanvasObject::isDeleted);
 			this.getChildren().parallelStream().forEach(ICanvasObject::onDrawComplete);
@@ -437,7 +425,6 @@ public class CanvasObject implements ICanvasObject {
 		return this.liFinder;
 	}
 	
-	@Override
 	public void setLightIntensityFinder(ILightIntensityFinder liFinder)
 	{
 		this.liFinder = liFinder;
@@ -455,23 +442,20 @@ public class CanvasObject implements ICanvasObject {
 		//create map for getting all the facets attached to a specific vertex
 		Map<Point,List<Facet>> vfMap = Maps.newHashMap();
 		
-		for (Facet f : this.facetList)
-		{
-			for (WorldCoord w : f.getAsList()){
+		for (Facet f : this.facetList) {
+			for (WorldCoord w : f.getAsList()) {
 				this.addPointFacetToMap(vfMap, w, f);
 			}
 		}
 
 	 	//remove anything where the facet group is highly divergent (will then use facet normal when shading)
-	 	for (List<Facet> fl : vfMap.values())
-	 	{
+	 	for (List<Facet> fl : vfMap.values()) {
 	 		boolean isDivergent;
 	 		Vector normal = fl.get(0).getNormal();
 
 	 		isDivergent = fl.stream().anyMatch(f -> {
 	 			double answer = normal.dotProduct(f.getNormal());
-	 			if (Math.toDegrees(Math.acos(answer)) > divergenceLimit) return true;
-	 			return false;
+	 			return Math.toDegrees(Math.acos(answer)) > divergenceLimit;
 	 		});
 	 		
 	 		if (isDivergent) {
@@ -480,26 +464,25 @@ public class CanvasObject implements ICanvasObject {
 	 	}
 	 	
 	 	this.vertexFacetMap = ImmutableMap.copyOf(vfMap);
-
 	}
 	
 	@Override
-	public Observable<Transform> observeTransforms() {
+	public final Observable<Transform> observeTransforms() {
 	    return transformSubject.takeUntil(deathSubject);
 	}
 	
 	@Override
-	public Observable<ObjectStatus> observeStatus() {
+	public final Observable<ObjectStatus> observeStatus() {
 	    return statusSubject.takeUntil(deathSubject);
 	}
 	
 	@Override
-    public Observable<Boolean> observeDeath() {
+    public final Observable<Boolean> observeDeath() {
         return deathSubject;
     }
 	
 	@Override
-	public void setBaseIntensity(double intensity)
+	public final void setBaseIntensity(double intensity)
 	{
 		this.getFacetList().forEach(f -> f.setBaseIntensity(intensity));
 	}
@@ -508,7 +491,7 @@ public class CanvasObject implements ICanvasObject {
 	{
 		//default, average of all un-tagged points
 		CentreFinder centre = this.vertexList.stream()
-				.filter(GeneralPredicates.untagged(this))
+				.filter(GeneralPredicates.untagged())
 				.collect(CentreFinder::new, CentreFinder::accept, CentreFinder::combine);
 		
 		return new WorldCoord(centre.result());

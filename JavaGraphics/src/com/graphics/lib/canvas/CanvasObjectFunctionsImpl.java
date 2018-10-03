@@ -238,7 +238,7 @@ public class CanvasObjectFunctionsImpl {
 	public double getMaxExtent(ICanvasObject obj)
 	{
 		Point centre = obj.getCentre();
-		return obj.getVertexList().stream().filter(GeneralPredicates.untagged(obj)).map(v -> v.distanceTo(centre))
+		return obj.getVertexList().stream().filter(GeneralPredicates.untagged()).map(v -> v.distanceTo(centre))
 				.reduce(0d, (a,b) -> b > a ? b : a); //playing with reduce, could equally just use max() instead of reduce
 	}
 	

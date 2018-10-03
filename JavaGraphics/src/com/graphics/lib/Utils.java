@@ -2,10 +2,9 @@ package com.graphics.lib;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
@@ -18,7 +17,10 @@ import com.graphics.lib.canvas.FunctionHandler;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ICanvasObjectList;
 import com.graphics.lib.interfaces.ILightIntensityFinder;
+import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.transform.MovementTransform;
+
+import io.reactivex.Observable;
 
 /**
  * Random orphaned utilities that need a proper home
@@ -27,7 +29,7 @@ import com.graphics.lib.transform.MovementTransform;
  *
  */
 public class Utils {	
-	public static ILightIntensityFinder getShadowLightIntensityFinder(ICanvasObjectList objectsToCheck)
+	public static ILightIntensityFinder getShadowLightIntensityFinder(final ICanvasObjectList objectsToCheck)
 	{
 		//EXPERIMENTAL
 		return (ls, obj, p, v, bf) -> {
@@ -39,17 +41,9 @@ public class Utils {
 				if (intComps.hasNoIntensity()) return;
 				
 				Vector lightVector = l.getPosition().vectorToPoint(p).getUnitVector();
-				Set<ICanvasObject> checkList = new HashSet<>(objectsToCheck.get());
-				for(ICanvasObject checkObj : checkList){
-					if (checkObj == obj || !checkObj.getCastsShadow() || !checkObj.isVisible()) continue;
-					Vector v1 = l.getPosition().vectorToPoint(checkObj.getCentre()).getUnitVector();
-					Vector v2 = p.vectorToPoint(checkObj.getCentre()).getUnitVector();
-					if (v1.dotProduct(v2) >= 0) continue; //not pointing towards each other so test object not between lightsource and obj
-					
-					if (FunctionHandler.getFunctions(checkObj).vectorIntersects(checkObj, l.getPosition(), lightVector)) return; //an object is blocking light
-
-				}
 				
+				if (isBlockingObjectPresent(objectsToCheck.get(), obj, l, p, lightVector)) return;
+							
 				double percent = 0;
 				
 				double answer = v.dotProduct(lightVector);
@@ -201,5 +195,18 @@ public class Utils {
         return Optional.ofNullable(obj)
                        .filter(o -> clazz.isAssignableFrom(o.getClass()))
                        .map(clazz::cast);
+    }
+    
+    private static boolean isBlockingObjectPresent(Collection<ICanvasObject> objectsToCheck, ICanvasObject parent, ILightSource l, Point p, Vector lightVector) {
+        return Observable.fromIterable(objectsToCheck)
+                         .filter(o -> o != parent && o.getCastsShadow() && o.isVisible())
+                         .filter(o -> {
+                              Vector v1 = l.getPosition().vectorToPoint(o.getCentre()).getUnitVector();
+                              Vector v2 = p.vectorToPoint(o.getCentre()).getUnitVector();
+                              return v1.dotProduct(v2) < 0;
+                         })
+                         .map(o -> FunctionHandler.getFunctions(o).vectorIntersects(o, l.getPosition(), lightVector))
+                         .filter(b -> b)
+                         .blockingFirst(false);
     }
 }
