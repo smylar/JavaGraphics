@@ -13,8 +13,10 @@ import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.lightsource.ObjectTiedLightSource;
+import com.graphics.lib.util.ShapeReader;
 
 public class Lantern extends CanvasObject implements Observer {
+    private static final String RESOURCE = "lantern";
     
 	public Lantern() {
 	    super(Lantern::init);
@@ -40,25 +42,27 @@ public class Lantern extends CanvasObject implements Observer {
 	
 	private static ImmutableList<WorldCoord> generateVertexList()
     {
-        return ImmutableList.of(new WorldCoord(0, -10, 0), //0
-                                new WorldCoord(5, 0, 5),//1
-                                new WorldCoord(5, 0, -5), //2
-                                new WorldCoord(-5, 0, -5), //3
-                                new WorldCoord(-5, 0, 5), //4
-                                new WorldCoord(0, 10, 0) //5
-                                );
+//        return ImmutableList.of(new WorldCoord(0, -10, 0), //0
+//                                new WorldCoord(5, 0, 5),//1
+//                                new WorldCoord(5, 0, -5), //2
+//                                new WorldCoord(-5, 0, -5), //3
+//                                new WorldCoord(-5, 0, 5), //4
+//                                new WorldCoord(0, 10, 0) //5
+//                                );
+	    return ShapeReader.getWorldCoordsFromResource(RESOURCE);
     }
     
     private static ImmutableList<Facet> generateFacetList(List<WorldCoord> vertexList)
     {
-        return ImmutableList.of(new Facet(vertexList.get(0), vertexList.get(3), vertexList.get(2)),
-                                new Facet(vertexList.get(5), vertexList.get(2), vertexList.get(3)),
-                                new Facet(vertexList.get(0), vertexList.get(2), vertexList.get(1)),
-                                new Facet(vertexList.get(5), vertexList.get(1), vertexList.get(2)),
-                                new Facet(vertexList.get(0), vertexList.get(1), vertexList.get(4)),
-                                new Facet(vertexList.get(5), vertexList.get(4), vertexList.get(1)),
-                                new Facet(vertexList.get(0), vertexList.get(4), vertexList.get(3)),
-                                new Facet(vertexList.get(5), vertexList.get(3), vertexList.get(4))
-                                );
+//        return ImmutableList.of(new Facet(vertexList.get(0), vertexList.get(3), vertexList.get(2)),
+//                                new Facet(vertexList.get(5), vertexList.get(2), vertexList.get(3)),
+//                                new Facet(vertexList.get(0), vertexList.get(2), vertexList.get(1)),
+//                                new Facet(vertexList.get(5), vertexList.get(1), vertexList.get(2)),
+//                                new Facet(vertexList.get(0), vertexList.get(1), vertexList.get(4)),
+//                                new Facet(vertexList.get(5), vertexList.get(4), vertexList.get(1)),
+//                                new Facet(vertexList.get(0), vertexList.get(4), vertexList.get(3)),
+//                                new Facet(vertexList.get(5), vertexList.get(3), vertexList.get(4))
+//                                );
+        return ShapeReader.getFacetsFromResource(RESOURCE, vertexList);
     }
 }
