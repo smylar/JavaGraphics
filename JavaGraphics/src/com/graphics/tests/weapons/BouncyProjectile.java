@@ -3,6 +3,7 @@ package com.graphics.tests.weapons;
 import java.awt.Color;
 import java.util.Date;
 
+import com.graphics.lib.Point;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IOrientation;
@@ -21,7 +22,7 @@ import com.graphics.tests.TestUtils;
 public class BouncyProjectile extends Projectile {
 	
 	@Override
-	public CanvasObject get(IOrientation orientation, double parentSpeed) {
+	public CanvasObject get(IOrientation orientation, Point startPoint, double parentSpeed) {
 	    Sphere proj = new Sphere(18,20);
 	    TraitHandler.INSTANCE.registerTrait(proj, TrackingTrait.class);
 		proj.setBaseIntensity(1);

@@ -2,6 +2,7 @@ package com.graphics.tests.weapons;
 
 import java.awt.Color;
 
+import com.graphics.lib.Point;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.interfaces.IOrientation;
 import com.graphics.lib.plugins.Events;
@@ -16,7 +17,7 @@ import com.graphics.tests.TestUtils;
 public class TrackingProjectile extends TargetedProjectile {
 
 	@Override
-	public CanvasObject get(IOrientation orientation, double parentSpeed) {
+	public CanvasObject get(IOrientation orientation, Point startPoint, double parentSpeed) {
 		if (this.getTargetFinder() == null || this.getTargetFinder().find() == null) 
 		    return null;
 		

@@ -19,7 +19,7 @@ import com.graphics.tests.TestUtils;
 public class DeflectionProjectile extends TargetedProjectile {
 	
 	@Override
-	public CanvasObject get(IOrientation orientation, double parentSpeed) {
+	public CanvasObject get(IOrientation orientation, Point startPoint, double parentSpeed) {
 	    Sphere proj = new Sphere(18,20);
 		proj.setBaseIntensity(1);
 		proj.setColour(new Color(255, 0, 255, 80));
@@ -32,7 +32,6 @@ public class DeflectionProjectile extends TargetedProjectile {
 		                     .registerPlugin(Events.EXPLODE, TestUtils.getExplodePlugin(this.getClipLibrary()), false);
 		
 		ICanvasObject target = this.getTargetFinder().find();
-		Point startPoint = this.getStartPoint().find();
 		Vector vTrackee = (target == null || startPoint == null) ? orientation.getForward() : CanvasObjectFunctions.DEFAULT.get().plotDeflectionShot(target, startPoint, this.getSpeed()).getLeft();
 		
 		MovementTransform move = new MovementTransform(vTrackee, 20); 

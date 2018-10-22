@@ -14,6 +14,7 @@ import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.swing.JFrame;
@@ -54,6 +55,7 @@ import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.canvas.SlaveCanvas3D;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IOrientable;
+import com.graphics.lib.interfaces.IOrientation;
 import com.graphics.lib.interfaces.IPlugable;
 import com.graphics.lib.interfaces.IPointFinder;
 import com.graphics.lib.lightsource.DirectionalLightSource;
@@ -276,7 +278,7 @@ public class GraphicsTest extends JFrame {
 			e1.printStackTrace();
 		}
 		
-		this.addKeyListener(new KeyListener(){
+		this.addKeyListener(new KeyListener() {
 			@Override
 			public void keyTyped(KeyEvent key) {
 				if (key.getKeyChar() == 'l') l4.toggle();
@@ -292,51 +294,51 @@ public class GraphicsTest extends JFrame {
 					cnv.registerObject(movingTarget , new Point(0, 0, 0), ShaderFactory.FLAT);
 				}
 				
-				else if (key.getKeyChar() == 'z'){
+				else if (key.getKeyChar() == 'z') {
 					double viewAngle = cam.getViewAngle() - 5;
 					cam.setViewAngle(viewAngle < 5 ? 5 : viewAngle);
 				}
 				
-				else if (key.getKeyChar() == 'x'){
+				else if (key.getKeyChar() == 'x') {
 					double viewAngle = cam.getViewAngle() + 5;
 					cam.setViewAngle(viewAngle > 85 ? 85 : viewAngle);
 				}
 				
-				else if (key.getKeyChar() == 'c'){
+				else if (key.getKeyChar() == 'c') {
 					double angle = l4.getLightConeAngle() - 5;
 					l4.setLightConeAngle(angle < 5 ? 5 : angle);
 				}
 				
-				else if (key.getKeyChar() == 'v'){
+				else if (key.getKeyChar() == 'v') {
 					double angle = l4.getLightConeAngle() + 5;
 					l4.setLightConeAngle(angle > 85 ? 85 : angle);
 				}
 				
-				else if (key.getKeyChar() == 'n'){
+				else if (key.getKeyChar() == 'n') {
 					wall.setVisible(!wall.isVisible());
 				}
 				
-				else if (key.getKeyChar() == 'm'){
+				else if (key.getKeyChar() == 'm') {
 					cnv.setDrawShadows(!cnv.isDrawShadows());
 				}
 				
-				else if (key.getKeyChar() == '.' && l3.getLightSource().getIntensity() <= 0.9 && l3.getLightSource().isOn()){
+				else if (key.getKeyChar() == '.' && l3.getLightSource().getIntensity() <= 0.9 && l3.getLightSource().isOn()) {
 					l3.getLightSource().setIntensity(l3.getLightSource().getIntensity() + 0.1);
 					lantern3.setColour(l3.getLightSource().getActualColour());
 				}
 				
-				else if (key.getKeyChar() == ',' && l3.getLightSource().getIntensity() >= 0.1 && l3.getLightSource().isOn()){
+				else if (key.getKeyChar() == ',' && l3.getLightSource().getIntensity() >= 0.1 && l3.getLightSource().isOn()) {
 					l3.getLightSource().setIntensity(l3.getLightSource().getIntensity() - 0.1);
 					lantern3.setColour(l3.getLightSource().getActualColour());
 				}
 				
-				else if (key.getKeyChar() == '1'){
+				else if (key.getKeyChar() == '1') {
 					l1.toggle();
 				}
-				else if (key.getKeyChar() == '2'){
+				else if (key.getKeyChar() == '2') {
 					l2.toggle();
 				}
-				else if (key.getKeyChar() == '3'){
+				else if (key.getKeyChar() == '3') {
 					l3.toggle();
 				}
 				
@@ -355,64 +357,14 @@ public class GraphicsTest extends JFrame {
 		});
 		
 		
-		cnv.addMouseListener(new MouseAdapter(){
+		cnv.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
 				select = e;
 			}		
 		});
 		
-		cnv.addDrawOperation((c, g) -> {
-			ICanvasObject selectedObject = getSelectedObject();
-			if (selectedObject == null || !selectedObject.isVisible()) return;
-			
-			WorldCoord pt = selectedObject.getVertexList().get(0);
-			double maxX = pt.getTransformed(cam).x;
-			double maxY = pt.getTransformed(cam).y;
-			double minX = pt.getTransformed(cam).x;
-			double minY = pt.getTransformed(cam).y;
-			for (WorldCoord p : selectedObject.getVertexList())
-			{
-				if (p.hasTags()) continue;
-				if (p.getTransformed(cam).x > maxX) maxX = p.getTransformed(cam).x;
-				if (p.getTransformed(cam).x < minX) minX = p.getTransformed(cam).x;
-				if (p.getTransformed(cam).y > maxY) maxY = p.getTransformed(cam).y;
-				if (p.getTransformed(cam).y < minY) minY = p.getTransformed(cam).y;
-			};
-			
-			g.setColor(Color.DARK_GRAY);
-			float dash1[] = {10.0f};
-		    BasicStroke dashed = new BasicStroke(1.5f,
-		                        BasicStroke.CAP_BUTT,
-		                        BasicStroke.JOIN_MITER,
-		                        10.0f, dash1, 0.0f);
-			((Graphics2D)g).setStroke(dashed);
-			g.drawRect((int)minX - 4, (int)minY - 4, (int)maxX - (int)minX + 8, (int)maxY - (int)minY + 8);
-		});
-		
-		/*cnv.addDrawOperation((c, g) -> {
-		 	//messing with collectors - puts the count of each object type at the bottom of the screen
-			Map<String, Long> objectCounts = c.getShapes().stream().collect(
-						Collectors.groupingBy(s -> s.getBaseObject().getClass().getSimpleName(), Collectors.counting())
-					);	
-			g.setColor(Color.LIGHT_GRAY);
-			g.drawString(objectCounts.toString(), 40, c.getHeight()-5);
-		});*/
-		cnv.addDrawOperation((c, g) -> {
-			//more messing with collectors for ammo counts
-			Map<String, Integer> ammoCounts = AmmoTracker.INSTANCE.getTracked()
-			                                      .entrySet()
-			                                      .stream()
-			                                      .collect(
-                                						Collectors.groupingBy(t -> t.getKey().getEffectClass().orElse(t.getKey().getClass()).getSimpleName(), 
-                                								Collectors.summingInt(t -> t.getValue().getAmmoCount()))
-			                                      );	
-			g.setColor(new Color(0,0,0,150));
-			g.fillRect(0, c.getHeight() - 20, c.getWidth(), 20);
-			g.setColor(Color.WHITE);
-			g.drawString(ammoCounts.toString(), 40, c.getHeight()-5);
-		});
-		
+		addUIOverlay(cnv, cam);
 		
 		cam.setTiedTo(ship, (o, c) -> {
 			Point p = o.getVertexList().get(0);
@@ -495,7 +447,7 @@ public class GraphicsTest extends JFrame {
 			return pos;
 		};
 		
-		
+		Supplier<IOrientation> forward = () -> TraitHandler.INSTANCE.getTrait(ship, IOrientable.class).map(o -> o.getOrientation().copy()).get();
 		ship.addWeapon(new LaserWeapon(centreMount,
 				() -> {
 					return cam.getOrientation().getForward();
@@ -504,9 +456,7 @@ public class GraphicsTest extends JFrame {
 		
 		Projectile bp = new BouncyProjectile();
 		bp.setClipLibary(clipLibrary);
-		ship.addWeapon(AmmoProxy.weaponWithAmmo(new ProjectileWeapon(bp, leftOffset, () -> {
-			return cam.getOrientation().copy();
-		}, ship), new DefaultAmmoHandler()));
+		ship.addWeapon(AmmoProxy.weaponWithAmmo(new ProjectileWeapon(bp, leftOffset, forward, ship), new DefaultAmmoHandler()));
 		
 		DeflectionProjectile dp = new DeflectionProjectile();
 		dp.setSpeed(20);
@@ -515,9 +465,7 @@ public class GraphicsTest extends JFrame {
 		dp.setTargetFinder(() -> {
 			return this.selectedObject;
 		});
-		ship.addWeapon(AmmoProxy.weaponWithAmmo(new ProjectileWeapon(dp, leftOffset, () -> {
-			return cam.getOrientation().copy();
-		}, ship), new DefaultAmmoHandler()));
+		ship.addWeapon(AmmoProxy.weaponWithAmmo(new ProjectileWeapon(dp, leftOffset, forward, ship), new DefaultAmmoHandler()));
 		
 		TrackingProjectile tp = new TrackingProjectile();
 		tp.setSpeed(20);
@@ -526,29 +474,74 @@ public class GraphicsTest extends JFrame {
 		tp.setTargetFinder(() -> {
 			return this.selectedObject;
 		});
-		ship.addWeapon(AmmoProxy.weaponWithAmmo(new ProjectileWeapon(tp, leftOffset, () -> {
-			return cam.getOrientation().copy();
-		}, ship), new DefaultAmmoHandler()));
+		ship.addWeapon(AmmoProxy.weaponWithAmmo(new ProjectileWeapon(tp, leftOffset, forward, ship), new DefaultAmmoHandler()));
 		
 		ExplodingProjectile ep = new ExplodingProjectile();
 		ep.setSpeed(20);
 		ep.setRange(1200);
 		ep.setClipLibary(clipLibrary);
 
-		ship.addWeapon(AmmoProxy.weaponWithAmmo(new ProjectileWeapon(ep, rightOffset, () -> {
-			return cam.getOrientation().copy();
-		}, ship), new DefaultAmmoHandler()));
+		ship.addWeapon(AmmoProxy.weaponWithAmmo(new ProjectileWeapon(ep, rightOffset, forward, ship), new DefaultAmmoHandler()));
 		
-		ship.addWeapon(AmmoProxy.weaponWithAmmo(new ProjectileWeapon(ep, leftOffset, () -> {
-			return cam.getOrientation().copy();
-		}, ship), new DefaultAmmoHandler()));
+		ship.addWeapon(AmmoProxy.weaponWithAmmo(new ProjectileWeapon(ep, leftOffset, forward, ship), new DefaultAmmoHandler()));
 		
 		ship.addWeapon(AutoAmmoProxy.weaponWithAmmo(new ProjectileWeapon(new GattlingRound().setRange(800).setSpeed(60),
 				centreMount,
-				() -> {
-					return cam.getOrientation().copy();
-				}
-				,ship
+				forward,
+				ship
 				), new DefaultAmmoHandler().setAmmoCount(1000).setTicksBetweenShots(2)));
+	}
+	
+	private void addUIOverlay(Canvas3D cnv, Camera cam) {
+	    cnv.addDrawOperation((c, g) -> {
+            ICanvasObject selectedObject = getSelectedObject();
+            if (selectedObject == null || !selectedObject.isVisible()) return;
+            
+            WorldCoord pt = selectedObject.getVertexList().get(0);
+            double maxX = pt.getTransformed(cam).x;
+            double maxY = pt.getTransformed(cam).y;
+            double minX = pt.getTransformed(cam).x;
+            double minY = pt.getTransformed(cam).y;
+            for (WorldCoord p : selectedObject.getVertexList())
+            {
+                if (p.hasTags()) continue;
+                if (p.getTransformed(cam).x > maxX) maxX = p.getTransformed(cam).x;
+                if (p.getTransformed(cam).x < minX) minX = p.getTransformed(cam).x;
+                if (p.getTransformed(cam).y > maxY) maxY = p.getTransformed(cam).y;
+                if (p.getTransformed(cam).y < minY) minY = p.getTransformed(cam).y;
+            };
+            
+            g.setColor(Color.DARK_GRAY);
+            float dash1[] = {10.0f};
+            BasicStroke dashed = new BasicStroke(1.5f,
+                                BasicStroke.CAP_BUTT,
+                                BasicStroke.JOIN_MITER,
+                                10.0f, dash1, 0.0f);
+            ((Graphics2D)g).setStroke(dashed);
+            g.drawRect((int)minX - 4, (int)minY - 4, (int)maxX - (int)minX + 8, (int)maxY - (int)minY + 8);
+        });
+        
+        /*cnv.addDrawOperation((c, g) -> {
+            //messing with collectors - puts the count of each object type at the bottom of the screen
+            Map<String, Long> objectCounts = c.getShapes().stream().collect(
+                        Collectors.groupingBy(s -> s.getBaseObject().getClass().getSimpleName(), Collectors.counting())
+                    );  
+            g.setColor(Color.LIGHT_GRAY);
+            g.drawString(objectCounts.toString(), 40, c.getHeight()-5);
+        });*/
+        cnv.addDrawOperation((c, g) -> {
+            //more messing with collectors for ammo counts
+            Map<String, Integer> ammoCounts = AmmoTracker.INSTANCE.getTracked()
+                                                  .entrySet()
+                                                  .stream()
+                                                  .collect(
+                                                        Collectors.groupingBy(t -> t.getKey().getEffectClass().orElse(t.getKey().getClass()).getSimpleName(), 
+                                                                Collectors.summingInt(t -> t.getValue().getAmmoCount()))
+                                                  );    
+            g.setColor(new Color(0,0,0,150));
+            g.fillRect(0, c.getHeight() - 20, c.getWidth(), 20);
+            g.setColor(Color.WHITE);
+            g.drawString(ammoCounts.toString(), 40, c.getHeight()-5);
+        });
 	}
 }

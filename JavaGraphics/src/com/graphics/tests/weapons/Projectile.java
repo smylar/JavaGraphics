@@ -2,16 +2,15 @@ package com.graphics.tests.weapons;
 
 import java.util.Optional;
 
+import com.graphics.lib.Point;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.interfaces.IOrientation;
-import com.graphics.lib.interfaces.IPointFinder;
 import com.sound.ClipLibrary;
 
 public abstract class Projectile {
 	
 	private double speed = 15;
 	private int range = 1000;
-	private IPointFinder startPoint;
 	private ClipLibrary clipLibrary;
 
 	public double getSpeed() {
@@ -32,15 +31,6 @@ public abstract class Projectile {
 		return this;
 	}
 	
-	public IPointFinder getStartPoint() {
-		return startPoint;
-	}
-
-	public Projectile setStartPoint(IPointFinder startPoint) {
-		this.startPoint = startPoint;
-		return this;
-	}
-	
 	public Optional<ClipLibrary> getClipLibrary() {
 		return Optional.ofNullable(clipLibrary);
 	}
@@ -50,5 +40,5 @@ public abstract class Projectile {
 		return this;
 	}
 
-	public abstract CanvasObject get(IOrientation orientation, double parentSpeed);
+	public abstract CanvasObject get(IOrientation orientation, Point startPoint, double parentSpeed);
 }

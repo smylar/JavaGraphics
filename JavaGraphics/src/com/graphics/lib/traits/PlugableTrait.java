@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import com.google.common.collect.Lists;
 import com.graphics.lib.ObjectStatus;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IPlugable;
@@ -36,7 +37,7 @@ public class PlugableTrait implements IPlugable {
 	
 	public void onDrawComplete()
 	{	
-	    Stream.of(afterDrawPlugins, singleAfterDrawPlugins)
+	    Stream.of(Lists.newArrayList(afterDrawPlugins), Lists.newArrayList(singleAfterDrawPlugins))
 	          .flatMap(Collection::stream)
 	          .forEach(this::executePlugin);
 	    

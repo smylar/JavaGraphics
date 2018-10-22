@@ -2,6 +2,7 @@ package com.graphics.tests.weapons;
 
 import java.awt.Color;
 
+import com.graphics.lib.Point;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.interfaces.IOrientation;
 import com.graphics.lib.plugins.Events;
@@ -15,7 +16,7 @@ import com.graphics.tests.TestUtils;
 public class GattlingRound extends Projectile {
 
 	@Override
-	public CanvasObject get(IOrientation orientation, double parentSpeed) {
+	public CanvasObject get(IOrientation orientation, Point startPoint, double parentSpeed) {
 		Sphere proj = new Sphere(4, 45);
 		proj.setBaseIntensity(1);
 		proj.setColour(new Color(255,165,0));

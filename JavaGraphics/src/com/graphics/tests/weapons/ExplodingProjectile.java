@@ -3,6 +3,7 @@ package com.graphics.tests.weapons;
 import java.awt.Color;
 
 import com.graphics.lib.Axis;
+import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.CanvasObjectFunctions;
@@ -26,7 +27,7 @@ import com.graphics.tests.TestUtils;
 public class ExplodingProjectile extends Projectile {
 
 	@Override
-	public CanvasObject get(IOrientation orientation, double parentSpeed) {
+	public CanvasObject get(IOrientation orientation, Point startPoint, double parentSpeed) {
 	    Ovoid proj = new Ovoid(20,0.3,30);
 		proj.applyTransform(new Rotation(Axis.X, -90));
 		TraitHandler.INSTANCE.registerTrait(proj, OrientableTrait.class).setOrientation(new SimpleOrientation());

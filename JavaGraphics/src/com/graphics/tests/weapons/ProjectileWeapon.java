@@ -34,7 +34,6 @@ public class ProjectileWeapon implements IEffector {
 		this.effectVector = effectVector;
 		this.parent = parent;
 		this.projectile = proj;
-		proj.setStartPoint(origin);
 	}
 	
 	@Override
@@ -75,7 +74,7 @@ public class ProjectileWeapon implements IEffector {
                 .map(MovementTransform::getSpeed)
                 .orElse(0d);
         
-       return Optional.ofNullable(projectile.get(effectVector.get(), parentSpeed));
+       return Optional.ofNullable(projectile.get(effectVector.get(), origin.find(), parentSpeed));
     }
     
     private void lightProjectile(CanvasObject proj, Point pos) {
