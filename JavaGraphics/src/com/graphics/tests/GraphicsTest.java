@@ -82,6 +82,7 @@ public class GraphicsTest extends JFrame {
 	private static ScheduledExecutorService runner = Executors.newSingleThreadScheduledExecutor();
     
 	private boolean go = true;
+	private boolean chaseCam = false;
 	private JFrame slave;
 	private Canvas3D canvas;
 	private ICanvasObject selectedObject = null;
@@ -339,6 +340,9 @@ public class GraphicsTest extends JFrame {
 				else if (key.getKeyChar() == '3') {
 					l3.toggle();
 				}
+				else if (key.getKeyChar() == '/') {
+				    chaseCam = !chaseCam;
+				}
 				
 			}
 			
@@ -366,7 +370,11 @@ public class GraphicsTest extends JFrame {
 		
 		cam.setTiedTo(ship, (o, c) -> {
 			Point p = o.getVertexList().get(0);
-			c.setPosition(new Point(p.x, p.y, p.z));
+			if (chaseCam) {
+			    moveBack(new Point(p), c);
+			} else {
+			    c.setPosition(new Point(p));
+			}
 		});
 		
 		scnv.setVisible(true);
@@ -374,6 +382,15 @@ public class GraphicsTest extends JFrame {
 		this.requestFocus();
 		this.canvas = cnv;
 
+	}
+	
+	private void moveBack(Point p, Camera cam) {
+	    Vector backward = cam.getOrientation().getBack();
+	    Vector up = cam.getOrientation().getUp();
+	    p.x += backward.getX() * 130 + up.getX() * 55;
+	    p.y += backward.getY() * 130 + up.getY() * 55;
+	    p.z += backward.getZ() * 130 + up.getZ() * 55;
+	    cam.setPosition(p);
 	}
 	
 	private synchronized ICanvasObject getSelectedObject() {
