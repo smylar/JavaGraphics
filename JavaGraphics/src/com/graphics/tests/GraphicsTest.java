@@ -57,7 +57,6 @@ import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IOrientable;
 import com.graphics.lib.interfaces.IOrientation;
 import com.graphics.lib.interfaces.IPlugable;
-import com.graphics.lib.interfaces.IPointFinder;
 import com.graphics.lib.lightsource.DirectionalLightSource;
 import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.lightsource.ObjectTiedLightSource;
@@ -185,10 +184,9 @@ public class GraphicsTest extends JFrame {
 		
 		Ship ship = new Ship (100, 100, 50);
 		
-		addWeapons(ship, cam);
-		
 		ship.setColour(new Color(50, 50, 50));
 		TraitHandler.INSTANCE.registerTrait(ship, OrientableTrait.class).setOrientation(new SimpleOrientation(OrientableTrait.ORIENTATION_TAG));
+		addWeapons(ship, cam);
 		ship.applyTransform(Axis.Y.getRotation(180));
 		cnv.registerObject(ship, new Point(350, 350, -50), ShaderFactory.GORAUD);
 
@@ -419,36 +417,17 @@ public class GraphicsTest extends JFrame {
 		}
 	}
 	
-	private void addWeapons(Ship ship, Camera cam) {
-		IPointFinder leftOffset = () -> {
-			Point pos = new Point(cam.getPosition());
-			Vector right = cam.getOrientation().getRight();
-			pos.x -= right.getX() * 25;
-			pos.y -= right.getY() * 25;
-			pos.z -= right.getZ() * 25;
-			return pos;
-		};
+	private void addWeapons(final Ship ship, final Camera cam) {
 		
-		IPointFinder rightOffset = () -> {
-			Point pos = new Point(cam.getPosition());
-			Vector right = cam.getOrientation().getRight();
-			pos.x += right.getX() * 25;
-			pos.y += right.getY() * 25;
-			pos.z += right.getZ() * 25;
-			return pos;
-		};
+	  //Supplier<IOrientation> forward = () -> cam.getOrientation().copy();
+		//Supplier<IOrientation> forward = () -> TraitHandler.INSTANCE.getTrait(ship, IOrientable.class).map(o -> o.getOrientation().copy()).get();
+		//hmm, having switched from the camera vector to the ship vector there might be an issue
+		//this can sometimes return null, presumably because the orientation is undergoing a transformation
+		//will need to consider when weapon activation takes place (needs to be in the draw complete stage?? or prior to transforming??)    
+	    final IOrientable shipOrientation = TraitHandler.INSTANCE.getTrait(ship, IOrientable.class).get();
+        Supplier<IOrientation> forward = () -> shipOrientation.getOrientation().copy(); //could be a problem getting the trait?
 		
-		IPointFinder centreMount = () -> {
-			Point pos = new Point(cam.getPosition());
-			Vector down = cam.getOrientation().getDown();
-			pos.x += down.getX() * 15;
-			pos.y += down.getY() * 15;
-			pos.z += down.getZ() * 15;
-			return pos;
-		};
-		
-		Supplier<IOrientation> forward = () -> TraitHandler.INSTANCE.getTrait(ship, IOrientable.class).map(o -> o.getOrientation().copy()).get();
-		ship.addWeapon(new LaserWeapon(centreMount,
+		ship.addWeapon(Ship.Hardpoints.CENTRE, new LaserWeapon("LASER",
 				() -> {
 					return cam.getOrientation().getForward();
 				},ship));
@@ -456,7 +435,7 @@ public class GraphicsTest extends JFrame {
 		
 		Projectile bp = new BouncyProjectile();
 		bp.setClipLibary(clipLibrary);
-		ship.addWeapon(AmmoProxy.weaponWithAmmo(new ProjectileWeapon(bp, leftOffset, forward, ship), new DefaultAmmoHandler()));
+		ship.addWeapon(Ship.Hardpoints.LEFT, AmmoProxy.weaponWithAmmo(new ProjectileWeapon("BOUNCY", bp, forward, ship), new DefaultAmmoHandler()));
 		
 		DeflectionProjectile dp = new DeflectionProjectile();
 		dp.setSpeed(20);
@@ -465,7 +444,7 @@ public class GraphicsTest extends JFrame {
 		dp.setTargetFinder(() -> {
 			return this.selectedObject;
 		});
-		ship.addWeapon(AmmoProxy.weaponWithAmmo(new ProjectileWeapon(dp, leftOffset, forward, ship), new DefaultAmmoHandler()));
+		ship.addWeapon(Ship.Hardpoints.LEFT, AmmoProxy.weaponWithAmmo(new ProjectileWeapon("DEFLECTION", dp, forward, ship), new DefaultAmmoHandler()));
 		
 		TrackingProjectile tp = new TrackingProjectile();
 		tp.setSpeed(20);
@@ -474,19 +453,18 @@ public class GraphicsTest extends JFrame {
 		tp.setTargetFinder(() -> {
 			return this.selectedObject;
 		});
-		ship.addWeapon(AmmoProxy.weaponWithAmmo(new ProjectileWeapon(tp, leftOffset, forward, ship), new DefaultAmmoHandler()));
+		ship.addWeapon(Ship.Hardpoints.RIGHT, AmmoProxy.weaponWithAmmo(new ProjectileWeapon("TRACKING", tp, forward, ship), new DefaultAmmoHandler()));
 		
 		ExplodingProjectile ep = new ExplodingProjectile();
 		ep.setSpeed(20);
 		ep.setRange(1200);
 		ep.setClipLibary(clipLibrary);
 
-		ship.addWeapon(AmmoProxy.weaponWithAmmo(new ProjectileWeapon(ep, rightOffset, forward, ship), new DefaultAmmoHandler()));
+		ship.addWeapon(Ship.Hardpoints.RIGHT, AmmoProxy.weaponWithAmmo(new ProjectileWeapon("TORPEDO1", ep, forward, ship), new DefaultAmmoHandler()));
 		
-		ship.addWeapon(AmmoProxy.weaponWithAmmo(new ProjectileWeapon(ep, leftOffset, forward, ship), new DefaultAmmoHandler()));
+		ship.addWeapon(Ship.Hardpoints.LEFT, AmmoProxy.weaponWithAmmo(new ProjectileWeapon("TORPEDO2", ep, forward, ship), new DefaultAmmoHandler()));
 		
-		ship.addWeapon(AutoAmmoProxy.weaponWithAmmo(new ProjectileWeapon(new GattlingRound().setRange(800).setSpeed(60),
-				centreMount,
+		ship.addWeapon(Ship.Hardpoints.CENTRE, AutoAmmoProxy.weaponWithAmmo(new ProjectileWeapon("GAT", new GattlingRound().setRange(800).setSpeed(60),
 				forward,
 				ship
 				), new DefaultAmmoHandler().setAmmoCount(1000).setTicksBetweenShots(2)));

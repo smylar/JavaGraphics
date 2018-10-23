@@ -37,7 +37,7 @@ public class AmmoProxy implements InvocationHandler {
                 weapon.activate();
             }
         } else {
-            method.invoke(weapon, args);
+            return method.invoke(weapon, args);
         }
         return null;
     }

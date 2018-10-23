@@ -40,7 +40,7 @@ public class AutoAmmoProxy implements InvocationHandler {
         } else if ("deActivate".equals(method.getName())) {
             deActivate();
         } else {
-            method.invoke(weapon, args);
+            return method.invoke(weapon, args);
         }
         return null;
     }

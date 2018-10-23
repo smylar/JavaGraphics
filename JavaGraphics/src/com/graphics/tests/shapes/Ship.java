@@ -1,8 +1,10 @@
 package com.graphics.tests.shapes;
 
 import java.awt.Color;
-import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
@@ -27,18 +29,28 @@ import com.graphics.lib.transform.MovementTransform;
 import com.graphics.lib.transform.RepeatingTransform;
 import com.graphics.lib.transform.Rotation;
 import com.graphics.lib.transform.Transform;
+import com.graphics.tests.weapons.Hardpoint;
+import com.graphics.tests.weapons.IWeaponised;
 
-public final class Ship extends CanvasObject {
+public final class Ship extends CanvasObject implements IWeaponised {
 	
+    public enum Hardpoints {
+        CENTRE,
+        LEFT,
+        RIGHT;
+    }
+    
 	private final Facet wingFlashLeft;
 	private final Facet wingFlashRight;
 	private int cnt = 0;
 	private double acceleration = 0.2;
 	private double panRate = 4;
-	private List<IEffector> weapons = new ArrayList<>();
+	private Map<Hardpoints, WorldCoord> hardpointCoords = new EnumMap<>(Hardpoints.class);
+	private Map<WorldCoord, Hardpoint> weapons = new HashMap<>();
+	//private List<IEffector> weapons = new ArrayList<>();
 	
 	public Ship(final int width, final int depth, final int height)
-	{
+	{   
 		super(() -> init(width,depth,height));
 		
 		wingFlashLeft = this.getFacetList().get(6);
@@ -51,6 +63,10 @@ public final class Ship extends CanvasObject {
 		
 		getFacetList().get(4).setColour(Color.YELLOW);
 		getFacetList().get(5).setColour(Color.YELLOW);
+		
+		hardpointCoords.put(Hardpoints.CENTRE ,getVertexList().get(10));
+		hardpointCoords.put(Hardpoints.LEFT ,getVertexList().get(11));
+		hardpointCoords.put(Hardpoints.RIGHT ,getVertexList().get(12));
 		
 		//self registering - based on trail plugin from plugin library
 		TraitHandler.INSTANCE.registerTrait(this, PlugableTrait.class).registerPlugin("TRAIL", 
@@ -104,13 +120,35 @@ public final class Ship extends CanvasObject {
 		this.panRate = panRate;
 	}
 
-	public List<IEffector> getWeapons() {
-		return weapons;
+//	public List<IEffector> getWeapons() {
+//		return weapons;
+//	}
+	
+	public void addWeapon(Hardpoints location, IEffector weapon) {
+		weapons.computeIfAbsent(hardpointCoords.get(location), k -> new Hardpoint()).add(weapon);
 	}
 	
-	public void addWeapon(IEffector weapon) {
-		weapons.add(weapon);
-	}
+	@Override
+    public Optional<WorldCoord> getWeaponLocation(final String id) {
+        return weapons.entrySet()
+                      .stream()
+                      .filter(e -> e.getValue().stream()
+                                               .filter(w -> w.getId().equals(id))
+                                               .findAny()
+                                               .isPresent())
+                      .map(e -> e.getKey())
+                      .findFirst();
+    }
+	
+	@Override
+    public Optional<IEffector> getWeapon(final String id) {
+        return weapons.values()
+                      .stream()
+                      .flatMap(h -> h.stream())
+                      .filter(w -> w.getId().equals(id))
+                      .findFirst();
+        //again, could do with java 9+ stuff to end stream when we get the first match instead of checking it all - or use rxjava
+    }
 	
 	private void generateTrail(final ICanvasObject obj, final MovementTransform movement) {
 	    Vector baseVector = movement.getVector();
@@ -161,7 +199,14 @@ public final class Ship extends CanvasObject {
 	                            new WorldCoord(width/2, -5, depth - 5), //wing flash left
         
 	                            new WorldCoord(-width/2, 5, depth - 5),
-	                            new WorldCoord(-width/2, -5, depth - 5)); //wing flash left
+	                            new WorldCoord(-width/2, -5, depth - 5), //wing flash left
+	    
+	                            new WorldCoord(0, 15, 20), //centre hardpoint
+	                            new WorldCoord(width/2, 0, depth - 30),  //left hardpoint
+	                            new WorldCoord(-width/2, 0, depth - 30));  //right hardpoint
+	                            //at the moment hardpoint will specify where the effect manifests
+	                            //have to give some clearance outside the object to avoid colliding with self
+	                            //may need another mechanism in the weapon of effect to deal with this
 	}
 	
 	private static ImmutableList<Facet> generateFacetList(List<WorldCoord> vertexList) {

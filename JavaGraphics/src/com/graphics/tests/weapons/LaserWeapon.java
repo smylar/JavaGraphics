@@ -18,7 +18,6 @@ import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IEffector;
 import com.graphics.lib.interfaces.IPlugable;
-import com.graphics.lib.interfaces.IPointFinder;
 import com.graphics.lib.interfaces.ITexturable;
 import com.graphics.lib.interfaces.ITracker;
 import com.graphics.lib.interfaces.IVectorFinder;
@@ -37,15 +36,15 @@ public class LaserWeapon implements IEffector {
 
 	private int duration = 15;
 	private int range = 1000;
-	private IPointFinder origin;
-	private IVectorFinder effectVector;
-	private ICanvasObject parent;
+	private final IVectorFinder effectVector;
+	private final IWeaponised parent;
+	private final String id;
 	private LaserEffect laserEffect;
 	
-	public LaserWeapon(IPointFinder origin, IVectorFinder effectVector, ICanvasObject parent){
-		this.origin = origin;
+	public LaserWeapon(String id, IVectorFinder effectVector, IWeaponised parent){
 		this.effectVector = effectVector;
 		this.parent = parent;
+		this.id = id;
 	}
 	
 	@Override
@@ -92,7 +91,7 @@ public class LaserWeapon implements IEffector {
 				for (Rotation r : OrientationData.getRotationsForVector(effectVector.getVector())) {
 					lsr.applyTransform(r);
 				}
-				CanvasObjectFunctions.DEFAULT.get().moveTo(lsr, origin.find());
+				CanvasObjectFunctions.DEFAULT.get().moveTo(lsr, parent.getWeaponLocation(id).get());
 				TraitHandler.INSTANCE.getTrait(lsr, ITracker.class).ifPresent(trait -> trait.observeAndMatch(parent));
 				return null;
 			})
@@ -127,6 +126,11 @@ public class LaserWeapon implements IEffector {
 	@Override
     public ICanvasObject getParent() {
         return this.parent;
+    }
+	
+	@Override
+    public String getId() {
+        return this.id;
     }
 	
 	private boolean markTexture(IntersectionData<ICanvasObject> intersectionData) {

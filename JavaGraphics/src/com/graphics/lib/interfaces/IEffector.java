@@ -9,5 +9,7 @@ public interface IEffector {
 	
 	public ICanvasObject getParent();
 	
+	public String getId();
+	
 	default Optional<Class<?>> getEffectClass() { return Optional.empty(); }
 }

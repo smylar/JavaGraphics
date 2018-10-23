@@ -14,12 +14,12 @@
 			{ "keyCode" : "39", "onPress" : "moveRight", "onRelease" : "stopMoveRight" },
 			{ "keyCode" : "40", "onPress" : "moveDown", "onRelease" : "stopMoveDown" },
 			{ "keyCode" : "37", "onPress" : "moveLeft", "onRelease" : "stopMoveLeft" },
-			{ "keyCode" : "r", "onPress" : "fireWeapon", "pressParams" : ["0"] },
-			{ "keyCode" : "b", "onPress" : "fireWeapon", "pressParams" : ["1"] },
-			{ "keyCode" : "u", "onPress" : "fireWeapon", "pressParams" : ["2"] },
-			{ "keyCode" : "t", "onPress" : "fireWeapon", "pressParams" : ["3"] },
-			{ "keyCode" : "f", "onPress" : "fireWeapon", "pressParams" : ["4","5"] },
-			{ "keyCode" : "g", "onPress" : "fireWeapon", "pressParams" : ["6"], "onRelease" : "deactivateWeapon", "releaseParams" : ["6"] }
+			{ "keyCode" : "r", "onPress" : "fireWeapon", "pressParams" : ["LASER"] },
+			{ "keyCode" : "b", "onPress" : "fireWeapon", "pressParams" : ["BOUNCY"] },
+			{ "keyCode" : "u", "onPress" : "fireWeapon", "pressParams" : ["DEFLECTION"] },
+			{ "keyCode" : "t", "onPress" : "fireWeapon", "pressParams" : ["TRACKING"] },
+			{ "keyCode" : "f", "onPress" : "fireWeapon", "pressParams" : ["TORPEDO1","TORPEDO2"] },
+			{ "keyCode" : "g", "onPress" : "fireWeapon", "pressParams" : ["GAT"], "onRelease" : "deactivateWeapon", "releaseParams" : ["GAT"] }
 		]
 	}
 }

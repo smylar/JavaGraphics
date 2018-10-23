@@ -5,6 +5,7 @@ import java.util.List;
 import com.graphics.lib.Axis;
 import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.control.ObjectInputController;
+import com.graphics.lib.interfaces.IEffector;
 import com.graphics.lib.interfaces.IOrientable;
 import com.graphics.lib.traits.TraitHandler;
 import com.graphics.lib.transform.MovementTransform;
@@ -166,10 +167,8 @@ public final class ShipControls extends ObjectInputController<Ship> {
 		if (params == null) return;
 		for (String param : params)
 		{
-			int n = Integer.parseInt(param);
-			if (this.controlledObject.getWeapons().size() > n && this.controlledObject.getWeapons().get(n) != null){
-				this.controlledObject.getWeapons().get(n).activate();
-			}
+			this.controlledObject.getWeapon(param)
+			                     .ifPresent(IEffector::activate);
 		}
 	}
 	
@@ -177,10 +176,8 @@ public final class ShipControls extends ObjectInputController<Ship> {
 		if (params == null) return;
 		for (String param : params)
 		{
-			int n = Integer.parseInt(param);
-			if (this.controlledObject.getWeapons().size() > n && this.controlledObject.getWeapons().get(n) != null){
-				this.controlledObject.getWeapons().get(n).deActivate();
-			}
+		    this.controlledObject.getWeapon(param)
+                                 .ifPresent(IEffector::deActivate);
 		}
 	}
 	
