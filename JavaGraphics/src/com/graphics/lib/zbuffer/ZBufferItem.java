@@ -2,6 +2,7 @@ package com.graphics.lib.zbuffer;
 
 import java.awt.Color;
 import java.util.TreeMap;
+import java.util.function.Supplier;
 
 import com.graphics.lib.interfaces.ICanvasObject;
 
@@ -87,14 +88,14 @@ public final class ZBufferItem
 	 * @param z
 	 * @param colour
 	 */
-	public synchronized void add(ICanvasObject obj, double z, Color colour)
+	public synchronized void add(ICanvasObject obj, double z, Supplier<Color> colour)
 	{	
 		if (items.isEmpty() || z < items.firstKey()) {
 			topMostObject = obj;
-			items.put(z, colour);
+			items.put(z, colour.get());
 			active = true;
 		} else if (items.firstEntry().getValue().getAlpha() < 255) {
-			items.put(z, colour);
+			items.put(z, colour.get());
 		}
 	}
 	
