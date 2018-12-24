@@ -10,10 +10,8 @@ public class TestTexture implements Texture {
 	private int repeaty = 8;
 	private Color colour = new Color(200,0,0);
 	private int order = 0;
-	//private int repeatx = 1;
-	//private int repeaty = 1;
 	
-	public TestTexture(){
+	public TestTexture() {
 		map = new int[5][5];
 		map[0] = new int[] {0,0,0,0,1};
 		map[1] = new int[] {0,0,0,0,1};
@@ -33,10 +31,8 @@ public class TestTexture implements Texture {
 	
 	@Override
 	public Optional<Color> getColour(int x, int y) {
-		if (x < 0 || y < 0) return Optional.empty();
 		
-		if (map[x % 5][y % 5] == 1){
-		//if (map[x][y] == 1){
+		if (x >= 0 && y >= 0 && map[x % map.length][y % map[0].length] == 1) {
 			return Optional.of(colour);
 		}
 		return Optional.empty();
