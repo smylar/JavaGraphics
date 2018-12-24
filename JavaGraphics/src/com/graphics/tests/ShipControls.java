@@ -1,6 +1,8 @@
 package com.graphics.tests;
 
+import java.util.function.Consumer;
 import java.util.List;
+import java.util.Optional;
 
 import com.graphics.lib.Axis;
 import com.graphics.lib.canvas.CanvasObjectFunctions;
@@ -11,9 +13,14 @@ import com.graphics.lib.traits.TraitHandler;
 import com.graphics.lib.transform.MovementTransform;
 import com.graphics.lib.transform.RepeatingTransform;
 import com.graphics.lib.transform.Rotation;
-import com.graphics.lib.transform.Transform;
 import com.graphics.tests.shapes.Ship;
 
+/**
+ * Methods for moving a ship around in the scene
+ * 
+ * @author paul.brandon
+ *
+ */
 public final class ShipControls extends ObjectInputController<Ship> {
 
 	private final IOrientable orientable;
@@ -23,165 +30,118 @@ public final class ShipControls extends ObjectInputController<Ship> {
 		orientable = TraitHandler.INSTANCE.getTrait(controlledObject, IOrientable.class).get();
 	}
 
-	public void increaseSpeed(){
+	public void increaseSpeed() {
 		getMovement(FORWARD).setAcceleration(this.controlledObject.getAcceleration());
 	}
 	
-	public void decreaseSpeed(){
+	public void decreaseSpeed() {
 		getMovement(FORWARD).setAcceleration(-this.controlledObject.getAcceleration());
 	}
 	
-	public void stopAccelerating(){
+	public void stopAccelerating() {
 		getMovement(FORWARD).setAcceleration(0);
 	}
 	
-	public void panRight()
-	{
-		if (this.controlledObject.hasNamedTransform(PAN_RIGHT)) return;
-		
+	public void panRight() {
 		addRotation(new Rotation(Axis.Y, this.controlledObject.getPanRate()), PAN_RIGHT);
 	}
 	
-	public void panLeft()
-	{
-		if (this.controlledObject.hasNamedTransform(PAN_LEFT)) return;
-		
+	public void panLeft() {
 		addRotation(new Rotation(Axis.Y, -this.controlledObject.getPanRate()), PAN_LEFT);
 	}
 	
-	public void panDown()
-	{
-		if (this.controlledObject.hasNamedTransform(PAN_DOWN)) return;
-		
+	public void panDown() {
 		addRotation(new Rotation(Axis.X, -this.controlledObject.getPanRate()), PAN_DOWN);
 	}
 	
-	public void panUp()
-	{
-		if (this.controlledObject.hasNamedTransform(PAN_UP)) return;
-		
+	public void panUp() {
 		addRotation(new Rotation(Axis.X, this.controlledObject.getPanRate()), PAN_UP);
 	}
 	
-	public void rollRight()
-	{
-		if (this.controlledObject.hasNamedTransform(ROLL_RIGHT)) return;
-		
+	public void rollRight() {
 		addRotation(new Rotation(Axis.Z, 4), ROLL_RIGHT);
 	}
 	
-	public void rollLeft()
-	{
-		if (this.controlledObject.hasNamedTransform(ROLL_LEFT)) return;
-		
+	public void rollLeft() {
 		addRotation(new Rotation(Axis.Z, -4), ROLL_LEFT);
 	}
 	
-	public void moveUp()
-	{
-		if (this.controlledObject.hasNamedTransform(UP)) return;
-		Transform move = new MovementTransform(() -> orientable.getOrientation().getUp(), 4);
-		move.setName(UP);
-		this.controlledObject.addTransform(move);
+	public void moveUp() {
+	    addTranslation(new MovementTransform(() -> orientable.getOrientation().getUp(), 4), UP);
 	}
 	
-	public void moveRight()
-	{
-		if (this.controlledObject.hasNamedTransform(RIGHT)) return;
-		Transform move = new MovementTransform(() -> orientable.getOrientation().getRight(), 4);
-		move.setName(RIGHT);
-		this.controlledObject.addTransform(move);
+	public void moveRight() {
+	    addTranslation(new MovementTransform(() -> orientable.getOrientation().getRight(), 4), RIGHT);
 	}
 	
-	public void moveDown()
-	{
-		if (this.controlledObject.hasNamedTransform(DOWN)) return;
-		Transform move = new MovementTransform(() -> orientable.getOrientation().getDown(), 4);
-		move.setName(DOWN);
-		this.controlledObject.addTransform(move);
+	public void moveDown() {
+	    addTranslation(new MovementTransform(() -> orientable.getOrientation().getDown(), 4), DOWN);
 	}
 	
-	public void moveLeft()
-	{
-		if (this.controlledObject.hasNamedTransform(LEFT)) return;
-		Transform move = new MovementTransform(() -> orientable.getOrientation().getLeft(), 4);
-		move.setName(LEFT);
-		this.controlledObject.addTransform(move);
+	public void moveLeft() {
+	    addTranslation(new MovementTransform(() -> orientable.getOrientation().getLeft(), 4), LEFT);
 	}
 	
-	public void stopPanDown()
-	{
+	public void stopPanDown() {
 		this.controlledObject.cancelNamedTransform(PAN_DOWN);
 	}
 	
-	public void stopPanUp()
-	{
+	public void stopPanUp() {
 		this.controlledObject.cancelNamedTransform(PAN_UP);
 	}
 	
-	public void stopPanRight()
-	{
+	public void stopPanRight() {
 		this.controlledObject.cancelNamedTransform(PAN_RIGHT);
 	}
 	
-	public void stopPanLeft()
-	{
+	public void stopPanLeft() {
 		this.controlledObject.cancelNamedTransform(PAN_LEFT);
 	}
 	
-	public void stopRollRight()
-	{
+	public void stopRollRight() {
 		this.controlledObject.cancelNamedTransform(ROLL_RIGHT);
 	}
 	
-	public void stopRollLeft()
-	{
+	public void stopRollLeft() {
 		this.controlledObject.cancelNamedTransform(ROLL_LEFT);
 	}
 	
-	public void stopMoveUp()
-	{
+	public void stopMoveUp() {
 		this.controlledObject.cancelNamedTransform(UP);
 	}
 	
-	public void stopMoveRight()
-	{
+	public void stopMoveRight() {
 		this.controlledObject.cancelNamedTransform(RIGHT);
 	}
-	public void stopMoveDown()
-	{
+	public void stopMoveDown() {
 		this.controlledObject.cancelNamedTransform(DOWN);
 	}
 	
-	public void stopMoveLeft()
-	{
+	public void stopMoveLeft() {
 		this.controlledObject.cancelNamedTransform(LEFT);
 	}
 	
-	public void stopAll()
-	{
+	public void stopAll() {
 		this.controlledObject.cancelTransforms();
 	}
 	
-	public void fireWeapon(List<String> params){
-		if (params == null) return;
-		for (String param : params)
-		{
-			this.controlledObject.getWeapon(param)
-			                     .ifPresent(IEffector::activate);
-		}
+	public void fireWeapon(List<String> params) {
+	    weaponAction(Optional.ofNullable(params), IEffector::activate);
 	}
 	
-	public void deactivateWeapon(List<String> params){
-		if (params == null) return;
-		for (String param : params)
-		{
-		    this.controlledObject.getWeapon(param)
-                                 .ifPresent(IEffector::deActivate);
-		}
+	public void deactivateWeapon(List<String> params) {
+	    weaponAction(Optional.ofNullable(params), IEffector::deActivate);
 	}
 	
-	private MovementTransform getMovement(String tag){
+	private void weaponAction(Optional<List<String>> params, Consumer<IEffector> action) {
+	    params.ifPresent(p -> 
+	              p.stream().map(controlledObject::getWeapon)
+	                        .filter(Optional::isPresent)
+	                        .forEach(w -> action.accept(w.get()))
+	    );
+	}
+	
+	private MovementTransform getMovement(String tag) {
 		return this.controlledObject.getTransform(tag, MovementTransform.class).orElseGet(() -> {
 			MovementTransform transform = new MovementTransform(() -> orientable.getOrientation().getForward(), 0d);
 			transform.setName(tag);
@@ -191,8 +151,17 @@ public final class ShipControls extends ObjectInputController<Ship> {
 	}
 	
 	private void addRotation(Rotation transform, String name) {
-		controlledObject.addTransform(orientable.toBaseOrientationTransform().setName(name));
-		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(controlledObject, new RepeatingTransform<Rotation>(transform, -1).setName(name));
-		controlledObject.addTransform(orientable.reapplyOrientationTransform().setName(name));
+	    if (!this.controlledObject.hasNamedTransform(name)) {
+	        controlledObject.addTransform(orientable.toBaseOrientationTransform().setName(name));
+	        CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(controlledObject, new RepeatingTransform<>(transform, -1).setName(name));
+	        controlledObject.addTransform(orientable.reapplyOrientationTransform().setName(name));
+	    }
+	}
+	
+	private void addTranslation(MovementTransform transform, String name) {
+	    if (!this.controlledObject.hasNamedTransform(name)) {
+	        transform.setName(name);
+            this.controlledObject.addTransform(transform);
+	    }
 	}
 }
