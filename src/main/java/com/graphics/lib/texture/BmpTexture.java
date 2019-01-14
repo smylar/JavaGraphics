@@ -21,7 +21,7 @@ public class BmpTexture implements Texture{
 	
 	public BmpTexture(String bmpFileResource){
 		try {
-			bmpImage = ImageIO.read(getClass().getResource(bmpFileResource + ".bmp"));
+			bmpImage = ImageIO.read(getClass().getClassLoader().getResource(String.format("textures/%s.bmp", bmpFileResource)));
 		} catch (IOException e) {}
 	}
 	
