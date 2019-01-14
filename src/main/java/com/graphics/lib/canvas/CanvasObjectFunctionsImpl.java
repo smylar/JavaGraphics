@@ -91,7 +91,7 @@ public class CanvasObjectFunctionsImpl {
 			}
 		}
 		else{
-			// via many substitutions I won't get into here we end up with the quadratic equation  a*t^2 + b*t + c = 0  or t = [ -b ± Sqrt( b^2 - 4*a*c ) ] / (2*a) by completing the square
+			// via many substitutions I won't get into here we end up with the quadratic equation  a*t^2 + b*t + c = 0  or t = [ -b +- Sqrt( b^2 - 4*a*c ) ] / (2*a) by completing the square
 			//where
 			// a = proj speed ^ 2 - target speed ^ 2
 			// b = 2A * target speed * cos(theta)
