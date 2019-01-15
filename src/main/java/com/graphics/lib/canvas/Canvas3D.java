@@ -273,7 +273,7 @@ public class Canvas3D extends AbstractCanvas {
 		if (floor == null || !obj.getCastsShadow()) {
 		    return Sets.newHashSet();
 		}
-		
+		final Color shadowColour = new Color(150,150,150,50);
 		return lightSources.stream()
 		                   .filter(ILightSource::isOn)
 		                   .map(ls -> 
@@ -291,7 +291,7 @@ public class Canvas3D extends AbstractCanvas {
 		                   )
 		                   .filter(shadow -> shadow.getFacetList().size() > 0)
 		                   .peek(shadow -> {
-		                       shadow.setColour(new Color(50,50,50));
+		                       shadow.setColour(shadowColour);
                                shadow.setProcessBackfaces(true);
                                shadow.setVisible(true);
 		                   })
