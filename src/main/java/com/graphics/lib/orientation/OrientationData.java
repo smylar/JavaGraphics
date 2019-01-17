@@ -17,9 +17,17 @@ import com.graphics.lib.transform.Rotation;
  *
  */
 public class OrientationData {
-	private double xRot = 0;
-	private double yRot = 0;
-	private double zRot = 0;
+	private double xRot;
+	private double yRot;
+	private double zRot;
+	
+	public OrientationData() {
+	    //default
+	}
+	
+	public OrientationData(IOrientation orientation) {
+	    saveCurrentTransforms(orientation);
+	}
 	
 	/**
 	 * Gets the angle in degrees to rotate by around the X axis

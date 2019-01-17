@@ -1,11 +1,7 @@
 package com.graphics.lib.canvas;
 
 import java.awt.Graphics;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
-import java.util.function.BiConsumer;
-
 import javax.swing.JPanel;
 
 import com.graphics.lib.ZBufferEnum;
@@ -16,21 +12,11 @@ public class AbstractCanvas extends JPanel {
 
     private static final long serialVersionUID = 1L;
     private IZBuffer zBuffer;
-    private List<BiConsumer<AbstractCanvas,Graphics>> drawPlugins = new ArrayList<>();
     private Camera camera;
 
     public AbstractCanvas(Camera camera) {
         super();
         this.camera = camera;
-    }
-    
-    /**
-     * Allows anonymous functions to be registered in order to customise the display
-     * 
-     * @param operation A paint operation
-     */
-    public void addDrawOperation(BiConsumer<AbstractCanvas,Graphics> operation) {
-    	drawPlugins.add(operation);
     }
 
     public Camera getCamera() {
@@ -62,8 +48,6 @@ public class AbstractCanvas extends JPanel {
     		super.paintComponent(g);
     
     		g.drawImage(this.zBuffer.getBuffer(), 0, 0, null);
-    
-    		drawPlugins.forEach(op -> op.accept(this, g));
     	}
     }
     

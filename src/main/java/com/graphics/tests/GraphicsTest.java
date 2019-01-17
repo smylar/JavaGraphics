@@ -53,6 +53,9 @@ import com.graphics.lib.canvas.Canvas3D;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.canvas.SlaveCanvas3D;
+import com.graphics.lib.canvas.effects.Reticule;
+import com.graphics.lib.canvas.effects.RollMarker;
+import com.graphics.lib.canvas.effects.ScreenEffectsAspect;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IOrientable;
 import com.graphics.lib.interfaces.IOrientation;
@@ -116,7 +119,9 @@ public class GraphicsTest extends JFrame {
 		//zBuf.setSkip(3);
 		cnv.setzBuffer(zBuf);
 		
-		cnv.addDrawOperation(TestUtils.showMarkers());
+		ScreenEffectsAspect.addAction(TestUtils.showMarkers());
+		ScreenEffectsAspect.addAction(new Reticule());
+		ScreenEffectsAspect.addAction(new RollMarker());
 		
 		Facet floor = new Facet(new WorldCoord(0,650,0), new WorldCoord(700,650,0), new WorldCoord(0,650,700));
 		cnv.setFloor(floor);
@@ -488,7 +493,7 @@ public class GraphicsTest extends JFrame {
 	}
 	
 	private void addUIOverlay(Canvas3D cnv, Camera cam) {
-	    cnv.addDrawOperation((c, g) -> {
+	    ScreenEffectsAspect.addAction((c, g) -> {
             ICanvasObject selectedObject = getSelectedObject();
             if (selectedObject == null || !selectedObject.isVisible()) return;
             
@@ -524,7 +529,7 @@ public class GraphicsTest extends JFrame {
             g.setColor(Color.LIGHT_GRAY);
             g.drawString(objectCounts.toString(), 40, c.getHeight()-5);
         });*/
-        cnv.addDrawOperation((c, g) -> {
+	    ScreenEffectsAspect.addAction((c, g) -> {
             //more messing with collectors for ammo counts
             Map<String, Integer> ammoCounts = AmmoTracker.INSTANCE.getTracked()
                                                   .entrySet()

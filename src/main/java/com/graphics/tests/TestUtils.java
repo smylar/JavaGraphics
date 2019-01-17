@@ -1,13 +1,9 @@
 package com.graphics.tests;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.util.Optional;
-import java.util.function.BiConsumer;
-import com.graphics.lib.Utils;
-import com.graphics.lib.camera.ViewAngleCamera;
-import com.graphics.lib.canvas.AbstractCanvas;
 import com.graphics.lib.canvas.Canvas3D;
+import com.graphics.lib.canvas.effects.DrawAction;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ICanvasObjectList;
 import com.graphics.lib.interfaces.IPlugable;
@@ -22,7 +18,7 @@ import com.sound.ClipLibrary;
 public class TestUtils {
 	public static final String SILENT_EXPLODE = "sexpl";
 	
-	public static BiConsumer<AbstractCanvas,Graphics> showMarkers(){
+	public static DrawAction showMarkers() {
 		return (c, g) -> {
 			double pixelsPerDegree = (double)c.getHeight() / 180;
 			int middleHeight = c.getHeight() / 2;
@@ -30,18 +26,17 @@ public class TestUtils {
 			g.fillRect(0, 0, 35, c.getHeight());
 			g.setColor(Color.WHITE);
 			double pitch = c.getCamera().getPitch();
-			for (int i = 0 ; i < 181 ; i+=10){
+			for (int i = 0 ; i < 181 ; i+=10) {
 				double marker = i - 90;
 				double offset = marker + pitch;
 				if (offset > 90 || offset < -90) continue;
-				int pos = middleHeight - (int)Math.round((offset*pixelsPerDegree)); 
+				int pos = middleHeight - (int)Math.round(offset*pixelsPerDegree); 
 				g.drawLine(5,pos,30,pos);
 				g.drawString(Double.toString(marker), 10, pos-1);
 			}
 			g.setColor(Color.RED);
 			g.drawLine(5,middleHeight,30,middleHeight);
-			
-			
+						
 			pixelsPerDegree = (double)c.getWidth() / 180;
 			int middleWidth = c.getWidth() / 2;
 			g.setColor(new Color(0,0,0,150));
@@ -49,10 +44,10 @@ public class TestUtils {
 			g.setColor(Color.WHITE);
 			double bearing = c.getCamera().getBearing();
 			int start = (int)((bearing - 90)/10) * 10;
-			for (int i = 0 ; i < 181 ; i+=10){
+			for (int i = 0 ; i < 181 ; i+=10) {
 				double marker = start + i;
 				double offset = marker - bearing;
-				int pos = middleWidth + (int)Math.round((offset*pixelsPerDegree)); 
+				int pos = middleWidth + (int)Math.round(offset*pixelsPerDegree); 
 				if (marker < -179){
 					marker = 180 + (180 + marker);
 				}
@@ -62,15 +57,6 @@ public class TestUtils {
 				g.drawLine(pos,5,pos,30);
 				g.drawString(Double.toString(marker), pos+1, 20);
 			}
-			g.setColor(Color.RED);
-			g.drawLine(middleWidth,5,middleWidth,30);
-			
-			g.setColor(Color.black);
-
-			Utils.drawCircle(middleWidth, middleHeight, 20, new Color(255,0,0), new Color(0,255,0,0)).accept(c, g);
-			
-			Utils.cast(c.getCamera(), ViewAngleCamera.class)
-			     .ifPresent(vac ->  g.drawString(""+vac.getViewAngle() , c.getWidth() - 30, c.getHeight() - 5));
 		};
 	}
 	
@@ -80,7 +66,7 @@ public class TestUtils {
 	
 	public static IPlugin<IPlugable,Void> getExplodePlugin(Optional<ClipLibrary> clipLibrary)
 	{
-		return new IPlugin<IPlugable,Void>(){
+		return new IPlugin<IPlugable,Void>() {
 			@Override
 			public Void execute(IPlugable plugable) {
 			    ICanvasObject obj = plugable.getParent();
