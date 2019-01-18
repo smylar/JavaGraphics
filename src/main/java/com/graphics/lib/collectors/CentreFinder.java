@@ -8,6 +8,7 @@ import com.graphics.lib.Point;
  * Used to collect a set of points and generate a centre point 
  * that is the centre of a cube encompassing all points
  * 
+ * May rename this as can be used for more than centre
  * @author paul
  *
  */
@@ -39,7 +40,31 @@ public class CentreFinder implements Consumer<Point> {
         minZ = min(minZ, other.minZ);
 	}
 	
-	public Point result() {
+	public Double getMaxX() {
+        return maxX;
+    }
+
+    public Double getMaxY() {
+        return maxY;
+    }
+
+    public Double getMaxZ() {
+        return maxZ;
+    }
+
+    public Double getMinX() {
+        return minX;
+    }
+
+    public Double getMinY() {
+        return minY;
+    }
+
+    public Double getMinZ() {
+        return minZ;
+    }
+
+    public Point result() {
 		//NULLS ??
 		return new Point(minX + ((maxX - minX)/2), minY + ((maxY - minY)/2), minZ + ((maxZ - minZ)/2));
 	}

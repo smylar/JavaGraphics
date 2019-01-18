@@ -2,13 +2,11 @@ package com.graphics.tests;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-import java.awt.BasicStroke;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executors;
@@ -53,6 +51,7 @@ import com.graphics.lib.canvas.Canvas3D;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.canvas.SlaveCanvas3D;
+import com.graphics.lib.canvas.effects.BoundingBox;
 import com.graphics.lib.canvas.effects.Reticule;
 import com.graphics.lib.canvas.effects.RollMarker;
 import com.graphics.lib.canvas.effects.ScreenEffectsAspect;
@@ -118,10 +117,6 @@ public class GraphicsTest extends JFrame {
 		ZBuffer zBuf = new ZBuffer();
 		//zBuf.setSkip(3);
 		cnv.setzBuffer(zBuf);
-		
-		ScreenEffectsAspect.addAction(TestUtils.showMarkers());
-		ScreenEffectsAspect.addAction(new Reticule());
-		ScreenEffectsAspect.addAction(new RollMarker());
 		
 		Facet floor = new Facet(new WorldCoord(0,650,0), new WorldCoord(700,650,0), new WorldCoord(0,650,700));
 		cnv.setFloor(floor);
@@ -493,33 +488,13 @@ public class GraphicsTest extends JFrame {
 	}
 	
 	private void addUIOverlay(Canvas3D cnv, Camera cam) {
-	    ScreenEffectsAspect.addAction((c, g) -> {
-            ICanvasObject selectedObject = getSelectedObject();
-            if (selectedObject == null || !selectedObject.isVisible()) return;
-            
-            WorldCoord pt = selectedObject.getVertexList().get(0);
-            double maxX = pt.getTransformed(cam).x;
-            double maxY = pt.getTransformed(cam).y;
-            double minX = pt.getTransformed(cam).x;
-            double minY = pt.getTransformed(cam).y;
-            for (WorldCoord p : selectedObject.getVertexList())
-            {
-                if (p.hasTags()) continue;
-                if (p.getTransformed(cam).x > maxX) maxX = p.getTransformed(cam).x;
-                if (p.getTransformed(cam).x < minX) minX = p.getTransformed(cam).x;
-                if (p.getTransformed(cam).y > maxY) maxY = p.getTransformed(cam).y;
-                if (p.getTransformed(cam).y < minY) minY = p.getTransformed(cam).y;
-            };
-            
-            g.setColor(Color.DARK_GRAY);
-            float dash1[] = {10.0f};
-            BasicStroke dashed = new BasicStroke(1.5f,
-                                BasicStroke.CAP_BUTT,
-                                BasicStroke.JOIN_MITER,
-                                10.0f, dash1, 0.0f);
-            ((Graphics2D)g).setStroke(dashed);
-            g.drawRect((int)minX - 4, (int)minY - 4, (int)maxX - (int)minX + 8, (int)maxY - (int)minY + 8);
-        });
+	    ScreenEffectsAspect.addAction(TestUtils.showMarkers());
+        ScreenEffectsAspect.addAction(new Reticule());
+        ScreenEffectsAspect.addAction(new RollMarker());
+	    
+	    ScreenEffectsAspect.addAction(new BoundingBox(() -> getSelectedObject()));
+	    //hmm seems to be another example here that using a method reference this::getSelectedObject does strange things
+	    //in the case the box can jump around
         
         /*cnv.addDrawOperation((c, g) -> {
             //messing with collectors - puts the count of each object type at the bottom of the screen
