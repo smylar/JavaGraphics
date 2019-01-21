@@ -493,8 +493,6 @@ public class GraphicsTest extends JFrame {
         ScreenEffectsAspect.addAction(new RollMarker());
 	    
 	    ScreenEffectsAspect.addAction(new BoundingBox(() -> getSelectedObject()));
-	    //hmm seems to be another example here that using a method reference this::getSelectedObject does strange things
-	    //in the case the box can jump around
         
         /*cnv.addDrawOperation((c, g) -> {
             //messing with collectors - puts the count of each object type at the bottom of the screen

@@ -46,9 +46,7 @@ public class Utils {
 							
 				double percent = 0;
 				
-				double answer = v.dotProduct(lightVector);
-				
-				double deg = Math.toDegrees(Math.acos(answer));
+				double deg = v.angleBetween(lightVector);
 				
 				if (deg > 90 && !bf)
 				{			

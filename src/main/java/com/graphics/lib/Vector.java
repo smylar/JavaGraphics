@@ -78,6 +78,28 @@ public final class Vector {
 	}
 	
 	/**
+	 * Return angle between 2 vectors in degrees
+	 * 
+	 * @param v2
+	 * @return
+	 */
+	public double angleBetween (Vector v2)
+    {
+	    return Math.toDegrees(angleBetweenRad(v2));
+    }
+	
+	/**
+     * Return angle between 2 vectors in radians
+     * 
+     * @param v2
+     * @return
+     */
+    public double angleBetweenRad (Vector v2)
+    {
+        return Math.acos(getUnitVector().dotProduct(v2.getUnitVector()));
+    }
+	
+	/**
 	 * Generates a vector that is perpendicular to the plane occupied by the 2 vectors it is generated from
 	 * <br/>
 	 * N.B. Ordering is important v1 x v2 will generate a vector opposite to v2 x v1

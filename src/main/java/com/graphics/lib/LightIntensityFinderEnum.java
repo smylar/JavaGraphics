@@ -12,11 +12,8 @@ public enum LightIntensityFinderEnum {
 				if (intComps.hasNoIntensity()) return;
 				
 				double percent = 0;
-				Vector lightVector = l.getPosition().vectorToPoint(p).getUnitVector();
-				
-				double answer = v.dotProduct(lightVector);
-				
-				double deg = Math.toDegrees(Math.acos(answer));
+
+				double deg = v.angleBetween(l.getPosition().vectorToPoint(p));
 				
 				if (deg > 90 && !bf)
 				{			
