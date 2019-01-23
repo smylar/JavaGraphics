@@ -3,15 +3,14 @@ package com.graphics.tests.weapons;
 import java.awt.Color;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 
 import com.graphics.lib.Point;
 import com.graphics.lib.Utils;
-import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.Canvas3D;
 import com.graphics.lib.canvas.CanvasObjectFunctions;
@@ -28,10 +27,16 @@ import com.graphics.lib.traits.PlugableTrait;
 import com.graphics.lib.traits.TrackingTrait;
 import com.graphics.lib.traits.TraitHandler;
 import com.graphics.lib.transform.Rotation;
-import com.graphics.lib.collectors.NearestIntersectedFacetFinder;
+import com.graphics.lib.collectors.IntersectedFacetFinder;
 import com.graphics.lib.collectors.IntersectionData;
 import com.graphics.tests.TestUtils;
 
+/**
+ * Defines parameters for a laser weapon, i.e. How/when to generate a {@link LaserEffect}
+ * 
+ * @author paul.brandon
+ *
+ */
 public class LaserWeapon implements IEffector {
 
 	private int duration = 15;
@@ -68,17 +73,15 @@ public class LaserWeapon implements IEffector {
 						}
 					
 						lsr.setTickLife(lsr.getTickLife() - 1);
-						Vector v = effectVector.getVector();
 						obj.getParent().getObjectAs(LaserEffect.class).ifPresent(l -> {
-							Entry<Double, IntersectionData<ICanvasObject>> f = TestUtils.getFilteredObjectList().get().stream().collect(new NearestIntersectedFacetFinder<>(v,l.getAnchorPoint(),l.getLength()));
-							if (f != null)
-							{
-								if (!markTexture(f.getValue())) {
-									f.getValue().getFacet().setMaxIntensity(f.getValue().getFacet().getMaxIntensity() - 0.15);
-								}
-								l.setCurLength(f.getKey());
-							}else{
-								l.resetLength();
+							TreeSet<IntersectionData<ICanvasObject>> f = TestUtils.getFilteredObjectList().get().parallelStream()
+							                                                      .collect(new IntersectedFacetFinder<>(effectVector.getVector(),l.getAnchorPoint(),l.getLength()));		
+							l.resetLength();								
+							if (!f.isEmpty()) {
+							    if (!markTexture(f.first())) {
+                                    f.first().getFacet().setMaxIntensity(f.first().getFacet().getMaxIntensity() - 0.15);
+                                }
+                                l.setCurLength(f.first().getDistanceAway());
 							}
 						});
 						return null;

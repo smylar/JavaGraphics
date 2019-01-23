@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -17,13 +17,23 @@ import com.graphics.lib.Vector;
 import com.graphics.lib.canvas.FunctionHandler;
 import com.graphics.lib.interfaces.ICanvasObject;
 
-public class NearestIntersectedFacetFinder<T extends ICanvasObject> implements Collector<T, Map<Double, IntersectionData<T>>, Entry<Double, IntersectionData<T>>>{
+/**
+ * Get the intersected facets along the given vector from the given point for a given distance
+ * <br/>
+ * All facets are returned in distance order, this allows the possible processing of penetrating effects
+ * where we might want to know about facets behind the the initially effected one.
+ * 
+ * @author paul.brandon
+ *
+ * @param <T>
+ */
+public class IntersectedFacetFinder<T extends ICanvasObject> implements Collector<T, TreeSet<IntersectionData<T>>, TreeSet<IntersectionData<T>>> {
 
 	private Vector v;
 	private Point p;
 	private double maxDist;
 	
-	public NearestIntersectedFacetFinder(Vector v, Point p, double maxDist)
+	public IntersectedFacetFinder(Vector v, Point p, double maxDist)
 	{
 		this.v = v;
 		this.p = p;
@@ -31,7 +41,7 @@ public class NearestIntersectedFacetFinder<T extends ICanvasObject> implements C
 	}
 	
 	@Override
-	public BiConsumer<Map<Double, IntersectionData<T>>, T> accumulator() {
+	public BiConsumer<TreeSet<IntersectionData<T>>, T> accumulator() {
 		return (acc, elem) -> {
 			Map<Facet,Point> mfp = FunctionHandler.getFunctions(elem).getIntersectedFacets(elem, p, v);
 			for (Entry<Facet,Point> entry : mfp.entrySet())
@@ -39,7 +49,7 @@ public class NearestIntersectedFacetFinder<T extends ICanvasObject> implements C
 				double dist = p.distanceTo(entry.getValue());
 				if (dist < maxDist)
 				{
-					acc.put(dist, new IntersectionData<T>(elem, entry.getKey(), entry.getValue()));
+					acc.add(new IntersectionData<T>(elem, entry.getKey(), entry.getValue(), dist));
 				}
 			}
 			
@@ -52,24 +62,21 @@ public class NearestIntersectedFacetFinder<T extends ICanvasObject> implements C
 	}
 
 	@Override
-	public BinaryOperator<Map<Double, IntersectionData<T>>> combiner() {
+	public BinaryOperator<TreeSet<IntersectionData<T>>> combiner() {
 		return (acc1, acc2) -> {
-		    throw new UnsupportedOperationException(); //fine if we do not use a parallel stream
+		    acc1.addAll(acc2);
+		    return acc1;
 		  };
 	}
 
 	@Override
-	public Function<Map<Double, IntersectionData<T>>, Entry<Double, IntersectionData<T>>> finisher() {
-		return (acc) -> {
-			TreeMap<Double, IntersectionData<T>> tm = (TreeMap<Double, IntersectionData<T>>)acc;
-			if (acc.size() > 0) return tm.firstEntry();
-			return null;
-		};
+	public Function<TreeSet<IntersectionData<T>>, TreeSet<IntersectionData<T>>> finisher() {
+	    return acc -> acc;
 	}
 
 	@Override
-	public Supplier<Map<Double, IntersectionData<T>>> supplier() {
-		return TreeMap::new;
+	public Supplier<TreeSet<IntersectionData<T>>> supplier() {
+	    return () -> new TreeSet<IntersectionData<T>>((o1,o2) -> o1.getDistanceAway().compareTo(o2.getDistanceAway()));
 	}
 
 }

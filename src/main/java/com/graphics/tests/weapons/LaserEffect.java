@@ -13,6 +13,12 @@ import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.shapes.Cylinder;
 
+/**
+ * Effect that will appear on screen when a Laser is activated
+ * 
+ * @author paul.brandon
+ *
+ */
 public final class LaserEffect extends CanvasObject {
 
 	private int tickLife = 15;

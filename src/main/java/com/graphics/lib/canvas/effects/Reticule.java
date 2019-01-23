@@ -2,6 +2,9 @@ package com.graphics.lib.canvas.effects;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.function.BiConsumer;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.graphics.lib.Utils;
 import com.graphics.lib.camera.ViewAngleCamera;
@@ -17,6 +20,7 @@ public class Reticule implements DrawAction {
     
     private final Color startColour;
     private final Color endColour;
+    private final BiConsumer<Pair<Integer,Integer>, Graphics> drawer;
     
     public Reticule() {
         this(Color.RED, new Color(0,255,0,0));
@@ -25,6 +29,7 @@ public class Reticule implements DrawAction {
     public Reticule(Color start, Color end) {
         startColour = start;
         endColour = end;
+        drawer = Utils.drawCircle(20, startColour, endColour);
     }
 
     @Override
@@ -37,7 +42,7 @@ public class Reticule implements DrawAction {
         
         g.setColor(Color.black);
 
-        Utils.drawCircle(middleWidth, middleHeight, 20, startColour, endColour).accept(cnv, g);
+        drawer.accept(Pair.of(middleWidth, middleHeight), g);
         
         Utils.cast(cnv.getCamera(), ViewAngleCamera.class)
              .ifPresent(vac ->  g.drawString(""+vac.getViewAngle() , cnv.getWidth() - 30, cnv.getHeight() - 5));

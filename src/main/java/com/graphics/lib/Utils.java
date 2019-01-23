@@ -11,7 +11,6 @@ import java.util.function.Predicate;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
-import com.graphics.lib.canvas.AbstractCanvas;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.FunctionHandler;
 import com.graphics.lib.interfaces.ICanvasObject;
@@ -69,9 +68,9 @@ public class Utils {
 		};
 	}
 	
-	public static BiConsumer<AbstractCanvas, Graphics> drawCircle(int x, int y, int radius, Color startColour, Color endColour){
+	public static BiConsumer<Pair<Integer,Integer>, Graphics> drawCircle(final int radius, final Color startColour, final Color endColour){
 		//drawing a circle without using drawCircle, just because :)
-		return (c,g) ->{
+		return (p,g) -> {
 			double rs = Math.pow(radius,2);
 			int redDiff = endColour.getRed() - startColour.getRed();
 			int blueDiff = endColour.getBlue() - startColour.getBlue();
@@ -80,7 +79,7 @@ public class Utils {
 			for(int i = 0 ; i <= radius ; i++)
 			{
 				int length = (int)Math.round(Math.sqrt(rs - Math.pow(i,2))) ;
-				for (int j = 0 ; j <= length ; j++ ){
+				for (int j = 0 ; j <= length ; j++ ) {
 					double pc = Math.sqrt(Math.pow(j, 2) + Math.pow(i, 2)) / (double)radius;
 					if (pc > 1) pc = 1;
 					int cRed = (int)Math.floor(startColour.getRed() + ((double)redDiff * pc));
@@ -90,10 +89,10 @@ public class Utils {
 			
 					g.setColor(new Color(cRed, cGreen, cBlue, cAlpha));
 			
-					g.drawLine(x+j, y-i, x+j, y-i); 
-					g.drawLine(x+j, y+i, x+j, y+i);
-					g.drawLine(x-j, y-i, x-j, y-i); 
-					g.drawLine(x-j, y+i, x-j, y+i); 
+					g.drawLine(p.getLeft()+j, p.getRight()-i, p.getLeft()+j, p.getRight()-i); 
+					g.drawLine(p.getLeft()+j, p.getRight()+i, p.getLeft()+j, p.getRight()+i);
+					g.drawLine(p.getLeft()-j, p.getRight()-i, p.getLeft()-j, p.getRight()-i); 
+					g.drawLine(p.getLeft()-j, p.getRight()+i, p.getLeft()-j, p.getRight()+i); 
 					//this will form a crosshair when using different alpha values, as we'll be drawing twice in some cases (unless we check for j = 0 etc)
 					//is a nice effect so keeping for now
 				}
