@@ -3,9 +3,11 @@ package com.graphics.lib;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -192,6 +194,20 @@ public class Utils {
         return Optional.ofNullable(obj)
                        .filter(o -> clazz.isAssignableFrom(o.getClass()))
                        .map(clazz::cast);
+    }
+    
+    
+    public static <T,R> R recurse(final Iterable<T> iteratable, final BiFunction<T,R,R> function, final R initital) {
+        //actually quite similar to using stream().collect() or .reduce()
+        return recurse(iteratable.iterator(), function, initital);
+    }
+    
+    public static <T,R> R recurse(final Iterable<T> iteratable, final BiFunction<T,R,R> function) {
+        return recurse(iteratable.iterator(), function, null);
+    }
+    
+    public static <T,R> R recurse(final Iterator<T> iterator, final BiFunction<T,R,R> function, final R prevResult) {
+        return iterator.hasNext() ? recurse(iterator, function, function.apply(iterator.next(), prevResult)) : prevResult;
     }
     
     private static boolean isBlockingObjectPresent(Collection<ICanvasObject> objectsToCheck, ICanvasObject parent, ILightSource l, Point p, Vector lightVector) {

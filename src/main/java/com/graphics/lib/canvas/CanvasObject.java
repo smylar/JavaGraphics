@@ -24,6 +24,7 @@ import com.graphics.lib.GeneralPredicates;
 import com.graphics.lib.LightIntensityFinderEnum;
 import com.graphics.lib.ObjectStatus;
 import com.graphics.lib.Point;
+import com.graphics.lib.Utils;
 import com.graphics.lib.Vector;
 import com.graphics.lib.VertexNormalFinderEnum;
 import com.graphics.lib.WorldCoord;
@@ -442,11 +443,7 @@ public class CanvasObject implements ICanvasObject {
 		//create map for getting all the facets attached to a specific vertex
 		Map<Point,List<Facet>> vfMap = Maps.newHashMap();
 		
-		for (Facet f : this.facetList) {
-			for (WorldCoord w : f.getAsList()) {
-				this.addPointFacetToMap(vfMap, w, f);
-			}
-		}
+		Utils.recurse(this.facetList, (f,r) -> Utils.recurse(f.getAsList(), (w,r2) -> addPointFacetToMap(vfMap, w, f)));
 
 	 	//remove anything where the facet group is highly divergent (will then use facet normal when shading)
 	 	for (List<Facet> fl : vfMap.values()) {
@@ -497,8 +494,8 @@ public class CanvasObject implements ICanvasObject {
 		return new WorldCoord(centre.result());
 	}
 	
-	private void addPointFacetToMap(Map<Point, List<Facet>> vfMap, Point p, Facet f)
+	private Boolean addPointFacetToMap(Map<Point, List<Facet>> vfMap, Point p, Facet f)
 	{
-	    vfMap.computeIfAbsent(p, key -> Lists.newArrayList()).add(f);
+	    return vfMap.computeIfAbsent(p, key -> Lists.newArrayList()).add(f);
 	}
 }

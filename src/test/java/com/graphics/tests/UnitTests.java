@@ -3,14 +3,15 @@ package com.graphics.tests;
 import static org.junit.Assert.*;
 
 import java.text.DecimalFormat;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.graphics.lib.Axis;
 import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
+import com.graphics.lib.Utils;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
@@ -149,5 +150,10 @@ public class UnitTests {
 		Vector intercept = CanvasObjectFunctions.DEFAULT.get().plotDeflectionShot(target, proj.getCentre(), 1).getLeft();
 		assertEquals(new Vector(-1,0,0),intercept);
 		
+	}
+	
+	@Test
+	public void testIteratorRecursion() {
+	    assertEquals(120, Utils.recurse(Lists.newArrayList(2,3,4,5), (next,prev) -> next*prev, 1), 0);
 	}
 }
