@@ -1,6 +1,7 @@
 package com.graphics.tests.shapes;
 
 import java.awt.Color;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ import com.graphics.tests.TestUtils;
  */
 public final class Gate extends Torus {
 	
+    private static final int delayms = 1500;
 	private Map<ICanvasObject, Double> currentDotProducts = new HashMap<>();
 	private IPlugin<Gate,Void> passThroughPluginForGate;
 	private IPlugin<ICanvasObject,Void> passThroughPluginForObject;
@@ -34,6 +36,7 @@ public final class Gate extends Torus {
 	private int cnt = 0;
 	private double holeRadius;
 	private boolean passThrough = false;
+	private long lastTrigger = 0;
 	
 	public Gate(double tubeRadius, double holeRadius, int arcProgression) {
 		super(tubeRadius, holeRadius, arcProgression);
@@ -55,17 +58,18 @@ public final class Gate extends Torus {
 	}
 	
 	@Override
-	public void onDrawComplete(){
+	public void onDrawComplete() {
 		super.onDrawComplete();
 		if (!this.isVisible() || this.isDeleted()) {
 			return;
 		}
 		
+		long timestamp = new Date().getTime();
 		Map<ICanvasObject, Double> dotProducts = new HashMap<>();
 		TestUtils.getFilteredObjectList().get().parallelStream().forEach(obj -> {
 		    double dot = getCurrentDotProduct(obj);
 		    dotProducts.put(obj, dot);
-		    if (obj.getCentre().distanceTo(this.getCentre()) < this.getActualHoleRadius() && isOpposite(obj, dot)) {
+		    if (lastTrigger + delayms < timestamp && obj.getCentre().distanceTo(this.getCentre()) < this.getActualHoleRadius() && isOpposite(obj, dot)) {
 		        passThrough = true;
 		        if (this.passThroughPluginForObject != null) {
 		            this.passThroughPluginForObject.execute(obj);
@@ -73,9 +77,12 @@ public final class Gate extends Torus {
 		    }
 		});
 		
-		if (passThrough && this.passThroughPluginForGate != null) {
-		    this.passThroughPluginForGate.execute(this);
+		if (passThrough) {
+		     if (this.passThroughPluginForGate != null) {
+		         this.passThroughPluginForGate.execute(this);
+		     }
 		    passThrough = false;
+		    lastTrigger = timestamp;   
 		}
 		
 		this.currentDotProducts = dotProducts;

@@ -33,13 +33,13 @@ import com.graphics.tests.shapes.Gate;
 import com.graphics.tests.shapes.Ship;
 import com.graphics.tests.shapes.TexturedCuboid;
 import com.graphics.tests.shapes.Wall;
-import com.graphics.tests.weapons.AmmoProxy;
 import com.graphics.tests.weapons.AmmoTracker;
 import com.graphics.tests.weapons.AutoAmmoProxy;
 import com.graphics.tests.weapons.BouncyProjectile;
 import com.graphics.tests.weapons.DefaultAmmoHandler;
 import com.graphics.tests.weapons.DeflectionProjectile;
 import com.graphics.tests.weapons.ExplodingProjectile;
+import com.graphics.tests.weapons.ExtendedMagazineWeapon;
 import com.graphics.tests.weapons.GattlingRound;
 import com.graphics.tests.weapons.LaserWeapon;
 import com.graphics.tests.weapons.Projectile;
@@ -212,6 +212,7 @@ public class GraphicsTest extends JFrame {
 		
 		torus.setPassThroughPluginForObject((obj) -> {
             obj.setColour(Color.pink);
+            AmmoTracker.INSTANCE.getTracked().values().forEach(h -> h.addAmmo(5));
             return null;
         });
 		
@@ -452,7 +453,7 @@ public class GraphicsTest extends JFrame {
 		
 		Projectile bp = new BouncyProjectile();
 		bp.setClipLibary(clipLibrary);
-		ship.addWeapon(Ship.Hardpoints.LEFT, AmmoProxy.weaponWithAmmo(new ProjectileWeapon("BOUNCY", bp, forward, ship), new DefaultAmmoHandler()));
+		ship.addWeapon(Ship.Hardpoints.LEFT, new ProjectileWeapon("BOUNCY", bp, forward, ship));
 		
 		DeflectionProjectile dp = new DeflectionProjectile();
 		dp.setSpeed(20);
@@ -461,7 +462,7 @@ public class GraphicsTest extends JFrame {
 		dp.setTargetFinder(() -> {
 			return this.selectedObject;
 		});
-		ship.addWeapon(Ship.Hardpoints.LEFT, AmmoProxy.weaponWithAmmo(new ProjectileWeapon("DEFLECTION", dp, forward, ship), new DefaultAmmoHandler()));
+		ship.addWeapon(Ship.Hardpoints.LEFT, new ProjectileWeapon("DEFLECTION", dp, forward, ship));
 		
 		TrackingProjectile tp = new TrackingProjectile();
 		tp.setSpeed(20);
@@ -470,21 +471,21 @@ public class GraphicsTest extends JFrame {
 		tp.setTargetFinder(() -> {
 			return this.selectedObject;
 		});
-		ship.addWeapon(Ship.Hardpoints.RIGHT, AmmoProxy.weaponWithAmmo(new ProjectileWeapon("TRACKING", tp, forward, ship), new DefaultAmmoHandler()));
+		ship.addWeapon(Ship.Hardpoints.RIGHT, new ProjectileWeapon("TRACKING", tp, forward, ship));
 		
 		ExplodingProjectile ep = new ExplodingProjectile();
 		ep.setSpeed(20);
 		ep.setRange(1200);
 		ep.setClipLibary(clipLibrary);
 
-		ship.addWeapon(Ship.Hardpoints.RIGHT, AmmoProxy.weaponWithAmmo(new ProjectileWeapon("TORPEDO1", ep, forward, ship), new DefaultAmmoHandler()));
+		ship.addWeapon(Ship.Hardpoints.RIGHT, new ExtendedMagazineWeapon("TORPEDO1", ep, forward, ship));
 		
-		ship.addWeapon(Ship.Hardpoints.LEFT, AmmoProxy.weaponWithAmmo(new ProjectileWeapon("TORPEDO2", ep, forward, ship), new DefaultAmmoHandler()));
+		ship.addWeapon(Ship.Hardpoints.LEFT, new ExtendedMagazineWeapon("TORPEDO2", ep, forward, ship));
 		
 		ship.addWeapon(Ship.Hardpoints.CENTRE, AutoAmmoProxy.weaponWithAmmo(new ProjectileWeapon("GAT", new GattlingRound().setRange(800).setSpeed(60),
 				forward,
 				ship
-				), new DefaultAmmoHandler().setAmmoCount(1000).setTicksBetweenShots(2)));
+				), new DefaultAmmoHandler(1000).setTicksBetweenShots(2)));
 	}
 	
 	private void addUIOverlay(Canvas3D cnv, Camera cam) {

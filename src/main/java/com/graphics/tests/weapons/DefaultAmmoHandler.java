@@ -12,9 +12,15 @@ import com.graphics.lib.canvas.Canvas3D;
  */
 public class DefaultAmmoHandler implements AmmoHandler {
 
-    private int ammoCount = 10;
+    private final int maxCount;
+    private int ammoCount;
     private int ticksBetweenShots = 20;
     private long lastShotTick = -1000;
+    
+    public DefaultAmmoHandler(int maxCount) {
+        this.maxCount = maxCount;
+        this.ammoCount = maxCount;
+    }
     
     @Override
     public int getAmmoCount() {
@@ -22,7 +28,7 @@ public class DefaultAmmoHandler implements AmmoHandler {
     }
 
     public DefaultAmmoHandler setAmmoCount(int ammoCount) {
-        this.ammoCount = ammoCount;
+        this.ammoCount = ammoCount > maxCount ? maxCount : ammoCount;
         return this;
     }
     
@@ -42,6 +48,16 @@ public class DefaultAmmoHandler implements AmmoHandler {
                     ammoCount--;
                 });
         return ammoCount < curAmmo;
+    }
+
+    @Override
+    public void addAmmo(int count) {
+        if (ammoCount + count > maxCount) {
+            ammoCount = maxCount;
+        } else {
+            ammoCount += count;
+        }
+        
     }
 
 }

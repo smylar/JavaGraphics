@@ -21,6 +21,7 @@ import com.graphics.lib.transform.MovementTransform;
  * @author paul.brandon
  *
  */
+@WithAmmo
 public class ProjectileWeapon implements IEffector {
 	
 	private boolean lightProjectile = true;
