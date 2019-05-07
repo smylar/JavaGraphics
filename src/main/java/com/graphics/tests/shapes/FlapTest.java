@@ -13,6 +13,9 @@ import com.graphics.lib.traits.AnimatedTrait;
 import com.graphics.lib.traits.TraitHandler;
 
 public class FlapTest extends Bird {
+    private static final String TIP_RETRACT_ACTION = "TIP_RETRACT";
+    private static final String TIP_EXTEND_ACTION = "TIP_EXTEND";
+    private static final String FLAP_ACTION = "FLAP";
 	private String tipAnimation = "";
 	
 	public FlapTest() {
@@ -28,7 +31,7 @@ public class FlapTest extends Bird {
 		rightWingPivot.setMin(Axis.X, -8);
 		rightWingPivot.setMax(Axis.X, 12);
 		
-		PivotSkeletonNode rightWingJointPivot = new PivotSkeletonNode(new WorldCoord(50, 0, 30));;
+		PivotSkeletonNode rightWingJointPivot = new PivotSkeletonNode(new WorldCoord(50, 0, 30));
 		rightWingJointPivot.setMax(Axis.Z, 100);
 		
 		rightWingJointPivot.getAttachedMeshCoords().add(this.getVertexList().get(2));
@@ -38,16 +41,16 @@ public class FlapTest extends Bird {
 		rootNode.addNode(rightWingPivot);
 		rightWingPivot.addNode(rightWingJointPivot);
 		
-		rightWingJointPivot.getAnimations().put("TIP_RETRACT", PivotSkeletonNode.getUniDirectionalPivotAction(Axis.Z, 6, true));
-		rightWingJointPivot.getAnimations().put("TIP_EXTEND", PivotSkeletonNode.getUniDirectionalPivotAction(Axis.Z, 6, false));
+		rightWingJointPivot.getAnimations().put(TIP_RETRACT_ACTION, PivotSkeletonNode.getUniDirectionalPivotAction(Axis.Z, 6, true));
+		rightWingJointPivot.getAnimations().put(TIP_EXTEND_ACTION, PivotSkeletonNode.getUniDirectionalPivotAction(Axis.Z, 6, false));
 		
 		PivotDetail wingPivot = new PivotDetail();
 		wingPivot.setDirection(Axis.Z);
 
 		PivotDetail xPivot = new PivotDetail();
 		xPivot.setDirection(Axis.X);
-		rightWingPivot.getAnimations().put("FLAP", (n) ->{
-			List<PivotDetail> p = new ArrayList<PivotDetail>();
+		rightWingPivot.getAnimations().put(FLAP_ACTION, n ->{
+			List<PivotDetail> p = new ArrayList<>();
 			double xPivotMod = 0;
 			double amt = 0;
 			if (n.getCur(Axis.Z) >= n.getMax(Axis.Z) || !n.isTravelPositive(Axis.Z)){
@@ -55,19 +58,19 @@ public class FlapTest extends Bird {
 				xPivotMod = 3;
 				n.setTravelPositive(Axis.Z, false);
 				if (n.getCur(Axis.Z) > n.getMin(Axis.Z) + 20){
-					tipAnimation = "TIP_RETRACT";
+					tipAnimation = TIP_RETRACT_ACTION;
 				}
 			}
 			
 			if (n.getCur(Axis.Z) > n.getMin(Axis.Z) && n.getCur(Axis.Z) < n.getMin(Axis.Z) + 20 && !n.isTravelPositive(Axis.Z)){
-				tipAnimation = "TIP_EXTEND";
+				tipAnimation = TIP_EXTEND_ACTION;
 			}
 			else if (n.getCur(Axis.Z) <= n.getMin(Axis.Z) || n.isTravelPositive(Axis.Z))
 			{
 				n.setTravelPositive(Axis.Z, true);
 				if (rightWingJointPivot.getCur(Axis.Z) > rightWingJointPivot.getMin(Axis.Z))
 				{
-					tipAnimation = "TIP_EXTEND";
+					tipAnimation = TIP_EXTEND_ACTION;
 				}else{
 					amt = 2;
 					xPivotMod = -3;
@@ -103,11 +106,11 @@ public class FlapTest extends Bird {
 		rootNode.addNode(leftWingPivot);
 		leftWingPivot.addNode(leftWingJointPivot);
 		
-		leftWingJointPivot.getAnimations().put("TIP_RETRACT", PivotSkeletonNode.getUniDirectionalPivotAction(Axis.Z, 6, false));
-		leftWingJointPivot.getAnimations().put("TIP_EXTEND", PivotSkeletonNode.getUniDirectionalPivotAction(Axis.Z, 6, true));
+		leftWingJointPivot.getAnimations().put(TIP_RETRACT_ACTION, PivotSkeletonNode.getUniDirectionalPivotAction(Axis.Z, 6, false));
+		leftWingJointPivot.getAnimations().put(TIP_EXTEND_ACTION, PivotSkeletonNode.getUniDirectionalPivotAction(Axis.Z, 6, true));
 
-		leftWingPivot.getAnimations().put("FLAP", (n) ->{
-			List<PivotDetail> p = new ArrayList<PivotDetail>();
+		leftWingPivot.getAnimations().put(FLAP_ACTION, n -> {
+			List<PivotDetail> p = new ArrayList<>();
 			
 			double xCur = n.getCur(Axis.X);
 			double xP = xPivot.getAmount();
@@ -123,6 +126,6 @@ public class FlapTest extends Bird {
 		});
 		
 		animatable.setSkeletonRootNode(rootNode);
-		animatable.startAnimation("FLAP");
+		animatable.startAnimation(FLAP_ACTION);
 	}
 }

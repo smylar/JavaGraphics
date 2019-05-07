@@ -52,7 +52,7 @@ public class TrackingTrait implements ITracker {
     private void doStop(boolean remove) {
         if (target != null && pending != target) {
         	if (remove) {
-        		target.getChildren().remove(this); //if delete parent will remove it anyway
+        		target.getChildren().remove(parent); //if delete parent will remove it anyway
         	}
 
             target = null;

@@ -3,12 +3,12 @@ package com.graphics.lib;
 import java.awt.Color;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
-public final class IntensityComponents implements Function<Color,Color>{
+public final class IntensityComponents implements UnaryOperator<Color>{
     
     public enum ColourComponent {
         RED,

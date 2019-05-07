@@ -173,7 +173,6 @@ public class ClipLibrary implements AutoCloseable, PropertyInjected {
                                 } catch (IOException e) { }
                             });
 	    clipSupplier.clear();
-	    INSTANCE = null;
 	}
 	
 	private Optional<Clip> getClip(String key) {

@@ -39,12 +39,7 @@ public class CanvasObjectFunctionsImpl {
 		double angle = Math.atan(getMaxExtent(obj)/dCentre);
 		Vector vCentre = start.vectorToPoint(obj.getCentre()).getUnitVector();
 		
-		double vAngle = Math.acos(v.getUnitVector().dotProduct(vCentre));
-		
-		if (vAngle >= angle) 
-		    return false;
-		
-		return true;
+		return Math.acos(v.getUnitVector().dotProduct(vCentre)) < angle; 
 	}
 	
 	/**

@@ -289,7 +289,7 @@ public class Canvas3D extends AbstractCanvas {
 		                           return Pair.of(vertexList.build(), facetList.build());
 		                       })
 		                   )
-		                   .filter(shadow -> shadow.getFacetList().size() > 0)
+		                   .filter(shadow -> !shadow.getFacetList().isEmpty())
 		                   .peek(shadow -> {
 		                       shadow.setColour(shadowColour);
                                shadow.setProcessBackfaces(true);

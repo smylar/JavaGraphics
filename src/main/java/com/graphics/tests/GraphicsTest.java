@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -87,7 +88,7 @@ public class GraphicsTest extends JFrame {
 	private boolean chaseCam = false;
 	private JFrame slave;
 	private Canvas3D canvas;
-	private ICanvasObject selectedObject = null;
+	private AtomicReference<ICanvasObject> selectedObject = new AtomicReference<>();
 	private MouseEvent select = null;	
 
 	public static void main (String[] args) {
@@ -394,12 +395,12 @@ public class GraphicsTest extends JFrame {
 	    cam.setPosition(p);
 	}
 	
-	private synchronized ICanvasObject getSelectedObject() {
-		return selectedObject;
+	private ICanvasObject getSelectedObject() {
+		return selectedObject.get();
 	}
 
-	private synchronized void setSelectedObject(ICanvasObject selectedObject) {
-		this.selectedObject = selectedObject;
+	private void setSelectedObject(ICanvasObject selectedObject) {
+		this.selectedObject.set(selectedObject);
 	}
 
 	private void checkEngineSound(CanvasObject source){
@@ -459,18 +460,14 @@ public class GraphicsTest extends JFrame {
 		dp.setSpeed(20);
 		dp.setRange(8000);
 		dp.setClipLibary(clipLibrary);
-		dp.setTargetFinder(() -> {
-			return this.selectedObject;
-		});
+		dp.setTargetFinder(this::getSelectedObject);
 		ship.addWeapon(Ship.Hardpoints.LEFT, new ProjectileWeapon("DEFLECTION", dp, forward, ship));
 		
 		TrackingProjectile tp = new TrackingProjectile();
 		tp.setSpeed(20);
 		tp.setRange(8000);
 		tp.setClipLibary(clipLibrary);
-		tp.setTargetFinder(() -> {
-			return this.selectedObject;
-		});
+		tp.setTargetFinder(this::getSelectedObject);
 		ship.addWeapon(Ship.Hardpoints.RIGHT, new ProjectileWeapon("TRACKING", tp, forward, ship));
 		
 		ExplodingProjectile ep = new ExplodingProjectile();
@@ -493,7 +490,7 @@ public class GraphicsTest extends JFrame {
         ScreenEffectsAspect.addAction(new Reticule());
         ScreenEffectsAspect.addAction(new RollMarker());
 	    
-	    ScreenEffectsAspect.addAction(new BoundingBox(() -> getSelectedObject()));
+	    ScreenEffectsAspect.addAction(new BoundingBox(this::getSelectedObject));
         
         /*cnv.addDrawOperation((c, g) -> {
             //messing with collectors - puts the count of each object type at the bottom of the screen

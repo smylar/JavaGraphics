@@ -340,7 +340,7 @@ public class CanvasObject implements ICanvasObject {
 			
 			this.transforms.removeIf(t -> {
 									t.getDependencyList().removeIf(Transform::isComplete);
-									return t.isComplete() && t.getDependencyList().size() == 0;
+									return t.isComplete() && t.getDependencyList().isEmpty();
 									});
 		}
 		if (this.transforms.isEmpty() && this.deleteAfterTransforms){

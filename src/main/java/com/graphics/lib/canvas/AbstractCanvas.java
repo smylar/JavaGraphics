@@ -11,8 +11,8 @@ import com.graphics.lib.interfaces.IZBuffer;
 public class AbstractCanvas extends JPanel {
 
     private static final long serialVersionUID = 1L;
-    private IZBuffer zBuffer;
-    private Camera camera;
+    private transient IZBuffer zBuffer;
+    private transient Camera camera;
 
     public AbstractCanvas(Camera camera) {
         super();

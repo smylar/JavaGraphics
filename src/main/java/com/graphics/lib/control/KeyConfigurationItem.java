@@ -97,7 +97,7 @@ public class KeyConfigurationItem {
 	
 	private boolean matchMethod(Method method, String name) {
 	  //allow for case-less match
-	    return method.getName().toLowerCase().equals(name.toLowerCase()) && (method.getParameterCount() == 0 ||
+	    return method.getName().equalsIgnoreCase(name) && (method.getParameterCount() == 0 ||
                     (method.getParameterCount() == 1 && List.class.isAssignableFrom(method.getParameters()[0].getType())
                             && method.getGenericParameterTypes().length == 1 && String.class.isAssignableFrom((Class<?>)((ParameterizedType)method.getGenericParameterTypes()[0]).getActualTypeArguments()[0])));
 	}
