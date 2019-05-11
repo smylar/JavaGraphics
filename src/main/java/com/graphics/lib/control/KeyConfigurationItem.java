@@ -31,9 +31,9 @@ public class KeyConfigurationItem {
 	}
 
 	public void setKeyCode(String keyCode) {
-		if (keyCode.length() == 1){
+		if (keyCode.length() == 1) {
 	    	 this.keyCode = KeyEvent.getExtendedKeyCodeForChar((int)keyCode.charAt(0));
-	     }else{
+	     } else {
 	    	 this.keyCode = Integer.parseInt(keyCode);
 	     }
 	}
@@ -71,7 +71,7 @@ public class KeyConfigurationItem {
 	}
 	
 	private void invoke(Object obj, Method method, List<String> params){
-		if (method != null && obj != null){
+		if (method != null && obj != null) {
 			try {
 				if (method.getParameterCount() == 1)
 					method.invoke(obj, params);

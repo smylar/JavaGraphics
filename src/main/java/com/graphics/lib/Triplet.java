@@ -1,30 +1,29 @@
 package com.graphics.lib;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.ImmutableList;
+
 public class Triplet<T> {
-    final List<T> triplet = new ArrayList<>(3);
+    private final List<T> values;
     
     public Triplet(T first, T second, T third) {
-        triplet.add(first);
-        triplet.add(second);
-        triplet.add(third);
+        values = ImmutableList.of(first, second, third);
     }
     
     public T first() {
-        return triplet.get(0);
+        return values.get(0);
     }
     
     public T second() {
-        return triplet.get(1);
+        return values.get(1);
     }
     
     public T third() {
-        return triplet.get(2);
+        return values.get(2);
     }
     
     public List<T> getAsList() {
-        return triplet;
+        return values;
     }
 }

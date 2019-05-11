@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import com.graphics.lib.Point;
 
@@ -42,8 +43,12 @@ public abstract class Transform {
 		dependencyList.add(t);
 	}
 	
-	public List<Transform> getDependencyList() {
-		return dependencyList;
+	public boolean removeDependencyIf(Predicate<Transform> filter) {
+	    return dependencyList.removeIf(filter);
+	}
+	
+	public boolean hasNoDependencies() {
+	    return dependencyList.isEmpty();
 	}
 	
 	public final void doTransform(Collection<? extends Point> points){
@@ -88,9 +93,7 @@ public abstract class Transform {
 	}
 	
 	protected final void transform(Collection<? extends Point> points, Consumer<Point> action) {
-		points.stream().forEach(p -> {
-			action.accept(p);
-		});
+		points.stream().forEach(action::accept);
 	}
 	
 	protected void setCompleted(boolean completed) {

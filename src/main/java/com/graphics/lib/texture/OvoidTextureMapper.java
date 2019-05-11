@@ -22,7 +22,7 @@ public class OvoidTextureMapper extends TextureMapper<Ovoid> {
 		double maxLength = Math.PI * obj.getRadius();
 		
 		for (int i = 0 ; i < pointsarc-1 ; i++){
-			double curAngle = (i+1) * angleProgression;
+			double curAngle = (i+1d) * angleProgression;
 			double circleRad = Math.sin(Math.toRadians(curAngle)) * obj.getRadius();
 			if (circleRad < 0) {
 			    circleRad = circleRad * -1 ;

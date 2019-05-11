@@ -1,6 +1,7 @@
 package com.graphics.shapes;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -33,8 +34,8 @@ public final class Whale extends CanvasObject {
 		
 		PivotSkeletonNode rootNode = new PivotSkeletonNode(new WorldCoord(this.getCentre()));
 		
-		PivotSkeletonNode tailNode = new PivotSkeletonNode(new WorldCoord(this.getVertexList().get(26)));
-		tailNode.getAttachedMeshCoords().addAll(this.getVertexList().stream().filter(v -> FLUKE_TAG.equals(v.getGroup())).collect(Collectors.toSet()));
+		Set<WorldCoord> tailMeshCoords = getVertexList().stream().filter(v -> FLUKE_TAG.equals(v.getGroup())).collect(Collectors.toSet());
+		PivotSkeletonNode tailNode = new PivotSkeletonNode(new WorldCoord(this.getVertexList().get(26)), tailMeshCoords);
 		
 		rootNode.addNode(tailNode);
 		rootNode.setMax(Axis.X,20);

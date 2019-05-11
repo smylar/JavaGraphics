@@ -287,7 +287,7 @@ public class CanvasObject implements ICanvasObject {
 	public final <T extends Transform> Optional<T> getTransform(String key, Class<T> clazz) {
 		synchronized(this.transforms) {
 			return this.transforms.stream()
-            						.filter(t -> t.getName() == key && clazz.isAssignableFrom(t.getClass()))
+            						.filter(t -> key.equals(t.getName()) && clazz.isAssignableFrom(t.getClass()))
             						.map(clazz::cast)
             						.findFirst();
 		}
@@ -339,11 +339,11 @@ public class CanvasObject implements ICanvasObject {
 			this.transforms.stream().filter(t -> !t.isCancelled()).forEach(this::applyTransform);
 			
 			this.transforms.removeIf(t -> {
-									t.getDependencyList().removeIf(Transform::isComplete);
-									return t.isComplete() && t.getDependencyList().isEmpty();
+									t.removeDependencyIf(Transform::isComplete);
+									return t.isComplete() && t.hasNoDependencies();
 									});
 		}
-		if (this.transforms.isEmpty() && this.deleteAfterTransforms){
+		if (this.transforms.isEmpty() && this.deleteAfterTransforms) {
 			if (!this.children.isEmpty()) {
 			    this.setVisible(false);
 			}

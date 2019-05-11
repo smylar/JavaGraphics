@@ -2,6 +2,7 @@ package com.graphics.lib.skeleton;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,12 +25,14 @@ public class PivotSkeletonNode extends SkeletonNode {
 
 	private Map<String, PivotAction> animations = new HashMap<>();
 	
-	private final Map<Axis, PivotInfo> pivotInfo;
+	private final Map<Axis, PivotInfo> pivotInfo = Arrays.stream(Axis.values()).collect(Collectors.toMap(a -> a, a -> new PivotInfo()));;
 	
 	public PivotSkeletonNode(WorldCoord position) {
         super(position);
-        
-        pivotInfo = Arrays.stream(Axis.values()).collect(Collectors.toMap(a -> a, a -> new PivotInfo()));
+    }
+	
+	public PivotSkeletonNode(WorldCoord position, Collection<WorldCoord> meshCoords) {
+        super(position, meshCoords);
     }
 	
 	/**

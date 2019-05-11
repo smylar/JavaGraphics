@@ -2,7 +2,9 @@ package com.graphics.tests.shapes;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
+import com.google.common.collect.Sets;
 import com.graphics.lib.Axis;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.orientation.SimpleOrientation;
@@ -31,12 +33,12 @@ public class FlapTest extends Bird {
 		rightWingPivot.setMin(Axis.X, -8);
 		rightWingPivot.setMax(Axis.X, 12);
 		
-		PivotSkeletonNode rightWingJointPivot = new PivotSkeletonNode(new WorldCoord(50, 0, 30));
-		rightWingJointPivot.setMax(Axis.Z, 100);
+		Set<WorldCoord> meshCoords = Sets.newHashSet(getVertexList().get(2), 
+                                                     getVertexList().get(3),
+                                                     getVertexList().get(4));
 		
-		rightWingJointPivot.getAttachedMeshCoords().add(this.getVertexList().get(2));
-		rightWingJointPivot.getAttachedMeshCoords().add(this.getVertexList().get(3));
-		rightWingJointPivot.getAttachedMeshCoords().add(this.getVertexList().get(4));
+		PivotSkeletonNode rightWingJointPivot = new PivotSkeletonNode(new WorldCoord(50, 0, 30), meshCoords);
+		rightWingJointPivot.setMax(Axis.Z, 100);
 		
 		rootNode.addNode(rightWingPivot);
 		rightWingPivot.addNode(rightWingJointPivot);
@@ -96,12 +98,12 @@ public class FlapTest extends Bird {
 		leftWingPivot.setMax(Axis.X, 12);
 		leftWingPivot.setTravelPositive(Axis.Z, false);
 		
-		PivotSkeletonNode leftWingJointPivot = new PivotSkeletonNode(new WorldCoord(-50, 0, 30));
+		Set<WorldCoord> leftMeshCoords = Sets.newHashSet(getVertexList().get(5), 
+		                                             getVertexList().get(6),
+		                                             getVertexList().get(7));
+		        
+		PivotSkeletonNode leftWingJointPivot = new PivotSkeletonNode(new WorldCoord(-50, 0, 30), leftMeshCoords);
 		leftWingJointPivot.setMin(Axis.Z, -100);
-		
-		leftWingJointPivot.getAttachedMeshCoords().add(this.getVertexList().get(5));
-		leftWingJointPivot.getAttachedMeshCoords().add(this.getVertexList().get(6));
-		leftWingJointPivot.getAttachedMeshCoords().add(this.getVertexList().get(7));
 		
 		rootNode.addNode(leftWingPivot);
 		leftWingPivot.addNode(leftWingJointPivot);

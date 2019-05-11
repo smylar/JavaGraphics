@@ -50,14 +50,14 @@ public class Ovoid extends CanvasObject{
 		int pointsarc = 180 / angleProgression;
 		
 		for (int i = 0 ; i < pointsarc-1 ; i++) {
-			double circleRad = Math.sin(Math.toRadians((i+1)*angleProgression)) * radius;
+			double circleRad = Math.sin(Math.toRadians((i+1d)*angleProgression)) * radius;
 			if (circleRad < 0) {
 			    circleRad = circleRad * -1 ;
 			}
 			
-			double y = Math.cos(Math.toRadians((i+1) * angleProgression)) * radius;
+			double y = Math.cos(Math.toRadians((i+1d) * angleProgression)) * radius;
 			
-			for (int j = 0 ; j < points ; j++){
+			for (double j = 0 ; j < points ; j++){
 				double x = circleRad * Math.sin(Math.toRadians(j * angleProgression));
 				double z = circleRad * Math.cos(Math.toRadians(j * angleProgression));
 				vertexList.add(new WorldCoord(x * radiusMod, y, z * radiusMod));
@@ -65,16 +65,16 @@ public class Ovoid extends CanvasObject{
 			
 		}
 		
-		for (int i = 0 ; i < pointsarc-2 ; i++){
+		for (int i = 0 ; i < pointsarc-2 ; i++) {
 		
 			int a = i * points;
 			int b = (points * i) + 1;
 			int c = points * (i + 1);
 			for (int j = 1 ; j < (points*2)-1 ; j++){
-				if (j % 2 == 0){
+				if (j % 2 == 0) {
 					a++;
 					b+=points;
-				}else if (j > 1){
+				} else if (j > 1) {
 					c++;
 					b-=(points-1);
 				}

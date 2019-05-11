@@ -17,7 +17,7 @@ public class Cuboid extends CanvasObject{
 	{
 	    super(() -> init(height, width, depth));
 	    
-	    applyTransform(new Translation(-width/2,-height/2,-depth/2));
+	    applyTransform(new Translation(-width/2d,-height/2d,-depth/2d));
         fixCentre();
 	}
 	

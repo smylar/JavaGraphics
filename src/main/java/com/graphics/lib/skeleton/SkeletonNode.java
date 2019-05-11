@@ -1,8 +1,10 @@
 package com.graphics.lib.skeleton;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableSet;
 import com.graphics.lib.WorldCoord;
 
 public class SkeletonNode {
@@ -10,13 +12,18 @@ public class SkeletonNode {
 	
 	private final WorldCoord position;
 	
-	private Set<WorldCoord> attachedMeshCoords = new HashSet<>();
+	private Set<WorldCoord> attachedMeshCoords = ImmutableSet.of();
 	
 	private Set<SkeletonNode> attachedNodes = new HashSet<>();
 
 	public SkeletonNode(WorldCoord position) {
         position.addTag(POS_TAG);
         this.position = position;
+    }
+	
+	public SkeletonNode(WorldCoord position, Collection<WorldCoord> meshCoords) {
+        this(position);
+        attachedMeshCoords = ImmutableSet.copyOf(meshCoords);
     }
 	
 	public WorldCoord getPosition() {
@@ -27,16 +34,8 @@ public class SkeletonNode {
 		return attachedMeshCoords;
 	}
 
-	public void setAttachedMeshCoords(Set<WorldCoord> attachedMeshCoords) {
-		this.attachedMeshCoords = attachedMeshCoords;
-	}
-
 	public Set<SkeletonNode> getAttachedNodes() {
 		return attachedNodes;
-	}
-
-	public void setAttachedNodes(Set<SkeletonNode> attachedNodes) {
-		this.attachedNodes = attachedNodes;
 	}
 	
 	public void addNode(SkeletonNode node) {

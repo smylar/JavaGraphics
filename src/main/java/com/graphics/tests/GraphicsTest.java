@@ -144,7 +144,7 @@ public class GraphicsTest extends JFrame {
 				
 		TraitHandler.INSTANCE.registerTrait(lantern3, OrientableTrait.class).setOrientation(new SimpleOrientation(OrientableTrait.ORIENTATION_TAG));
 		cnv.registerObject(lantern3, new Point(400,100,100), ShaderFactory.NONE);
-		l3.getLightSource().setDirection(() -> {return TraitHandler.INSTANCE.getTrait(lantern3, IOrientable.class).get().getOrientation().getForward();});
+		l3.getLightSource().setDirection(() -> TraitHandler.INSTANCE.getTrait(lantern3, IOrientable.class).get().getOrientation().getForward());
 		l3.getLightSource().setLightConeAngle(40);
 		lantern3.attachLightsource(l3);
 		lantern3.getFacetList().stream().filter(f -> f.getNormal().getZ() <= 0).forEach(f -> f.setColour(Color.BLACK));
@@ -205,13 +205,13 @@ public class GraphicsTest extends JFrame {
 		torus.addFlag(Events.EXPLODE_PERSIST);
 		//torus.setCastsShadow(false);
 		
-		torus.setPassThroughPluginForGate((obj) -> {
+		torus.setPassThroughPluginForGate(obj -> {
 		    Transform rot = new RepeatingTransform<>(Axis.X.getRotation(3), 60);
 		    CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(obj, rot);
 			return null;
 		});
 		
-		torus.setPassThroughPluginForObject((obj) -> {
+		torus.setPassThroughPluginForObject(obj -> {
             obj.setColour(Color.pink);
             AmmoTracker.INSTANCE.getTracked().values().forEach(h -> h.addAmmo(5));
             return null;
@@ -247,7 +247,7 @@ public class GraphicsTest extends JFrame {
 		
 		Wall wall = new Wall(40,40);
 		wall.setColour(new Color(240, 240, 240));
-		wall.setLightIntensityFinder(Utils.getShadowLightIntensityFinder(() -> { return cnv.getShapes();}));
+		wall.setLightIntensityFinder(Utils.getShadowLightIntensityFinder(cnv::getShapes));
 		wall.setVisible(false);
 		cnv.registerObject(wall, new Point(350,350,700), ShaderFactory.GORAUD);		
 		
@@ -259,15 +259,15 @@ public class GraphicsTest extends JFrame {
 			}
 		};
 		rpt.setResetAfterComplete(true);
-		RepeatingTransform<?> spheret = new RepeatingTransform<RepeatingTransform<?>>(rpt,30);
+		RepeatingTransform<?> spheret = new RepeatingTransform<>(rpt,30);
 			
 		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(ball, spheret);
 		
 		//CameraTiedLightSource l4 = new CameraTiedLightSource(cam.getPosition().x, cam.getPosition().y, cam.getPosition().z);
 		//l4.tieTo(cam);
 		DirectionalLightSource l4 = new DirectionalLightSource();
-		l4.setPosition(() -> {return cam.getPosition();});
-		l4.setDirection(() -> {return cam.getOrientation().getForward().getUnitVector();});
+		l4.setPosition(cam::getPosition);
+		l4.setDirection(() -> cam.getOrientation().getForward().getUnitVector());
 		l4.setLightConeAngle(45);
 		l4.setColour(new Color(255, 255, 255));
 		cnv.addLightSource(l4);
@@ -447,9 +447,7 @@ public class GraphicsTest extends JFrame {
         Supplier<IOrientation> forward = () -> shipOrientation.getOrientation().copy(); //could be a problem getting the trait?
 		
 		ship.addWeapon(Ship.Hardpoints.CENTRE, new LaserWeapon("LASER",
-				() -> {
-					return cam.getOrientation().getForward();
-				},ship));
+				() -> cam.getOrientation().getForward(), ship));
 			
 		
 		Projectile bp = new BouncyProjectile();
