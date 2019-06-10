@@ -43,7 +43,7 @@ public class TexturedGoraudShader extends GoraudShader {
 
 	@Override
 	public Color getColour(ScanLine scanLine, int x, int y) {
-		if (textures.size() == 0) return super.getColour(scanLine, x, y);
+		if (textures.isEmpty()) return super.getColour(scanLine, x, y);
 		if (scanLine == null) return colour;
 		
 		if (scanLine != this.curScanline){
@@ -97,10 +97,10 @@ public class TexturedGoraudShader extends GoraudShader {
 		
 		WorldCoord start = line.getWorldStart();
 		WorldCoord end = line.getWorldEnd();
-		Point startTexture = this.texturableParent.get().getTextureCoord(t, start).get();
-		Point endTexture = this.texturableParent.get().getTextureCoord(t, end).get();
-		double x = (1 - percentLength) * (startTexture.x/line.getStart().z) + (percentLength * (endTexture.x/line.getEnd().z));
-		double y = (1 - percentLength) * (startTexture.y/line.getStart().z) + (percentLength * (endTexture.y/line.getEnd().z));
+		Point startTexturePoint = this.texturableParent.get().getTextureCoord(t, start).get();
+		Point endTexturePoint = this.texturableParent.get().getTextureCoord(t, end).get();
+		double x = (1 - percentLength) * (startTexturePoint.x/line.getStart().z) + (percentLength * (endTexturePoint.x/line.getEnd().z));
+		double y = (1 - percentLength) * (startTexturePoint.y/line.getStart().z) + (percentLength * (endTexturePoint.y/line.getEnd().z));
 		double r = (1 - percentLength) * (1/line.getStart().z) + (percentLength * (1/line.getEnd().z));
 		x = x/r;
 		y = y/r;
