@@ -18,15 +18,13 @@ public class Facet extends Triplet<WorldCoord> {
 	private boolean isFrontFace = true;
 	private String tag = null;
 	
-	public Facet(WorldCoord p1, WorldCoord p2, WorldCoord p3)
-    {
+	public Facet(WorldCoord p1, WorldCoord p2, WorldCoord p3) {
 	    super(p1, p2, p3);
-    }
+	}
 	
-	public Facet(WorldCoord p1, WorldCoord p2, WorldCoord p3, String tag)
-	{
-		super(p1, p2, p3);
-		this.tag = tag;
+	public Facet(WorldCoord p1, WorldCoord p2, WorldCoord p3, String tag) {
+	    super(p1, p2, p3);
+	    this.tag = tag;
 	}
 	
 	public String getTag() {
@@ -99,7 +97,7 @@ public class Facet extends Triplet<WorldCoord> {
 	 * 
 	 * @return Normal Vector
 	 */
-	public Vector getTransformedNormal(Camera c){
+	public Vector getTransformedNormal(Camera c) {
 		 Vector vector1 = new Vector(second().getTransformed(c).x - first().getTransformed(c).x, second().getTransformed(c).y - first().getTransformed(c).y, second().getTransformed(c).z - first().getTransformed(c).z);
 		 Vector vector2 = new Vector(third().getTransformed(c).x - first().getTransformed(c).x, third().getTransformed(c).y - first().getTransformed(c).y, third().getTransformed(c).z - first().getTransformed(c).z);
 		 
@@ -112,8 +110,7 @@ public class Facet extends Triplet<WorldCoord> {
 	 * 
 	 * @return Normal Vector
 	 */
-	public Vector getNormal()
-	{
+	public Vector getNormal() {
 		Vector vector1 = new Vector(second().x - first().x, second().y - first().y, second().z - first().z);
 		Vector vector2 = new Vector(third().x - first().x, third().y - first().y, third().z - first().z);
 		 
@@ -121,7 +118,7 @@ public class Facet extends Triplet<WorldCoord> {
 		return normal.getUnitVector();
 	}
 	
-	public Point getIntersectionPointWithFacetPlane(Point p, Vector vec){
+	public Point getIntersectionPointWithFacetPlane(Point p, Vector vec) {
 		return this.getIntersectionPointWithFacetPlane(p, vec, false);
 	}
 	/**
@@ -132,7 +129,7 @@ public class Facet extends Triplet<WorldCoord> {
 	 * @param includeBackfaces - Indicates if intersection should be generated if facet is back facing (relative to vec)
 	 * @return - Point of intersection, or null if it cannot intersect
 	 */
-	public Point getIntersectionPointWithFacetPlane(Point p, Vector vec, boolean includeBackfaces){
+	public Point getIntersectionPointWithFacetPlane(Point p, Vector vec, boolean includeBackfaces) {
 		Vector normal = this.getNormal();
 		Vector v = vec.getUnitVector();
 		double t = (normal.getX() * v.getX()) + (normal.getY() * v.getY()) + (normal.getZ() * v.getZ());
@@ -155,7 +152,7 @@ public class Facet extends Triplet<WorldCoord> {
 	 * @param p - Point to test
 	 * @return
 	 */
-	public double getDistanceFromFacetPlane(Point p){
+	public double getDistanceFromFacetPlane(Point p) {
 		Vector normal = this.getNormal();
 		double planex = normal.getX() * (p.x - first().x);
 		double planey = normal.getY() * (p.y - first().y);
@@ -171,15 +168,11 @@ public class Facet extends Triplet<WorldCoord> {
 	 * @param p - Point to test
 	 * @return <code>True</code> if p is within facet footprint, <code>False</code> otherwise
 	 */
-	public boolean isPointWithin(Point p){
-		if (p != null &&
+	public boolean isPointWithin(Point p) {
+		return p != null &&
 			isSameSide(p, this.first(), this.second(), this.third()) &&
 			isSameSide(p, this.second(), this.third(), this.first()) &&
-			isSameSide(p, this.third(), this.first(), this.second())
-		){
-			return true;
-		}
-		return false;
+			isSameSide(p, this.third(), this.first(), this.second());
 		
 	}
 	
@@ -192,48 +185,36 @@ public class Facet extends Triplet<WorldCoord> {
 	 * @param fthird() - Facet point 3
 	 * @return <code>True</code> if p and fthird() are the same side of the line, <code>False</code> otherwise
 	 */
-	public static boolean isSameSide(Point p, Point fpoint1, Point fpoint2, Point fpoint3){
+	public static boolean isSameSide(Point p, Point fpoint1, Point fpoint2, Point fpoint3) {
 		Vector vInteresect = p.vectorToPoint(fpoint1);
 		Vector vector1 = fpoint2.vectorToPoint(fpoint1);
 		Vector vector2 = fpoint3.vectorToPoint(fpoint1);
 		Vector cp1 = vector1.crossProduct(vInteresect);
 		Vector cp2 = vector1.crossProduct(vector2);
-		if (cp1.dotProduct(cp2) >= 0)
-		    return true;
-		
-		return false;
+		return cp1.dotProduct(cp2) >= 0;
 	}
 
-	public boolean isEqualTo(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Facet other = (Facet) obj;
-		if (colour == null) {
-			if (other.colour != null)
-				return false;
-		} else if (!colour.equals(other.colour))
-			return false;
-		if (first() == null) {
-			if (other.first() != null)
-				return false;
-		} else if (!first().isEqualTo(other.first()))
-			return false;
-		if (second() == null) {
-			if (other.second() != null)
-				return false;
-		} else if (!second().isEqualTo(other.second()))
-			return false;
-		if (third() == null) {
-			if (other.third() != null)
-				return false;
-		} else if (!third().isEqualTo(other.third()))
-			return false;
-		return true;
+	public boolean isEqualTo(Facet other) {
+        if (this == other)
+            return true;
+        if (other == null)
+            return false;
+
+        if (colour == null) {
+                if (other.colour != null)
+                return false;
+        } else if (!colour.equals(other.colour))
+            return false;
+
+        List<WorldCoord> coords = this.getAsList();
+        List<WorldCoord> otherCoords = other.getAsList();
+        for (int i = 0 ; i < coords.size() ; i++) {
+            //are ImmutableLists of size 3, so will not contains nulls
+            if (!coords.get(i).isEqualTo(otherCoords.get(i))) {
+            return false;
+            }
+        }
+        return true;
 	}
-	
 	
 }
