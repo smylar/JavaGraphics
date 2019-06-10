@@ -1,6 +1,7 @@
 package com.graphics.lib;
 
 import java.awt.Color;
+import java.util.List;
 
 import com.graphics.lib.camera.Camera;
 
@@ -201,7 +202,7 @@ public class Facet extends Triplet<WorldCoord> {
             return false;
 
         if (colour == null) {
-                if (other.colour != null)
+            if (other.colour != null)
                 return false;
         } else if (!colour.equals(other.colour))
             return false;
@@ -211,7 +212,7 @@ public class Facet extends Triplet<WorldCoord> {
         for (int i = 0 ; i < coords.size() ; i++) {
             //are ImmutableLists of size 3, so will not contains nulls
             if (!coords.get(i).isEqualTo(otherCoords.get(i))) {
-            return false;
+                return false;
             }
         }
         return true;
