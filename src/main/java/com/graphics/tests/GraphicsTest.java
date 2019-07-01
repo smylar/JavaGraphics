@@ -66,7 +66,7 @@ import com.graphics.lib.lightsource.ObjectTiedLightSource;
 import com.graphics.lib.orientation.SimpleOrientation;
 import com.graphics.lib.plugins.Events;
 import com.graphics.lib.plugins.IPlugin;
-import com.graphics.lib.shader.ShaderFactory;
+import com.graphics.lib.shader.ScanlineShaderFactory;
 import com.graphics.lib.texture.BmpTexture;
 import com.graphics.lib.texture.OvoidTextureMapper;
 import com.graphics.lib.traits.OrientableTrait;
@@ -128,14 +128,14 @@ public class GraphicsTest extends JFrame {
 		cnv.addLightSource(l1.getLightSource());
 		Lantern lantern1 = new Lantern();
 		lantern1.attachLightsource(l1);
-		cnv.registerObject(lantern1, new Point(0,0,-500), ShaderFactory.NONE);
+		cnv.registerObject(lantern1, new Point(0,0,-500), ScanlineShaderFactory.NONE);
 		
 		ObjectTiedLightSource<LightSource> l2 = new ObjectTiedLightSource<>(LightSource.class, 500,200,-100);
 		l2.getLightSource().setColour(new Color(0, 255, 0));
 		cnv.addLightSource(l2.getLightSource());
 		Lantern lantern2 = new Lantern();
 		lantern2.attachLightsource(l2);
-		cnv.registerObject(lantern2, new Point(500,200,-100), ShaderFactory.NONE);
+		cnv.registerObject(lantern2, new Point(500,200,-100), ScanlineShaderFactory.NONE);
 		
 		ObjectTiedLightSource<DirectionalLightSource> l3 = new ObjectTiedLightSource<>(DirectionalLightSource.class, 400,100,100);
 		l3.getLightSource().setColour(new Color(0, 0, 255));
@@ -143,7 +143,7 @@ public class GraphicsTest extends JFrame {
 		Lantern lantern3 = new Lantern();
 				
 		TraitHandler.INSTANCE.registerTrait(lantern3, OrientableTrait.class).setOrientation(new SimpleOrientation(OrientableTrait.ORIENTATION_TAG));
-		cnv.registerObject(lantern3, new Point(400,100,100), ShaderFactory.NONE);
+		cnv.registerObject(lantern3, new Point(400,100,100), ScanlineShaderFactory.NONE);
 		l3.getLightSource().setDirection(() -> TraitHandler.INSTANCE.getTrait(lantern3, IOrientable.class).get().getOrientation().getForward());
 		l3.getLightSource().setLightConeAngle(40);
 		lantern3.attachLightsource(l3);
@@ -162,16 +162,16 @@ public class GraphicsTest extends JFrame {
 		IPlugin<IPlugable, Void> explode = TestUtils.getExplodePlugin(Optional.ofNullable(clipLibrary));
 		
 		CanvasObject camcube = new Cuboid(20,20,20);
-		cnv.registerObject(camcube, new Point(1560, 200, 350), ShaderFactory.FLAT);
+		cnv.registerObject(camcube, new Point(1560, 200, 350), ScanlineShaderFactory.FLAT);
 		
 		Whale whale = new Whale(); 
 		TraitHandler.INSTANCE.registerTrait(whale, PlugableTrait.class).registerPlugin(Events.EXPLODE, explode, false);
 		whale.setColour(Color.cyan);
-		cnv.registerObject(whale, new Point(1515, 300, 400), ShaderFactory.GORAUD);
+		cnv.registerObject(whale, new Point(1515, 300, 400), ScanlineShaderFactory.GORAUD);
 		
 		FlapTest flap = new FlapTest(); 
 		flap.setColour(Color.ORANGE);
-		cnv.registerObject(flap, new Point(1000, 500, 200), ShaderFactory.GORAUD);
+		cnv.registerObject(flap, new Point(1000, 500, 200), ScanlineShaderFactory.GORAUD);
 		CanvasObjectFunctions.DEFAULT.get().addTransformAboutPoint(flap, new Point(1200, 500, 200), new RepeatingTransform<>(Axis.Y.getRotation(2),0));
 		
 		ViewAngleCamera slaveCam = new ViewAngleCamera(new SimpleOrientation(OrientableTrait.ORIENTATION_TAG));
@@ -190,13 +190,13 @@ public class GraphicsTest extends JFrame {
 		TraitHandler.INSTANCE.registerTrait(ship, OrientableTrait.class).setOrientation(new SimpleOrientation(OrientableTrait.ORIENTATION_TAG));
 		addWeapons(ship, cam);
 		ship.applyTransform(Axis.Y.getRotation(180));
-		cnv.registerObject(ship, new Point(350, 350, -50), ShaderFactory.GORAUD);
+		cnv.registerObject(ship, new Point(350, 350, -50), ScanlineShaderFactory.GORAUD);
 
 		Gate torus = new Gate(50,50,20);
 		TraitHandler.INSTANCE.registerTrait(torus, PlugableTrait.class).registerPlugin(Events.EXPLODE, explode, false);
 		torus.setColour(new Color(250, 250, 250));
 		//torus.setLightIntensityFinder(Utils.getShadowLightIntensityFinder(() -> { return cnv.getShapes();})); //for testing shadows falling on the torus
-		cnv.registerObject(torus, new Point(200,200,450), ShaderFactory.GORAUD);
+		cnv.registerObject(torus, new Point(200,200,450), ScanlineShaderFactory.GORAUD);
 		Transform torust1 = new RepeatingTransform<>(Axis.Y.getRotation(3), 60);
 		Transform torust2 = new RepeatingTransform<>(Axis.X.getRotation(3), 60);
 		SequenceTransform torust = new SequenceTransform();
@@ -219,7 +219,7 @@ public class GraphicsTest extends JFrame {
 		
 		TexturedCuboid cube = new TexturedCuboid(200,200,200);
 		TraitHandler.INSTANCE.registerTrait(cube, PlugableTrait.class);
-		cnv.registerObject(cube, new Point(500,500,500), ShaderFactory.TEXGORAUD);
+		cnv.registerObject(cube, new Point(500,500,500), ScanlineShaderFactory.TEXGORAUD);
 		Transform cubet2 = new RepeatingTransform<>(Axis.Z.getRotation(3), 30);
 		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(cube, cubet2);
 		cube.addFlag(Events.STICKY);
@@ -234,7 +234,7 @@ public class GraphicsTest extends JFrame {
 		TraitHandler.INSTANCE.registerTrait(ball, PlugableTrait.class).registerPlugin(Events.EXPLODE, explode, false);
 		ball.setColour(new Color(255, 255, 0));
 		ball.addFlag(Events.EXPLODE_PERSIST);
-		cnv.registerObject(ball, new Point(500,200,450), ShaderFactory.TEXGORAUD);
+		cnv.registerObject(ball, new Point(500,200,450), ScanlineShaderFactory.TEXGORAUD);
 		
 		for (int i = 0; i < ball.getFacetList().size() ; i++)
 		{
@@ -249,7 +249,7 @@ public class GraphicsTest extends JFrame {
 		wall.setColour(new Color(240, 240, 240));
 		wall.setLightIntensityFinder(Utils.getShadowLightIntensityFinder(cnv::getShapes));
 		wall.setVisible(false);
-		cnv.registerObject(wall, new Point(350,350,700), ShaderFactory.GORAUD);		
+		cnv.registerObject(wall, new Point(350,350,700), ScanlineShaderFactory.GORAUD);		
 		
 		ScaleTransform st = new ScaleTransform(0.95);
 		RepeatingTransform<ScaleTransform> rpt = new RepeatingTransform<ScaleTransform>(st,15){
@@ -292,7 +292,7 @@ public class GraphicsTest extends JFrame {
 					movingTarget.setCastsShadow(false);
 					movingTarget.deleteAfterTransforms();
 					TraitHandler.INSTANCE.registerTrait(movingTarget, PlugableTrait.class).registerPlugin(Events.EXPLODE, explode, false);
-					cnv.registerObject(movingTarget , new Point(0, 0, 0), ShaderFactory.FLAT);
+					cnv.registerObject(movingTarget , new Point(0, 0, 0), ScanlineShaderFactory.FLAT);
 				}
 				
 				else if (key.getKeyChar() == 'z') {

@@ -45,11 +45,11 @@ public final class ScanLine {
         return endLine;
     }
     
-    static Builder builder() {
+    public static Builder builder() {
         return new Builder();
     }
     
-    static class Builder {
+    public static class Builder {
         public Double startY = null;
         public Double endY = null;
         public Double startZ = null;

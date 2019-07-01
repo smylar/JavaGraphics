@@ -10,7 +10,7 @@ import com.graphics.lib.interfaces.IPlugable;
 import com.graphics.lib.plugins.Events;
 import com.graphics.lib.plugins.IPlugin;
 import com.graphics.lib.plugins.PluginLibrary;
-import com.graphics.lib.shader.ShaderFactory;
+import com.graphics.lib.shader.ScanlineShaderFactory;
 import com.graphics.lib.traits.PlugableTrait;
 import com.graphics.lib.traits.TraitHandler;
 import com.sound.ClipLibrary;
@@ -80,7 +80,7 @@ public class TestUtils {
 				}
 				
 				PluginLibrary.explode().execute(plugable).forEach(c -> {
-					Canvas3D.get().replaceShader(obj, ShaderFactory.FLAT);
+					Canvas3D.get().replaceShader(obj, ScanlineShaderFactory.FLAT);
 					TraitHandler.INSTANCE.registerTrait(c, PlugableTrait.class).registerPlugin(Events.CHECK_COLLISION, getBouncePlugin(), true);
 					if (!obj.hasFlag(SILENT_EXPLODE)) {
 					    clipLibrary.ifPresent(cl -> cl.playSound("EXPLODE", -20f));

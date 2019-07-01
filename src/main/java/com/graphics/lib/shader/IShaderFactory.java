@@ -1,5 +1,10 @@
 package com.graphics.lib.shader;
 
+import java.awt.Dimension;
+
+import com.graphics.lib.camera.Camera;
+import com.graphics.lib.interfaces.ICanvasObject;
+
 /**
  * Interface for retrieving shaders (allows custom shaders to be added)
  * 
@@ -8,11 +13,7 @@ package com.graphics.lib.shader;
  */
 @FunctionalInterface
 public interface IShaderFactory {
-    /**
-     * Retrieve a shader instance
-     * 
-     * @return
-     */
-    public IShader getShader();
+
+    void add(ICanvasObject parent, Camera c, Dimension screen, ZBufferItemUpdater zBufferItemUpdater);
 
 }

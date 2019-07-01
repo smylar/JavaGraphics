@@ -33,7 +33,7 @@ import com.graphics.lib.interfaces.IZBuffer;
 import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.shader.IShaderFactory;
-import com.graphics.lib.shader.ShaderFactory;
+import com.graphics.lib.shader.ScanlineShaderFactory;
 import com.graphics.lib.traits.TrackingTrait;
 import com.graphics.lib.zbuffer.ZBufferItem;
 
@@ -119,7 +119,7 @@ public class Canvas3D extends AbstractCanvas {
 	}
 	
 	public IShaderFactory getShader(ICanvasObject obj) {
-		return shapes.get(obj) == null ? ShaderFactory.NONE : shapes.get(obj);
+		return shapes.get(obj) == null ? ScanlineShaderFactory.NONE : shapes.get(obj);
 	}
 	
 	public void replaceShader(ICanvasObject obj, IShaderFactory shader) {
@@ -152,7 +152,7 @@ public class Canvas3D extends AbstractCanvas {
 	 * @param position	Position to draw the centre of the object at
 	 */
 	public void registerObject(ICanvasObject obj, Point position){
-		this.registerObject(obj, position, ShaderFactory.NONE);
+		this.registerObject(obj, position, ScanlineShaderFactory.NONE);
 	}
 	
 	/**
