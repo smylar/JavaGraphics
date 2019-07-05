@@ -130,7 +130,9 @@ public class Canvas3D extends AbstractCanvas {
 	}
 	
 	public void replaceShader(ICanvasObject obj, IShaderFactory shader) {
-		this.shapes.replace(obj, shader);
+	    if (!"point".equals(drawMode)) {
+	        this.shapes.replace(obj, shader);
+	    }
 	}
 
 	public Set<ILightSource> getLightSources() {

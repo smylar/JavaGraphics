@@ -1,5 +1,6 @@
 package com.graphics.lib.shader;
 
+import java.awt.Color;
 import java.awt.Dimension;
 
 import com.graphics.lib.Point;
@@ -11,7 +12,7 @@ import com.graphics.lib.interfaces.ICanvasObject;
  */
 public class PointShader implements IShaderFactory {
     
-    private static PointShader INSTANCE = new PointShader();
+    private static final PointShader INSTANCE = new PointShader();
     
     private PointShader() {}
     
@@ -37,7 +38,7 @@ public class PointShader implements IShaderFactory {
     }
     
     private void addMarkerToBuffer(final Point p, final ICanvasObject parent, final ZBufferItemUpdater zBufferItemUpdater) {
-        zBufferItemUpdater.update((int)Math.round(p.x), (int)Math.round(p.y), p.z, parent::getColour);
+        zBufferItemUpdater.update((int)Math.round(p.x), (int)Math.round(p.y), p.z, () -> Color.BLACK);
         zBufferItemUpdater.update((int)Math.round(p.x+1), (int)Math.round(p.y), p.z, parent::getColour);
         zBufferItemUpdater.update((int)Math.round(p.x-1), (int)Math.round(p.y), p.z, parent::getColour);
         zBufferItemUpdater.update((int)Math.round(p.x), (int)Math.round(p.y+1), p.z, parent::getColour);
