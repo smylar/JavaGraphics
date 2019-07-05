@@ -36,17 +36,17 @@ public enum ScanlineShaderFactory implements IShaderFactory {
 		GORAUD(GoraudShader::new, 8), 
 		TEXGORAUD(TexturedGoraudShader::new, 8), 
 		FLAT(FlatShader::new, 8), 
-		NONE(DefaultShader::new, 8);
+		NONE(DefaultScanlineShader::new, 8);
 
-	private LinkedBlockingQueue<IShader> pool;
+	private LinkedBlockingQueue<ScanlineShader> pool;
 	
 	@Property(name="zbuffer.skip", defaultValue="2")
     private Integer skip;
 	
-	private ScanlineShaderFactory(Supplier<IShader> shader, int poolSize) {
+	private ScanlineShaderFactory(Supplier<ScanlineShader> shader, int poolSize) {
         pool = new LinkedBlockingQueue<>(poolSize);
         for (int i = 0 ; i < poolSize ; i++) {
-            IShader shaderImpl = shader.get();
+            ScanlineShader shaderImpl = shader.get();
             shaderImpl.setCloseAction(pool::add);
             pool.add(shaderImpl);
         }
@@ -77,7 +77,7 @@ public enum ScanlineShaderFactory implements IShaderFactory {
         if (maxX > screen.getWidth()) 
             maxX = screen.getWidth();          
         
-        try (IShader localShader = getShader()) {
+        try (ScanlineShader localShader = getShader()) {
             if (localShader != null) {
                 localShader.init(parent, facet, c);
             }
@@ -96,7 +96,7 @@ public enum ScanlineShaderFactory implements IShaderFactory {
         } catch (Exception e) { }
     }
 	
-	private IShader getShader() {   
+	private ScanlineShader getShader() {   
         try {
             return pool.take();
         } catch (InterruptedException e) {
@@ -162,7 +162,7 @@ public enum ScanlineShaderFactory implements IShaderFactory {
         return Optional.ofNullable(builder.build());
     }
 	
-	private void processScanline(ScanLine scanLine, int x, IShader shader, Dimension screen, ZBufferItemUpdater zBufferItemUpdater) {
+	private void processScanline(ScanLine scanLine, int x, ScanlineShader shader, Dimension screen, ZBufferItemUpdater zBufferItemUpdater) {
         double scanLineLength = Math.floor(scanLine.getEndY()) - Math.floor(scanLine.getStartY());
         double percentDistCovered = 0;
         Color colour = null;

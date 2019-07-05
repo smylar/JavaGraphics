@@ -20,7 +20,7 @@ import com.graphics.lib.zbuffer.ScanLine;
  * @author Paul Brandon
  *
  */
-public class FlatShader extends DefaultShader {
+public class FlatShader extends DefaultScanlineShader {
     private static final Color DEFAULT = new Color(255,255,255);
     
 	private Color colour = DEFAULT;

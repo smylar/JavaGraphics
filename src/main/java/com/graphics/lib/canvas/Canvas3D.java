@@ -32,7 +32,10 @@ import com.graphics.lib.interfaces.ICanvasUpdateListener;
 import com.graphics.lib.interfaces.IZBuffer;
 import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.lightsource.LightSource;
+import com.graphics.lib.properties.Property;
+import com.graphics.lib.properties.PropertyInject;
 import com.graphics.lib.shader.IShaderFactory;
+import com.graphics.lib.shader.PointShader;
 import com.graphics.lib.shader.ScanlineShaderFactory;
 import com.graphics.lib.traits.TrackingTrait;
 import com.graphics.lib.zbuffer.ZBufferItem;
@@ -45,6 +48,7 @@ import io.reactivex.Observable;
  * @author Paul Brandon
  *
  */
+@PropertyInject
 public class Canvas3D extends AbstractCanvas {
 
 	private static final long serialVersionUID = 1L;
@@ -59,6 +63,9 @@ public class Canvas3D extends AbstractCanvas {
 	private boolean drawShadows = false;
 	private Facet floor = null;
 	private long tickCount = 0;
+	
+	@Property(name="canvas.drawMode", defaultValue="normal")
+    private String drawMode;
 
 	protected Canvas3D(Camera camera)
     {
@@ -166,7 +173,11 @@ public class Canvas3D extends AbstractCanvas {
 	{
 		if (Objects.nonNull(obj) && !this.shapes.containsKey(obj)) {
 		    CanvasObjectFunctions.DEFAULT.get().moveTo(obj, position);
-    		this.shapes.put(obj, shaderFactory);
+		    if ("point".contentEquals(drawMode)) {
+		        this.shapes.put(obj, PointShader.getShader());
+		    } else {
+		        this.shapes.put(obj, shaderFactory);
+		    }
 		}
 	}
 	

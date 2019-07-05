@@ -23,7 +23,7 @@ import com.graphics.lib.zbuffer.ScanLine;
  * @author Paul Brandon
  *
  */
-public class GoraudShader extends DefaultShader {
+public class GoraudShader extends DefaultScanlineShader {
     protected static final Color DEFAULT = new Color(255,255,255);
     
 	protected Color colour;
@@ -61,7 +61,6 @@ public class GoraudShader extends DefaultShader {
 		}
 	}
 
-	@Override
 	public Color getColour(ScanLine scanLine, int x, int y) {
 		if (facet == null || scanLine == null) 
 		    return colour;
