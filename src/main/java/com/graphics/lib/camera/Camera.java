@@ -2,7 +2,6 @@ package com.graphics.lib.camera;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Observable;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
@@ -26,7 +25,7 @@ import com.graphics.lib.transform.Translation;
  * @author Paul Brandon
  *
  */
-public abstract class Camera extends Observable implements IOrientableCamera {
+public abstract class Camera implements IOrientableCamera {
 	public static final String CAMERA_MOVED = "cameraMoved";
 	private Point position = new Point(0,0,0);
 	private Optional<ICanvasObject> tiedTo = Optional.empty();
@@ -140,9 +139,6 @@ public abstract class Camera extends Observable implements IOrientableCamera {
 		transforms.values().forEach(t -> t.doTransform(this));
 
 		ot.saveCurrentTransforms(orientation);
-		
-		setChanged();
-		notifyObservers(CAMERA_MOVED);
 	}
 	
 	public void alignShapeToCamera(ICanvasObject obj)

@@ -92,8 +92,8 @@ public class GraphicsTest extends JFrame {
 	private MouseEvent select = null;	
 
 	public static void main (String[] args) {
-		try (ClipLibrary cl = ClipLibrary.getInstance()) {
-		    clipLibrary = cl;
+		try {
+		    clipLibrary = ClipLibrary.getInstance();
 			SwingUtilities.invokeAndWait(() -> gt = new GraphicsTest());
 			clipLibrary.playMusic();
 			runner.scheduleAtFixedRate(gt::drawCycle, 0, 50, TimeUnit.MILLISECONDS);
@@ -263,8 +263,6 @@ public class GraphicsTest extends JFrame {
 			
 		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(ball, spheret);
 		
-		//CameraTiedLightSource l4 = new CameraTiedLightSource(cam.getPosition().x, cam.getPosition().y, cam.getPosition().z);
-		//l4.tieTo(cam);
 		DirectionalLightSource l4 = new DirectionalLightSource();
 		l4.setPosition(cam::getPosition);
 		l4.setDirection(() -> cam.getOrientation().getForward().getUnitVector());
@@ -430,6 +428,12 @@ public class GraphicsTest extends JFrame {
 		if (go) {
 			go = false;
 		} else {
+		    try {
+                clipLibrary.close();
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
 		    runner.shutdown();
 			super.dispose();
 			slave.dispose();
@@ -443,7 +447,7 @@ public class GraphicsTest extends JFrame {
 		//hmm, having switched from the camera vector to the ship vector there might be an issue
 		//this can sometimes return null, presumably because the orientation is undergoing a transformation
 		//will need to consider when weapon activation takes place (needs to be in the draw complete stage?? or prior to transforming??)    
-	    final IOrientable shipOrientation = TraitHandler.INSTANCE.getTrait(ship, IOrientable.class).get();
+	    final IOrientable shipOrientation = TraitHandler.INSTANCE.getTrait(ship, IOrientable.class).orElseThrow();
         Supplier<IOrientation> forward = () -> shipOrientation.getOrientation().copy(); //could be a problem getting the trait?
 		
 		ship.addWeapon(Ship.Hardpoints.CENTRE, new LaserWeapon("LASER",

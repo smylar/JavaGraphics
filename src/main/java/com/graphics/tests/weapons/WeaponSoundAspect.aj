@@ -15,12 +15,12 @@ public aspect WeaponSoundAspect {
     private final ClipLibrary clipLibrary = ClipLibrary.getInstance();
     
     after(ProjectileWeapon weapon) : call(void IEffector.activate()) && target(weapon) {
-        System.out.println("Fired " + weapon.getProjectile().getClass().getName());
-        makeSound(weapon.getProjectile().getClass().getName());
+        //System.out.println("Fired " + weapon.getProjectile().getClass().getName());
+        makeSound(weapon.getProjectile().getClass().getSimpleName());
     }
     
     after() returning(LaserEffect effect) : call(LaserEffect.new(..)) {
-        System.out.println("Fired laser");
+        //System.out.println("Fired laser");
         makeSound("laser");
                 
     }

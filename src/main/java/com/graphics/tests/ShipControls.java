@@ -27,7 +27,7 @@ public final class ShipControls extends ObjectInputController<Ship> {
 	
 	public ShipControls(Ship controlledObject) throws Exception {
 		super(controlledObject);
-		orientable = TraitHandler.INSTANCE.getTrait(controlledObject, IOrientable.class).get();
+		orientable = TraitHandler.INSTANCE.getTrait(controlledObject, IOrientable.class).orElseThrow();
 	}
 
 	public void increaseSpeed() {

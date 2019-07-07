@@ -1,5 +1,6 @@
 package com.graphics.lib;
 
+import java.awt.Dimension;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -60,4 +61,10 @@ public class GeneralPredicates {
 	{
 		return w -> !w.hasTags();
 	}
+	
+	public static Predicate<Point> isOnScreen(final Dimension screen) {
+        return p -> p.z > 1 &&
+                    p.x > 0 && p.x < screen.getWidth() &&
+                    p.y > 0 && p.y < screen.getHeight();
+     }
 }

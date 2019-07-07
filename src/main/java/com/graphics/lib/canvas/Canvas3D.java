@@ -37,6 +37,7 @@ import com.graphics.lib.properties.PropertyInject;
 import com.graphics.lib.shader.IShaderFactory;
 import com.graphics.lib.shader.PointShader;
 import com.graphics.lib.shader.ScanlineShaderFactory;
+import com.graphics.lib.shader.WireframeShader;
 import com.graphics.lib.traits.TrackingTrait;
 import com.graphics.lib.zbuffer.ZBufferItem;
 
@@ -130,7 +131,7 @@ public class Canvas3D extends AbstractCanvas {
 	}
 	
 	public void replaceShader(ICanvasObject obj, IShaderFactory shader) {
-	    if (!"point".equals(drawMode)) {
+	    if (!"point".equals(drawMode) && !"wire".equals(drawMode)) {
 	        this.shapes.replace(obj, shader);
 	    }
 	}
@@ -177,6 +178,8 @@ public class Canvas3D extends AbstractCanvas {
 		    CanvasObjectFunctions.DEFAULT.get().moveTo(obj, position);
 		    if ("point".contentEquals(drawMode)) {
 		        this.shapes.put(obj, PointShader.getShader());
+		    } else if ("wire".contentEquals(drawMode)) {
+                this.shapes.put(obj, WireframeShader.getShader()); 
 		    } else {
 		        this.shapes.put(obj, shaderFactory);
 		    }

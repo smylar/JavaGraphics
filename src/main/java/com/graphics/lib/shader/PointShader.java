@@ -3,6 +3,7 @@ package com.graphics.lib.shader;
 import java.awt.Color;
 import java.awt.Dimension;
 
+import com.graphics.lib.GeneralPredicates;
 import com.graphics.lib.Point;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasObject;
@@ -26,15 +27,9 @@ public class PointShader implements IShaderFactory {
               .stream()
               .filter(v -> !v.hasTags())
               .map(v -> v.getTransformed(c))
-              .filter(p -> isOnScreen(p, screen))
+              .filter(GeneralPredicates.isOnScreen(screen))
               .forEach(p -> addMarkerToBuffer(p, parent, zBufferItemUpdater));
 
-    }
-    
-    private boolean isOnScreen(final Point p, final Dimension screen) {
-        return p.z > 0 &&
-               p.x > 0 && p.x < screen.getWidth() &&
-               p.y > 0 && p.y < screen.getHeight();
     }
     
     private void addMarkerToBuffer(final Point p, final ICanvasObject parent, final ZBufferItemUpdater zBufferItemUpdater) {

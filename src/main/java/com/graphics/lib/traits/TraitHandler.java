@@ -33,7 +33,9 @@ public class TraitHandler {
         T trait = null;
         try {
             trait = traitClass.getConstructor(ICanvasObject.class).newInstance(obj);
-            traitMap.computeIfAbsent(obj, key -> Sets.newConcurrentHashSet()).add(trait);
+            synchronized (traitMap) {
+                traitMap.computeIfAbsent(obj, key -> Sets.newConcurrentHashSet()).add(trait);
+            }
             obj.observeDeath()
                .subscribe(d -> traitMap.remove(obj));
         } catch (Exception e) {

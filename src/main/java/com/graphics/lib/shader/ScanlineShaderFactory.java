@@ -4,7 +4,6 @@ import static com.graphics.lib.util.NumberUtils.NUMBERS;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -13,7 +12,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.Lists;
 import com.graphics.lib.Facet;
 import com.graphics.lib.GeneralPredicates;
 import com.graphics.lib.LineEquation;
@@ -82,11 +80,9 @@ public enum ScanlineShaderFactory implements IShaderFactory {
                 localShader.init(parent, facet, c);
             }
             
-            List<LineEquation> lines = new ArrayList<>();
-            
-            lines.add(new LineEquation(points.get(0), points.get(1), c));
-            lines.add(new LineEquation(points.get(1), points.get(2), c));
-            lines.add(new LineEquation(points.get(2), points.get(0), c));
+            var lines = List.of(new LineEquation(points.get(0), points.get(1), c),
+                                new LineEquation(points.get(1), points.get(2), c),
+                                new LineEquation(points.get(2), points.get(0), c));
             
             for (int x = (int)Math.floor(minX) ; x <= Math.ceil(maxX) ; x++)
             {
@@ -203,10 +199,10 @@ public enum ScanlineShaderFactory implements IShaderFactory {
         facet.setFrontFace(GeneralPredicates.isFrontface(c).test(facet));
         return facet.getTransformedNormal(c).getZ() == 0 ||
                 Utils.allMatchAny(facet.getAsList().stream().map(p -> p.getTransformed(c)).collect(Collectors.toList()), 
-                        Lists.newArrayList(p -> p.z <= 1,
-                                           p -> p.x < 0,
-                                           p -> p.x > dimension.getWidth(),
-                                           p -> p.y < 0,
-                                           p -> p.y > dimension.getHeight()));
+                        List.of(p -> p.z <= 1,
+                                p -> p.x < 0,
+                                p -> p.x > dimension.getWidth(),
+                                p -> p.y < 0,
+                                p -> p.y > dimension.getHeight()));
     }
 }

@@ -15,7 +15,7 @@ public class PanCamera implements CameraTransform {
 	@Override
 	public void doTransform(Camera c) {
 		try{
-			IOrientation o = c.getOrientation().getClass().newInstance();
+			IOrientation o = c.getOrientation().getClass().getDeclaredConstructor().newInstance();
 			rot.beforeTransform();
 			o.getRepresentation().getVertexList().forEach(rot.doTransformSpecific()::accept);
 			rot.afterTransform();

@@ -19,11 +19,11 @@ public class Rotation extends Transform{
 	
 	public Rotation(Axis axis, double angleProgression){
 		try {
-			this.matrix = axis.getMatrix().newInstance();
+			this.matrix = axis.getMatrix().getDeclaredConstructor().newInstance();
 			this.axis = axis;
 			this.matrix.generateMatrix(angleProgression, 0, 0);
 			this.angleProgression = angleProgression;
-		} catch (InstantiationException | IllegalAccessException e) {}
+		} catch (Exception e) {}
 		
 	}
 	

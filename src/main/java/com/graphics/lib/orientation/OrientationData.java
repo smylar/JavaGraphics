@@ -1,9 +1,7 @@
 package com.graphics.lib.orientation;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import com.google.common.collect.ImmutableList;
 import com.graphics.lib.Axis;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
@@ -70,7 +68,7 @@ public class OrientationData {
 		WorldCoord up = new WorldCoord(upv.getX(), upv.getY(), upv.getZ());
 		WorldCoord right = new WorldCoord(rightv.getX(), rightv.getY(), rightv.getZ());
 			
-		ImmutableList<WorldCoord> vertexList = ImmutableList.of(forward, up, right);
+		List<WorldCoord> vertexList = List.of(forward, up, right);
 		
 		this.xRot = 0;
 		this.yRot = 0;
@@ -132,7 +130,6 @@ public class OrientationData {
 //	}
 	
 	public static List<Rotation> getRotationsForVector(Vector v){
-		List<Rotation> rots = new ArrayList<>();
 		Vector unit = v.getUnitVector();
 		WorldCoord wc = new WorldCoord(unit.getX(), unit.getY(), unit.getZ());
 
@@ -161,9 +158,7 @@ public class OrientationData {
 			xRot = 90;
 			
 		Rotation r1 = Axis.X.getRotation(xRot);
-		rots.add(r1);
-		rots.add(r0);
 		
-		return rots;
+		return List.of(r1,r0);
 	}
 }

@@ -1,14 +1,14 @@
 package com.graphics.lib.lightsource;
 
 import java.awt.Color;
-import java.util.Observable;
+import java.util.concurrent.SubmissionPublisher;
 
 import com.graphics.lib.IntensityComponents;
 import com.graphics.lib.Point;
 
 import static com.graphics.lib.IntensityComponents.ColourComponent.*;
 
-public class LightSource extends Observable implements ILightSource{
+public class LightSource extends SubmissionPublisher<String> implements ILightSource {
 	public static final String ONOFFCHANGE = "ONOFF";
 	public static final String POSITIONCHANGE = "POS";
 	public static final String INTENSITYCHANGE = "INT";
@@ -128,8 +128,7 @@ public class LightSource extends Observable implements ILightSource{
 	}
 
 	protected void flagChange(String change){
-		this.setChanged();
-		this.notifyObservers(change);
+		submit(change);
 	}
 	
 	
@@ -179,8 +178,5 @@ public class LightSource extends Observable implements ILightSource{
 				.doubleToLongBits(other.range))
 			return false;
 		return true;
-	}
-	
-	
- 
+	} 
 }

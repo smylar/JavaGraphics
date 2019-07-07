@@ -1,39 +1,40 @@
 package com.graphics.shapes;
 
 import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
+import java.util.Objects;
+import java.util.concurrent.Flow.Subscriber;
+import java.util.concurrent.Flow.Subscription;
 
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
 import com.graphics.lib.Facet;
-import com.graphics.lib.Utils;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.lightsource.ObjectTiedLightSource;
 import com.graphics.lib.util.ShapeReader;
 
-public class Lantern extends CanvasObject implements Observer {
+public class Lantern extends CanvasObject implements Subscriber<String> {
     private static final String RESOURCE = "lantern";
+    private LightSource tied;
+    private Subscription subscription;
     
 	public Lantern() {
-	    super(Lantern::init);
+	    super(Lantern::init);    
 	}
 	
-	public void attachLightsource(ObjectTiedLightSource<?> ls){
-		this.setColour(ls.getLightSource().getColour());
-		this.setCastsShadow(false);
-		ls.tieTo(this);
-		ls.getLightSource().addObserver(this);
-	}
-	
-	@Override
-	public synchronized void update(Observable arg0, Object arg1) {
-		Utils.cast(arg0, LightSource.class)
-		     .ifPresent(l -> setColour(l.getActualColour()));
-	}
+	public void attachLightsource(ObjectTiedLightSource<? extends LightSource> tied) {
+	    if (Objects.nonNull(subscription)) {
+	        subscription.cancel();
+	    }
+	    this.setColour(tied.getLightSource().getColour());
+        this.setCastsShadow(false);
+        tied.tieTo(this);
+        tied.getLightSource().subscribe(this);
+        this.tied = tied.getLightSource();
+        
+    }
 	
 	private static Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>> init() {
         ImmutableList<WorldCoord> vertexList = generateVertexList();
@@ -64,5 +65,27 @@ public class Lantern extends CanvasObject implements Observer {
 //                                new Facet(vertexList.get(5), vertexList.get(3), vertexList.get(4))
 //                                );
         return ShapeReader.getFacetsFromResource(RESOURCE, vertexList);
+    }
+
+    @Override
+    public void onSubscribe(Subscription subscription) {
+        this.subscription = subscription;
+        subscription.request(1);
+    }
+
+    @Override
+    public void onNext(String item) {
+        setColour(tied.getActualColour());
+        subscription.request(1);
+    }
+
+    @Override
+    public void onError(Throwable throwable) {
+        throwable.printStackTrace();
+    }
+
+    @Override
+    public void onComplete() {
+        subscription = null;
     }
 }

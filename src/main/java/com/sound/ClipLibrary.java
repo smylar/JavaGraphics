@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.FloatControl;
+import javax.sound.sampled.LineEvent.Type;
 
 import org.apache.commons.io.IOUtils;
 
@@ -38,6 +39,7 @@ public class ClipLibrary implements AutoCloseable, PropertyInjected {
     private static ClipLibrary INSTANCE = null;
 	private final Map<String,Supplier<Optional<Clip>>> clipSupplier = new HashMap<>();
 	private final ExecutorService musicExecutor = Executors.newSingleThreadExecutor();
+	private Optional<Clip> currentTrack;
 	
 	@Property(name="sounds.effects.location", defaultValue="sounds/")
 	private String soundResource;
@@ -55,18 +57,20 @@ public class ClipLibrary implements AutoCloseable, PropertyInjected {
 	
 	public void playMusic() {
 	    //TODO stop music
-	    clipSupplier.values()
-                    .stream()
-                    .filter(supplier -> OndemandClip.class.isAssignableFrom(supplier.getClass()))
-                    .map(OndemandClip.class::cast)
-                    .forEach(odc -> 
-                        odc.addObserver((o,a) -> musicExecutor.execute(this::playRandomTrack)) //currently only a track ending should cause this
-                    );
-                    
-	    musicExecutor.execute(this::playRandomTrack);
+	    currentTrack = getRandomTrack();
+	    currentTrack.map(clip -> {
+	        clip.addLineListener(l -> {
+                    if (l.getType() == Type.STOP) {
+                        musicExecutor.execute(this::playMusic);
+                    }
+             });
+	        FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+            gainControl.setValue(-25);
+	        return clip;
+	    }).ifPresent(Clip::start);
 	}
 	
-	public Optional<Clip> playSound(String key){
+	public Optional<Clip> playSound(String key) {
 		return playSound(key, 0);
 	}
 	
@@ -80,9 +84,9 @@ public class ClipLibrary implements AutoCloseable, PropertyInjected {
 	public Optional<Clip> playSound(String key, float gain) {
 		try {		
 			return getClip(key)
+			           .filter(c -> !c.isRunning())
                        .filter(Clip::isOpen)
                        .map(clip -> {
-                           clip.stop();
                            clip.setFramePosition(0);
                            FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
                            gainControl.setValue(gain);
@@ -162,11 +166,10 @@ public class ClipLibrary implements AutoCloseable, PropertyInjected {
 	
 	@Override
 	public void close() throws Exception {
+	    currentTrack.ifPresent(Clip::close);
 	    musicExecutor.shutdown();
 	    clipSupplier.values().stream()
-	                         .map(obj -> Utils.cast(obj, Closeable.class))
-	                         .filter(Optional::isPresent)
-	                         .map(Optional::get)
+	                         .flatMap(obj -> Utils.cast(obj, Closeable.class).stream())
 	                         .forEach(c -> {
                                 try {
                                     c.close();
@@ -201,7 +204,7 @@ public class ClipLibrary implements AutoCloseable, PropertyInjected {
         }
 	}
 	
-	private void playRandomTrack() {
+	private Optional<Clip> getRandomTrack() {
 	    //TODO might be nice to take a custom selector
 	    List<String> keys = clipSupplier.entrySet()
                     	                .stream()
@@ -210,8 +213,10 @@ public class ClipLibrary implements AutoCloseable, PropertyInjected {
                     	                .collect(Collectors.toList());
 	    
 	    if (!keys.isEmpty()) {
-	        playSound(keys.get(new Random().nextInt(keys.size())), -25f);
+	        return getClip(keys.get(new Random().nextInt(keys.size())));
 	    }
+	    
+	    return Optional.empty();
 	}
 
     @Override
