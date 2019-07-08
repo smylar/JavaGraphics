@@ -1,6 +1,8 @@
 package com.graphics.lib.orientation;
 
 
+import java.util.stream.IntStream;
+
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
@@ -107,10 +109,9 @@ public class SimpleOrientation implements IOrientation {
 		SimpleOrientation copy = new SimpleOrientation();
 		ICanvasObject source = this.getRepresentation();
 		ICanvasObject dest = copy.getRepresentation();
-		for (int i = 0 ; i < 4 ; i++)
-		{
-			dest.getVertexList().get(i).copyFrom(source.getVertexList().get(i));
-		}
+		IntStream.range(0,4)
+		         .forEach(i -> dest.getVertexList().get(i).copyFrom(source.getVertexList().get(i)));
+
 		return copy;
 	}
 }

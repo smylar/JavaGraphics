@@ -2,6 +2,7 @@ package com.graphics.lib;
 
 import java.awt.Color;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import com.graphics.lib.camera.Camera;
 
@@ -209,13 +210,15 @@ public class Facet extends Triplet<WorldCoord> {
 
         List<WorldCoord> coords = this.getAsList();
         List<WorldCoord> otherCoords = other.getAsList();
-        for (int i = 0 ; i < coords.size() ; i++) {
-            //are ImmutableLists of size 3, so will not contains nulls
-            if (!coords.get(i).isEqualTo(otherCoords.get(i))) {
-                return false;
-            }
-        }
-        return true;
+        return IntStream.range(0, coords.size())
+                        .allMatch(i -> coords.get(i).isEqualTo(otherCoords.get(i)));
+//        for (int i = 0 ; i < coords.size() ; i++) {
+//            //are ImmutableLists of size 3, so will not contains nulls
+//            if (!coords.get(i).isEqualTo(otherCoords.get(i))) {
+//                return false;
+//            }
+//        }
+//        return true;
 	}
 	
 }
