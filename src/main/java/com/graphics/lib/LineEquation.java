@@ -103,6 +103,80 @@ public final class LineEquation {
 
 	public WorldCoord getWorldEnd() {
 		return worldEnd;
-	}	
+	}
+	
+	public double getZValue(final double xVal, final double yVal)
+    {
+        double dx = xVal - start.x;
+        double dy = yVal - start.y;
+        double len = Math.sqrt((dx*dx)+(dy*dy));
+        
+        double percentLength = len / getLength();
+        
+        return interpolateZ(start.z, end.z, percentLength); 
+    }
+    
+    public static double interpolateZ(final double startZ, final double endZ, final double percentLength)
+    {
+        return 1d / ((1d/startZ) + (percentLength * ((1d/endZ) - (1d/startZ))));
+    }
+
+	//generated
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((c == null) ? 0 : c.hashCode());
+        result = prime * result + ((end == null) ? 0 : end.hashCode());
+        result = prime * result + ((m == null) ? 0 : m.hashCode());
+        result = prime * result + ((start == null) ? 0 : start.hashCode());
+        result = prime * result + ((x == null) ? 0 : x.hashCode());
+        result = prime * result + ((y == null) ? 0 : y.hashCode());
+        return result;
+    }
+
+    //generated
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        LineEquation other = (LineEquation) obj;
+        if (c == null) {
+            if (other.c != null)
+                return false;
+        } else if (!c.equals(other.c))
+            return false;
+        if (end == null) {
+            if (other.end != null)
+                return false;
+        } else if (!end.equals(other.end))
+            return false;
+        if (m == null) {
+            if (other.m != null)
+                return false;
+        } else if (!m.equals(other.m))
+            return false;
+        if (start == null) {
+            if (other.start != null)
+                return false;
+        } else if (!start.equals(other.start))
+            return false;
+        if (x == null) {
+            if (other.x != null)
+                return false;
+        } else if (!x.equals(other.x))
+            return false;
+        if (y == null) {
+            if (other.y != null)
+                return false;
+        } else if (!y.equals(other.y))
+            return false;
+        return true;
+    }	
+	
 	
 }

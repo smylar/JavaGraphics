@@ -131,7 +131,7 @@ public enum ScanlineShaderFactory implements IShaderFactory {
         for(LineEquation line : activeLines)
         {
             Double y = line.getYAtX(xVal);
-            Double z = this.getZValue(xVal, y, line);
+            Double z = line.getZValue(xVal, y);
             
             if (builder.startY == null){
                 builder.startY = y;
@@ -170,29 +170,11 @@ public enum ScanlineShaderFactory implements IShaderFactory {
                 percentDistCovered = (y - Math.floor(scanLine.getStartY())) / scanLineLength;
             }
             
-            double z = this.interpolateZ(scanLine.getStartZ(), scanLine.getEndZ(), percentDistCovered);
+            double z = LineEquation.interpolateZ(scanLine.getStartZ(), scanLine.getEndZ(), percentDistCovered);
             final int yVal = y;
             Supplier<Color> colourSupplier = () -> skip == 1 || yVal % skip == 0 || colour == null || shader == null ? shader.getColour(scanLine, x, yVal) : colour;
             zBufferItemUpdater.update(x, y, z, colourSupplier);
         }
-    }
-	
-	private double getZValue(double xVal, double yVal, LineEquation line)
-    {
-        double dx = xVal - line.getStart().x;
-        double dy = yVal - line.getStart().y;
-        double len = Math.sqrt((dx*dx)+(dy*dy));
-        
-        double percentLength = len / line.getLength();
-        double startZ = line.getStart().z;
-        double endZ = line.getEnd().z;
-        
-        return this.interpolateZ(startZ, endZ, percentLength); 
-    }
-	
-	private double interpolateZ(double startZ, double endZ, double percentLength)
-    {
-        return 1d / ((1d/startZ) + (percentLength * ((1d/endZ) - (1d/startZ))));
     }
 	
 	private boolean isOffScreen(Facet facet, Camera c, Dimension dimension) {
