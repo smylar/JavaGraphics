@@ -30,11 +30,6 @@ public class BasicLightSource implements ILightSource {
 
 	@Override
 	public Color getColour() {
-		return getActualColour();
-	}
-
-	@Override
-	public Color getActualColour() {
 		return colour;
 	}
 

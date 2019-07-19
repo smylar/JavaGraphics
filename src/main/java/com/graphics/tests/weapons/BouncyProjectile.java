@@ -2,6 +2,7 @@ package com.graphics.tests.weapons;
 
 import java.awt.Color;
 import java.util.Date;
+import java.util.Set;
 
 import com.graphics.lib.Point;
 import com.graphics.lib.canvas.CanvasObject;
@@ -49,7 +50,7 @@ public class BouncyProjectile extends Projectile {
 				if (impactee != null){
 					if (impactee.hasFlag(Events.STICKY)){ 
 						PluginLibrary.stop2().execute(obj);
-						TraitHandler.INSTANCE.getTrait(obj.getParent(), ITracker.class).ifPresent(o -> o.observeAndMatch(impactee));
+						TraitHandler.INSTANCE.getTrait(obj.getParent(), ITracker.class).ifPresent(o -> o.observeAndMatch(impactee, Set.of()));
 						getClipLibrary().ifPresent(cl -> cl.playSound("STICK", -20f));
 					}
 					else {

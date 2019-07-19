@@ -54,7 +54,7 @@ public class Rotation extends Transform{
 		if (matrix != null) {			
 			return matrix.getMapper();
 		}
-	 return p -> {return;};
+	 return p -> {};
 	}
 	
 }

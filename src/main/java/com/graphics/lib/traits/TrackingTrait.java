@@ -1,8 +1,11 @@
 package com.graphics.lib.traits;
 
+import java.util.Set;
+
 import com.graphics.lib.ObjectStatus;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ITracker;
+import com.graphics.lib.transform.Transform;
 
 /**
  * Trait whereby an object will completely mirror the transforms applied to another object<br/>
@@ -19,6 +22,8 @@ public class TrackingTrait implements ITracker {
     
     private ICanvasObject pending;
     
+    private Set<Class<? extends Transform>> matchTypes;
+    
     public TrackingTrait(ICanvasObject parent) {
         this.parent = parent;
     }
@@ -29,11 +34,12 @@ public class TrackingTrait implements ITracker {
     }
     
     @Override
-    public void observeAndMatch (ICanvasObject target) {
+    public void observeAndMatch (ICanvasObject target, Set<Class<? extends Transform>> transformTypes) {
         pending = target;
+        matchTypes = transformTypes;
         synchronized(pending.getChildren()) {
-        	parent.addFlag(TRACKING_TAG);
-        	pending.getChildren().add(parent); 
+            parent.addFlag(TRACKING_TAG);
+            pending.getChildren().add(parent); 
         }
         doObserve();
     }
@@ -72,6 +78,7 @@ public class TrackingTrait implements ITracker {
 
         target.observeTransforms()
                   .takeWhile(t -> thisTarget == target)
+                  .filter(t -> matchTypes.isEmpty() || matchTypes.contains(t.getClass()))
                   .subscribe(parent::replayTransform); 
         
         target.observeStatus()

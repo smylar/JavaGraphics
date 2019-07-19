@@ -57,7 +57,7 @@ public class RepeatingTransform<T extends Transform> extends Transform{
 		if (!this.isComplete()){		
 			return transform.doTransformSpecific();
 		}
-		return (p) -> {return;};
+		return p -> {};
 	}
 	
 	@Override

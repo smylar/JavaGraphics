@@ -95,7 +95,7 @@ public class LaserWeapon implements IEffector {
 					lsr.applyTransform(r);
 				}
 				CanvasObjectFunctions.DEFAULT.get().moveTo(lsr, parent.getWeaponLocation(id).get());
-				TraitHandler.INSTANCE.getTrait(lsr, ITracker.class).ifPresent(trait -> trait.observeAndMatch(parent));
+				TraitHandler.INSTANCE.getTrait(lsr, ITracker.class).ifPresent(trait -> trait.observeAndMatch(parent, Set.of()));
 				return null;
 			})
 		);

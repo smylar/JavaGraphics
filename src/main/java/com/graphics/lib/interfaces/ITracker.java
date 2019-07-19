@@ -1,5 +1,9 @@
 package com.graphics.lib.interfaces;
 
+import java.util.Set;
+
+import com.graphics.lib.transform.Transform;
+
 public interface ITracker extends ITrait {
 
     /**
@@ -12,9 +16,9 @@ public interface ITracker extends ITrait {
      * 
      * @param o
      */
-	void observeAndMatch(ICanvasObject target);
+    
+    void observeAndMatch(ICanvasObject target, Set<Class<? extends Transform>> transformType);
 
     void stopObserving();
-
 
 }

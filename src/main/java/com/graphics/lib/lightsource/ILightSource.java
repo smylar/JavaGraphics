@@ -18,7 +18,7 @@ public interface ILightSource {
 	 * 
 	 * @return
 	 */
-	public Color getActualColour();
+	default Color getActualColour() { return getColour();}
 	
 	/**
 	 * Get the amount of each colour component of the light illuminating the given point from this light source
