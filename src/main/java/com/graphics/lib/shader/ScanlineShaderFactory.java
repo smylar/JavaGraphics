@@ -1,7 +1,5 @@
 package com.graphics.lib.shader;
 
-import static com.graphics.lib.util.NumberUtils.NUMBERS;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.util.Comparator;
@@ -117,9 +115,9 @@ public enum ScanlineShaderFactory implements IShaderFactory {
             return Optional.empty();
         
         if (activeLines.size() == 3) {
-            double dif1 = NUMBERS.toPostive(activeLines.get(0).getYAtX(xVal) - activeLines.get(1).getYAtX(xVal));
-            double dif2 = NUMBERS.toPostive(activeLines.get(1).getYAtX(xVal) - activeLines.get(2).getYAtX(xVal));
-            double dif3 = NUMBERS.toPostive(activeLines.get(0).getYAtX(xVal) - activeLines.get(2).getYAtX(xVal));
+            double dif1 = Math.abs(activeLines.get(0).getYAtX(xVal) - activeLines.get(1).getYAtX(xVal));
+            double dif2 = Math.abs(activeLines.get(1).getYAtX(xVal) - activeLines.get(2).getYAtX(xVal));
+            double dif3 = Math.abs(activeLines.get(0).getYAtX(xVal) - activeLines.get(2).getYAtX(xVal));
                     
             if ((dif1 < dif2 && dif1 < dif3) || (dif3 < dif2 && dif3 < dif1)) {
                 activeLines.remove(0);

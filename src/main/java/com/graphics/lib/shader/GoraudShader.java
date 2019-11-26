@@ -61,6 +61,7 @@ public class GoraudShader extends DefaultScanlineShader {
 		}
 	}
 
+	@Override
 	public Color getColour(ScanLine scanLine, int x, int y) {
 		if (facet == null || scanLine == null) 
 		    return colour;
@@ -86,7 +87,7 @@ public class GoraudShader extends DefaultScanlineShader {
 	{
 		double dx = xVal - line.getStart().x;
 		double dy = yVal - line.getStart().y;
-		double len = Math.sqrt((dx*dx)+(dy*dy));
+		double len = Math.hypot(dx, dy);
 		
 		double percentLength = len / line.getLength();
 		

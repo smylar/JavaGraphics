@@ -77,8 +77,8 @@ public class Point {
 		double dy = p2.y - y;
 		double dz = p2.z - z;
 		
-		double adj = Math.sqrt((dx * dx) + (dz * dz));
-		return Math.sqrt((dy * dy) + (adj * adj));
+		double adj = Math.hypot(dx, dz);
+		return Math.hypot(dy, adj);
 	}
 	
 	/**
@@ -94,26 +94,26 @@ public class Point {
 		return new Vector(p2.x - this.x, p2.y - this.y, p2.z - this.z);
 	}
 	
-	public void add(Point p){
+	public void add(Point p) {
 		x += p.x;
 		y += p.y;
 		z += p.z;
 	}
 	
-	public void subtract(Point p){
+	public void subtract(Point p) {
 		x -= p.x;
 		y -= p.y;
 		z -= p.z;
 	}
 	
-	public void copyFrom(Point p){
+	public void copyFrom(Point p) {
 		x = p.x;
 		y = p.y;
 		z = p.z;
 	}
 	
 	@Override
-	public String toString(){
+	public String toString() {
 		return this.x + "," + this.y + "," + this.z;
 	}
 	

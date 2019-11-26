@@ -72,7 +72,7 @@ public final class LineEquation {
 	{
 		double dx = this.getMaxX() - this.getMinX();
 		double dy = this.getMaxY() - this.getMinY();
-		return Math.sqrt((dx*dx) + (dy*dy));
+		return Math.hypot(dx, dy);
 	}
 	
 	public Double getXAtY(double yValue)
@@ -109,7 +109,7 @@ public final class LineEquation {
     {
         double dx = xVal - start.x;
         double dy = yVal - start.y;
-        double len = Math.sqrt((dx*dx)+(dy*dy));
+        double len = Math.hypot(dx, dy);
         
         double percentLength = len / getLength();
         

@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import javax.swing.SwingUtilities;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
@@ -131,7 +132,8 @@ public class Canvas3D extends AbstractCanvas {
 	}
 	
 	public void replaceShader(ICanvasObject obj, IShaderFactory shader) {
-	    if (!"point".equals(drawMode) && !"wire".equals(drawMode)) {
+	    
+	    if (!StringUtils.equalsAnyIgnoreCase(drawMode, "point", "wire")) {
 	        this.shapes.replace(obj, shader);
 	    }
 	}

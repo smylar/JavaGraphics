@@ -89,7 +89,7 @@ public class TexturedGoraudShader extends GoraudShader {
 	{
 		double dx = xVal - line.getStart().x;
 		double dy = yVal - line.getStart().y;
-		double len = Math.sqrt((dx*dx)+(dy*dy));
+		double len = Math.hypot(dx, dy);
 		
 		double percentLength = len / line.getLength();
 		

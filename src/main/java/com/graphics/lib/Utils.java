@@ -82,7 +82,7 @@ public class Utils {
 			{
 				int length = (int)Math.round(Math.sqrt(rs - Math.pow(i,2))) ;
 				for (int j = 0 ; j <= length ; j++ ) {
-					double pc = Math.sqrt(Math.pow(j, 2) + Math.pow(i, 2)) / (double)radius;
+					double pc = Math.hypot(j, i) / (double)radius;
 					if (pc > 1) pc = 1;
 					int cRed = (int)Math.floor(startColour.getRed() + ((double)redDiff * pc));
 					int cGreen = (int)Math.floor(startColour.getGreen() + ((double)greenDiff * pc));

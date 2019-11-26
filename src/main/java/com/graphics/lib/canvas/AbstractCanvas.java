@@ -4,9 +4,9 @@ import java.awt.Graphics;
 import java.util.Objects;
 import javax.swing.JPanel;
 
-import com.graphics.lib.ZBufferEnum;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.IZBuffer;
+import com.graphics.lib.zbuffer.ZBufferEnum;
 
 public class AbstractCanvas extends JPanel {
 

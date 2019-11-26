@@ -19,7 +19,7 @@ import com.graphics.lib.texture.Texture;
  */
 public class WorldCoord extends Point {
 
-	private Map<Camera, Point> transformed = new HashMap<Camera, Point>();
+	private Map<Camera, Point> transformed = new HashMap<>();
 	private String group = "";
 	
 	public WorldCoord() {

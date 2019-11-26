@@ -8,6 +8,9 @@ import com.graphics.lib.camera.Camera;
 import com.graphics.lib.lightsource.ILightSource;
 
 public class GeneralPredicates {
+    
+    private GeneralPredicates() {}
+    
 	public static Predicate<Facet> isFrontface(Camera c)
 	{
 		return f -> {
@@ -17,7 +20,7 @@ public class GeneralPredicates {
 			double camVecZ = c.getOrientation().getForward().getZ();
 			double facetVecZ = f.getTransformedNormal(c).getZ();
 			
-			if (camVecZ < 0) camVecZ = camVecZ * -1;
+			camVecZ = Math.abs(camVecZ);
 			
 			return (camVecZ * facetVecZ) < 0;
 		};
@@ -28,8 +31,6 @@ public class GeneralPredicates {
 		return f -> {		
 			List<WorldCoord> points = f.getAsList();
 			
-			//IntensityComponents intComps = l.getIntensityComponents(points.get(0));
-			//if (intComps.hasNoIntensity()) return false;
 			if (points.stream().allMatch(p -> l.getIntensityComponents(p).hasNoIntensity())) return false; 
 			
 			Vector lightVector = l.getPosition().vectorToPoint(points.get(0)).getUnitVector();

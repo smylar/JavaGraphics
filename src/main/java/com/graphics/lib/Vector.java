@@ -45,8 +45,7 @@ public final class Vector {
 	 */
 	public Vector getUnitVector()
 	{
-		double squareadd = (x*x)+(y*y)+(z*z);
-		double divider = Math.sqrt(squareadd);
+		double divider = getSpeed();
 		if (divider == 0){
 			return ZERO_VECTOR;
 		}
