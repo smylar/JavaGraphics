@@ -22,7 +22,6 @@ import javax.swing.SwingUtilities;
 import com.graphics.lib.Axis;
 import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
-import com.graphics.lib.Temp;
 import com.graphics.lib.Utils;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
@@ -38,12 +37,12 @@ import com.graphics.tests.shapes.Wall;
 import com.graphics.tests.weapons.AmmoTracker;
 import com.graphics.tests.weapons.AutoAmmoProxy;
 import com.graphics.tests.weapons.BouncyProjectile;
+import com.graphics.tests.weapons.DefaultAmmoHandler;
 //import com.graphics.tests.weapons.DefaultAmmoHandler;
 import com.graphics.tests.weapons.DeflectionProjectile;
 import com.graphics.tests.weapons.ExplodingProjectile;
 import com.graphics.tests.weapons.ExtendedMagazineWeapon;
 import com.graphics.tests.weapons.GattlingRound;
-import com.graphics.tests.weapons.KotlinAmmoHandler;
 import com.graphics.tests.weapons.LaserWeapon;
 import com.graphics.tests.weapons.Projectile;
 import com.graphics.tests.weapons.ProjectileWeapon;
@@ -94,8 +93,6 @@ public class GraphicsTest extends JFrame {
 	private MouseEvent select = null;	
 
 	public static void main (String[] args) {
-	    Temp t = new Temp();
-	    t.sayHelloTo("Dave");
 		try {
 		    clipLibrary = ClipLibrary.getInstance();
 			SwingUtilities.invokeAndWait(() -> gt = new GraphicsTest());
@@ -488,8 +485,8 @@ public class GraphicsTest extends JFrame {
 		ship.addWeapon(Ship.Hardpoints.CENTRE, AutoAmmoProxy.weaponWithAmmo(new ProjectileWeapon("GAT", new GattlingRound().setRange(800).setSpeed(60),
 				forward,
 				ship
-				//), new DefaultAmmoHandler(1000).setTicksBetweenShots(2)));
-		        ), new KotlinAmmoHandler(1000,2)));
+				), new DefaultAmmoHandler(1000).setTicksBetweenShots(2)));
+		        //), new KotlinAmmoHandler(1000,2)));
 	}
 	
 	private void addUIOverlay(Canvas3D cnv, Camera cam) {
