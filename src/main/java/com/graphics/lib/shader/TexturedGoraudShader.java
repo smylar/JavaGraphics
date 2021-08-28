@@ -43,19 +43,18 @@ public class TexturedGoraudShader extends GoraudShader {
 
 	@Override
 	public Color getColour(ScanLine scanLine, int x, int y) {
-		if (textures.isEmpty()) return super.getColour(scanLine, x, y);
-		if (scanLine == null) return colour;
+		if (textures.isEmpty() || scanLine == null) return super.getColour(scanLine, x, y);
 		
-		if (scanLine != this.curScanline){
-			startIntensity = this.getIntensities(x, scanLine.getStartY(), scanLine.getStartLine());
-			endIntensity = this.getIntensities(x, scanLine.getEndY(), scanLine.getEndLine());
-			curScanline = scanLine;
-			lineLength = Math.ceil(scanLine.getEndY()) - Math.floor(scanLine.getStartY());
-		}
-		
-		if (lineLength == 0) return colour;
+//		if (scanLine != this.curScanline){
+//			startIntensity = this.getIntensities(x, scanLine.getStartY(), scanLine.getStartLine());
+//			endIntensity = this.getIntensities(x, scanLine.getEndY(), scanLine.getEndLine());
+//			curScanline = scanLine;
+//			lineLength = scanLine.getEndY() - scanLine.getStartY();
+//		}
+		var lineLength = scanLine.getEndY() - scanLine.getStartY();
+		if (lineLength <= 0) return colour;
 
-		double percentDistCovered = (y - Math.floor(scanLine.getStartY())) / lineLength;
+		double percentDistCovered = (y - scanLine.getStartY()) / lineLength;
 		
 		Color pointColour = colour;
 		
@@ -81,7 +80,8 @@ public class TexturedGoraudShader extends GoraudShader {
 			}
 		}
 		
-		return super.generateColour(pointColour, percentDistCovered);
+		//return super.generateColour(pointColour, percentDistCovered);
+		return generateColour(pointColour, new Point(x,y,0));
 	}
 	
 	

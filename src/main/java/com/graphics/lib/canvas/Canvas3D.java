@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 
 import javax.swing.SwingUtilities;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
@@ -40,6 +39,7 @@ import com.graphics.lib.shader.PointShader;
 import com.graphics.lib.shader.ScanlineShaderFactory;
 import com.graphics.lib.shader.WireframeShader;
 import com.graphics.lib.traits.TrackingTrait;
+import com.graphics.lib.util.DrawMode;
 import com.graphics.lib.zbuffer.ZBufferItem;
 
 import io.reactivex.Observable;
@@ -66,8 +66,8 @@ public class Canvas3D extends AbstractCanvas {
 	private Facet floor = null;
 	private long tickCount = 0;
 	
-	@Property(name="canvas.drawMode", defaultValue="normal")
-    private String drawMode;
+	@Property(name="canvas.drawMode", defaultValue="NORMAL")
+    private DrawMode drawMode;
 
 	protected Canvas3D(Camera camera)
     {
@@ -133,7 +133,7 @@ public class Canvas3D extends AbstractCanvas {
 	
 	public void replaceShader(ICanvasObject obj, IShaderFactory shader) {
 	    
-	    if (!StringUtils.equalsAnyIgnoreCase(drawMode, "point", "wire")) {
+	    if (!drawMode.fixedShader()) {
 	        this.shapes.replace(obj, shader);
 	    }
 	}
@@ -178,9 +178,9 @@ public class Canvas3D extends AbstractCanvas {
 	{
 		if (Objects.nonNull(obj) && !this.shapes.containsKey(obj)) {
 		    CanvasObjectFunctions.DEFAULT.get().moveTo(obj, position);
-		    if ("point".contentEquals(drawMode)) {
+		    if (drawMode == DrawMode.POINT) {
 		        this.shapes.put(obj, PointShader.getShader());
-		    } else if ("wire".contentEquals(drawMode)) {
+		    } else if (drawMode == DrawMode.WIRE) {
                 this.shapes.put(obj, WireframeShader.getShader()); 
 		    } else {
 		        this.shapes.put(obj, shaderFactory);

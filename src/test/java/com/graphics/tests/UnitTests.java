@@ -19,6 +19,7 @@ import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.transform.MovementTransform;
 import com.graphics.lib.transform.Rotation;
+import com.graphics.lib.util.TriangleAreaCalculator;
 
 public class UnitTests {
 
@@ -155,5 +156,10 @@ public class UnitTests {
 	@Test
 	public void testIteratorRecursion() {
 	    assertEquals(120, Utils.recurse(Lists.newArrayList(2,3,4,5), (next,prev) -> next*prev, 1), 0);
+	}
+	
+	@Test
+	public void testTriangleArea() {
+	    assertEquals(6, TriangleAreaCalculator.getArea(new Point(0,0,0), new Point(0,3,0), new Point(4,0,0)), 0); //345 triangle
 	}
 }

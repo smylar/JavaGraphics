@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -111,19 +113,22 @@ public enum ScanlineShaderFactory implements IShaderFactory {
                                                        .collect(Collectors.toList());
         
         
-        if (activeLines.size() < 2) 
+        if (activeLines.size() < 2) {
             return Optional.empty();
+        }
         
         if (activeLines.size() == 3) {
-            double dif1 = Math.abs(activeLines.get(0).getYAtX(xVal) - activeLines.get(1).getYAtX(xVal));
-            double dif2 = Math.abs(activeLines.get(1).getYAtX(xVal) - activeLines.get(2).getYAtX(xVal));
-            double dif3 = Math.abs(activeLines.get(0).getYAtX(xVal) - activeLines.get(2).getYAtX(xVal));
-                    
-            if ((dif1 < dif2 && dif1 < dif3) || (dif3 < dif2 && dif3 < dif1)) {
-                activeLines.remove(0);
-            } else {
-                 activeLines.remove(2);
-            }
+            return Optional.empty();
+//largely useless hardly ever triggered
+//            double dif1 = Math.abs(activeLines.get(0).getYAtX(xVal) - activeLines.get(1).getYAtX(xVal));
+//            double dif2 = Math.abs(activeLines.get(1).getYAtX(xVal) - activeLines.get(2).getYAtX(xVal));
+//            double dif3 = Math.abs(activeLines.get(0).getYAtX(xVal) - activeLines.get(2).getYAtX(xVal));
+//                    
+//            if ((dif1 < dif2 && dif1 < dif3) || (dif3 < dif2 && dif3 < dif1)) {
+//                activeLines.remove(0);
+//            } else {
+//                 activeLines.remove(2);
+//            }
         }   
         
         for(LineEquation line : activeLines)
@@ -131,7 +136,7 @@ public enum ScanlineShaderFactory implements IShaderFactory {
             Double y = line.getYAtX(xVal);
             Double z = line.getZValue(xVal, y);
             
-            if (builder.startY == null){
+            if (builder.startY == null) {
                 builder.startY = y;
                 builder.startLine = line;
                 builder.startZ = z;
@@ -157,20 +162,26 @@ public enum ScanlineShaderFactory implements IShaderFactory {
     }
 	
 	private void processScanline(ScanLine scanLine, int x, ScanlineShader shader, Dimension screen, ZBufferItemUpdater zBufferItemUpdater) {
-        double scanLineLength = Math.floor(scanLine.getEndY()) - Math.floor(scanLine.getStartY());
+	    int ceilEnd = (int)Math.ceil(scanLine.getEndY());
+	    int floorStart = (int)Math.floor(scanLine.getStartY().intValue());
+	    double scanLineLength = ceilEnd - floorStart;
         double percentDistCovered = 0;
-        Color colour = null;
-        for (int y = (int)Math.floor(scanLine.getStartY() < 0 ? 0 : scanLine.getStartY()) ; y < Math.floor(scanLine.getEndY() > screen.getHeight() ? screen.getHeight() : scanLine.getEndY() ) ; y++)
+        AtomicReference<Color> colour = new AtomicReference<>();
+        
+        Function<Integer,Color> colourSupplier = yVal -> {
+            Color c = skip <= 1 || yVal % skip == 0 || colour.get() == null || shader == null ? shader.getColour(scanLine, x, yVal) : colour.get();
+            colour.set(c);
+            return c;
+        };
+        for (int y = floorStart < 0 ? 0 : floorStart ; y <= (ceilEnd > screen.getHeight() ? screen.getHeight() : ceilEnd) ; y++)
         {
             
             if (scanLineLength != 0)
             {
-                percentDistCovered = (y - Math.floor(scanLine.getStartY())) / scanLineLength;
+                percentDistCovered = (y - floorStart) / scanLineLength;
             }
             
             double z = LineEquation.interpolateZ(scanLine.getStartZ(), scanLine.getEndZ(), percentDistCovered);
-            final int yVal = y;
-            Supplier<Color> colourSupplier = () -> skip == 1 || yVal % skip == 0 || colour == null || shader == null ? shader.getColour(scanLine, x, yVal) : colour;
             zBufferItemUpdater.update(x, y, z, colourSupplier);
         }
     }

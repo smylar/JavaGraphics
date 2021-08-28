@@ -75,7 +75,7 @@ public class WireframeShader implements IShaderFactory {
     private void addToBuffer(final double x, final double y, final LineEquation l, final ZBufferItemUpdater zBufferItemUpdater, final Predicate<Point> isOnScreen) {
         double z = l.getZValue(x, y);
         if (isOnScreen.test(new Point(x,y,z))) {
-            zBufferItemUpdater.update((int)Math.round(x), (int)Math.round(y), z, () -> Color.BLACK);
+            zBufferItemUpdater.update((int)Math.round(x), (int)Math.round(y), z, yVal -> Color.BLACK);
         }
     }
 }

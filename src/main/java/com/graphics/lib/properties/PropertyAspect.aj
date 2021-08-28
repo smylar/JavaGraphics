@@ -30,14 +30,23 @@ public aspect PropertyAspect {
                   Property prop = f.getAnnotation(Property.class);
                   //TODO will need converters for different types
                   try {
+                      var name = PropertyHolder.getProperty(prop.name()).orElse(prop.defaultValue());
                       f.setAccessible(true);
-                      f.set(obj, Converters.convert(f.getType(), PropertyHolder.getProperty(prop.name()).orElse(prop.defaultValue())));
+                      if (Enum.class.isAssignableFrom(f.getType())) {
+                          f.set(obj, getEnum((Class<Enum>)f.getType(), name));
+                      } else {
+                          f.set(obj, Converters.convert(f.getType(), name));
+                      }
                       f.setAccessible(false);
                   } catch (Exception e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                   }
               });
+    }
+    
+    private Enum<?> getEnum(final Class<Enum> clazz, final String name) {
+        return Enum.valueOf(clazz, name.toUpperCase());
     }
 
 }

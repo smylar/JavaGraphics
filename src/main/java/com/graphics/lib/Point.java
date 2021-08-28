@@ -81,6 +81,14 @@ public class Point {
 		return Math.hypot(dy, adj);
 	}
 	
+	public double screenDistanceTo(Point p2)
+    {
+        double dx = p2.x - x;
+        double dy = p2.y - y;
+        
+        return Math.hypot(dx, dy);
+    }
+	
 	/**
 	 * Generate a vector that points from this point to another given point
 	 * 

@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import java.util.List;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasObject;
@@ -38,12 +38,12 @@ public class ZBuffer implements IZBuffer {
 	}
 	
 	@Override
-	public synchronized BufferedImage getBuffer() {
+	public BufferedImage getBuffer() {
 		return imageBuf;
 	}
 	
 	@Override
-	public synchronized void refreshBuffer() {
+	public void refreshBuffer() {
 
 	    buffer.parallelStream()
 	          .flatMap(List::parallelStream)
@@ -56,13 +56,13 @@ public class ZBuffer implements IZBuffer {
 	           });
 	}
 	
-	private void addToBuffer(ICanvasObject parent, Integer x, Integer y, double z, Supplier<Color> colour)
+	private void addToBuffer(ICanvasObject parent, Integer x, Integer y, double z, Function<Integer,Color> colour)
 	{	
 	    //use a supplier for colour so we don't lose performance executing a shader when this pixel is actually behind another
 		try {
 		    if (z >= 0) {
     			ZBufferItem bufferItem = getItemAt(x,y);
-    			bufferItem.add(parent, z, colour);
+    			bufferItem.add(parent, z, colour.apply(y));
 		    }
 		} catch(Exception e) {
 			//think it sometimes initially sets buffer of wrong size - JComponents taking their time to report their height etc.
