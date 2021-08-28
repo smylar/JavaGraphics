@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import java.text.DecimalFormat;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
