@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.util.HashSet;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -149,7 +148,7 @@ public class LaserWeapon implements IEffector {
 		
 		if (!textures.isEmpty()) {
 			//get top most texture
-			Texture active = textures.stream().sorted((a,b) -> b.getOrder() - a.getOrder()).collect(Collectors.toList()).get(0);
+			Texture active = textures.stream().sorted((a,b) -> b.getOrder() - a.getOrder()).toList().get(0);
 
 			//get texture coord
 			Point tp1 = texturable.get().getTextureCoord(active, coords.get(0)).get();

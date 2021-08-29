@@ -3,7 +3,6 @@ package com.graphics.lib.canvas;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -64,11 +63,10 @@ public class CanvasObjectFunctionsImpl {
 		    return defaultVector;
 		
 		
-		Vector targetVec = mTrans.stream().map(transform -> Vector.builder().x(transform.getVector().getX() * transform.getSpeed())
-			  	   															.y(transform.getVector().getY() * transform.getSpeed())
-		  	   																.z(transform.getVector().getZ() * transform.getSpeed()))
-										  .reduce(Vector.builder(), (left, right) -> left.combine(right))
-										  .build();
+		Vector targetVec = mTrans.stream().map(transform -> new Vector(transform.getVector().x() * transform.getSpeed(),
+			  	   													   transform.getVector().y() * transform.getSpeed(),
+		  	   														   transform.getVector().z() * transform.getSpeed()))
+										  .reduce(Vector.ZERO_VECTOR, (left, right) -> left.combine(right));
 		
 		double speed = targetVec.getSpeed();
 		targetVec = targetVec.getUnitVector();
@@ -117,14 +115,14 @@ public class CanvasObjectFunctionsImpl {
 		// Start + (Vector of Proj * time) = TargetPos +  (Vector of target * time), which becomes
 		//Vector of Proj = Vector of target + [(TargetPos - Start) / time ]
 		return Pair.of(new Vector (
-            				(targetVec.getX() * speed) + ((target.getCentre().x - startPoint.x) / time),
-            				(targetVec.getY() * speed) + ((target.getCentre().y - startPoint.y) / time),
-            				(targetVec.getZ() * speed) + ((target.getCentre().z - startPoint.z) / time)
+            				(targetVec.x() * speed) + ((target.getCentre().x - startPoint.x) / time),
+            				(targetVec.y() * speed) + ((target.getCentre().y - startPoint.y) / time),
+            				(targetVec.z() * speed) + ((target.getCentre().z - startPoint.z) / time)
             				).getUnitVector()
     		        ,new Point(
-    		                target.getCentre().x + (targetVec.getX() * time),
-    		                target.getCentre().y + (targetVec.getY() * time),
-    		                target.getCentre().z + (targetVec.getZ() * time)
+    		                target.getCentre().x + (targetVec.x() * time),
+    		                target.getCentre().y + (targetVec.y() * time),
+    		                target.getCentre().z + (targetVec.z() * time)
     		               )
     		        );
 		
@@ -153,7 +151,7 @@ public class CanvasObjectFunctionsImpl {
 		Facet closest = null;
 		double closestDist = 0;
 		//the brute force generalised approach, check each front facing (to point) facet for intersection - will be horrible for something with a high facet count
-		for (Facet f : obj.getFacetList().stream().filter(GeneralPredicates.isFrontface(start)).collect(Collectors.toList()))
+		for (Facet f : obj.getFacetList().parallelStream().filter(GeneralPredicates.isFrontface(start)).toList())
 		{
 			if (f.isPointWithin(f.getIntersectionPointWithFacetPlane(start, v))){
 				if (getAny) 

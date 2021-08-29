@@ -2,7 +2,6 @@ package com.graphics.lib.util;
 
 import com.google.common.base.Splitter;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.List;
 import io.reactivex.Observable;
 
@@ -15,7 +14,7 @@ public class ArrayReader {
         return ResourceLineReader.getLineObserver(resource)
                                  .map(line -> split.splitToList(line).stream()
                                                    .map(item -> converter.apply(item.trim()))
-                                                   .collect(Collectors.toList())
+                                                   .toList()
                                   );
     }
     

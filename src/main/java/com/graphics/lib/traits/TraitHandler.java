@@ -52,11 +52,11 @@ public class TraitHandler {
      * @return      Optional trait, empty if trait not registered against object
      */
     public <T extends ITrait> Optional<T> getTrait(ICanvasObject obj, Class<T> trait) {
-        if (traitMap.containsKey(obj)) {
-            return traitMap.get(obj).stream().filter(t -> trait.isAssignableFrom(t.getClass())).map(trait::cast).findFirst();
-        }
-        
-        return Optional.empty();
+            return traitMap.getOrDefault(obj, Set.of())
+            			   .stream()
+            			   .dropWhile(t -> !trait.isAssignableFrom(t.getClass()))
+            			   .findFirst()
+            			   .map(trait::cast);
     }
 
 }

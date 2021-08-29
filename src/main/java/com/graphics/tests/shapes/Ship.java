@@ -145,9 +145,8 @@ public final class Ship extends CanvasObject implements IWeaponised {
         return weapons.values()
                       .stream()
                       .flatMap(h -> h.stream())
-                      .filter(w -> w.getId().equals(id))
+                      .dropWhile(w -> !w.getId().equals(id))
                       .findFirst();
-        //again, could do with java 9+ stuff to end stream when we get the first match instead of checking it all - or use rxjava
     }
 	
 	private void generateTrail(final ICanvasObject obj, final MovementTransform movement) {
@@ -165,9 +164,9 @@ public final class Ship extends CanvasObject implements IWeaponised {
             if (colour == 1) fragment.setColour(Color.ORANGE);
             if (colour == 2) fragment.setColour(Color.YELLOW);
             fragment.setProcessBackfaces(true);
-            double xVector = baseVector.getX() + (Math.random()/2) - 0.25;
-            double yVector = baseVector.getY() + (Math.random()/2) - 0.25;
-            double zVector = baseVector.getZ() + (Math.random()/2) - 0.25;
+            double xVector = baseVector.x() + (Math.random()/2) - 0.25;
+            double yVector = baseVector.y() + (Math.random()/2) - 0.25;
+            double zVector = baseVector.z() + (Math.random()/2) - 0.25;
             Transform rot1 = new RepeatingTransform<Rotation>(new Rotation(Axis.Y, Math.random() * 10), 15);
             MovementTransform move = new MovementTransform(new Vector(xVector, yVector, zVector), movement.getAcceleration() > 0 ? -20 : 20);
             move.moveUntil(t -> rot1.isCompleteSpecific());

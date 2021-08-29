@@ -124,7 +124,7 @@ public class Utils {
 			//may need some tolerance
 			//circles touch at one point
 			Vector v = p1.vectorToPoint(p2).getUnitVector();
-			Point p3 = new Point(p1.x + (v.getX()*r1) , p1.y + (v.getY()*r1), 0);
+			Point p3 = new Point(p1.x + (v.x()*r1) , p1.y + (v.y()*r1), 0);
 			return Optional.of(Pair.of(p3, p3));
 		}
 		
@@ -145,11 +145,11 @@ public class Utils {
 	    //I know r=d-2(d.n)n is reflection vector in 2 dimension (hopefully it'll work on 3)
         double multiplier = moveVector.dotProduct(surfaceNormal) * -2;
              
-        move.setVector(Vector.builder()
-        					 .x(moveVector.getX() + (surfaceNormal.getX() * multiplier))
-        					 .y(moveVector.getY() + (surfaceNormal.getY() * multiplier))
-        					 .z(moveVector.getZ() + (surfaceNormal.getZ() * multiplier))
-        					 .build());
+        move.setVector(new Vector(
+        					 moveVector.x() + (surfaceNormal.x() * multiplier),
+        					 moveVector.y() + (surfaceNormal.y() * multiplier),
+        					 moveVector.z() + (surfaceNormal.z() * multiplier)
+        					 ));
 	}
 	
 	public static CanvasObject getParticle(final Point p, final double particleSize) {

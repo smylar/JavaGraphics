@@ -11,7 +11,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -245,7 +244,7 @@ public class CanvasObject implements ICanvasObject {
 	@Override
 	public final void applyCameraTransform(Transform transform, Camera c)
 	{
-			transform.doTransform(this.vertexList.stream().map(v -> v.getTransformed(c)).collect(Collectors.toList()));
+			transform.doTransform(this.vertexList.stream().map(v -> v.getTransformed(c)).toList());
 			fixedCentre.ifPresent(centre -> transform.replay(centre.getTransformed(c)));
 	}
 	

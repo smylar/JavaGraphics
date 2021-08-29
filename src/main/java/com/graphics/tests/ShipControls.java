@@ -136,8 +136,8 @@ public final class ShipControls extends ObjectInputController<Ship> {
 	private void weaponAction(Optional<List<String>> params, Consumer<IEffector> action) {
 	    params.ifPresent(p -> 
 	              p.stream().map(controlledObject::getWeapon)
-	                        .filter(Optional::isPresent)
-	                        .forEach(w -> action.accept(w.get()))
+	                        .flatMap(Optional::stream)
+	                        .forEach(action::accept)
 	    );
 	}
 	

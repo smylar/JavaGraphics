@@ -1,10 +1,15 @@
 package com.sound;
 
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
-import java.net.URLDecoder;
+import java.net.URI;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,13 +19,14 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.LineEvent.Type;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Charsets;
 import com.graphics.lib.Utils;
@@ -182,23 +188,58 @@ public class ClipLibrary implements AutoCloseable, PropertyInjected {
 	    return clipSupplier.getOrDefault(key.toUpperCase(), () -> Optional.empty()).get();
 	}
 	
+	private FileSystem getFileSystem(final URI uri) throws IOException {
+		try {
+			return FileSystems.getFileSystem(uri);
+		} catch (FileSystemNotFoundException fse) {
+			return FileSystems.newFileSystem(uri, Map.of());
+		}
+	}
+	
+	private <T extends Supplier<Optional<Clip>>> boolean loadClipsFromJar(String resource, Class<T> clazz) {
+		try {
+			URI uri = getClass().getClassLoader().getResource(resource).toURI();
+
+			if (uri.getScheme().equals("jar")) {
+	            FileSystem fileSystem = getFileSystem(uri);
+	            Path path = fileSystem.getPath(resource);
+	            try (Stream<Path> walk = Files.walk(path, 1)) {
+		            for (Iterator<Path> it = walk.iterator(); it.hasNext();){
+		            	Path p = it.next();
+		                if (!Files.isDirectory(p)) {
+		                	addClip(p.toString(), clazz);
+		                }
+	
+		            }
+	            }
+	            return true;
+	        }
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
 	private <T extends Supplier<Optional<Clip>>> void loadClips(String resource, Class<T> clazz) {
-        
-        try {
-            IOUtils.readLines(getClass().getClassLoader()
-                    .getResourceAsStream(resource), Charsets.UTF_8)
-                    .forEach(line -> 
-                        addClip(line.replaceAll("^(.*?)\\..*$", "$1").toUpperCase(), resource + line, clazz)
-                    );
-        } catch (Exception ex) {
-            System.out.println("ClipLibrary:: " + ex.getMessage());
-        }
+		
+		if (!loadClipsFromJar(resource, clazz)) {
+	        try {
+	            IOUtils.readLines(getClass().getClassLoader()
+	                    .getResourceAsStream(resource), Charsets.UTF_8)
+	                    .forEach(line -> {
+	                        addClip(resource + line, clazz);
+	                    });
+	        } catch (Exception ex) {
+	            System.out.println("ClipLibrary:: " + ex.getMessage());
+	        }
+		}
     }
 	
-	private <T extends Supplier<Optional<Clip>>> void addClip(String name, String sound, Class<T> clazz) {
+	private <T extends Supplier<Optional<Clip>>> void addClip(String path, Class<T> clazz) {
+		var name = StringUtils.substringAfterLast(path, "/").replaceAll("^(.*?)\\..*$", "$1").toUpperCase();
 	    try {
-            clipSupplier.put(name, clazz.getDeclaredConstructor(File.class)
-                                        .newInstance(new File(URLDecoder.decode(getClass().getClassLoader().getResource(sound).getFile(), "UTF-8"))));
+	    	 clipSupplier.put(name, clazz.getDeclaredConstructor(String.class).newInstance(path));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -210,7 +251,7 @@ public class ClipLibrary implements AutoCloseable, PropertyInjected {
                     	                .stream()
                     	                .filter(entry -> OndemandClip.class.isAssignableFrom(entry.getValue().getClass()))
                     	                .map(Entry::getKey)
-                    	                .collect(Collectors.toList());
+                    	                .toList();
 	    
 	    if (!keys.isEmpty()) {
 	        return getClip(keys.get(new Random().nextInt(keys.size())));

@@ -1,8 +1,9 @@
 package com.sound;
 
+import java.io.BufferedInputStream;
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -21,16 +22,18 @@ public final class PreloadedClip implements Supplier<Optional<Clip>>, Closeable 
 
     private final Optional<Clip> clip;
     
-    public PreloadedClip (File file) {
+    public PreloadedClip (String resource) {
         
         Clip newClip = null;
         try {
             newClip = (Clip)AudioSystem.getLine(new Line.Info(Clip.class));           
             
-            newClip.open(AudioSystem.getAudioInputStream(file));
+            InputStream audioFile = new BufferedInputStream(getClass().getClassLoader().getResourceAsStream(resource));
+            newClip.open(AudioSystem.getAudioInputStream(audioFile));
             
         } catch (Exception e) {
             System.out.println(e.getMessage());
+            e.printStackTrace();
             newClip = null;
         }
         

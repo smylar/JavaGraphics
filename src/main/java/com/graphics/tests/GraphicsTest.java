@@ -148,7 +148,7 @@ public class GraphicsTest extends JFrame {
 		l3.getLightSource().setDirection(() -> TraitHandler.INSTANCE.getTrait(lantern3, IOrientable.class).get().getOrientation().getForward());
 		l3.getLightSource().setLightConeAngle(40);
 		lantern3.attachLightsource(l3);
-		lantern3.getFacetList().stream().filter(f -> f.getNormal().getZ() <= 0).forEach(f -> f.setColour(Color.BLACK));
+		lantern3.getFacetList().stream().filter(f -> f.getNormal().z() <= 0).forEach(f -> f.setColour(Color.BLACK));
 		Transform l3spin = new RepeatingTransform<>(Axis.X.getRotation(4), 0);
 		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(lantern3, l3spin);
 		
@@ -236,6 +236,7 @@ public class GraphicsTest extends JFrame {
 		ball.setColour(new Color(255, 255, 0));
 		ball.addFlag(Events.EXPLODE_PERSIST);
 		cnv.registerObject(ball, new Point(500,200,450), ScanlineShaderFactory.TEXGORAUD);
+		cnv.registerObject(ball, new Point(500,200,450), ScanlineShaderFactory.GORAUD);
 		
 		for (int i = 0; i < ball.getFacetList().size() ; i++)
 		{
@@ -388,9 +389,9 @@ public class GraphicsTest extends JFrame {
 	private void moveBack(Point p, Camera cam) {
 	    Vector backward = cam.getOrientation().getBack();
 	    Vector up = cam.getOrientation().getUp();
-	    p.x += backward.getX() * 130 + up.getX() * 55;
-	    p.y += backward.getY() * 130 + up.getY() * 55;
-	    p.z += backward.getZ() * 130 + up.getZ() * 55;
+	    p.x += backward.x() * 130 + up.x() * 55;
+	    p.y += backward.y() * 130 + up.y() * 55;
+	    p.z += backward.z() * 130 + up.z() * 55;
 	    cam.setPosition(p);
 	}
 	

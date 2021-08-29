@@ -6,37 +6,14 @@ package com.graphics.lib;
  * @author paul.brandon
  *
  */
-public final class Vector {
+public record Vector(double x, double y, double z) {
 
 	public static final Vector ZERO_VECTOR = new Vector(0,0,0);
 	
-    private final double x;
-    private final double y;
-    private final double z;
-	
-	
-	public Vector(double x, double y, double z)
-	{
-		this.x = x;
-		this.y = y;
-		this.z = z;
+	public Vector(Vector from) {
+		this(from.x, from.y, from.z);
 	}
 	
-	public double getX() {
-        return x;
-    }
-
-    public double getY() {
-        return y;
-    }
-
-    public double getZ() {
-        return z;
-    }
-    
-    public static Builder builder() {
-    	return new Builder();
-    }
 
     /**
 	 * A unit vector is one where it's magnitude is exactly 1
@@ -108,10 +85,9 @@ public final class Vector {
 	 */
 	public Vector crossProduct(Vector v2)
 	{
-		return Vector.builder().x((this.y*v2.z) - (v2.y*this.z))
-						  	   .y(-(this.x*v2.z ) + (v2.x*this.z))
-						  	   .z((this.x*v2.y) - (v2.x*this.y))
-						  	   .build();
+		return new Vector((this.y*v2.z) - (v2.y*this.z),
+				         -(this.x*v2.z ) + (v2.x*this.z),
+				         (this.x*v2.y) - (v2.x*this.y));
 	}
 	
 	/**
@@ -124,82 +100,12 @@ public final class Vector {
 		return new Vector(-this.x, -this.y, -this.z);
 	}
 	
-	@Override
-	public String toString() {
-		return this.x + "," + this.y + "," + this.z;
+	public Vector combine(Vector other) {
+		return new Vector(
+			x + other.x, 
+			y + other.y,
+			z + other.z
+			);
 	}
-    
-    @Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		long temp;
-		temp = Double.doubleToLongBits(x);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(y);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(z);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Vector other = (Vector) obj;
-		if (Double.doubleToLongBits(x) != Double.doubleToLongBits(other.x))
-			return false;
-		if (Double.doubleToLongBits(y) != Double.doubleToLongBits(other.y))
-			return false;
-		if (Double.doubleToLongBits(z) != Double.doubleToLongBits(other.z))
-			return false;
-		return true;
-	}
-
-
-
-	public static final class Builder {
-    	private double x = 0;
-    	private double y = 0;
-    	private double z = 0;
-    	
-    	public Builder x(double value) {
-    		this.x = value;
-    		return this;
-    	}
-    	
-    	public Builder y(double value) {
-    		this.y = value;
-    		return this;
-    	}
-    	
-    	public Builder z(double value) {
-    		this.z = value;
-    		return this;
-    	}
-    	
-    	public Builder from(Vector vector) {
-    		this.x = vector.getX();
-    		this.y = vector.getY();
-    		this.z = vector.getZ();
-    		return this;
-    	}
-
-		public Vector build() {
-    		return new Vector(x,y,z);
-    	}
-		
-		public Builder combine(Builder other) {
-			x += other.x; 
-			y += other.y;
-			z += other.z;
-			return this;
-		}
-    }
 	
 }

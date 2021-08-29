@@ -64,9 +64,9 @@ public class OrientationData {
 		Vector forwardv = orientation.getForward();
 		Vector upv = orientation.getUp();
 		Vector rightv = orientation.getRight();
-		WorldCoord forward = new WorldCoord(forwardv.getX(), forwardv.getY(), forwardv.getZ());
-		WorldCoord up = new WorldCoord(upv.getX(), upv.getY(), upv.getZ());
-		WorldCoord right = new WorldCoord(rightv.getX(), rightv.getY(), rightv.getZ());
+		WorldCoord forward = new WorldCoord(forwardv.x(), forwardv.y(), forwardv.z());
+		WorldCoord up = new WorldCoord(upv.x(), upv.y(), upv.z());
+		WorldCoord right = new WorldCoord(rightv.x(), rightv.y(), rightv.z());
 			
 		List<WorldCoord> vertexList = List.of(forward, up, right);
 		
@@ -131,7 +131,7 @@ public class OrientationData {
 	
 	public static List<Rotation> getRotationsForVector(Vector v){
 		Vector unit = v.getUnitVector();
-		WorldCoord wc = new WorldCoord(unit.getX(), unit.getY(), unit.getZ());
+		WorldCoord wc = new WorldCoord(unit.x(), unit.y(), unit.z());
 
 		double xRot = 0;
 		double yRot = 0;

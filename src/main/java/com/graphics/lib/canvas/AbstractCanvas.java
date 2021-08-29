@@ -17,6 +17,8 @@ public class AbstractCanvas extends JPanel {
     public AbstractCanvas(Camera camera) {
         super();
         this.camera = camera;
+        this.setDoubleBuffered(false); 
+        //turned off as we are effectively buffering in zbuffer as it is, may or may not offer a performance improvement
     }
 
     public Camera getCamera() {

@@ -10,7 +10,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import com.graphics.lib.Facet;
 import com.graphics.lib.GeneralPredicates;
@@ -110,7 +109,7 @@ public enum ScanlineShaderFactory implements IShaderFactory {
                                                            Double y = line.getYAtX(xVal);
                                                            return Objects.nonNull(y) && y <= line.getMaxY() && y >= line.getMinY();
                                                        })
-                                                       .collect(Collectors.toList());
+                                                       .toList();
         
         
         if (activeLines.size() < 2) {
@@ -188,8 +187,8 @@ public enum ScanlineShaderFactory implements IShaderFactory {
 	
 	private boolean isOffScreen(Facet facet, Camera c, Dimension dimension) {
         facet.setFrontFace(GeneralPredicates.isFrontface(c).test(facet));
-        return facet.getTransformedNormal(c).getZ() == 0 ||
-                Utils.allMatchAny(facet.getAsList().stream().map(p -> p.getTransformed(c)).collect(Collectors.toList()), 
+        return facet.getTransformedNormal(c).z() == 0 ||
+                Utils.allMatchAny(facet.getAsList().stream().map(p -> p.getTransformed(c)).toList(), 
                         List.of(p -> p.z <= 1,
                                 p -> p.x < 0,
                                 p -> p.x > dimension.getWidth(),

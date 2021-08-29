@@ -11,9 +11,8 @@ public enum VertexNormalFinderEnum {
                 List<Facet> facetList = obj.getVertexFacetMap().get(p);
                 if (Objects.nonNull(facetList) && !facetList.isEmpty())
                 {    
-                    return facetList.stream().map(facet -> Vector.builder().from(facet.getNormal()))
-                                             .reduce(Vector.builder(), (left, right) -> left.combine(right))
-                                             .build()
+                    return facetList.stream().map(facet -> new Vector(facet.getNormal()))
+                                             .reduce(Vector.ZERO_VECTOR, (left, right) -> left.combine(right))
                                              .getUnitVector(); 
                 }
             }

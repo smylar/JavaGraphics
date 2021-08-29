@@ -132,16 +132,14 @@ public class Point {
 			return true;
 		if (obj == null)
 			return false;
-		if (!(obj instanceof Point))
-			return false;
-		Point other = (Point) obj;
-		if (Double.doubleToLongBits(x) != Double.doubleToLongBits(other.x))
-			return false;
-		if (Double.doubleToLongBits(y) != Double.doubleToLongBits(other.y))
-			return false;
-		if (Double.doubleToLongBits(z) != Double.doubleToLongBits(other.z))
-			return false;
-		return true;
+		
+		if (obj instanceof Point other) {
+			return Double.doubleToLongBits(x) == Double.doubleToLongBits(other.x)
+				&& Double.doubleToLongBits(y) == Double.doubleToLongBits(other.y)
+				&& Double.doubleToLongBits(z) == Double.doubleToLongBits(other.z);
+		}
+		
+		return false;
 	}
 	
 }

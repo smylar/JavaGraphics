@@ -1,6 +1,7 @@
 package com.sound;
 
-import java.io.File;
+import java.io.BufferedInputStream;
+import java.io.InputStream;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -18,11 +19,17 @@ import javax.sound.sampled.LineEvent.Type;
  */
 public class OndemandClip implements Supplier<Optional<Clip>> {
 
-    private final File file;
-    
-    public OndemandClip(File file) {
-        this.file = file;
-    }
+//    private final File file;
+//    
+//    public OndemandClip(File file) {
+//        this.file = file;
+//    }
+	
+	private final String resource;
+	
+	public OndemandClip(String resource) {
+		this.resource = resource;
+	}
     
     @Override
     public Optional<Clip> get() {   
@@ -33,7 +40,9 @@ public class OndemandClip implements Supplier<Optional<Clip>> {
                         clip.close();
                     }
                  });
-                clip.open(AudioSystem.getAudioInputStream(file));
+                
+                InputStream audioFile = new BufferedInputStream(getClass().getClassLoader().getResourceAsStream(resource));
+                clip.open(AudioSystem.getAudioInputStream(audioFile));
                 
                 return Optional.of(clip);
             } catch (Exception e) {

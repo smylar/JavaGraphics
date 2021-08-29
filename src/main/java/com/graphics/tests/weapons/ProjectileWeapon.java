@@ -77,8 +77,8 @@ public class ProjectileWeapon implements IEffector {
     private Optional<CanvasObject> generateProjectile(WorldCoord origin) {
         double parentSpeed = parent.getTransformsOfType(MovementTransform.class)
                 .stream()
-                .filter(m -> m.getName().equals(ObjectInputController.FORWARD) )
-                .findFirst() //using dropWhile would be better than filter here (in Java 9)
+                .dropWhile(m -> !m.getName().equals(ObjectInputController.FORWARD) )
+                .findFirst()
                 .map(MovementTransform::getSpeed)
                 .orElse(0d);
         

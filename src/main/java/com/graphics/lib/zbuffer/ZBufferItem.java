@@ -16,8 +16,8 @@ public final class ZBufferItem
 	private TreeMap<Double, Color> items = new TreeMap<>();
 	private ICanvasObject topMostObject = null;
 
-	private int x = 0;
-	private int y = 0;
+	private final int x;
+	private final int y;
 	private boolean active = false;
 		
 	public ZBufferItem(int x, int y){

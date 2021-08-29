@@ -48,11 +48,7 @@ public class TexturableTrait implements ITexturable {
 	
 	@Override
 	public Optional<Point> getTextureCoord(Texture texture, WorldCoord vertex) {
-		if (textureMap.containsKey(texture)) {
-			return Optional.ofNullable(textureMap.get(texture).get(vertex));
-		}
-		
-		return Optional.empty();
+			return Optional.ofNullable(textureMap.get(texture)).map(t -> t.get(vertex));
 	}
 
 	@Override

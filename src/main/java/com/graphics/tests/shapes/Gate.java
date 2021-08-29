@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import com.graphics.lib.Point;
 import com.graphics.lib.Utils;
@@ -41,7 +40,10 @@ public final class Gate extends Torus {
 	public Gate(double tubeRadius, double holeRadius, int arcProgression) {
 		super(tubeRadius, holeRadius, arcProgression);
 		this.holeRadius = holeRadius;
-		innerPoints = this.getVertexList().stream().filter(v -> v.distanceTo(getCentre()) <= holeRadius + 0.01 && !v.equals(getCentre())).collect(Collectors.toList());
+		innerPoints = this.getVertexList()
+						  .stream()
+						  .filter(v -> v.distanceTo(getCentre()) <= holeRadius + 0.01 && !v.equals(getCentre()))
+						  .toList();
 	}
 	
 	public void setPassThroughPluginForGate(IPlugin<Gate, Void> passThroughPlugin) {
