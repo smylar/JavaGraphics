@@ -327,10 +327,10 @@ public class CanvasObject implements ICanvasObject {
 	 * 
 	 */
 	@Override
-	public final void applyTransforms()
+	public final ICanvasObject applyTransforms()
 	{
 		if (this.vertexList == null || this.vertexList.isEmpty() || this.isDeleted) {
-		    return;
+		    return this;
 		}
 		
 		synchronized(this.transforms) {
@@ -353,6 +353,7 @@ public class CanvasObject implements ICanvasObject {
 		
 		this.afterTransforms();
 		statusSubject.onNext(ObjectStatus.TRANSFORMS_APPLIED);
+		return this;
 	}
 	
 	

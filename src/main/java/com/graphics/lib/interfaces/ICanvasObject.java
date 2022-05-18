@@ -114,7 +114,7 @@ public interface ICanvasObject {
 	 * Any transform that is complete will be removed from the list at this point
 	 * 
 	 */
-	void applyTransforms();
+	ICanvasObject applyTransforms();
 
 	/**
 	 * Describes how to generate a normal vector for a Vertex 

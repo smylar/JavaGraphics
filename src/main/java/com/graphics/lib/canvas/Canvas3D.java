@@ -1,6 +1,8 @@
 package com.graphics.lib.canvas;
 
-import static com.graphics.lib.canvas.CanvasEvent.*;
+import static com.graphics.lib.canvas.CanvasEvent.PAINT;
+import static com.graphics.lib.canvas.CanvasEvent.PREPARE_BUFFER;
+import static com.graphics.lib.canvas.CanvasEvent.PROCESS;
 
 import java.awt.Color;
 import java.util.Collections;
@@ -178,20 +180,21 @@ public class Canvas3D extends AbstractCanvas {
 	{
 		if (Objects.nonNull(obj) && !this.shapes.containsKey(obj)) {
 		    CanvasObjectFunctions.DEFAULT.get().moveTo(obj, position);
-		    if (drawMode == DrawMode.POINT) {
-		        this.shapes.put(obj, PointShader.getShader());
-		    } else if (drawMode == DrawMode.WIRE) {
-                this.shapes.put(obj, WireframeShader.getShader()); 
-		    } else {
-		        this.shapes.put(obj, shaderFactory);
-		    }
+		    var shader = switch (drawMode) {
+		        case POINT -> PointShader.getShader();
+		        case WIRE -> WireframeShader.getShader();
+		        default -> shaderFactory;
+		    }; //could just put these in the enum
+
+		    this.shapes.put(obj, shader);
+
 		}
 	}
-	
+
 	/**
 	 * Trigger a draw cycle
 	 */
-	public void doDraw()
+	public Observable<ICanvasObject> doDraw()
 	{
 	    tickCount++;
 		addPendingLightsources();
@@ -200,11 +203,11 @@ public class Canvas3D extends AbstractCanvas {
 		
 		this.lightSources.removeIf(ILightSource::isDeleted);
 		
-		Set<ICanvasObject> processShapes = new HashSet<>(this.getShapes());
-		processShapes.stream().filter(ICanvasObject::isDeleted).forEach(this.shapes::remove);
-		processShapes.removeIf(s -> s.isDeleted() || s.hasFlag(TrackingTrait.TRACKING_TAG));
-
-		processShapes.parallelStream().forEach(ICanvasObject::applyTransforms);
+		Set<ICanvasObject> processShapes = Set.copyOf(this.getShapes())
+		                                       .parallelStream()
+		                                       .filter(this::filterShapes)
+		                                       .map(ICanvasObject::applyTransforms)
+		                                       .collect(Collectors.toSet());
 		
 		getCamera().doTransforms();
 		
@@ -215,7 +218,16 @@ public class Canvas3D extends AbstractCanvas {
 		                                      .collect(Collectors.toSet()));
 		}
 
-		renderShapes(processShapes);
+		return renderShapes(processShapes);
+	}
+	
+	private boolean filterShapes(ICanvasObject shape) {
+	    if (shape.isDeleted()) {
+	        shapes.remove(shape);
+	        return false;
+	    }
+	    
+	    return !shape.hasFlag(TrackingTrait.TRACKING_TAG);
 	}
 	
 	@Override
@@ -224,8 +236,8 @@ public class Canvas3D extends AbstractCanvas {
         notifyEvent(PREPARE_BUFFER);
     }
 	
-	private void renderShapes(Set<ICanvasObject> shapes) {
-	    Observable.fromIterable(shapes)
+	private Observable<ICanvasObject> renderShapes(Set<ICanvasObject> shapes) {
+	    return Observable.fromIterable(shapes)
 	              .doOnSubscribe(d -> prepareZBuffer())
 	              .doOnNext(s -> {
 	                  s.onDrawComplete();  //cross object updates can happen here safer not to be parallel
@@ -236,8 +248,8 @@ public class Canvas3D extends AbstractCanvas {
 	                  getzBuffer().refreshBuffer();
 	                  SwingUtilities.invokeLater(this::repaint);
 	                  notifyEvent(PAINT);
-	              })
-	              .subscribe();
+	              });
+	    //may try and get the slave canvases to subscribe to this, instead of a specific notification
 	}
 	
 	private void notifyEvent(CanvasEvent event) {

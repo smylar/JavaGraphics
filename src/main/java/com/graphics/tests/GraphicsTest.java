@@ -6,11 +6,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -25,28 +22,6 @@ import com.graphics.lib.Point;
 import com.graphics.lib.Utils;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
-import com.graphics.shapes.Cuboid;
-import com.graphics.shapes.Lantern;
-import com.graphics.shapes.Sphere;
-import com.graphics.shapes.Whale;
-import com.graphics.tests.shapes.FlapTest;
-import com.graphics.tests.shapes.Gate;
-import com.graphics.tests.shapes.Ship;
-import com.graphics.tests.shapes.TexturedCuboid;
-import com.graphics.tests.shapes.Wall;
-import com.graphics.tests.weapons.AmmoTracker;
-import com.graphics.tests.weapons.AutoAmmoProxy;
-import com.graphics.tests.weapons.BouncyProjectile;
-import com.graphics.tests.weapons.DefaultAmmoHandler;
-//import com.graphics.tests.weapons.DefaultAmmoHandler;
-import com.graphics.tests.weapons.DeflectionProjectile;
-import com.graphics.tests.weapons.ExplodingProjectile;
-import com.graphics.tests.weapons.ExtendedMagazineWeapon;
-import com.graphics.tests.weapons.GattlingRound;
-import com.graphics.tests.weapons.LaserWeapon;
-import com.graphics.tests.weapons.Projectile;
-import com.graphics.tests.weapons.ProjectileWeapon;
-import com.graphics.tests.weapons.TrackingProjectile;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.camera.ViewAngleCamera;
 import com.graphics.lib.canvas.Canvas3D;
@@ -74,30 +49,58 @@ import com.graphics.lib.traits.OrientableTrait;
 import com.graphics.lib.traits.PlugableTrait;
 import com.graphics.lib.traits.TexturableTrait;
 import com.graphics.lib.traits.TraitHandler;
-import com.graphics.lib.transform.*;
+import com.graphics.lib.transform.MovementTransform;
+import com.graphics.lib.transform.PanCamera;
+import com.graphics.lib.transform.RepeatingTransform;
+import com.graphics.lib.transform.ScaleTransform;
+import com.graphics.lib.transform.SequenceTransform;
+import com.graphics.lib.transform.Transform;
 import com.graphics.lib.zbuffer.ZBuffer;
+import com.graphics.shapes.Cuboid;
+import com.graphics.shapes.Lantern;
+import com.graphics.shapes.Sphere;
+import com.graphics.shapes.Whale;
+import com.graphics.tests.shapes.FlapTest;
+import com.graphics.tests.shapes.Gate;
+import com.graphics.tests.shapes.Ship;
+import com.graphics.tests.shapes.TexturedCuboid;
+import com.graphics.tests.shapes.Wall;
+import com.graphics.tests.weapons.AmmoTracker;
+import com.graphics.tests.weapons.AutoAmmoProxy;
+import com.graphics.tests.weapons.BouncyProjectile;
+import com.graphics.tests.weapons.DefaultAmmoHandler;
+//import com.graphics.tests.weapons.DefaultAmmoHandler;
+import com.graphics.tests.weapons.DeflectionProjectile;
+import com.graphics.tests.weapons.ExplodingProjectile;
+import com.graphics.tests.weapons.ExtendedMagazineWeapon;
+import com.graphics.tests.weapons.GattlingRound;
+import com.graphics.tests.weapons.LaserWeapon;
+import com.graphics.tests.weapons.Projectile;
+import com.graphics.tests.weapons.ProjectileWeapon;
+import com.graphics.tests.weapons.TrackingProjectile;
 import com.sound.ClipLibrary;
+
+import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
 
 public class GraphicsTest extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private static GraphicsTest gt;
 	private static ClipLibrary clipLibrary;
-	private static ScheduledExecutorService runner = Executors.newSingleThreadScheduledExecutor();
     
-	private boolean go = true;
 	private boolean chaseCam = false;
 	private JFrame slave;
 	private Canvas3D canvas;
 	private AtomicReference<ICanvasObject> selectedObject = new AtomicReference<>();
 	private MouseEvent select = null;	
+	private final Disposable drawSubscription;
 
 	public static void main (String[] args) {
 		try {
 		    clipLibrary = ClipLibrary.getInstance();
 			SwingUtilities.invokeAndWait(() -> gt = new GraphicsTest());
 			clipLibrary.playMusic();
-			runner.scheduleAtFixedRate(gt::drawCycle, 0, 50, TimeUnit.MILLISECONDS);
 		} catch (Exception e1) {
             e1.printStackTrace();
         }
@@ -383,6 +386,8 @@ public class GraphicsTest extends JFrame {
 		cnv.setVisible(true);
 		this.requestFocus();
 		this.canvas = cnv;
+		
+		drawSubscription = subscribeToCanvas(50);
 
 	}
 	
@@ -411,36 +416,61 @@ public class GraphicsTest extends JFrame {
 		}
 	}
 	
-	public void drawCycle()
-	{
-	    if (go) {
-	        canvas.doDraw();
-            if (select != null) {
-                canvas.getObjectAt(select.getX(), select.getY()).ifPresent(this::setSelectedObject);
-                select = null;
-            }
-	    } else {	        
-	        this.dispose();
-	        System.out.println("Bye bye");
-	    }
+	private Disposable subscribeToCanvas(long refreshms) {
+	    return Observable.interval(refreshms, TimeUnit.MILLISECONDS)
+                .flatMap(t -> canvas.doDraw().doOnComplete(this::selectObject))
+                .doOnDispose(() -> System.out.println("Bye bye"))
+                .subscribe();
 	}
 	
-	@Override
-	public void dispose() {
-		if (go) {
-			go = false;
-		} else {
-		    try {
+	private void selectObject() {
+	    if (select != null) {
+            canvas.getObjectAt(select.getX(), select.getY()).ifPresent(this::setSelectedObject);
+            select = null;
+        }
+	}
+	
+//	public void drawCycle()
+//	{
+//	    if (go) {
+//	        canvas.doDraw();
+//            if (select != null) {
+//                canvas.getObjectAt(select.getX(), select.getY()).ifPresent(this::setSelectedObject);
+//                select = null;
+//            }
+//	    } else {	        
+//	        this.dispose();
+//	        System.out.println("Bye bye");
+//	    }
+//	}
+    @Override
+    public void dispose() {
+            try {
                 clipLibrary.close();
             } catch (Exception e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-		    runner.shutdown();
-			super.dispose();
-			slave.dispose();
-		}
-	}
+            drawSubscription.dispose();
+            super.dispose();
+            slave.dispose();
+    }	
+//	@Override
+//	public void dispose() {
+//		if (go) {
+//			go = false;
+//		} else {
+//		    try {
+//                clipLibrary.close();
+//            } catch (Exception e) {
+//                // TODO Auto-generated catch block
+//                e.printStackTrace();
+//            }
+//		    runner.shutdown();
+//			super.dispose();
+//			slave.dispose();
+//		}
+//	}
 	
 	private void addWeapons(final Ship ship, final Camera cam) {
 		
