@@ -4,8 +4,10 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.function.Function;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.IntStream;
+
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IZBuffer;
@@ -78,16 +80,10 @@ public class ZBuffer implements IZBuffer {
 		if (dimension.getHeight() != height || dimension.getWidth() != width)
 		{
 			dimension = new Dimension(width, height);
-
-			buffer = new ArrayList<>();
 			
-			for (int x = 0 ; x < width + 1 ; x++) {
-				ArrayList<ZBufferItem> list = new ArrayList<>();
-					for (int y = 0 ; y < height + 1 ; y++) {
-						list.add(new ZBufferItem(x, y));
-					}
-				buffer.add(list);
-			}
+			buffer = IntStream.rangeClosed(0, width)
+    			              .mapToObj(x -> IntStream.rangeClosed(0, height).mapToObj(y -> new ZBufferItem(x, y)).toList())
+    			              .toList();			
 			
 			imageBuf = new BufferedImage(width + 1, height + 1, BufferedImage.TYPE_INT_ARGB);
 			imageBuf.setAccelerationPriority(0.75f);
