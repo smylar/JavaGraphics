@@ -24,7 +24,7 @@ public class Cylinder extends CanvasObject {
 	{
 	    super(() -> init(radius, height, 360 % arcProgression != 0 ? 18 : arcProgression));
 		//N.B. this is currently an open cylinder, i.e. ends are not closed like a sealed can
-		//may like option to specify if an end is open or not	
+		//may like option to specify if an end is open or not
 		
 		Point centre = this.getCentre();
 		this.addTransform(new Translation(-centre.x, 0, -centre.z));
@@ -38,7 +38,7 @@ public class Cylinder extends CanvasObject {
 		
 		int points = 360/arcProgression;
 		
-		for (int i = 0 ; i < points ; i++){
+		for (double i = 0 ; i < points ; i++){
 			double angle = Math.toRadians(i*arcProgression);
 			double x = radius - (radius*Math.sin(angle));
 			double z = radius - (radius*Math.cos(angle));

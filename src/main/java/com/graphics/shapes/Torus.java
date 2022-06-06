@@ -102,7 +102,7 @@ public class Torus extends CanvasObject {
         Point circleCentre = new Point(tubeRadius,holeRadius+(tubeRadius*2),tubeRadius);
         
         //make an initial circle 2d circle in x-z plane (y doesn't change)
-        for (int i = 0 ; i < points ; i++){
+        for (double i = 0 ; i < points ; i++){
             double angle = Math.toRadians(i*arcProgression);
             double x = tubeRadius - (tubeRadius*Math.sin(angle));
             double z = tubeRadius - (tubeRadius*Math.cos(angle));
@@ -112,7 +112,7 @@ public class Torus extends CanvasObject {
         //now move circle in a circle in y plane around centre point of torus
         
         List<WorldCoord> circleCentres = new ArrayList<>();
-        for (int i = 0 ; i < points ; i++){
+        for (double i = 0 ; i < points ; i++){
             double angle = Math.toRadians(i*arcProgression);
             for (Point p : circle)
             {
@@ -126,7 +126,7 @@ public class Torus extends CanvasObject {
             double radiustopoint = holeRadius + tubeRadius;
             double y = radiustopoint*Math.sin(angle);
             double z = radiustopoint - (radiustopoint*Math.cos(angle));
-            circleCentres.add(new WorldCoord(circleCentre.x,circleCentre.y - y, circleCentre.z + z));           
+            circleCentres.add(new WorldCoord(circleCentre.x,circleCentre.y - y, circleCentre.z + z));
         }
         vertexList.addAll(circleCentres);
         

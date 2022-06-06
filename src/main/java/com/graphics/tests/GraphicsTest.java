@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 
 import com.graphics.lib.Axis;
 import com.graphics.lib.Facet;
@@ -89,12 +90,13 @@ public class GraphicsTest extends JFrame {
 	private static GraphicsTest gt;
 	private static ClipLibrary clipLibrary;
     
+	private final transient Disposable drawSubscription;
 	private boolean chaseCam = false;
 	private JFrame slave;
 	private Canvas3D canvas;
 	private AtomicReference<ICanvasObject> selectedObject = new AtomicReference<>();
-	private MouseEvent select = null;	
-	private final Disposable drawSubscription;
+	private MouseEvent select = null;
+	
 
 	public static void main (String[] args) {
 		try {
@@ -108,11 +110,11 @@ public class GraphicsTest extends JFrame {
 	}
 	
 	public GraphicsTest() {
-		super("Graphics Test");
+		super("Super Graphics Test");
 		this.setLayout(new BorderLayout());
 		this.setSize(700, 700);
 		
-		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 			
 		ViewAngleCamera cam = new ViewAngleCamera(new SimpleOrientation(OrientableTrait.ORIENTATION_TAG));
 		cam.setPosition(new Point(350, 280, -200));
@@ -158,7 +160,7 @@ public class GraphicsTest extends JFrame {
 		this.add(cnv, BorderLayout.CENTER);
 		
 		slave = new JFrame("Slave");
-		slave.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		slave.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		slave.setLayout(new BorderLayout());
 		slave.setSize(300, 300);
 		slave.setLocation(750, 50);
@@ -168,12 +170,12 @@ public class GraphicsTest extends JFrame {
 		CanvasObject camcube = new Cuboid(20,20,20);
 		cnv.registerObject(camcube, new Point(1560, 200, 350), ScanlineShaderFactory.FLAT);
 		
-		Whale whale = new Whale(); 
+		Whale whale = new Whale();
 		TraitHandler.INSTANCE.registerTrait(whale, PlugableTrait.class).registerPlugin(Events.EXPLODE, explode, false);
 		whale.setColour(Color.cyan);
 		cnv.registerObject(whale, new Point(1515, 300, 400), ScanlineShaderFactory.GORAUD);
 		
-		FlapTest flap = new FlapTest(); 
+		FlapTest flap = new FlapTest();
 		flap.setColour(Color.ORANGE);
 		cnv.registerObject(flap, new Point(1000, 500, 200), ScanlineShaderFactory.GORAUD);
 		CanvasObjectFunctions.DEFAULT.get().addTransformAboutPoint(flap, new Point(1200, 500, 200), new RepeatingTransform<>(Axis.Y.getRotation(2),0));
@@ -254,7 +256,7 @@ public class GraphicsTest extends JFrame {
 		wall.setColour(new Color(240, 240, 240));
 		wall.setLightIntensityFinder(Utils.getShadowLightIntensityFinder(cnv::getShapes));
 		wall.setVisible(false);
-		cnv.registerObject(wall, new Point(350,350,700), ScanlineShaderFactory.GORAUD);		
+		cnv.registerObject(wall, new Point(350,350,700), ScanlineShaderFactory.GORAUD);
 		
 		ScaleTransform st = new ScaleTransform(0.95);
 		RepeatingTransform<ScaleTransform> rpt = new RepeatingTransform<ScaleTransform>(st,15){
@@ -368,7 +370,7 @@ public class GraphicsTest extends JFrame {
 			@Override
 			public void mousePressed(MouseEvent e) {
 				select = e;
-			}		
+			}
 		});
 		
 		addUIOverlay(cnv, cam);
@@ -438,7 +440,7 @@ public class GraphicsTest extends JFrame {
 //                canvas.getObjectAt(select.getX(), select.getY()).ifPresent(this::setSelectedObject);
 //                select = null;
 //            }
-//	    } else {	        
+//	    } else {
 //	        this.dispose();
 //	        System.out.println("Bye bye");
 //	    }
@@ -454,7 +456,7 @@ public class GraphicsTest extends JFrame {
             drawSubscription.dispose();
             super.dispose();
             slave.dispose();
-    }	
+    }
 //	@Override
 //	public void dispose() {
 //		if (go) {
@@ -478,7 +480,7 @@ public class GraphicsTest extends JFrame {
 		//Supplier<IOrientation> forward = () -> TraitHandler.INSTANCE.getTrait(ship, IOrientable.class).map(o -> o.getOrientation().copy()).get();
 		//hmm, having switched from the camera vector to the ship vector there might be an issue
 		//this can sometimes return null, presumably because the orientation is undergoing a transformation
-		//will need to consider when weapon activation takes place (needs to be in the draw complete stage?? or prior to transforming??)    
+		//will need to consider when weapon activation takes place (needs to be in the draw complete stage?? or prior to transforming??)
 	    final IOrientable shipOrientation = TraitHandler.INSTANCE.getTrait(ship, IOrientable.class).orElseThrow();
         Supplier<IOrientation> forward = () -> shipOrientation.getOrientation().copy(); //could be a problem getting the trait?
 		
@@ -531,7 +533,7 @@ public class GraphicsTest extends JFrame {
             //messing with collectors - puts the count of each object type at the bottom of the screen
             Map<String, Long> objectCounts = c.getShapes().stream().collect(
                         Collectors.groupingBy(s -> s.getBaseObject().getClass().getSimpleName(), Collectors.counting())
-                    );  
+                    );
             g.setColor(Color.LIGHT_GRAY);
             g.drawString(objectCounts.toString(), 40, c.getHeight()-5);
         });*/
@@ -541,9 +543,9 @@ public class GraphicsTest extends JFrame {
                                                   .entrySet()
                                                   .stream()
                                                   .collect(
-                                                        Collectors.groupingBy(t -> t.getKey().getEffectClass().orElse(t.getKey().getClass()).getSimpleName(), 
+                                                        Collectors.groupingBy(t -> t.getKey().getEffectClass().orElse(t.getKey().getClass()).getSimpleName(),
                                                                 Collectors.summingInt(t -> t.getValue().getAmmoCount()))
-                                                  );    
+                                                  );
             g.setColor(new Color(0,0,0,150));
             g.fillRect(0, c.getHeight() - 20, c.getWidth(), 20);
             g.setColor(Color.WHITE);

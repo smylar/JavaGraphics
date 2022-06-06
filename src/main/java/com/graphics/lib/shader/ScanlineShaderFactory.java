@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
 import com.graphics.lib.Facet;
@@ -30,37 +30,37 @@ import com.graphics.lib.zbuffer.ScanLine;
  */
 @PropertyInject
 public enum ScanlineShaderFactory implements IShaderFactory {
-		GORAUD(GoraudShader::new, 8), 
-		TEXGORAUD(TexturedGoraudShader::new, 8), 
-		FLAT(FlatShader::new, 8), 
-		NONE(DefaultScanlineShader::new, 8);
+        GORAUD(GoraudShader::new, 8),
+        TEXGORAUD(TexturedGoraudShader::new, 8),
+        FLAT(FlatShader::new, 8),
+        NONE(DefaultScanlineShader::new, 8);
 
-	private LinkedBlockingQueue<ScanlineShader> pool;
-	
-	@Property(name="zbuffer.skip", defaultValue="2")
+    private LinkedBlockingQueue<ScanlineShader> pool;
+    
+    @Property(name="zbuffer.skip", defaultValue="2")
     private Integer skip;
-	
-	private ScanlineShaderFactory(Supplier<ScanlineShader> shader, int poolSize) {
+    
+    private ScanlineShaderFactory(Supplier<ScanlineShader> shader, int poolSize) {
         pool = new LinkedBlockingQueue<>(poolSize);
         for (int i = 0 ; i < poolSize ; i++) {
             ScanlineShader shaderImpl = shader.get();
             shaderImpl.setCloseAction(pool::add);
             pool.add(shaderImpl);
         }
-	}
-	
-	@Override
-	public void add(ICanvasObject parent, Camera c, Dimension screen, ZBufferItemUpdater zBufferItemUpdater)
-    {       
-	    parent.getFacetList().parallelStream()
+    }
+    
+    @Override
+    public void add(ICanvasObject parent, Camera c, Dimension screen, ZBufferItemUpdater zBufferItemUpdater)
+    {
+        parent.getFacetList().parallelStream()
                              .filter(f -> parent.isProcessBackfaces() || GeneralPredicates.isFrontface(c).test(f))
                              .filter(f -> !isOffScreen(f,c,screen))
                              .forEach(f -> add(f, parent, c, screen, zBufferItemUpdater));
 
     }
-	
-	private void add(Facet facet, ICanvasObject parent, Camera c, Dimension screen, ZBufferItemUpdater zBufferItemUpdater)
-    {   
+    
+    private void add(Facet facet, ICanvasObject parent, Camera c, Dimension screen, ZBufferItemUpdater zBufferItemUpdater)
+    {
         List<WorldCoord> points = facet.getAsList();
         
         Comparator<WorldCoord> xComp = (o1, o2) -> (int)(o1.getTransformed(c).x - o2.getTransformed(c).x);
@@ -69,10 +69,10 @@ public enum ScanlineShaderFactory implements IShaderFactory {
         double maxX = points.stream().max(xComp).get().getTransformed(c).x;
 
         
-        if (minX < 0) 
+        if (minX < 0)
             minX = 0;
-        if (maxX > screen.getWidth()) 
-            maxX = screen.getWidth();          
+        if (maxX > screen.getWidth())
+            maxX = screen.getWidth();
         
         try (ScanlineShader localShader = getShader()) {
             if (localShader != null) {
@@ -90,8 +90,8 @@ public enum ScanlineShaderFactory implements IShaderFactory {
             }
         } catch (Exception e) { }
     }
-	
-	private ScanlineShader getShader() {   
+    
+    private ScanlineShader getShader() {
         try {
             return pool.take();
         } catch (InterruptedException e) {
@@ -99,8 +99,8 @@ public enum ScanlineShaderFactory implements IShaderFactory {
         }
         return null;
     }
-	
-	private Optional<ScanLine> getScanline(int xVal, List<LineEquation> lines)
+    
+    private Optional<ScanLine> getScanline(int xVal, List<LineEquation> lines)
     {
         ScanLine.Builder builder = ScanLine.builder();
         
@@ -122,13 +122,13 @@ public enum ScanlineShaderFactory implements IShaderFactory {
 //            double dif1 = Math.abs(activeLines.get(0).getYAtX(xVal) - activeLines.get(1).getYAtX(xVal));
 //            double dif2 = Math.abs(activeLines.get(1).getYAtX(xVal) - activeLines.get(2).getYAtX(xVal));
 //            double dif3 = Math.abs(activeLines.get(0).getYAtX(xVal) - activeLines.get(2).getYAtX(xVal));
-//                    
+//
 //            if ((dif1 < dif2 && dif1 < dif3) || (dif3 < dif2 && dif3 < dif1)) {
 //                activeLines.remove(0);
 //            } else {
 //                 activeLines.remove(2);
 //            }
-        }   
+        }
         
         for(LineEquation line : activeLines)
         {
@@ -159,15 +159,15 @@ public enum ScanlineShaderFactory implements IShaderFactory {
         
         return Optional.ofNullable(builder.build());
     }
-	
-	private void processScanline(ScanLine scanLine, int x, ScanlineShader shader, Dimension screen, ZBufferItemUpdater zBufferItemUpdater) {
-	    int ceilEnd = (int)Math.ceil(scanLine.getEndY());
-	    int floorStart = (int)Math.floor(scanLine.getStartY().intValue());
-	    double scanLineLength = ceilEnd - floorStart;
+    
+    private void processScanline(ScanLine scanLine, int x, ScanlineShader shader, Dimension screen, ZBufferItemUpdater zBufferItemUpdater) {
+        int ceilEnd = (int)Math.ceil(scanLine.getEndY());
+        int floorStart = scanLine.getStartY().intValue();
+        int scanLineLength = ceilEnd - floorStart;
         double percentDistCovered = 0;
         AtomicReference<Color> colour = new AtomicReference<>();
         
-        Function<Integer,Color> colourSupplier = yVal -> {
+        IntFunction<Color> colourSupplier = yVal -> {
             Color c = skip <= 1 || yVal % skip == 0 || colour.get() == null || shader == null ? shader.getColour(scanLine, x, yVal) : colour.get();
             colour.set(c);
             return c;
@@ -177,18 +177,18 @@ public enum ScanlineShaderFactory implements IShaderFactory {
             
             if (scanLineLength != 0)
             {
-                percentDistCovered = (y - floorStart) / scanLineLength;
+                percentDistCovered = (double)(y - floorStart) / scanLineLength;
             }
             
             double z = LineEquation.interpolateZ(scanLine.getStartZ(), scanLine.getEndZ(), percentDistCovered);
             zBufferItemUpdater.update(x, y, z, colourSupplier);
         }
     }
-	
-	private boolean isOffScreen(Facet facet, Camera c, Dimension dimension) {
+    
+    private boolean isOffScreen(Facet facet, Camera c, Dimension dimension) {
         facet.setFrontFace(GeneralPredicates.isFrontface(c).test(facet));
         return facet.getTransformedNormal(c).z() == 0 ||
-                Utils.allMatchAny(facet.getAsList().stream().map(p -> p.getTransformed(c)).toList(), 
+                Utils.allMatchAny(facet.getAsList().stream().map(p -> p.getTransformed(c)).toList(),
                         List.of(p -> p.z <= 1,
                                 p -> p.x < 0,
                                 p -> p.x > dimension.getWidth(),
