@@ -25,10 +25,6 @@ public enum LightIntensityFinderEnum {
 					percent = (90-deg) / 90;
 				}
 				
-				if (f.getBaseIntensity() > percent) {
-				    percent = f.getBaseIntensity();
-                }
-				
 				final double pc = percent;
 				
 				IntensityComponents.forEach(comp -> {
@@ -38,7 +34,7 @@ public enum LightIntensityFinderEnum {
 		        });
 				
 			});
-			return maxIntensity;
+			return f.checkIntensity(maxIntensity);
 	});
 	
 	private ILightIntensityFinder finder;
