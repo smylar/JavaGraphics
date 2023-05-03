@@ -1,4 +1,4 @@
-package com.graphics.tests.shapes;
+package com.graphics.shapes;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -7,11 +7,15 @@ import com.graphics.lib.Facet;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
 
-public class Wall extends CanvasObject {
+public class Surface extends CanvasObject {
 
-	public Wall(int rows, int cols) {
+	public Surface(int rows, int cols) {
 		super(() -> init(rows,cols,10));
 	}
+	
+	public Surface(int rows, int cols, int blockSize) {
+        super(() -> init(rows,cols,blockSize));
+    }
 	
 	private static Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>> init(int rows, int cols, int blockSize) {
 		WorldCoord[][] coords = new WorldCoord[rows + 1][cols + 1]; 

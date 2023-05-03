@@ -36,6 +36,8 @@ import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.properties.Property;
 import com.graphics.lib.properties.PropertyInject;
+import com.graphics.lib.scene.FlooredFrame;
+import com.graphics.lib.scene.SceneFrame;
 import com.graphics.lib.shader.IShaderFactory;
 import com.graphics.lib.shader.PointShader;
 import com.graphics.lib.shader.ScanlineShaderFactory;
@@ -65,8 +67,9 @@ public class Canvas3D extends AbstractCanvas {
 	private double horizon = 8000;
 	private Set<ICanvasUpdateListener> slaves = new HashSet<>();
 	private boolean drawShadows = false;
-	private Facet floor = null;
 	private long tickCount = 0;
+	private String currentFrameAddress;
+	private Map<String, SceneFrame> frames = new HashMap<>();
 	
 	@Property(name="canvas.drawMode", defaultValue="NORMAL")
     private DrawMode drawMode;
@@ -105,13 +108,11 @@ public class Canvas3D extends AbstractCanvas {
 		this.drawShadows = drawShadows;
 	}
 	
-	public Facet getFloor() {
-		return floor;
+	public void addScene(int xaddr, int zaddr, SceneFrame scene) { //may want to add default too
+	    //idea here that as we move around we can load in new content and drop what we don't need
+	    frames.put(String.format("%d_%d", xaddr, zaddr), scene);
 	}
 
-	public void setFloor(Facet floor) {
-		this.floor = floor;
-	}
 
 	public void addLightSource(LightSource lightSource) {
 		if (lightSource != null) {
@@ -142,6 +143,17 @@ public class Canvas3D extends AbstractCanvas {
 
 	public Set<ILightSource> getLightSources() {
 		return lightSources;
+	}
+	
+	public Facet getFloorPlane() {
+	    if (frames.containsKey(currentFrameAddress)) {
+	        return frames.get(currentFrameAddress).getFloor().getFacetList().get(0);
+	    }
+	    return null;
+	}
+	
+	public SceneFrame getCurrentScene() {
+	    return frames.get(currentFrameAddress);
 	}
 	
 	public void addObserver(ICanvasUpdateListener l){
@@ -197,6 +209,7 @@ public class Canvas3D extends AbstractCanvas {
 	public Observable<ICanvasObject> doDraw()
 	{
 	    tickCount++;
+	    switchFrames();
 		addPendingLightsources();
 		
 		getCamera().setViewport(this.getWidth(), this.getHeight());
@@ -211,7 +224,7 @@ public class Canvas3D extends AbstractCanvas {
 		
 		getCamera().doTransforms();
 		
-		if (this.drawShadows && Objects.nonNull(this.floor)) {
+		if (this.drawShadows && Objects.nonNull(this.getFloorPlane())) {
 
 		    processShapes.addAll(processShapes.stream() 
 		                                      .flatMap(s -> getShadowOnFloor(s).parallelStream())
@@ -219,6 +232,44 @@ public class Canvas3D extends AbstractCanvas {
 		}
 
 		return renderShapes(processShapes);
+	}
+	
+	private void switchFrames() {
+	    //FlooredFrame is currently a 3600x3600 pixel square, will want more flexible way
+	    Point camPos = getCamera().getPosition();
+	    int framex = (int) (camPos.x / 3600); // this will be sh!t, will want a better way, depends how scene initially placed, lets see what happens
+	    int framez = (int) (camPos.z / 3600);
+	    String frameAddress = String.format("%d_%d", framex, framez); 
+	    
+	    if (!frameAddress.equals(currentFrameAddress)) {
+	        //TODO remove frames we no longer want to process, and we will likely want to show more than one, i.e. The ones around the current frame
+	        SceneFrame currentFrame = getCurrentScene();
+	        if (currentFrame != null) {
+	            currentFrame.destroyFrame(); //test
+	        }
+	        
+	        SceneFrame frame = frames.computeIfAbsent(frameAddress, k -> new FlooredFrame(Color.LIGHT_GRAY, 700)); //arbitrary default for the moment
+	        frame.buildFrame();
+	        
+	        //register objects with an offset depending on frame address 
+	        double xoffset = framex * 3600;
+	        double zoffset = framez * 3600;
+	        
+	        frame.getFrameLightsources().forEach(ls -> {
+	            Point lsPosition = ls.getPosition();
+	            ls.setPosition(new Point(lsPosition.x + xoffset, lsPosition.y, lsPosition.z + zoffset));
+	            addLightSource(ls);
+	        });
+	        
+	        frame.getFrameObjects().forEach(o -> {
+	            Point position = o.framePosition();
+	            registerObject(o.object(), new Point(position.x + xoffset, position.y, position.z + zoffset), o.shaderFactory());
+	        });
+	        
+	        
+	        currentFrameAddress = frameAddress;
+	        
+	    }
 	}
 	
 	private boolean filterShapes(ICanvasObject shape) {
@@ -249,7 +300,6 @@ public class Canvas3D extends AbstractCanvas {
 	                  SwingUtilities.invokeLater(this::repaint);
 	                  notifyEvent(PAINT);
 	              });
-	    //may try and get the slave canvases to subscribe to this, instead of a specific notification
 	}
 	
 	private void notifyEvent(CanvasEvent event) {
@@ -300,6 +350,7 @@ public class Canvas3D extends AbstractCanvas {
 	 */
 	private Set<CanvasObject> getShadowOnFloor(ICanvasObject obj){	
 
+	    Facet floor = getFloorPlane();
 		if (floor == null || !obj.getCastsShadow()) {
 		    return Sets.newHashSet();
 		}
@@ -354,7 +405,8 @@ public class Canvas3D extends AbstractCanvas {
 	 * @param end
 	 * @return World coordinate of intersection with the floor
 	 */
-	private WorldCoord getShadowPoint(Point start, Point end){
+	private WorldCoord getShadowPoint(Point start, Point end) {
+	    Facet floor = getFloorPlane();
 		Vector lightVector = start.vectorToPoint(end).getUnitVector();
 		Point intersect = floor.getIntersectionPointWithFacetPlane(end, lightVector);
 		

@@ -33,7 +33,7 @@ public class Utils {
 	public static ILightIntensityFinder getShadowLightIntensityFinder(final ICanvasObjectList objectsToCheck)
 	{
 		//EXPERIMENTAL
-		return (ls, obj, p, v, bf) -> {
+		return (ls, obj, p, v, f) -> {
 			IntensityComponents maxIntensity = new IntensityComponents();
 			
 			ls.stream().filter(l -> l.isOn()).forEach(l ->
@@ -49,11 +49,11 @@ public class Utils {
 				
 				double deg = v.angleBetween(lightVector);
 				
-				if (deg > 90 && !bf)
+				if (deg > 90 && f.isFrontFace())
 				{			
 					percent = (deg-90) / 90;
 				}
-				else if (bf)
+				else if (!f.isFrontFace())
 				{
 					//light on the rear of the facet for if we are processing backfaces - which implies the rear may be visible
 					percent = (90-deg) / 90;

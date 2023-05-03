@@ -58,7 +58,7 @@ public class GoraudShader extends DefaultScanlineShader {
 		for (WorldCoord p : facet.getAsList())
 		{
 			Vector n = parent.getVertexNormalFinder().getVertexNormal(parent, p, facet);
-			pointLight.put(p.getTransformed(c), parent.getLightIntensityFinder().getLightIntensity(Canvas3D.get().getLightSources(), parent, p, n, !facet.isFrontFace()));
+			pointLight.put(p.getTransformed(c), parent.getLightIntensityFinder().getLightIntensity(Canvas3D.get().getLightSources(), parent, p, n, facet));
 		}
 	}
 

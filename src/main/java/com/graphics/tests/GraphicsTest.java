@@ -17,16 +17,13 @@ import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import com.graphics.lib.Axis;
-import com.graphics.lib.Facet;
 import com.graphics.lib.Point;
 import com.graphics.lib.Utils;
 import com.graphics.lib.Vector;
-import com.graphics.lib.WorldCoord;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.camera.ViewAngleCamera;
 import com.graphics.lib.canvas.Canvas3D;
 import com.graphics.lib.canvas.CanvasObject;
-import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.canvas.SlaveCanvas3D;
 import com.graphics.lib.canvas.effects.BoundingBox;
 import com.graphics.lib.canvas.effects.Reticule;
@@ -37,34 +34,21 @@ import com.graphics.lib.interfaces.IOrientable;
 import com.graphics.lib.interfaces.IOrientation;
 import com.graphics.lib.interfaces.IPlugable;
 import com.graphics.lib.lightsource.DirectionalLightSource;
-import com.graphics.lib.lightsource.LightSource;
-import com.graphics.lib.lightsource.ObjectTiedLightSource;
 import com.graphics.lib.orientation.SimpleOrientation;
 import com.graphics.lib.plugins.Events;
 import com.graphics.lib.plugins.IPlugin;
+import com.graphics.lib.scene.SceneFrame;
 import com.graphics.lib.shader.ScanlineShaderFactory;
-import com.graphics.lib.texture.BmpTexture;
-import com.graphics.lib.texture.OvoidTextureMapper;
 import com.graphics.lib.traits.OrientableTrait;
 import com.graphics.lib.traits.PlugableTrait;
-import com.graphics.lib.traits.TexturableTrait;
 import com.graphics.lib.traits.TraitHandler;
 import com.graphics.lib.transform.MovementTransform;
 import com.graphics.lib.transform.PanCamera;
-import com.graphics.lib.transform.RepeatingTransform;
-import com.graphics.lib.transform.ScaleTransform;
-import com.graphics.lib.transform.SequenceTransform;
-import com.graphics.lib.transform.Transform;
+import com.graphics.lib.transform.Translation;
 import com.graphics.lib.zbuffer.ZBuffer;
 import com.graphics.shapes.Cuboid;
-import com.graphics.shapes.Lantern;
-import com.graphics.shapes.Sphere;
-import com.graphics.shapes.Whale;
-import com.graphics.tests.shapes.FlapTest;
-import com.graphics.tests.shapes.Gate;
+import com.graphics.shapes.Surface;
 import com.graphics.tests.shapes.Ship;
-import com.graphics.tests.shapes.TexturedCuboid;
-import com.graphics.tests.shapes.Wall;
 import com.graphics.tests.weapons.AmmoTracker;
 import com.graphics.tests.weapons.AutoAmmoProxy;
 import com.graphics.tests.weapons.BouncyProjectile;
@@ -86,7 +70,6 @@ import io.reactivex.disposables.Disposable;
 public class GraphicsTest extends JFrame {
 
 	private static final long serialVersionUID = 1L;
-	private static GraphicsTest gt;
 	private static ClipLibrary clipLibrary;
     
 	private boolean chaseCam = false;
@@ -99,7 +82,7 @@ public class GraphicsTest extends JFrame {
 	public static void main (String[] args) {
 		try {
 		    clipLibrary = ClipLibrary.getInstance();
-			SwingUtilities.invokeAndWait(() -> gt = new GraphicsTest());
+			SwingUtilities.invokeAndWait(GraphicsTest::new);
 			clipLibrary.playMusic();
 		} catch (Exception e1) {
             e1.printStackTrace();
@@ -114,6 +97,8 @@ public class GraphicsTest extends JFrame {
 		
 		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 			
+		//N.B. world coords follow the inverted Y screen coords, really should've had these the right way up
+		//and transformed in the camera transform but we're a bit far down the line here
 		ViewAngleCamera cam = new ViewAngleCamera(new SimpleOrientation(OrientableTrait.ORIENTATION_TAG));
 		cam.setPosition(new Point(350, 280, -200));
 		//FocusPointCamera cam = new FocusPointCamera();
@@ -122,38 +107,6 @@ public class GraphicsTest extends JFrame {
 		ZBuffer zBuf = new ZBuffer();
 		//zBuf.setSkip(3);
 		cnv.setzBuffer(zBuf);
-		
-		Facet floor = new Facet(new WorldCoord(0,650,0), new WorldCoord(700,650,0), new WorldCoord(0,650,700));
-		cnv.setFloor(floor);
-		//cnv.setDrawShadows(true);
-		
-		ObjectTiedLightSource<LightSource> l1 = new ObjectTiedLightSource<>(LightSource.class, 0,0,-500);
-		l1.getLightSource().setColour(new Color(255, 0, 0));
-		cnv.addLightSource(l1.getLightSource());
-		Lantern lantern1 = new Lantern();
-		lantern1.attachLightsource(l1);
-		cnv.registerObject(lantern1, new Point(0,0,-500), ScanlineShaderFactory.NONE);
-		
-		ObjectTiedLightSource<LightSource> l2 = new ObjectTiedLightSource<>(LightSource.class, 500,200,-100);
-		l2.getLightSource().setColour(new Color(0, 255, 0));
-		cnv.addLightSource(l2.getLightSource());
-		Lantern lantern2 = new Lantern();
-		lantern2.attachLightsource(l2);
-		cnv.registerObject(lantern2, new Point(500,200,-100), ScanlineShaderFactory.NONE);
-		
-		ObjectTiedLightSource<DirectionalLightSource> l3 = new ObjectTiedLightSource<>(DirectionalLightSource.class, 400,100,100);
-		l3.getLightSource().setColour(new Color(0, 0, 255));
-		cnv.addLightSource(l3.getLightSource());
-		Lantern lantern3 = new Lantern();
-				
-		TraitHandler.INSTANCE.registerTrait(lantern3, OrientableTrait.class).setOrientation(new SimpleOrientation(OrientableTrait.ORIENTATION_TAG));
-		cnv.registerObject(lantern3, new Point(400,100,100), ScanlineShaderFactory.NONE);
-		l3.getLightSource().setDirection(() -> TraitHandler.INSTANCE.getTrait(lantern3, IOrientable.class).get().getOrientation().getForward());
-		l3.getLightSource().setLightConeAngle(40);
-		lantern3.attachLightsource(l3);
-		lantern3.getFacetList().stream().filter(f -> f.getNormal().z() <= 0).forEach(f -> f.setColour(Color.BLACK));
-		Transform l3spin = new RepeatingTransform<>(Axis.X.getRotation(4), 0);
-		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(lantern3, l3spin);
 		
 		this.add(cnv, BorderLayout.CENTER);
 		
@@ -165,19 +118,6 @@ public class GraphicsTest extends JFrame {
 		
 		IPlugin<IPlugable, Void> explode = TestUtils.getExplodePlugin(Optional.ofNullable(clipLibrary));
 		
-		CanvasObject camcube = new Cuboid(20,20,20);
-		cnv.registerObject(camcube, new Point(1560, 200, 350), ScanlineShaderFactory.FLAT);
-		
-		Whale whale = new Whale(); 
-		TraitHandler.INSTANCE.registerTrait(whale, PlugableTrait.class).registerPlugin(Events.EXPLODE, explode, false);
-		whale.setColour(Color.cyan);
-		cnv.registerObject(whale, new Point(1515, 300, 400), ScanlineShaderFactory.GORAUD);
-		
-		FlapTest flap = new FlapTest(); 
-		flap.setColour(Color.ORANGE);
-		cnv.registerObject(flap, new Point(1000, 500, 200), ScanlineShaderFactory.GORAUD);
-		CanvasObjectFunctions.DEFAULT.get().addTransformAboutPoint(flap, new Point(1200, 500, 200), new RepeatingTransform<>(Axis.Y.getRotation(2),0));
-		
 		ViewAngleCamera slaveCam = new ViewAngleCamera(new SimpleOrientation(OrientableTrait.ORIENTATION_TAG));
 		slaveCam.setPosition(new Point(1550, 200, 350));
 		slaveCam.addTransform("INIT", new PanCamera(Axis.Y, -90));
@@ -188,6 +128,10 @@ public class GraphicsTest extends JFrame {
 		cnv.addObserver(scnv);
 		this.setVisible(true);
 		
+		StartScene scene = new StartScene(new Color(246,215,176), 700);
+		
+		cnv.addScene(0, 0, scene);
+		
 		Ship ship = new Ship (100, 100, 50);
 		
 		ship.setColour(new Color(50, 50, 50));
@@ -195,78 +139,22 @@ public class GraphicsTest extends JFrame {
 		addWeapons(ship, cam);
 		ship.applyTransform(Axis.Y.getRotation(180));
 		cnv.registerObject(ship, new Point(350, 350, -50), ScanlineShaderFactory.GORAUD);
-
-		Gate torus = new Gate(50,50,20);
-		TraitHandler.INSTANCE.registerTrait(torus, PlugableTrait.class).registerPlugin(Events.EXPLODE, explode, false);
-		torus.setColour(new Color(250, 250, 250));
-		//torus.setLightIntensityFinder(Utils.getShadowLightIntensityFinder(() -> { return cnv.getShapes();})); //for testing shadows falling on the torus
-		cnv.registerObject(torus, new Point(200,200,450), ScanlineShaderFactory.GORAUD);
-		Transform torust1 = new RepeatingTransform<>(Axis.Y.getRotation(3), 60);
-		Transform torust2 = new RepeatingTransform<>(Axis.X.getRotation(3), 60);
-		SequenceTransform torust = new SequenceTransform();
-		torust.add(torust1).add(torust2);
-		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(torus, torust);
-		torus.addFlag(Events.EXPLODE_PERSIST);
-		//torus.setCastsShadow(false);
 		
-		torus.setPassThroughPluginForGate(obj -> {
-		    Transform rot = new RepeatingTransform<>(Axis.X.getRotation(3), 60);
-		    CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(obj, rot);
-			return null;
-		});
+	    TraitHandler.INSTANCE.registerTrait(ship, PlugableTrait.class)
+          .registerPlugin("CHECK_FLOOR", 
+                  plugable -> {
+                      double ydif = plugable.getParent().getCentre().y - cnv.getFloorPlane().first().y; //ideally check for specific point that has gone through floor
+                      if (ydif > 1) {
+                          ship.applyTransform(new Translation(0, -ydif, 0));
+                      }
+                      return null;   
+                  }, true);
 		
-		torus.setPassThroughPluginForObject(obj -> {
-            obj.setColour(Color.pink);
-            AmmoTracker.INSTANCE.getTracked().values().forEach(h -> h.addAmmo(5));
-            return null;
-        });
-		
-		TexturedCuboid cube = new TexturedCuboid(200,200,200);
-		TraitHandler.INSTANCE.registerTrait(cube, PlugableTrait.class);
-		cnv.registerObject(cube, new Point(500,500,500), ScanlineShaderFactory.TEXGORAUD);
-		Transform cubet2 = new RepeatingTransform<>(Axis.Z.getRotation(3), 30);
-		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(cube, cubet2);
-		cube.addFlag(Events.STICKY);
-		
-		MovementTransform cubet = new MovementTransform(new Vector(-1,0,0), 5);
-		cubet.moveUntil(t -> t.getDistanceMoved() >= 350);
-		
-		cube.addTransform(cubet);
-		
-		Sphere ball = new Sphere(100,15);
-		TraitHandler.INSTANCE.registerTrait(ball, TexturableTrait.class).addTexture(new BmpTexture("smily")).mapTexture(new OvoidTextureMapper());
-		TraitHandler.INSTANCE.registerTrait(ball, PlugableTrait.class).registerPlugin(Events.EXPLODE, explode, false);
-		ball.setColour(new Color(255, 255, 0));
-		ball.addFlag(Events.EXPLODE_PERSIST);
-		cnv.registerObject(ball, new Point(500,200,450), ScanlineShaderFactory.TEXGORAUD);
-		cnv.registerObject(ball, new Point(500,200,450), ScanlineShaderFactory.GORAUD);
-		
-		for (int i = 0; i < ball.getFacetList().size() ; i++)
-		{
-			if (i % (ball.getPointsPerCircle()/3) == 1 || i % (ball.getPointsPerCircle()/3) == 0)
-			{
-			    ball.getFacetList().get(i).setColour(new Color(150,0,150));
-			}
-		}
-		
-		
-		Wall wall = new Wall(40,40);
+		Surface wall = new Surface(40,40);
 		wall.setColour(new Color(240, 240, 240));
 		wall.setLightIntensityFinder(Utils.getShadowLightIntensityFinder(cnv::getShapes));
 		wall.setVisible(false);
 		cnv.registerObject(wall, new Point(350,350,700), ScanlineShaderFactory.GORAUD);		
-		
-		ScaleTransform st = new ScaleTransform(0.95);
-		RepeatingTransform<ScaleTransform> rpt = new RepeatingTransform<ScaleTransform>(st,15){
-			@Override
-			public void onComplete(){
-				st.setScaling(1.05);
-			}
-		};
-		rpt.setResetAfterComplete(true);
-		RepeatingTransform<?> spheret = new RepeatingTransform<>(rpt,30);
-			
-		CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(ball, spheret);
 		
 		DirectionalLightSource l4 = new DirectionalLightSource();
 		l4.setPosition(cam::getPosition);
@@ -326,27 +214,11 @@ public class GraphicsTest extends JFrame {
 					cnv.setDrawShadows(!cnv.isDrawShadows());
 				}
 				
-				else if (key.getKeyChar() == '.' && l3.getLightSource().getIntensity() <= 0.9 && l3.getLightSource().isOn()) {
-					l3.getLightSource().setIntensity(l3.getLightSource().getIntensity() + 0.1);
-					lantern3.setColour(l3.getLightSource().getActualColour());
-				}
-				
-				else if (key.getKeyChar() == ',' && l3.getLightSource().getIntensity() >= 0.1 && l3.getLightSource().isOn()) {
-					l3.getLightSource().setIntensity(l3.getLightSource().getIntensity() - 0.1);
-					lantern3.setColour(l3.getLightSource().getActualColour());
-				}
-				
-				else if (key.getKeyChar() == '1') {
-					l1.toggle();
-				}
-				else if (key.getKeyChar() == '2') {
-					l2.toggle();
-				}
-				else if (key.getKeyChar() == '3') {
-					l3.toggle();
-				}
-				else if (key.getKeyChar() == '/') {
-				    chaseCam = !chaseCam;
+				else {
+				    SceneFrame currentFrame = cnv.getCurrentScene();
+				    if (currentFrame != null) {
+				        currentFrame.processInput(key);
+				    }
 				}
 				
 			}
@@ -430,19 +302,7 @@ public class GraphicsTest extends JFrame {
         }
 	}
 	
-//	public void drawCycle()
-//	{
-//	    if (go) {
-//	        canvas.doDraw();
-//            if (select != null) {
-//                canvas.getObjectAt(select.getX(), select.getY()).ifPresent(this::setSelectedObject);
-//                select = null;
-//            }
-//	    } else {	        
-//	        this.dispose();
-//	        System.out.println("Bye bye");
-//	    }
-//	}
+
     @Override
     public void dispose() {
             try {
@@ -455,22 +315,7 @@ public class GraphicsTest extends JFrame {
             super.dispose();
             slave.dispose();
     }	
-//	@Override
-//	public void dispose() {
-//		if (go) {
-//			go = false;
-//		} else {
-//		    try {
-//                clipLibrary.close();
-//            } catch (Exception e) {
-//                // TODO Auto-generated catch block
-//                e.printStackTrace();
-//            }
-//		    runner.shutdown();
-//			super.dispose();
-//			slave.dispose();
-//		}
-//	}
+
 	
 	private void addWeapons(final Ship ship, final Camera cam) {
 		

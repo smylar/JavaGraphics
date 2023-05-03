@@ -10,6 +10,8 @@ import com.google.common.collect.Maps;
 
 public final class IntensityComponents implements UnaryOperator<Color>{
     
+    private final double defaultIntensity;
+    
     public enum ColourComponent {
         RED,
         GREEN,
@@ -18,8 +20,16 @@ public final class IntensityComponents implements UnaryOperator<Color>{
     
     private final Map<ColourComponent, Double> intensities = Maps.newEnumMap(ColourComponent.class);
     
+    public IntensityComponents() {
+        this(0d);
+    }
+    
+    public IntensityComponents(double defaultIntensity) {
+        this.defaultIntensity = defaultIntensity;
+    }
+    
     public double get(ColourComponent comp) {
-        return intensities.getOrDefault(comp, 0d);
+        return intensities.getOrDefault(comp, defaultIntensity);
     }
     
     public void set(ColourComponent comp, double val) {

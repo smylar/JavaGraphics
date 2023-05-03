@@ -225,12 +225,14 @@ public class PluginLibrary {
 		};
 	}
 	
-	public static IPlugin<IPlugable, Void> stop()
+	public static IPlugin<IPlugable, Void> stop(boolean removePlugins)
 	{
 		return plugable -> {
 		    ICanvasObject obj = plugable.getParent();
 			obj.cancelTransforms();
-			plugable.removePlugins();
+			if (removePlugins) {
+			    plugable.removePlugins();
+			}
 			return null;
 		};
 	}

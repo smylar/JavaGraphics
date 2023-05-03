@@ -35,7 +35,7 @@ public class FlatShader extends DefaultScanlineShader {
 				(points.get(0).y + points.get(1).y + points.get(2).y)/3, 
 				(points.get(0).z + points.get(1).z + points.get(2).z)/3);
 		
-		colour = Optional.ofNullable(obj.getLightIntensityFinder().getLightIntensity(ls, obj, p, f.getNormal(), !f.isFrontFace()))
+		colour = Optional.ofNullable(obj.getLightIntensityFinder().getLightIntensity(ls, obj, p, f.getNormal(), f))
         		         .map(i -> i.apply(newColour))
         		         .orElse(DEFAULT);
 
