@@ -50,22 +50,22 @@ public final class LineEquation {
 	
 	public double getMaxX()
 	{
-		return start.x > end.x ? start.x : end.x;
+		return Math.max(start.x, end.x);
 	}
 	
 	public double getMaxY()
 	{
-		return start.y > end.y ? start.y : end.y;
+		return Math.max(start.y, end.y);
 	}
 	
 	public double getMinX()
 	{
-		return start.x < end.x ? start.x : end.x;
+		return Math.min(start.x, end.x);
 	}
 	
 	public double getMinY()
 	{
-		return start.y < end.y ? start.y : end.y;
+		return Math.min(start.y, end.y);
 	}
 	
 	public double getLength()
