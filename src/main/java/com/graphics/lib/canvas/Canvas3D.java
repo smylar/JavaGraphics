@@ -31,7 +31,6 @@ import com.graphics.lib.WorldCoord;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ICanvasUpdateListener;
-import com.graphics.lib.interfaces.IZBuffer;
 import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.properties.Property;
@@ -44,6 +43,7 @@ import com.graphics.lib.shader.ScanlineShaderFactory;
 import com.graphics.lib.shader.WireframeShader;
 import com.graphics.lib.traits.TrackingTrait;
 import com.graphics.lib.util.DrawMode;
+import com.graphics.lib.zbuffer.IZBuffer;
 import com.graphics.lib.zbuffer.ZBufferItem;
 
 import io.reactivex.Observable;

@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 
 import com.graphics.lib.Axis;
 import com.graphics.lib.Point;
@@ -72,12 +73,13 @@ public class GraphicsTest extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private static ClipLibrary clipLibrary;
     
+	private final transient Disposable drawSubscription;
 	private boolean chaseCam = false;
 	private JFrame slave;
 	private Canvas3D canvas;
 	private AtomicReference<ICanvasObject> selectedObject = new AtomicReference<>();
-	private MouseEvent select = null;	
-	private final Disposable drawSubscription;
+	private MouseEvent select = null;
+	
 
 	public static void main (String[] args) {
 		try {
@@ -91,11 +93,11 @@ public class GraphicsTest extends JFrame {
 	}
 	
 	public GraphicsTest() {
-		super("Graphics Test");
+		super("Super Graphics Test");
 		this.setLayout(new BorderLayout());
 		this.setSize(700, 700);
 		
-		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 			
 		//N.B. world coords follow the inverted Y screen coords, really should've had these the right way up
 		//and transformed in the camera transform but we're a bit far down the line here
@@ -111,7 +113,7 @@ public class GraphicsTest extends JFrame {
 		this.add(cnv, BorderLayout.CENTER);
 		
 		slave = new JFrame("Slave");
-		slave.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		slave.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		slave.setLayout(new BorderLayout());
 		slave.setSize(300, 300);
 		slave.setLocation(750, 50);
@@ -154,7 +156,7 @@ public class GraphicsTest extends JFrame {
 		wall.setColour(new Color(240, 240, 240));
 		wall.setLightIntensityFinder(Utils.getShadowLightIntensityFinder(cnv::getShapes));
 		wall.setVisible(false);
-		cnv.registerObject(wall, new Point(350,350,700), ScanlineShaderFactory.GORAUD);		
+		cnv.registerObject(wall, new Point(350,350,700), ScanlineShaderFactory.GORAUD);
 		
 		DirectionalLightSource l4 = new DirectionalLightSource();
 		l4.setPosition(cam::getPosition);
@@ -240,7 +242,7 @@ public class GraphicsTest extends JFrame {
 			@Override
 			public void mousePressed(MouseEvent e) {
 				select = e;
-			}		
+			}
 		});
 		
 		addUIOverlay(cnv, cam);
@@ -302,7 +304,6 @@ public class GraphicsTest extends JFrame {
         }
 	}
 	
-
     @Override
     public void dispose() {
             try {
@@ -315,7 +316,6 @@ public class GraphicsTest extends JFrame {
             super.dispose();
             slave.dispose();
     }	
-
 	
 	private void addWeapons(final Ship ship, final Camera cam) {
 		
@@ -323,7 +323,7 @@ public class GraphicsTest extends JFrame {
 		//Supplier<IOrientation> forward = () -> TraitHandler.INSTANCE.getTrait(ship, IOrientable.class).map(o -> o.getOrientation().copy()).get();
 		//hmm, having switched from the camera vector to the ship vector there might be an issue
 		//this can sometimes return null, presumably because the orientation is undergoing a transformation
-		//will need to consider when weapon activation takes place (needs to be in the draw complete stage?? or prior to transforming??)    
+		//will need to consider when weapon activation takes place (needs to be in the draw complete stage?? or prior to transforming??)
 	    final IOrientable shipOrientation = TraitHandler.INSTANCE.getTrait(ship, IOrientable.class).orElseThrow();
         Supplier<IOrientation> forward = () -> shipOrientation.getOrientation().copy(); //could be a problem getting the trait?
 		
@@ -376,7 +376,7 @@ public class GraphicsTest extends JFrame {
             //messing with collectors - puts the count of each object type at the bottom of the screen
             Map<String, Long> objectCounts = c.getShapes().stream().collect(
                         Collectors.groupingBy(s -> s.getBaseObject().getClass().getSimpleName(), Collectors.counting())
-                    );  
+                    );
             g.setColor(Color.LIGHT_GRAY);
             g.drawString(objectCounts.toString(), 40, c.getHeight()-5);
         });*/
@@ -386,9 +386,9 @@ public class GraphicsTest extends JFrame {
                                                   .entrySet()
                                                   .stream()
                                                   .collect(
-                                                        Collectors.groupingBy(t -> t.getKey().getEffectClass().orElse(t.getKey().getClass()).getSimpleName(), 
+                                                        Collectors.groupingBy(t -> t.getKey().getEffectClass().orElse(t.getKey().getClass()).getSimpleName(),
                                                                 Collectors.summingInt(t -> t.getValue().getAmmoCount()))
-                                                  );    
+                                                  );
             g.setColor(new Color(0,0,0,150));
             g.fillRect(0, c.getHeight() - 20, c.getWidth(), 20);
             g.setColor(Color.WHITE);
