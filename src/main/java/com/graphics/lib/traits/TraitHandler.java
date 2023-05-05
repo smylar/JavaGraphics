@@ -1,8 +1,7 @@
 package com.graphics.lib.traits;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -26,21 +25,27 @@ public class TraitHandler {
      * Associate an object with a trait
      * 
      * @param obj   Object to gain trait
-     * @param trait Class of trait to give to object
+     * @param traitClass Class of trait to give to object
      * @return      The trait
      */
     public <T extends ITrait> T registerTrait(final ICanvasObject obj, final Class<T> traitClass) {
-        T trait = null;
         try {
-            trait = traitClass.getConstructor(ICanvasObject.class).newInstance(obj);
-            synchronized (traitMap) {
-                traitMap.computeIfAbsent(obj, key -> Sets.newConcurrentHashSet()).add(trait);
-            }
-            obj.observeDeath()
-               .subscribe(d -> traitMap.remove(obj));
+            T trait = traitClass.getConstructor(ICanvasObject.class).newInstance(obj);
+            return registerTrait(obj, co -> trait);
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return null; //refactor for optional!
+    }
+
+    public <T extends ITrait> T registerTrait(final ICanvasObject obj, final Function<ICanvasObject,T> traitObject) {
+        T trait = traitObject.apply(obj);
+
+        synchronized (traitMap) {
+            traitMap.computeIfAbsent(obj, key -> Sets.newConcurrentHashSet()).add(trait);
+        }
+        obj.observeDeath().subscribe(d -> traitMap.remove(obj));
+
         return trait;
     }
     

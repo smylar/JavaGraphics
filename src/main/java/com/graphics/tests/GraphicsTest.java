@@ -40,6 +40,7 @@ import com.graphics.lib.plugins.Events;
 import com.graphics.lib.plugins.IPlugin;
 import com.graphics.lib.scene.SceneFrame;
 import com.graphics.lib.shader.ScanlineShaderFactory;
+import com.graphics.lib.texture.BmpTexture;
 import com.graphics.lib.traits.OrientableTrait;
 import com.graphics.lib.traits.PlugableTrait;
 import com.graphics.lib.traits.TraitHandler;
@@ -107,7 +108,6 @@ public class GraphicsTest extends JFrame {
 		//cam.setFocusPoint(new Point(300, 300, 1000));
 		Canvas3D cnv = Canvas3D.get(cam);
 		ZBuffer zBuf = new ZBuffer();
-		//zBuf.setSkip(3);
 		cnv.setzBuffer(zBuf);
 		
 		this.add(cnv, BorderLayout.CENTER);
@@ -131,7 +131,8 @@ public class GraphicsTest extends JFrame {
 		this.setVisible(true);
 		
 		StartScene scene = new StartScene(new Color(246,215,176), 700);
-		
+		scene.addFloorTexture(() -> new BmpTexture("river", Color.white));
+
 		cnv.addScene(0, 0, scene);
 		
 		Ship ship = new Ship (100, 100, 50);

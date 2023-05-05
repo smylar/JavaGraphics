@@ -6,7 +6,6 @@ import java.util.Set;
 import com.graphics.lib.Point;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.texture.Texture;
-import com.graphics.lib.texture.TextureMapper;
 
 /**
  * Allows a texture to be applied to an object
@@ -23,14 +22,6 @@ public interface ITexturable extends ITrait {
 	 * @return
 	 */
 	ITexturable addTexture(Texture texture);
-
-	/**
-	 * Map the textures onto the object using the supplied texture mapper 
-	 * 
-	 * @param mapper
-	 * @return
-	 */
-	ITexturable mapTexture(TextureMapper<?> mapper);
 
 	/**
 	 * Get the textures added to this object

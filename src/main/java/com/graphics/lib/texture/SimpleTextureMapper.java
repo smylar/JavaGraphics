@@ -18,15 +18,15 @@ public class SimpleTextureMapper extends TextureMapper<ICanvasObject> {
 	public SimpleTextureMapper() {
 		super(ICanvasObject.class);
 	}
-	
+
 	@Override
-	public void mapImpl(ICanvasObject obj, Map<WorldCoord, Point> textureMap, Texture texture) {
+	public Map<WorldCoord, Point>  mapImpl(ICanvasObject obj, Texture texture) {
 		List<WorldCoord> vertexList = obj.getVertexList();
-		if (vertexList.size() < 4) return;
-		
-		textureMap.put(vertexList.get(0), new Point(0, 0, 0));
-		textureMap.put(vertexList.get(1), new Point(0, texture.getHeight(), 0));
-		textureMap.put(vertexList.get(2), new Point(texture.getWidth(), texture.getHeight(), 0));
-		textureMap.put(vertexList.get(3), new Point(texture.getWidth(), 0, 0));
+		if (vertexList.size() < 4) return Map.of();
+
+		return Map.of(vertexList.get(0), new Point(0, 0, 0),
+				vertexList.get(1), new Point(0, texture.getHeight(), 0),
+				vertexList.get(2), new Point(texture.getWidth(), texture.getHeight(), 0),
+				vertexList.get(3), new Point(texture.getWidth(), 0, 0));
 	}
 }

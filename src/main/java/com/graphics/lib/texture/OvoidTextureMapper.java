@@ -1,5 +1,6 @@
 package com.graphics.lib.texture;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.graphics.lib.Point;
@@ -13,8 +14,9 @@ public class OvoidTextureMapper extends TextureMapper<Ovoid> {
 	}
 
 	@Override
-	protected void mapImpl(Ovoid obj, Map<WorldCoord, Point> textureMap, Texture texture) {
-		
+	protected Map<WorldCoord, Point> mapImpl(Ovoid obj, Texture texture) {
+
+		Map<WorldCoord, Point> textureMap = new HashMap<>();
 		//apply to half spheres only because of problem of start and end point being the same, TODO add option to apply on either half
 		int angleProgression = obj.getAngleProgression();
 		int pointsarc = 180 / angleProgression;
@@ -39,8 +41,8 @@ public class OvoidTextureMapper extends TextureMapper<Ovoid> {
 				textureMap.put(obj.getVertexList().get(index), new Point(teX, teY, 0));
 				teX += teIncr;
 			}
-			
 		}
+		return textureMap;
 	}
 
 }

@@ -135,7 +135,7 @@ public class StartScene extends FlooredFrame {
         cube.addTransform(cubet);
         
         Sphere ball = new Sphere(100,15);
-        TraitHandler.INSTANCE.registerTrait(ball, TexturableTrait.class).addTexture(new BmpTexture("smily")).mapTexture(new OvoidTextureMapper());
+        TraitHandler.INSTANCE.registerTrait(ball, co -> new TexturableTrait(co, new OvoidTextureMapper())).addTexture(new BmpTexture("smily"));
         TraitHandler.INSTANCE.registerTrait(ball, PlugableTrait.class).registerPlugin(Events.EXPLODE, explode, false);
         ball.setColour(new Color(255, 255, 0));
         ball.addFlag(Events.EXPLODE_PERSIST);
@@ -150,7 +150,7 @@ public class StartScene extends FlooredFrame {
         }  
         
         ScaleTransform st = new ScaleTransform(0.95);
-        RepeatingTransform<ScaleTransform> rpt = new RepeatingTransform<ScaleTransform>(st,15){
+        RepeatingTransform<ScaleTransform> rpt = new RepeatingTransform<>(st,15){
             @Override
             public void onComplete(){
                 st.setScaling(1.05);

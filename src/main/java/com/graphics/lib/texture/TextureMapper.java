@@ -1,5 +1,6 @@
 package com.graphics.lib.texture;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.graphics.lib.Point;
@@ -8,16 +9,16 @@ import com.graphics.lib.interfaces.ICanvasObject;
 
 public abstract class TextureMapper<T extends ICanvasObject> {
 
-	private Class<T> clazz;
+	private final Class<T> clazz;
 	
 	public TextureMapper(Class<T> clazz) {
 		this.clazz = clazz;
 	}
 	
-	public final void map(ICanvasObject obj, Map<WorldCoord, Point> textureMap, Texture texture) {
-	    obj.getObjectAs(clazz).ifPresent(o -> mapImpl(o, textureMap, texture));
+	public final Map<WorldCoord, Point> map(ICanvasObject obj, Texture texture) {
+	    return obj.getObjectAs(clazz).map(o -> mapImpl(o, texture)).orElseGet(HashMap::new);
 	}
 	
-	protected abstract void mapImpl(T obj, Map<WorldCoord, Point> textureMap, Texture texture);
+	protected abstract Map<WorldCoord, Point> mapImpl(T obj, Texture texture);
 
 }
