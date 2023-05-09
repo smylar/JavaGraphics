@@ -12,6 +12,7 @@ import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
@@ -84,6 +85,15 @@ public class Surface extends CanvasObject {
 			}
 		}
 		return Pair.of(vertexList.build(), facets.build());		
+	}
+
+	public List<WorldCoord> getCorners() {
+		var vl = getVertexList();
+		int last = vl.size() - 1;
+		return List.of(vl.get(0),
+				vl.get(cols),
+				vl.get(last - cols),
+				vl.get(last));
 	}
 
 }

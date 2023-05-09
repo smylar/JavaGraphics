@@ -52,30 +52,30 @@ public class StartScene extends FlooredFrame {
     
     @Override
     public void buildFrame() {
-        if (!frameObjects.isEmpty()) return;
+        if (isLoaded()) return;
         
         super.buildFrame();
         ObjectTiedLightSource<LightSource> l1 = new ObjectTiedLightSource<>(LightSource.class, 0,0,-500);
         l1.getLightSource().setColour(new Color(255, 0, 0));
-        lightSources.add(l1.getLightSource());
+        addSceneLightSource(l1.getLightSource());
         Lantern lantern1 = new Lantern();
         lantern1.attachLightsource(l1);
-        frameObjects.add(new SceneObject(lantern1, new Point(0,0,-500), ScanlineShaderFactory.NONE));
+        addSceneObject(new SceneObject(lantern1, new Point(0,0,-500), ScanlineShaderFactory.NONE));
         
         ObjectTiedLightSource<LightSource> l2 = new ObjectTiedLightSource<>(LightSource.class, 500,200,-100);
         l2.getLightSource().setColour(new Color(0, 255, 0));
-        lightSources.add(l2.getLightSource());
+        addSceneLightSource(l2.getLightSource());
         Lantern lantern2 = new Lantern();
         lantern2.attachLightsource(l2);
-        frameObjects.add(new SceneObject(lantern2, new Point(500,200,-100), ScanlineShaderFactory.NONE));
+        addSceneObject(new SceneObject(lantern2, new Point(500,200,-100), ScanlineShaderFactory.NONE));
         
         l3 = new ObjectTiedLightSource<>(DirectionalLightSource.class, 400,100,100);
         l3.getLightSource().setColour(new Color(0, 0, 255));
-        lightSources.add(l3.getLightSource());
+        addSceneLightSource(l3.getLightSource());
         
         lantern3 = new Lantern();        
         TraitHandler.INSTANCE.registerTrait(lantern3, OrientableTrait.class).setOrientation(new SimpleOrientation(OrientableTrait.ORIENTATION_TAG));
-        frameObjects.add(new SceneObject(lantern3, new Point(400,100,100), ScanlineShaderFactory.NONE));
+        addSceneObject(new SceneObject(lantern3, new Point(400,100,100), ScanlineShaderFactory.NONE));
         l3.getLightSource().setDirection(() -> TraitHandler.INSTANCE.getTrait(lantern3, IOrientable.class).get().getOrientation().getForward());
         l3.getLightSource().setLightConeAngle(40);
         lantern3.attachLightsource(l3);
@@ -84,24 +84,24 @@ public class StartScene extends FlooredFrame {
         CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(lantern3, l3spin);
         
         CanvasObject camcube = new Cuboid(20,20,20);
-        frameObjects.add(new SceneObject(camcube, new Point(1560, 200, 350), ScanlineShaderFactory.FLAT));
+        addSceneObject(new SceneObject(camcube, new Point(1560, 200, 350), ScanlineShaderFactory.FLAT));
         
         IPlugin<IPlugable, Void> explode = TestUtils.getExplodePlugin(Optional.ofNullable(ClipLibrary.getInstance()));
         
         Whale whale = new Whale(); 
         TraitHandler.INSTANCE.registerTrait(whale, PlugableTrait.class).registerPlugin(Events.EXPLODE, explode, false);
         whale.setColour(Color.cyan);
-        frameObjects.add(new SceneObject(whale, new Point(1515, 300, 400), ScanlineShaderFactory.GORAUD));
+        addSceneObject(new SceneObject(whale, new Point(1515, 300, 400), ScanlineShaderFactory.GORAUD));
         
         FlapTest flap = new FlapTest(); 
         flap.setColour(Color.ORANGE);
-        frameObjects.add(new SceneObject(flap, new Point(1000, 500, 200), ScanlineShaderFactory.GORAUD));
+        addSceneObject(new SceneObject(flap, new Point(1000, 500, 200), ScanlineShaderFactory.GORAUD));
         CanvasObjectFunctions.DEFAULT.get().addTransformAboutPoint(flap, new Point(1200, 500, 200), new RepeatingTransform<>(Axis.Y.getRotation(2),0));
         
         Gate torus = new Gate(50,50,20);
         TraitHandler.INSTANCE.registerTrait(torus, PlugableTrait.class).registerPlugin(Events.EXPLODE, explode, false);
         torus.setColour(new Color(250, 250, 250));
-        frameObjects.add(new SceneObject(torus, new Point(200,200,450), ScanlineShaderFactory.GORAUD));
+        addSceneObject(new SceneObject(torus, new Point(200,200,450), ScanlineShaderFactory.GORAUD));
         Transform torust1 = new RepeatingTransform<>(Axis.Y.getRotation(3), 60);
         Transform torust2 = new RepeatingTransform<>(Axis.X.getRotation(3), 60);
         SequenceTransform torust = new SequenceTransform();
@@ -124,7 +124,7 @@ public class StartScene extends FlooredFrame {
         
         TexturedCuboid cube = new TexturedCuboid(200,200,200);
         TraitHandler.INSTANCE.registerTrait(cube, PlugableTrait.class);
-        frameObjects.add(new SceneObject(cube, new Point(500,500,500), ScanlineShaderFactory.TEXGORAUD));
+        addSceneObject(new SceneObject(cube, new Point(500,500,500), ScanlineShaderFactory.TEXGORAUD));
         Transform cubet2 = new RepeatingTransform<>(Axis.Z.getRotation(3), 30);
         CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(cube, cubet2);
         cube.addFlag(Events.STICKY);
@@ -139,7 +139,7 @@ public class StartScene extends FlooredFrame {
         TraitHandler.INSTANCE.registerTrait(ball, PlugableTrait.class).registerPlugin(Events.EXPLODE, explode, false);
         ball.setColour(new Color(255, 255, 0));
         ball.addFlag(Events.EXPLODE_PERSIST);
-        frameObjects.add(new SceneObject(ball, new Point(500,200,450), ScanlineShaderFactory.TEXGORAUD));
+        addSceneObject(new SceneObject(ball, new Point(500,200,450), ScanlineShaderFactory.TEXGORAUD));
         
         for (int i = 0; i < ball.getFacetList().size() ; i++)
         {
@@ -175,13 +175,13 @@ public class StartScene extends FlooredFrame {
         }
         
         else if (key.getKeyChar() == '1') {
-            lightSources.get(0).toggle();
+            getFrameLightsources().get(0).toggle();
         }
         else if (key.getKeyChar() == '2') {
-            lightSources.get(1).toggle();
+            getFrameLightsources().get(1).toggle();
         }
         else if (key.getKeyChar() == '3') {
-            lightSources.get(2).toggle();
+            getFrameLightsources().get(2).toggle();
         }
     }
     

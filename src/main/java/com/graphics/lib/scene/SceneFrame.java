@@ -12,5 +12,7 @@ public interface SceneFrame {
     List<LightSource> getFrameLightsources();
     List<SceneObject> getFrameObjects();
     Surface getFloor();
+    SceneExtents getSceneExtents();
+    boolean isLoaded();
     void processInput(KeyEvent key);
 }

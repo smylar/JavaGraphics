@@ -13,11 +13,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import javax.swing.SwingUtilities;
 
+import com.graphics.lib.scene.SceneExtents;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
@@ -60,16 +63,17 @@ public class Canvas3D extends AbstractCanvas {
 	private static final long serialVersionUID = 1L;
 	private static Canvas3D cnv = null;
 	
-	private Map<ICanvasObject, IShaderFactory> shapes = Collections.synchronizedMap(new HashMap<ICanvasObject, IShaderFactory>());
+	private final Map<ICanvasObject, IShaderFactory> shapes = Collections.synchronizedMap(new HashMap<>());
 	
-	private Set<ILightSource> lightSources = new HashSet<>(); 
-	private Set<ILightSource> lightSourcesToAdd = Collections.synchronizedSet(new HashSet<ILightSource>()); 
+	private final Set<ILightSource> lightSources = new HashSet<>();
+	private final Set<ILightSource> lightSourcesToAdd = Collections.synchronizedSet(new HashSet<>());
 	private double horizon = 8000;
-	private Set<ICanvasUpdateListener> slaves = new HashSet<>();
+	private final Set<ICanvasUpdateListener> slaves = new HashSet<>();
 	private boolean drawShadows = false;
 	private long tickCount = 0;
-	private String currentFrameAddress;
-	private Map<String, SceneFrame> frames = new HashMap<>();
+	private int currentFrameX;
+	private int currentFrameZ;
+	private final Map<String, SceneFrame> frames = new HashMap<>();
 	
 	@Property(name="canvas.drawMode", defaultValue="NORMAL")
     private DrawMode drawMode;
@@ -110,7 +114,12 @@ public class Canvas3D extends AbstractCanvas {
 	
 	public void addScene(int xaddr, int zaddr, SceneFrame scene) { //may want to add default too
 	    //idea here that as we move around we can load in new content and drop what we don't need
-	    frames.put(String.format("%d_%d", xaddr, zaddr), scene);
+	    frames.put(toFrameAddress(xaddr, zaddr), scene);
+		if (xaddr == 0 && zaddr == 0) {
+			//assume start scene
+			scene.buildFrame();
+			loadScene(0,0, x -> 0d, z -> 0d);
+		}
 	}
 
 
@@ -146,6 +155,7 @@ public class Canvas3D extends AbstractCanvas {
 	}
 	
 	public Facet getFloorPlane() {
+		String currentFrameAddress = toFrameAddress(currentFrameX, currentFrameZ);
 	    if (frames.containsKey(currentFrameAddress)) {
 	        return frames.get(currentFrameAddress).getFloor().getFacetList().get(0);
 	    }
@@ -153,7 +163,8 @@ public class Canvas3D extends AbstractCanvas {
 	}
 	
 	public SceneFrame getCurrentScene() {
-	    return frames.get(currentFrameAddress);
+		String currentFrameAddress = toFrameAddress(currentFrameX, currentFrameZ);
+		return frames.get(currentFrameAddress);
 	}
 	
 	public void addObserver(ICanvasUpdateListener l){
@@ -184,9 +195,9 @@ public class Canvas3D extends AbstractCanvas {
 	/**
 	 * Register an object with this canvas so that it will draw it at a specified (world) location
 	 * 
-	 * @param obj		Object to register
-	 * @param position	Position to draw the centre of the object at
-	 * @param shader	Shader to draw the object with
+	 * @param obj		    Object to register
+	 * @param position	    Position to draw the centre of the object at
+	 * @param shaderFactory	Shader to draw the object with
 	 */
 	public void registerObject(ICanvasObject obj, Point position, IShaderFactory shaderFactory)
 	{
@@ -235,41 +246,70 @@ public class Canvas3D extends AbstractCanvas {
 	}
 	
 	private void switchFrames() {
-	    //FlooredFrame is currently a 3600x3600 pixel square, will want more flexible way
+		SceneFrame currentFrame = getCurrentScene();
+		//may want to null check but there generally should be a start scene, and generating a default as we move about below
+
 	    Point camPos = getCamera().getPosition();
-	    int framex = (int) (camPos.x / 3600); // this will be sh!t, will want a better way, depends how scene initially placed, lets see what happens
-	    int framez = (int) (camPos.z / 3600);
-	    String frameAddress = String.format("%d_%d", framex, framez); 
-	    
-	    if (!frameAddress.equals(currentFrameAddress)) {
-	        //TODO remove frames we no longer want to process, and we will likely want to show more than one, i.e. The ones around the current frame
-	        SceneFrame currentFrame = getCurrentScene();
-	        if (currentFrame != null) {
-	            currentFrame.destroyFrame(); //test
-	        }
-	        
-	        SceneFrame frame = frames.computeIfAbsent(frameAddress, k -> new FlooredFrame(Color.LIGHT_GRAY, 700)); //arbitrary default for the moment
-	        frame.buildFrame();
-	        
-	        //register objects with an offset depending on frame address 
-	        double xoffset = framex * 3600;
-	        double zoffset = framez * 3600;
-	        
-	        frame.getFrameLightsources().forEach(ls -> {
-	            Point lsPosition = ls.getPosition();
-	            ls.setPosition(new Point(lsPosition.x + xoffset, lsPosition.y, lsPosition.z + zoffset));
-	            addLightSource(ls);
-	        });
-	        
-	        frame.getFrameObjects().forEach(o -> {
-	            Point position = o.framePosition();
-	            registerObject(o.object(), new Point(position.x + xoffset, position.y, position.z + zoffset), o.shaderFactory());
-	        });
-	        
-	        
-	        currentFrameAddress = frameAddress;
-	        
-	    }
+		//we'll presume frame floor coords are axis aligned as it makes sense to do so, therefore no transforms required
+		//we'll also assume they all have the same orientation (unless we start spinning rooms or something)
+		int frameX = currentFrameX;
+		int frameZ = currentFrameZ;
+		UnaryOperator<Double> xOffsetCalc = x -> 0d;
+		UnaryOperator<Double> zOffsetCalc = z -> 0d;
+		SceneExtents extents = currentFrame.getSceneExtents();
+		if (camPos.x > extents.maxX()) {
+			frameX++;
+			xOffsetCalc = x -> extents.maxX() + x;
+		}
+		else if (camPos.x < extents.minX()) {
+			frameX--;
+			xOffsetCalc = x -> extents.minX() - x;
+		}
+		if (camPos.z > extents.maxZ()) {
+			frameZ++;
+			zOffsetCalc = z -> extents.maxZ() + z;
+		}
+		else if (camPos.z < extents.minZ()) {
+			frameZ--;
+			zOffsetCalc = z -> extents.minZ() - z;
+		}
+		// TODO this will load at the border, obviously will want something that loads as you get near while keeping the current one
+		// or have walls between them!
+
+		//assumes we always go to an adjacent frame
+	    if (frameX != currentFrameX || frameZ != currentFrameZ) {
+			currentFrame.destroyFrame();
+			loadScene(frameX, frameZ, xOffsetCalc, zOffsetCalc);
+		}
+	}
+
+	private void loadScene (int frameX, int frameZ, UnaryOperator<Double> xOffsetCalc, UnaryOperator<Double> zOffsetCalc) {
+		String frameAddress = toFrameAddress(frameX, frameZ);
+		SceneFrame frame = frames.computeIfAbsent(frameAddress, k -> new FlooredFrame(Color.LIGHT_GRAY, 700)); //arbitrary default for the moment
+		frame.buildFrame();
+		SceneExtents newFrameExtents = frame.getSceneExtents();
+
+		//register will use the floor centre point to locate it so need distance to centre in x and z directions
+		double xOffset = xOffsetCalc.apply((newFrameExtents.maxX() - newFrameExtents.minX())/2);
+		double zOffset = zOffsetCalc.apply((newFrameExtents.maxZ() - newFrameExtents.minZ())/2);
+
+		frame.getFrameLightsources().forEach(ls -> {
+			Point lsPosition = ls.getPosition();
+			ls.setPosition(new Point(lsPosition.x + xOffset, lsPosition.y, lsPosition.z + zOffset));
+			addLightSource(ls);
+		});
+
+		frame.getFrameObjects().forEach(o -> {
+			Point position = o.framePosition();
+			registerObject(o.object(), new Point(position.x + xOffset, position.y, position.z + zOffset), o.shaderFactory());
+		});
+
+		currentFrameX = frameX;
+		currentFrameZ = frameZ;
+	}
+
+	private String toFrameAddress(int x, int z) {
+		return String.format("%d_%d", x, z);
 	}
 	
 	private boolean filterShapes(ICanvasObject shape) {

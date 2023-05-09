@@ -84,7 +84,6 @@ public class ClipLibrary implements AutoCloseable, PropertyInjected {
 	 * Play sound only once from the start of the sound. If another request is made to play this sound while running, then the running sound is stopped and restarted
 	 * 
 	 * @param key	Key of the sound to play
-	 * @param wait	Flag indicating whether method should wait for sound to finish before returning
 	 * @param gain	Decibel modification
 	 */
 	public Optional<Clip> playSound(String key, float gain) {
@@ -171,7 +170,7 @@ public class ClipLibrary implements AutoCloseable, PropertyInjected {
 	}
 	
 	@Override
-	public void close() throws Exception {
+	public void close() {
 	    currentTrack.ifPresent(Clip::close);
 	    musicExecutor.shutdown();
 	    clipSupplier.values().stream()
@@ -185,7 +184,7 @@ public class ClipLibrary implements AutoCloseable, PropertyInjected {
 	}
 	
 	private Optional<Clip> getClip(String key) {
-	    return clipSupplier.getOrDefault(key.toUpperCase(), () -> Optional.empty()).get();
+	    return clipSupplier.getOrDefault(key.toUpperCase(), Optional::empty).get();
 	}
 	
 	private FileSystem getFileSystem(final URI uri) throws IOException {
@@ -227,9 +226,7 @@ public class ClipLibrary implements AutoCloseable, PropertyInjected {
 	        try {
 	            IOUtils.readLines(getClass().getClassLoader()
 	                    .getResourceAsStream(resource), Charsets.UTF_8)
-	                    .forEach(line -> {
-	                        addClip(resource + line, clazz);
-	                    });
+	                    .forEach(line -> addClip(resource + line, clazz));
 	        } catch (Exception ex) {
 	            System.out.println("ClipLibrary:: " + ex.getMessage());
 	        }

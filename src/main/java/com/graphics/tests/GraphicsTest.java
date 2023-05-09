@@ -132,7 +132,6 @@ public class GraphicsTest extends JFrame {
 		
 		StartScene scene = new StartScene(new Color(246,215,176), 700);
 		scene.addFloorTexture(() -> new BmpTexture("river", Color.white));
-
 		cnv.addScene(0, 0, scene);
 		
 		Ship ship = new Ship (100, 100, 50);

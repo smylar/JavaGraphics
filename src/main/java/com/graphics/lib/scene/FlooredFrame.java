@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 
 import com.graphics.lib.Axis;
 import com.graphics.lib.Point;
+import com.graphics.lib.WorldCoord;
 import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.shader.ScanlineShaderFactory;
 import com.graphics.lib.texture.Texture;
@@ -20,10 +21,11 @@ public class FlooredFrame implements SceneFrame {
     private final Color floorColour;
     private final double floorLevel;
     private final Set<Supplier<Texture>> textureSuppliers = new HashSet<>();
-    
-    protected Surface floor;
-    protected List<SceneObject> frameObjects = new ArrayList<>();
-    protected List<LightSource> lightSources = new ArrayList<>();
+
+    private final List<SceneObject> frameObjects = new ArrayList<>();
+    private final List<LightSource> lightSources = new ArrayList<>();
+    private Surface floor;
+    private boolean isLoaded = false;
 
     public FlooredFrame(Color floorColour, double floorLevel) {
         this.floorColour = floorColour;
@@ -32,7 +34,7 @@ public class FlooredFrame implements SceneFrame {
     
     @Override
     public void buildFrame() {
-        if (!frameObjects.isEmpty()) return;
+        if (isLoaded) return;
         
         floor = new Surface(20, 20, 180);
         floor.applyTransform(Axis.X.getRotation(-90));
@@ -41,6 +43,7 @@ public class FlooredFrame implements SceneFrame {
         textureSuppliers.forEach(s -> floor.addTexture(s.get()));
         ScanlineShaderFactory shader = textureSuppliers.isEmpty() ? ScanlineShaderFactory.GORAUD : ScanlineShaderFactory.TEXGORAUD;
         frameObjects.add(new SceneObject(floor, new Point(0, floorLevel, 0), shader));
+        isLoaded = true;
     }
 
     @Override
@@ -59,12 +62,27 @@ public class FlooredFrame implements SceneFrame {
     }
 
     @Override
+    public SceneExtents getSceneExtents() {
+        List<WorldCoord> corners = floor.getCorners();
+        return new SceneExtents(corners.get(1).x,
+                corners.get(0).x,
+                corners.get(0).z,
+                corners.get(2).z); //on the basis that we don't move the world grid
+    }
+
+    @Override
+    public boolean isLoaded() {
+        return isLoaded;
+    }
+
+    @Override
     public void destroyFrame() {
         frameObjects.forEach(o -> o.object().setDeleted(true));
         lightSources.forEach(ls -> ls.setDeleted(true));
         floor = null;
         frameObjects.clear();
         lightSources.clear();
+        isLoaded = false;
     }
 
     @Override
@@ -75,6 +93,14 @@ public class FlooredFrame implements SceneFrame {
 
     public void addFloorTexture(final Supplier<Texture> textureSupplier) { //only load bmps as required not upfront
         textureSuppliers.add(textureSupplier);
+    }
+
+    public void addSceneObject(SceneObject obj) {
+        frameObjects.add(obj);
+    }
+
+    public void addSceneLightSource(LightSource ls) {
+        lightSources.add(ls);
     }
 
 }
