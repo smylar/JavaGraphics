@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 
 import com.graphics.lib.Axis;
 import com.graphics.lib.Point;
+import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.shader.ScanlineShaderFactory;
@@ -18,6 +19,7 @@ import com.graphics.shapes.Surface;
 
 public class FlooredFrame implements SceneFrame {
 
+    private final Vector up = new Vector(0,-1,0);
     private final Color floorColour;
     private final double floorLevel;
     private final Set<Supplier<Texture>> textureSuppliers = new HashSet<>();
@@ -40,6 +42,7 @@ public class FlooredFrame implements SceneFrame {
         floor.applyTransform(Axis.X.getRotation(-90));
         floor.setColour(floorColour);
         floor.setBaseIntensity(0.5);
+        floor.setVertexNormalFinder((obj, p, f) -> up);
         textureSuppliers.forEach(s -> floor.addTexture(s.get()));
         ScanlineShaderFactory shader = textureSuppliers.isEmpty() ? ScanlineShaderFactory.GORAUD : ScanlineShaderFactory.TEXGORAUD;
         frameObjects.add(new SceneObject(floor, new Point(0, floorLevel, 0), shader));
@@ -48,12 +51,12 @@ public class FlooredFrame implements SceneFrame {
 
     @Override
     public List<LightSource> getFrameLightsources() {
-        return lightSources == null ? List.of() : List.copyOf(lightSources);
+        return List.copyOf(lightSources);
     }
 
     @Override
     public List<SceneObject> getFrameObjects() {
-        return frameObjects == null ? List.of() : List.copyOf(frameObjects);
+        return List.copyOf(frameObjects);
     }
 
     @Override

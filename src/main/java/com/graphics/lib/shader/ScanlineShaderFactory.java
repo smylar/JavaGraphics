@@ -35,7 +35,7 @@ public enum ScanlineShaderFactory implements IShaderFactory {
         FLAT(FlatShader::new, 8),
         NONE(DefaultScanlineShader::new, 8);
 
-    private LinkedBlockingQueue<ScanlineShader> pool;
+    private final LinkedBlockingQueue<ScanlineShader> pool;
     
     @Property(name="zbuffer.skip", defaultValue="2")
     private Integer skip;
@@ -161,8 +161,10 @@ public enum ScanlineShaderFactory implements IShaderFactory {
     }
     
     private void processScanline(ScanLine scanLine, int x, ScanlineShader shader, Dimension screen, ZBufferItemUpdater zBufferItemUpdater) {
-        int ceilEnd = (int)Math.ceil(scanLine.getEndY());
-        int floorStart = scanLine.getStartY().intValue();
+        int ceilEnd = (int)Math.round(scanLine.getEndY());
+        //int ceilEnd = (int)Math.ceil(scanLine.getEndY());
+        int floorStart = (int)Math.round(scanLine.getStartY());
+        //int floorStart = scanLine.getStartY().intValue();
         int scanLineLength = ceilEnd - floorStart;
         double percentDistCovered = 0;
         AtomicReference<Color> colour = new AtomicReference<>();
@@ -172,7 +174,7 @@ public enum ScanlineShaderFactory implements IShaderFactory {
             colour.set(c);
             return c;
         };
-        for (int y = floorStart < 0 ? 0 : floorStart ; y <= (ceilEnd > screen.getHeight() ? screen.getHeight() : ceilEnd) ; y++)
+        for (int y = Math.max(floorStart, 0); y <= (ceilEnd > screen.getHeight() ? screen.getHeight() : ceilEnd) ; y++)
         {
             
             if (scanLineLength != 0)
