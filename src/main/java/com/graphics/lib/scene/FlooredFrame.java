@@ -45,7 +45,7 @@ public class FlooredFrame implements SceneFrame {
         floor.setVertexNormalFinder((obj, p, f) -> up);
         textureSuppliers.forEach(s -> floor.addTexture(s.get()));
         ScanlineShaderFactory shader = textureSuppliers.isEmpty() ? ScanlineShaderFactory.GORAUD : ScanlineShaderFactory.TEXGORAUD;
-        frameObjects.add(new SceneObject(floor, new Point(0, floorLevel, 0), shader));
+        frameObjects.add(new SceneObject(floor, new Point(0, floorLevel, 0), shader.getDefaultSelector()));
         isLoaded = true;
     }
 

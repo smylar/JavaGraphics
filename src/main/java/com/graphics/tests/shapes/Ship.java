@@ -1,13 +1,8 @@
 package com.graphics.tests.shapes;
 
 import java.awt.Color;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -37,7 +32,7 @@ public final class Ship extends CanvasObject implements IWeaponised {
     public enum Hardpoints {
         CENTRE,
         LEFT,
-        RIGHT;
+        RIGHT
     }
     
 	private final Facet wingFlashLeft;
@@ -45,8 +40,8 @@ public final class Ship extends CanvasObject implements IWeaponised {
 	private int cnt = 0;
 	private double acceleration = 0.2;
 	private double panRate = 4;
-	private Map<Hardpoints, WorldCoord> hardpointCoords = new EnumMap<>(Hardpoints.class);
-	private Map<WorldCoord, Hardpoint> weapons = new HashMap<>();
+	private final Map<Hardpoints, WorldCoord> hardpointCoords = new EnumMap<>(Hardpoints.class);
+	private final Map<WorldCoord, Hardpoint> weapons = new HashMap<>();
 	//private List<IEffector> weapons = new ArrayList<>();
 	
 	public Ship(final int width, final int depth, final int height)
@@ -133,10 +128,8 @@ public final class Ship extends CanvasObject implements IWeaponised {
         return weapons.entrySet()
                       .stream()
                       .filter(e -> e.getValue().stream()
-                                               .filter(w -> w.getId().equals(id))
-                                               .findAny()
-                                               .isPresent())
-                      .map(e -> e.getKey())
+                                               .anyMatch(w -> w.getId().equals(id)))
+                      .map(Entry::getKey)
                       .findFirst();
     }
 	
@@ -144,8 +137,8 @@ public final class Ship extends CanvasObject implements IWeaponised {
     public Optional<IEffector> getWeapon(final String id) {
         return weapons.values()
                       .stream()
-                      .flatMap(h -> h.stream())
-                      .dropWhile(w -> !w.getId().equals(id))
+                      .flatMap(Collection::stream)
+                      .filter(w -> w.getId().equals(id))
                       .findFirst();
     }
 	
@@ -167,10 +160,10 @@ public final class Ship extends CanvasObject implements IWeaponised {
             double xVector = baseVector.x() + (Math.random()/2) - 0.25;
             double yVector = baseVector.y() + (Math.random()/2) - 0.25;
             double zVector = baseVector.z() + (Math.random()/2) - 0.25;
-            Transform rot1 = new RepeatingTransform<Rotation>(new Rotation(Axis.Y, Math.random() * 10), 15);
+            Transform rot1 = new RepeatingTransform<>(new Rotation(Axis.Y, Math.random() * 10), 15);
             MovementTransform move = new MovementTransform(new Vector(xVector, yVector, zVector), movement.getAcceleration() > 0 ? -20 : 20);
             move.moveUntil(t -> rot1.isCompleteSpecific());
-            Transform rot2 = new RepeatingTransform<Rotation>(new Rotation(Axis.X, Math.random() * 10), t -> rot1.isCompleteSpecific());                
+            Transform rot2 = new RepeatingTransform<>(new Rotation(Axis.X, Math.random() * 10), t -> rot1.isCompleteSpecific());
             CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(fragment, rot1, rot2);
             fragment.addTransform(move);
             fragment.deleteAfterTransforms();   

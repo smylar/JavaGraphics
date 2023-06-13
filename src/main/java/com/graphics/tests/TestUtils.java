@@ -66,50 +66,44 @@ public class TestUtils {
 	
 	public static IPlugin<IPlugable,Void> getExplodePlugin(Optional<ClipLibrary> clipLibrary)
 	{
-		return new IPlugin<IPlugable,Void>() {
-			@Override
-			public Void execute(IPlugable plugable) {
-			    ICanvasObject obj = plugable.getParent();
-				//could be 2 hits at the same time
-				synchronized(obj) {
-					if (obj.isVisible()) {
-						obj.setVisible(false);
-					} else {
-						return null;
-					}
+		return plugable -> {
+			ICanvasObject obj = plugable.getParent();
+			//could be 2 hits at the same time
+			synchronized(obj) {
+				if (obj.isVisible()) {
+					obj.setVisible(false);
+				} else {
+					return null;
 				}
-				
-				PluginLibrary.explode().execute(plugable).forEach(c -> {
-					Canvas3D.get().replaceShader(obj, ScanlineShaderFactory.FLAT);
-					TraitHandler.INSTANCE.registerTrait(c, PlugableTrait.class).registerPlugin(Events.CHECK_COLLISION, getBouncePlugin(), true);
-					if (!obj.hasFlag(SILENT_EXPLODE)) {
-					    clipLibrary.ifPresent(cl -> cl.playSound("EXPLODE", -20f));
-					}
-				});
-				plugable.registerSingleAfterDrawPlugin(Events.FLASH, PluginLibrary.flash(Canvas3D.get().getLightSources()));
-				return null;
-			}			
+			}
+
+			PluginLibrary.explode().execute(plugable).forEach(c -> {
+				Canvas3D.get().replaceShader(obj, ScanlineShaderFactory.FLAT.getDefaultSelector());
+				TraitHandler.INSTANCE.registerTrait(c, PlugableTrait.class).registerPlugin(Events.CHECK_COLLISION, getBouncePlugin(), true);
+				if (!obj.hasFlag(SILENT_EXPLODE)) {
+					clipLibrary.ifPresent(cl -> cl.playSound("EXPLODE", -20f));
+				}
+			});
+			plugable.registerSingleAfterDrawPlugin(Events.FLASH, PluginLibrary.flash(Canvas3D.get().getLightSources()));
+			return null;
 		};
 	}
 	
 	public static IPlugin<IPlugable,Void> getBouncePlugin(){
-		return new IPlugin<IPlugable,Void>(){
-			@Override
-			public Void execute(IPlugable plugable) {
-			    ICanvasObject obj = plugable.getParent();
-				ICanvasObject impactee = PluginLibrary.hasCollided(TestUtils.getFilteredObjectList(),null, null).execute(plugable);
-				if (impactee != null){
-					if (impactee.hasFlag(Events.STICKY)){ 
-						obj.cancelTransforms();
-						//obj.observeAndMatch(impactee); 
-						//TODO if already a child, object needs to stop being a child of that object, as observe and match also makes this fragment a child of impactee, get weird artifacts with the double processing
-					}
-					else {
-						PluginLibrary.bounce(impactee).execute(plugable);
-					}
+		return plugable -> {
+			ICanvasObject obj = plugable.getParent();
+			ICanvasObject impactee = PluginLibrary.hasCollided(TestUtils.getFilteredObjectList(),null, null).execute(plugable);
+			if (impactee != null){
+				if (impactee.hasFlag(Events.STICKY)){
+					obj.cancelTransforms();
+					//obj.observeAndMatch(impactee);
+					//TODO if already a child, object needs to stop being a child of that object, as observe and match also makes this fragment a child of impactee, get weird artifacts with the double processing
 				}
-				return null;
-			}			
+				else {
+					PluginLibrary.bounce(impactee).execute(plugable);
+				}
+			}
+			return null;
 		};
 	}
 	

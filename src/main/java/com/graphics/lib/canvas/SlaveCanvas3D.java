@@ -33,7 +33,7 @@ public class SlaveCanvas3D extends AbstractCanvas implements ICanvasUpdateListen
 			this.getzBuffer().add(obj, shader, this.getCamera(), source.getHorizon());
 		}
 		
-		for (ICanvasObject child : new HashSet<ICanvasObject>(obj.getChildren()))
+		for (ICanvasObject child : new HashSet<>(obj.getChildren()))
 		{
 			this.processShape(source, child, shader);
 		}
@@ -49,7 +49,7 @@ public class SlaveCanvas3D extends AbstractCanvas implements ICanvasUpdateListen
             prepareZBuffer();
         }
         else {
-            this.processShape(source, obj, source.getShader(obj));
+            this.processShape(source, obj, source.getShader(obj, getCamera()));
         }
     }
 }

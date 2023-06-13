@@ -18,6 +18,7 @@ import com.graphics.lib.Utils;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasObject;
+import com.graphics.lib.interfaces.IShaderSelector;
 import com.graphics.lib.properties.Property;
 import com.graphics.lib.properties.PropertyInject;
 import com.graphics.lib.zbuffer.ScanLine;
@@ -36,6 +37,7 @@ public enum ScanlineShaderFactory implements IShaderFactory {
         NONE(DefaultScanlineShader::new, 8);
 
     private final LinkedBlockingQueue<ScanlineShader> pool;
+    private final IShaderSelector defaultSelector = (o, c) -> this;
     
     @Property(name="zbuffer.skip", defaultValue="2")
     private Integer skip;
@@ -57,6 +59,19 @@ public enum ScanlineShaderFactory implements IShaderFactory {
                              .filter(f -> !isOffScreen(f,c,screen))
                              .forEach(f -> add(f, parent, c, screen, zBufferItemUpdater));
 
+    }
+
+    public IShaderSelector getDefaultSelector() {
+        return defaultSelector;
+    }
+
+    public ScanlineShader getShader() {
+        try {
+            return pool.take();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        return null;
     }
     
     private void add(Facet facet, ICanvasObject parent, Camera c, Dimension screen, ZBufferItemUpdater zBufferItemUpdater)
@@ -89,15 +104,6 @@ public enum ScanlineShaderFactory implements IShaderFactory {
                 getScanline(x, lines).ifPresent(sl -> processScanline(sl, xVal, localShader, screen, zBufferItemUpdater));
             }
         } catch (Exception e) { }
-    }
-    
-    private ScanlineShader getShader() {
-        try {
-            return pool.take();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        return null;
     }
     
     private Optional<ScanLine> getScanline(int xVal, List<LineEquation> lines)

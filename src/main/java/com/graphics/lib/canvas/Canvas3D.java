@@ -13,13 +13,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import javax.swing.SwingUtilities;
 
+import com.graphics.lib.interfaces.IShaderSelector;
 import com.graphics.lib.scene.SceneExtents;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -60,10 +60,12 @@ import io.reactivex.Observable;
 @PropertyInject
 public class Canvas3D extends AbstractCanvas {
 
+	private static final IShaderSelector pointShaderSelector = (o, c) -> PointShader.getShader();
+	private static final IShaderSelector wireShaderSelector = (o,c) -> WireframeShader.getShader();
 	private static final long serialVersionUID = 1L;
 	private static Canvas3D cnv = null;
 	
-	private final Map<ICanvasObject, IShaderFactory> shapes = Collections.synchronizedMap(new HashMap<>());
+	private final Map<ICanvasObject, IShaderSelector> shapes = Collections.synchronizedMap(new HashMap<>());
 	
 	private final Set<ILightSource> lightSources = new HashSet<>();
 	private final Set<ILightSource> lightSourcesToAdd = Collections.synchronizedSet(new HashSet<>());
@@ -139,14 +141,14 @@ public class Canvas3D extends AbstractCanvas {
 		return shapes.keySet();
 	}
 	
-	public IShaderFactory getShader(ICanvasObject obj) {
-		return shapes.get(obj) == null ? ScanlineShaderFactory.NONE : shapes.get(obj);
+	public IShaderFactory getShader(ICanvasObject obj, Camera cam) {
+		return shapes.get(obj) == null ? ScanlineShaderFactory.NONE : shapes.get(obj).apply(obj, cam);
 	}
 	
-	public void replaceShader(ICanvasObject obj, IShaderFactory shader) {
+	public void replaceShader(ICanvasObject obj, IShaderSelector selector) {
 	    
 	    if (!drawMode.fixedShader()) {
-	        this.shapes.replace(obj, shader);
+	        this.shapes.replace(obj, selector);
 	    }
 	}
 
@@ -189,24 +191,24 @@ public class Canvas3D extends AbstractCanvas {
 	 * @param position	Position to draw the centre of the object at
 	 */
 	public void registerObject(ICanvasObject obj, Point position){
-		this.registerObject(obj, position, ScanlineShaderFactory.NONE);
+		this.registerObject(obj, position, (o,c) -> ScanlineShaderFactory.NONE);
 	}
 	
 	/**
 	 * Register an object with this canvas so that it will draw it at a specified (world) location
 	 * 
-	 * @param obj		    Object to register
-	 * @param position	    Position to draw the centre of the object at
-	 * @param shaderFactory	Shader to draw the object with
+	 * @param obj		    	Object to register
+	 * @param position	    	Position to draw the centre of the object at
+	 * @param shaderSelector	Shader to draw the object with
 	 */
-	public void registerObject(ICanvasObject obj, Point position, IShaderFactory shaderFactory)
+	public void registerObject(ICanvasObject obj, Point position, IShaderSelector shaderSelector)
 	{
 		if (Objects.nonNull(obj) && !this.shapes.containsKey(obj)) {
 		    CanvasObjectFunctions.DEFAULT.get().moveTo(obj, position);
 		    var shader = switch (drawMode) {
-		        case POINT -> PointShader.getShader();
-		        case WIRE -> WireframeShader.getShader();
-		        default -> shaderFactory;
+		        case POINT -> pointShaderSelector;
+		        case WIRE -> wireShaderSelector;
+		        default -> shaderSelector;
 		    }; //could just put these in the enum
 
 		    this.shapes.put(obj, shader);
@@ -301,7 +303,7 @@ public class Canvas3D extends AbstractCanvas {
 
 		frame.getFrameObjects().forEach(o -> {
 			Point position = o.framePosition();
-			registerObject(o.object(), new Point(position.x + xOffset, position.y, position.z + zOffset), o.shaderFactory());
+			registerObject(o.object(), new Point(position.x + xOffset, position.y, position.z + zOffset), o.shaderSelector());
 		});
 
 		currentFrameX = frameX;
@@ -332,7 +334,7 @@ public class Canvas3D extends AbstractCanvas {
 	              .doOnSubscribe(d -> prepareZBuffer())
 	              .doOnNext(s -> {
 	                  s.onDrawComplete();  //cross object updates can happen here safer not to be parallel
-	                  processShape(s, getzBuffer(), getShader(s));
+	                  processShape(s, getzBuffer(), getShader(s, getCamera()));
 	                  notifyEvent(PROCESS, s);
 	              })
 	              .doFinally(() -> {
@@ -356,15 +358,7 @@ public class Canvas3D extends AbstractCanvas {
             lightSourcesToAdd.clear();
         }
 	}
-	
-	
-	/**
-	 * Process a shape into z buffer entries using the given shader
-	 * 
-	 * @param obj	Object to process
-	 * @param zBuf	Z Buffer to update
-	 * @param shader	Shader to draw pixels with
-	 */
+
 	private void processShape(ICanvasObject obj, IZBuffer zBuf, IShaderFactory shader)
 	{
 		if (obj.isVisible() && !obj.isDeleted())
@@ -374,7 +368,7 @@ public class Canvas3D extends AbstractCanvas {
 			zBuf.add(obj, shader, getCamera(), this.horizon);
 		}
 		
-		obj.getChildren().forEach(child -> this.processShape(child, zBuf, shapes.containsKey(child) ? getShader(child) : shader));
+		obj.getChildren().forEach(child -> this.processShape(child, zBuf, shader));
 	}
 	
 	

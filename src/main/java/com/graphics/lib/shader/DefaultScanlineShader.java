@@ -11,8 +11,8 @@ import com.graphics.lib.zbuffer.ScanLine;
 public class DefaultScanlineShader implements ScanlineShader { 
     
     private Consumer<ScanlineShader> onClose;
-    private Facet facet;
-    private ICanvasObject parent;
+    protected Facet facet;
+    protected ICanvasObject parent;
 
     @Override
     public void close() throws Exception {

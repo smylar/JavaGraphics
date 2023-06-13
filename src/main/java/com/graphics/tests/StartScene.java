@@ -11,6 +11,7 @@ import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.interfaces.IOrientable;
 import com.graphics.lib.interfaces.IPlugable;
+import com.graphics.lib.interfaces.IShaderSelector;
 import com.graphics.lib.lightsource.DirectionalLightSource;
 import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.lightsource.ObjectTiedLightSource;
@@ -60,14 +61,14 @@ public class StartScene extends FlooredFrame {
         addSceneLightSource(l1.getLightSource());
         Lantern lantern1 = new Lantern();
         lantern1.attachLightsource(l1);
-        addSceneObject(new SceneObject(lantern1, new Point(0,0,-500), ScanlineShaderFactory.NONE));
+        addSceneObject(new SceneObject(lantern1, new Point(0,0,-500), ScanlineShaderFactory.NONE.getDefaultSelector()));
         
         ObjectTiedLightSource<LightSource> l2 = new ObjectTiedLightSource<>(LightSource.class, 500,200,-100);
         l2.getLightSource().setColour(new Color(0, 255, 0));
         addSceneLightSource(l2.getLightSource());
         Lantern lantern2 = new Lantern();
         lantern2.attachLightsource(l2);
-        addSceneObject(new SceneObject(lantern2, new Point(500,200,-100), ScanlineShaderFactory.NONE));
+        addSceneObject(new SceneObject(lantern2, new Point(500,200,-100), ScanlineShaderFactory.NONE.getDefaultSelector()));
         
         l3 = new ObjectTiedLightSource<>(DirectionalLightSource.class, 400,100,100);
         l3.getLightSource().setColour(new Color(0, 0, 255));
@@ -75,7 +76,7 @@ public class StartScene extends FlooredFrame {
         
         lantern3 = new Lantern();        
         TraitHandler.INSTANCE.registerTrait(lantern3, OrientableTrait.class).setOrientation(new SimpleOrientation(OrientableTrait.ORIENTATION_TAG));
-        addSceneObject(new SceneObject(lantern3, new Point(400,100,100), ScanlineShaderFactory.NONE));
+        addSceneObject(new SceneObject(lantern3, new Point(400,100,100), ScanlineShaderFactory.NONE.getDefaultSelector()));
         l3.getLightSource().setDirection(() -> TraitHandler.INSTANCE.getTrait(lantern3, IOrientable.class).get().getOrientation().getForward());
         l3.getLightSource().setLightConeAngle(40);
         lantern3.attachLightsource(l3);
@@ -84,24 +85,29 @@ public class StartScene extends FlooredFrame {
         CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(lantern3, l3spin);
         
         CanvasObject camcube = new Cuboid(20,20,20);
-        addSceneObject(new SceneObject(camcube, new Point(1560, 200, 350), ScanlineShaderFactory.FLAT));
+        addSceneObject(new SceneObject(camcube, new Point(1560, 200, 350), ScanlineShaderFactory.FLAT.getDefaultSelector()));
         
         IPlugin<IPlugable, Void> explode = TestUtils.getExplodePlugin(Optional.ofNullable(ClipLibrary.getInstance()));
         
         Whale whale = new Whale(); 
         TraitHandler.INSTANCE.registerTrait(whale, PlugableTrait.class).registerPlugin(Events.EXPLODE, explode, false);
         whale.setColour(Color.cyan);
-        addSceneObject(new SceneObject(whale, new Point(1515, 300, 400), ScanlineShaderFactory.GORAUD));
+        addSceneObject(new SceneObject(whale, new Point(1515, 300, 400), ScanlineShaderFactory.GORAUD.getDefaultSelector()));
         
         FlapTest flap = new FlapTest(); 
         flap.setColour(Color.ORANGE);
-        addSceneObject(new SceneObject(flap, new Point(1000, 500, 200), ScanlineShaderFactory.GORAUD));
+        addSceneObject(new SceneObject(flap, new Point(1000, 500, 200), ScanlineShaderFactory.GORAUD.getDefaultSelector()));
         CanvasObjectFunctions.DEFAULT.get().addTransformAboutPoint(flap, new Point(1200, 500, 200), new RepeatingTransform<>(Axis.Y.getRotation(2),0));
         
         Gate torus = new Gate(50,50,20);
+        IShaderSelector selector = (o,c) ->
+                o.getCentre().distanceTo(c.getPosition()) > 1500
+                    ? ScanlineShaderFactory.FLAT
+                    : ScanlineShaderFactory.GORAUD; // change shade mode based on distance away, may also look at reducing facet count
+
         TraitHandler.INSTANCE.registerTrait(torus, PlugableTrait.class).registerPlugin(Events.EXPLODE, explode, false);
         torus.setColour(new Color(250, 250, 250));
-        addSceneObject(new SceneObject(torus, new Point(200,200,450), ScanlineShaderFactory.GORAUD));
+        addSceneObject(new SceneObject(torus, new Point(200,200,450), selector));
         Transform torust1 = new RepeatingTransform<>(Axis.Y.getRotation(3), 60);
         Transform torust2 = new RepeatingTransform<>(Axis.X.getRotation(3), 60);
         SequenceTransform torust = new SequenceTransform();
@@ -124,7 +130,7 @@ public class StartScene extends FlooredFrame {
         
         TexturedCuboid cube = new TexturedCuboid(200,200,200);
         TraitHandler.INSTANCE.registerTrait(cube, PlugableTrait.class);
-        addSceneObject(new SceneObject(cube, new Point(500,500,500), ScanlineShaderFactory.TEXGORAUD));
+        addSceneObject(new SceneObject(cube, new Point(500,500,500), ScanlineShaderFactory.TEXGORAUD.getDefaultSelector()));
         Transform cubet2 = new RepeatingTransform<>(Axis.Z.getRotation(3), 30);
         CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(cube, cubet2);
         cube.addFlag(Events.STICKY);
@@ -139,7 +145,7 @@ public class StartScene extends FlooredFrame {
         TraitHandler.INSTANCE.registerTrait(ball, PlugableTrait.class).registerPlugin(Events.EXPLODE, explode, false);
         ball.setColour(new Color(255, 255, 0));
         ball.addFlag(Events.EXPLODE_PERSIST);
-        addSceneObject(new SceneObject(ball, new Point(500,200,450), ScanlineShaderFactory.TEXGORAUD));
+        addSceneObject(new SceneObject(ball, new Point(500,200,450), ScanlineShaderFactory.TEXGORAUD.getDefaultSelector()));
         
         for (int i = 0; i < ball.getFacetList().size() ; i++)
         {

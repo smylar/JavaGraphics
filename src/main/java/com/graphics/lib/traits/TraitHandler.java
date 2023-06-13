@@ -59,9 +59,9 @@ public class TraitHandler {
     public <T extends ITrait> Optional<T> getTrait(ICanvasObject obj, Class<T> trait) {
             return traitMap.getOrDefault(obj, Set.of())
             			   .stream()
-            			   .dropWhile(t -> !trait.isAssignableFrom(t.getClass()))
-            			   .findFirst()
-            			   .map(trait::cast);
+            			   .filter(t -> trait.isAssignableFrom(t.getClass())) //all entries are not tested with findFirst
+            			   .map(trait::cast)
+                           .findFirst(); //may want to refactor to allow multiple traits of the same type?
     }
 
 }

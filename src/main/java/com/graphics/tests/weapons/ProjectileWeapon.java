@@ -39,16 +39,14 @@ public class ProjectileWeapon implements IEffector {
 	
 	@Override
 	public void activate() {
-	    parent.getWeaponLocation(id).ifPresent(origin -> {
-	    
-    		generateProjectile(origin).ifPresent(proj -> {
-        		Canvas3D.get().registerObject(proj, origin);
-        		if (lightProjectile) {
-        		    lightProjectile(proj, origin);
-        		}
-        		
-    		});
-	    });
+	    parent.getWeaponLocation(id).ifPresent(origin ->
+                generateProjectile(origin).ifPresent(proj -> {
+                Canvas3D.get().registerObject(proj, origin);
+                if (lightProjectile) {
+                    lightProjectile(proj, origin);
+                }
+
+            }));
 	}
 
 	public Projectile getProjectile() {
@@ -77,9 +75,9 @@ public class ProjectileWeapon implements IEffector {
     private Optional<CanvasObject> generateProjectile(WorldCoord origin) {
         double parentSpeed = parent.getTransformsOfType(MovementTransform.class)
                 .stream()
-                .dropWhile(m -> !m.getName().equals(ObjectInputController.FORWARD) )
-                .findFirst()
+                .filter(m -> m.getName().equals(ObjectInputController.FORWARD) )
                 .map(MovementTransform::getSpeed)
+                .findFirst()
                 .orElse(0d);
         
        return Optional.ofNullable(projectile.get(effectVector.get(), origin, parentSpeed));

@@ -28,7 +28,7 @@ public class GoraudShader extends DefaultScanlineShader {
     protected static final Color DEFAULT = new Color(255,255,255);
     
 	protected Color colour;
-	protected Facet facet;
+	//protected Facet facet;
 	//protected ScanLine curScanline;
 	//protected IntensityComponents startIntensity;
 	//protected IntensityComponents endIntensity;
@@ -38,9 +38,10 @@ public class GoraudShader extends DefaultScanlineShader {
 	
 	@Override
 	public void init(ICanvasObject parent, Facet facet, Camera c) {
+		super.init(parent, facet, c);
 	    pointLight.clear();
 	    //lineLength = 0;
-	    this.facet = facet;
+	    //this.facet = facet;
 		//curScanline = null;
 		//startIntensity = null;
 		//endIntensity = null;
@@ -145,7 +146,7 @@ public class GoraudShader extends DefaultScanlineShader {
                 TriangleAreaCalculator.getArea(p, points.get(2), points.get(0)),
                 TriangleAreaCalculator.getArea(p, points.get(0), points.get(1)));
         
-        double total = areas.stream().reduce((a,b) -> a+b).orElseGet(() -> 0D);
+        double total = areas.stream().reduce(Double::sum).orElse(0D);
         
         double red = 0;
         double green = 0;

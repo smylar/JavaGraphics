@@ -140,7 +140,7 @@ public class GraphicsTest extends JFrame {
 		TraitHandler.INSTANCE.registerTrait(ship, OrientableTrait.class).setOrientation(new SimpleOrientation(OrientableTrait.ORIENTATION_TAG));
 		addWeapons(ship, cam);
 		ship.applyTransform(Axis.Y.getRotation(180));
-		cnv.registerObject(ship, new Point(350, 350, -50), ScanlineShaderFactory.GORAUD);
+		cnv.registerObject(ship, new Point(350, 350, -50), ScanlineShaderFactory.GORAUD.getDefaultSelector());
 		
 	    TraitHandler.INSTANCE.registerTrait(ship, PlugableTrait.class)
           .registerPlugin("CHECK_FLOOR", 
@@ -156,7 +156,7 @@ public class GraphicsTest extends JFrame {
 		wall.setColour(new Color(240, 240, 240));
 		wall.setLightIntensityFinder(Utils.getShadowLightIntensityFinder(cnv::getShapes));
 		wall.setVisible(false);
-		cnv.registerObject(wall, new Point(350,350,700), ScanlineShaderFactory.GORAUD);
+		cnv.registerObject(wall, new Point(350,350,700), ScanlineShaderFactory.GORAUD.getDefaultSelector());
 		
 		DirectionalLightSource l4 = new DirectionalLightSource();
 		l4.setPosition(cam::getPosition);
@@ -185,7 +185,7 @@ public class GraphicsTest extends JFrame {
 					movingTarget.setCastsShadow(false);
 					movingTarget.deleteAfterTransforms();
 					TraitHandler.INSTANCE.registerTrait(movingTarget, PlugableTrait.class).registerPlugin(Events.EXPLODE, explode, false);
-					cnv.registerObject(movingTarget , new Point(0, 0, 0), ScanlineShaderFactory.FLAT);
+					cnv.registerObject(movingTarget , new Point(0, 0, 0), ScanlineShaderFactory.FLAT.getDefaultSelector());
 				}
 				
 				else if (key.getKeyChar() == 'z') {
@@ -215,7 +215,10 @@ public class GraphicsTest extends JFrame {
 				else if (key.getKeyChar() == 'm') {
 					cnv.setDrawShadows(!cnv.isDrawShadows());
 				}
-				
+
+				else if (key.getKeyChar() == '/') {
+					chaseCam = !chaseCam;
+				}
 				else {
 				    SceneFrame currentFrame = cnv.getCurrentScene();
 				    if (currentFrame != null) {
@@ -283,9 +286,9 @@ public class GraphicsTest extends JFrame {
 	}
 
 	private void checkEngineSound(CanvasObject source){
-		if (source.getTransformsOfType(MovementTransform.class).stream().filter(t -> !t.isCancelled() && !t.isComplete() && t.getAcceleration() != 0).count() > 0){
+		if (source.getTransformsOfType(MovementTransform.class).stream().anyMatch(t -> !t.isCancelled() && !t.isComplete() && t.getAcceleration() != 0)){
 			clipLibrary.loopSound("ENGINE", -30f);
-		}else{
+		} else {
 			clipLibrary.stopSound("ENGINE");
 		}
 	}
