@@ -39,6 +39,7 @@ import com.graphics.lib.orientation.SimpleOrientation;
 import com.graphics.lib.plugins.Events;
 import com.graphics.lib.plugins.IPlugin;
 import com.graphics.lib.scene.SceneFrame;
+import com.graphics.lib.scene.SceneMap;
 import com.graphics.lib.shader.ScanlineShaderFactory;
 import com.graphics.lib.texture.BmpTexture;
 import com.graphics.lib.traits.OrientableTrait;
@@ -99,14 +100,16 @@ public class GraphicsTest extends JFrame {
 		this.setSize(700, 700);
 		
 		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-			
+
+		SceneMap sceneMap = new SceneMap();
+
 		//N.B. world coords follow the inverted Y screen coords, really should've had these the right way up
 		//and transformed in the camera transform but we're a bit far down the line here
 		ViewAngleCamera cam = new ViewAngleCamera(new SimpleOrientation(OrientableTrait.ORIENTATION_TAG));
 		cam.setPosition(new Point(350, 280, -200));
 		//FocusPointCamera cam = new FocusPointCamera();
 		//cam.setFocusPoint(new Point(300, 300, 1000));
-		Canvas3D cnv = Canvas3D.get(cam);
+		Canvas3D cnv = Canvas3D.get(cam, sceneMap);
 		ZBuffer zBuf = new ZBuffer();
 		cnv.setzBuffer(zBuf);
 		
@@ -132,7 +135,7 @@ public class GraphicsTest extends JFrame {
 		
 		StartScene scene = new StartScene(new Color(246,215,176), 700);
 		scene.addFloorTexture(() -> new BmpTexture("river", Color.white));
-		cnv.addScene(0, 0, scene);
+		sceneMap.add(0, 0, scene);
 		
 		Ship ship = new Ship (100, 100, 50);
 		

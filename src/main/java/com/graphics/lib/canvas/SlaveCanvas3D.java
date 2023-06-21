@@ -1,21 +1,24 @@
 package com.graphics.lib.canvas;
 
+import java.io.Serial;
 import java.util.HashSet;
 import javax.swing.SwingUtilities;
 
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasObject;
-import com.graphics.lib.interfaces.ICanvasUpdateListener;
+import com.graphics.lib.interfaces.ISecondaryCamera;
+import com.graphics.lib.scene.SceneMap;
+import com.graphics.lib.scene.SceneWithOffset;
 import com.graphics.lib.shader.IShaderFactory;
 
 /**
  * Provides another view of the same scene in the parent
- * 
  * (This sometimes seems to paint double on start, not sure why yet)
  * @author paul
  *
  */
-public class SlaveCanvas3D extends AbstractCanvas implements ICanvasUpdateListener {
+public class SlaveCanvas3D extends AbstractCanvas implements ISecondaryCamera {
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
 	public SlaveCanvas3D(Camera camera)
@@ -52,4 +55,9 @@ public class SlaveCanvas3D extends AbstractCanvas implements ICanvasUpdateListen
             this.processShape(source, obj, source.getShader(obj, getCamera()));
         }
     }
+
+	@Override
+	public SceneWithOffset getRelevantFrame(SceneMap sceneMap) {
+		return sceneMap.getFrameFromPoint(getCamera().getPosition());
+	}
 }

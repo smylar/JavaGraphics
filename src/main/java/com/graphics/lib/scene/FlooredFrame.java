@@ -38,7 +38,7 @@ public class FlooredFrame implements SceneFrame {
     public void buildFrame() {
         if (isLoaded) return;
         
-        floor = new Surface(20, 20, 180);
+        floor = new Surface(20, 20, SceneMap.sceneSize/20);
         floor.applyTransform(Axis.X.getRotation(-90));
         floor.setColour(floorColour);
         floor.setBaseIntensity(0.5);
