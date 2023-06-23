@@ -304,7 +304,7 @@ public class Canvas3D extends AbstractCanvas {
 	                  s.onDrawComplete();  //cross object updates can happen here safer not to be parallel
 	                  notifyEvent(PROCESS, s);
 	              })
-				  .filter(frameObjects::contains) //only draw if in current frame, may need to do something with light sources too
+				  .filter(frameObjects::contains) //only draw if in current frame, will need to do something with light sources too, to stop cross lighting
 				  .doOnNext(s -> processShape(s, getzBuffer(), getShader(s, getCamera())))
 	              .doFinally(() -> {
 	                  getzBuffer().refreshBuffer();

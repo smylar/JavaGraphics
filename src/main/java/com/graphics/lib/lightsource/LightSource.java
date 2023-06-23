@@ -147,13 +147,15 @@ public class LightSource extends SubmissionPublisher<String> implements ILightSo
 	
 	protected double getIntensity(Point p) {
 		if (this.range < 1) {
-		    return this.intensity;
+		    return intensity;
 		}
-		double distanceAway = this.position.distanceTo(p);
-		if (distanceAway > this.range || distanceAway < 0) {
+		//N.B. some lightsources are overriding getPosition(), leaving position here as 0
+		//may need some refactoring, but for now must not use the local position field here
+		double distanceAway = getPosition().distanceTo(p);
+		if (distanceAway > range || distanceAway < 0) {
 		    return 0;
 		}
-		return this.intensity - ((intensity/range) * distanceAway);
+		return intensity - ((intensity/range) * distanceAway);
 	}
 
 	public boolean isEqualTo(Object obj) {
@@ -174,9 +176,8 @@ public class LightSource extends SubmissionPublisher<String> implements ILightSo
 				return false;
 		} else if (!position.isEqualTo(other.position))
 			return false;
-		if (Double.doubleToLongBits(range) != Double
-				.doubleToLongBits(other.range))
-			return false;
-		return true;
+		
+		return Double.doubleToLongBits(range) == Double
+				.doubleToLongBits(other.range);
 	} 
 }

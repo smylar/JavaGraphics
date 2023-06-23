@@ -32,10 +32,7 @@ import com.graphics.lib.transform.RepeatingTransform;
 import com.graphics.lib.transform.ScaleTransform;
 import com.graphics.lib.transform.SequenceTransform;
 import com.graphics.lib.transform.Transform;
-import com.graphics.shapes.Cuboid;
-import com.graphics.shapes.Lantern;
-import com.graphics.shapes.Sphere;
-import com.graphics.shapes.Whale;
+import com.graphics.shapes.*;
 import com.graphics.tests.shapes.FlapTest;
 import com.graphics.tests.shapes.Gate;
 import com.graphics.tests.shapes.TexturedCuboid;
@@ -46,7 +43,7 @@ public class StartScene extends FlooredFrame {
 
     private ObjectTiedLightSource<DirectionalLightSource> l3;
     private Lantern lantern3;
-    
+
     public StartScene(Color floorColour, double floorLevel) {
         super(floorColour, floorLevel);
     }
@@ -56,6 +53,11 @@ public class StartScene extends FlooredFrame {
         if (isLoaded()) return;
         
         super.buildFrame();
+
+        //Mountain mountain = new Mountain(5, 500, 300);
+        //mountain.setColour(new Color(217, 128, 69));
+        //addSceneObject(new SceneObject(mountain, new Point(0, floorLevel - 250,1000), ScanlineShaderFactory.FLAT.getDefaultSelector()));
+
         ObjectTiedLightSource<LightSource> l1 = new ObjectTiedLightSource<>(LightSource.class, 0,0,-500);
         l1.getLightSource().setColour(new Color(255, 0, 0));
         addSceneLightSource(l1.getLightSource());

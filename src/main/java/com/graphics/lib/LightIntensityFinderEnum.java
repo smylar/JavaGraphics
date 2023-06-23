@@ -1,12 +1,13 @@
 package com.graphics.lib;
 
 import com.graphics.lib.interfaces.ILightIntensityFinder;
+import com.graphics.lib.lightsource.ILightSource;
 
 public enum LightIntensityFinderEnum {
 	DEFAULT((ls, obj, p, v, f) -> {
 			IntensityComponents maxIntensity = new IntensityComponents(f.getBaseIntensity());
-			
-			ls.stream().filter(l -> l.isOn()).forEach(l ->
+
+			ls.stream().filter(ILightSource::isOn).forEach(l ->
 			{
 				IntensityComponents intComps = l.getIntensityComponents(p);
 				if (intComps.hasNoIntensity()) return;
@@ -37,9 +38,9 @@ public enum LightIntensityFinderEnum {
 			return f.checkIntensity(maxIntensity);
 	});
 	
-	private ILightIntensityFinder finder;
+	private final ILightIntensityFinder finder;
 	
-	private LightIntensityFinderEnum(ILightIntensityFinder finder) {
+	LightIntensityFinderEnum(ILightIntensityFinder finder) {
 		this.finder = finder;
 	}
 	

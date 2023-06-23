@@ -21,7 +21,7 @@ public class FlooredFrame implements SceneFrame {
 
     private final Vector up = new Vector(0,-1,0);
     private final Color floorColour;
-    private final double floorLevel;
+    protected final double floorLevel;
     private final Set<Supplier<Texture>> textureSuppliers = new HashSet<>();
 
     private final List<SceneObject> frameObjects = new ArrayList<>();

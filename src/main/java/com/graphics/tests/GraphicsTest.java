@@ -132,10 +132,13 @@ public class GraphicsTest extends JFrame {
 		slave.setVisible(true);
 		cnv.addObserver(scnv);
 		this.setVisible(true);
-		
-		StartScene scene = new StartScene(new Color(246,215,176), 700);
+
+		double floorLevel = 700;
+		StartScene scene = new StartScene(new Color(246,215,176), floorLevel);
 		scene.addFloorTexture(() -> new BmpTexture("river", Color.white));
 		sceneMap.add(0, 0, scene);
+
+		sceneMap.add(1,0, new MountainScene(new Color(20, 85, 20), floorLevel));
 		
 		Ship ship = new Ship (100, 100, 50);
 		
@@ -166,6 +169,7 @@ public class GraphicsTest extends JFrame {
 		l4.setDirection(() -> cam.getOrientation().getForward().getUnitVector());
 		l4.setLightConeAngle(45);
 		l4.setColour(new Color(255, 255, 255));
+		//l4.setRange(0);
 		cnv.addLightSource(l4);
 		
 		try {
@@ -221,6 +225,9 @@ public class GraphicsTest extends JFrame {
 
 				else if (key.getKeyChar() == '/') {
 					chaseCam = !chaseCam;
+				}
+				else if (key.getKeyChar() == 'i') {
+					System.out.println(l4.getPosition());
 				}
 				else {
 				    SceneFrame currentFrame = cnv.getCurrentScene();
