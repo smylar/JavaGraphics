@@ -67,18 +67,20 @@ public class CanvasObject implements ICanvasObject {
     private final Subject<Transform> transformSubject = PublishSubject.create();
     private final Subject<ObjectStatus> statusSubject = PublishSubject.create();
     private final Subject<Boolean> deathSubject = ReplaySubject.create();
-	
+
+
 	public CanvasObject(Supplier<Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>>> initMesh) {
 		Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>> mesh = initMesh.get();
 		vertexList = mesh.getLeft();
 		facetList = mesh.getRight();
 	}
-	
+
 	public <T extends CanvasObject> CanvasObject(Function<T, Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>>> initMesh, Class<T> clazz) {
         Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>> mesh = initMesh.apply(clazz.cast(this));
         vertexList = mesh.getLeft();
         facetList = mesh.getRight();
     }
+
 	
 	/**
 	 * Use to save a fixed centre point so it is not recalculated every time
@@ -291,14 +293,7 @@ public class CanvasObject implements ICanvasObject {
             						.findFirst();
 		}
 	}
-	
-	/**
-	 * Apply a given transform (e.g. Moving or rotating the object) immediately to this object
-	 * 
-	 * @see Transform
-	 * 
-	 * @param t - Transform to apply
-	 */
+
 	@Override
 	public final void applyTransform(Transform...transforms)
 	{

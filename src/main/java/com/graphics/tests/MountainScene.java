@@ -24,7 +24,8 @@ public class MountainScene extends FlooredFrame {
         super.buildFrame();
 
         Mountain mountain = new Mountain(5, 500, 300);
-        mountain.setColour(new Color(217, 128, 69));
+        mountain.setSnowLine(350, Color.WHITE)
+                .setColour(new Color(217, 128, 69));
         addSceneObject(new SceneObject(mountain, new Point(0, floorLevel - 250,0), ScanlineShaderFactory.FLAT.getDefaultSelector()));
         //may not want to anchor this on centre point will be easier to place
 

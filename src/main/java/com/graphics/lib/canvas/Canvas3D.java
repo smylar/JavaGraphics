@@ -61,6 +61,7 @@ import io.reactivex.Observable;
 @PropertyInject
 public class Canvas3D extends AbstractCanvas {
 
+	private static final String UNBOUND = "unbound";
 	private static final IShaderSelector pointShaderSelector = (o, c) -> PointShader.getShader();
 	private static final IShaderSelector wireShaderSelector = (o,c) -> WireframeShader.getShader();
 	@Serial
@@ -175,36 +176,12 @@ public class Canvas3D extends AbstractCanvas {
 	                   .map(ZBufferItem::getTopMostObject);
 	}
 
-	/**
-	 * Register an object with this canvas so that it will draw it at a specified (world) location with a default shader
-	 * 
-	 * @param obj		Object to register
-	 * @param position	Position to draw the centre of the object at
-	 */
-	public void registerObject(ICanvasObject obj, Point position){
-		this.registerObject(obj, position, (o,c) -> ScanlineShaderFactory.NONE);
+	public void registerObject(ICanvasObject obj, Point position) {
+		registerObject(obj, position, (o,c) -> ScanlineShaderFactory.NONE, false);
 	}
-	
-	/**
-	 * Register an object with this canvas so that it will draw it at a specified (world) location
-	 * 
-	 * @param obj		    	Object to register
-	 * @param position	    	Position to draw the centre of the object at
-	 * @param shaderSelector	Shader to draw the object with
-	 */
-	public void registerObject(ICanvasObject obj, Point position, IShaderSelector shaderSelector)
-	{
-		if (Objects.nonNull(obj) && !this.shapes.containsKey(obj)) {
-		    CanvasObjectFunctions.DEFAULT.get().moveTo(obj, position);
-		    var shader = switch (drawMode) {
-		        case POINT -> pointShaderSelector;
-		        case WIRE -> wireShaderSelector;
-		        default -> shaderSelector;
-		    }; //could just put these in the enum
 
-		    this.shapes.put(obj, shader);
-
-		}
+	public void registerObject(ICanvasObject obj, Point position, IShaderSelector shaderSelector){
+		registerObject(obj, position, shaderSelector, false);
 	}
 
 	/**
@@ -236,6 +213,27 @@ public class Canvas3D extends AbstractCanvas {
 		}
 
 		return renderShapes(processShapes);
+	}
+
+	private void registerObject(ICanvasObject obj, Point position, IShaderSelector shaderSelector, boolean sceneBound)
+	{
+		if (Objects.isNull(obj) || shapes.containsKey(obj)) {
+			return;
+		}
+
+		CanvasObjectFunctions.DEFAULT.get().moveTo(obj, position);
+		var shader = switch (drawMode) {
+			case POINT -> pointShaderSelector;
+			case WIRE -> wireShaderSelector;
+			default -> shaderSelector;
+		}; //could just put these in the enum
+
+		shapes.put(obj, shader);
+
+		if (!sceneBound) {
+			obj.addFlag(UNBOUND); //may want an explicit boolean for this in the interface for slightly better performance
+		}
+
 	}
 	
 	private void switchFrames() {
@@ -277,7 +275,7 @@ public class Canvas3D extends AbstractCanvas {
 
 		newFrame.getFrameObjects().forEach(o -> {
 			Point position = o.framePosition();
-			registerObject(o.object(), new Point(position.x + xOffset, position.y, position.z + zOffset), o.shaderSelector());
+			registerObject(o.object(), new Point(position.x + xOffset, position.y, position.z + zOffset), o.shaderSelector(), true);
 		});
 	}
 	
@@ -304,7 +302,7 @@ public class Canvas3D extends AbstractCanvas {
 	                  s.onDrawComplete();  //cross object updates can happen here safer not to be parallel
 	                  notifyEvent(PROCESS, s);
 	              })
-				  .filter(frameObjects::contains) //only draw if in current frame, will need to do something with light sources too, to stop cross lighting
+				  .filter(s -> frameObjects.contains(s) || s.hasFlag(UNBOUND)) //only draw if in current frame, will need to do something with light sources too, to stop cross lighting
 				  .doOnNext(s -> processShape(s, getzBuffer(), getShader(s, getCamera())))
 	              .doFinally(() -> {
 	                  getzBuffer().refreshBuffer();

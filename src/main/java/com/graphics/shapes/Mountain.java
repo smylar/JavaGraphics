@@ -7,6 +7,7 @@ import com.graphics.lib.WorldCoord;
 import com.graphics.lib.canvas.CanvasObject;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.awt.Color;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -53,8 +54,8 @@ public class Mountain extends CanvasObject {
                 .distinct()
                 .toList();
 
-        //TODO colour top of mountain a different colour e.g. for snow capped effect
         //really should refactor away from Guava on CanvasObject lists now! copying immutable list to immutable list!!!
+        //just immutableList makes it clear what is required without the parent having to test for it
         return Pair.of(ImmutableList.copyOf(vl), ImmutableList.copyOf(facets));
         // need to make transition into floor a lot nicer there are gaps around the base,
         // may be able to use further triangles with different variation settings to smooth things out around the sides
@@ -87,11 +88,21 @@ public class Mountain extends CanvasObject {
                 .findFirst()
                 .orElseGet(() -> {
                     Vector v = wc1.vectorToPoint(wc2);
-                    double raiseAmount = (-100d/level) + Math.random() * (200d/level); //probably should be some function of height
+                    double raiseAmount = (-100d/level) + Math.random() * (200d/level); //probably should be some function of height or configurable
                     WorldCoord midPoint = new WorldCoord(wc1.x + v.x()/2, wc1.y + v.y()/2 - raiseAmount, wc1.z + v.z()/2); //n.b. world coords still flipped so decreasing y values are the upwards direction
                     sharedPoints.add(new SharedPoint(wc1, wc2, midPoint));
                     return midPoint;
                 });
+    }
+
+    public Mountain setSnowLine(int above, Color colour) {
+        List<WorldCoord> pointsInRange = getVertexList().stream().filter(v -> v.y < -above).toList(); //inverted y
+
+        getFacetList().stream()
+                .filter(f -> pointsInRange.contains(f.first()) || pointsInRange.contains(f.second()) || pointsInRange.contains(f.third()))
+                .forEach(f -> f.setColour(colour));
+
+        return this;
     }
 
     private record SharedPoint(WorldCoord a, WorldCoord b, WorldCoord midPoint) {
