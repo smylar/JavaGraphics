@@ -1,9 +1,7 @@
 package com.graphics.lib.shader;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.graphics.lib.Facet;
@@ -13,6 +11,7 @@ import com.graphics.lib.WorldCoord;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ITexturable;
+import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.texture.Texture;
 import com.graphics.lib.traits.TraitHandler;
 import com.graphics.lib.zbuffer.ScanLine;
@@ -25,8 +24,8 @@ public class TexturedGoraudShader extends GoraudShader {
     private Point endTexture;
 	
 	@Override
-	public void init(ICanvasObject parent, Facet facet, Camera c) {
-		super.init(parent, facet, c);
+	public void init(ICanvasObject parent, Facet facet, Camera c, Collection<ILightSource> lightSources) {
+		super.init(parent, facet, c, lightSources);
 		
 		startTexture = null;
         endTexture = null;

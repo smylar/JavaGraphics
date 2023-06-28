@@ -2,10 +2,7 @@ package com.graphics.lib.shader;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.IntFunction;
@@ -19,6 +16,7 @@ import com.graphics.lib.WorldCoord;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IShaderSelector;
+import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.properties.Property;
 import com.graphics.lib.properties.PropertyInject;
 import com.graphics.lib.zbuffer.ScanLine;
@@ -42,7 +40,7 @@ public enum ScanlineShaderFactory implements IShaderFactory {
     @Property(name="zbuffer.skip", defaultValue="2")
     private Integer skip;
     
-    private ScanlineShaderFactory(Supplier<ScanlineShader> shader, int poolSize) {
+    ScanlineShaderFactory(Supplier<ScanlineShader> shader, int poolSize) {
         pool = new LinkedBlockingQueue<>(poolSize);
         for (int i = 0 ; i < poolSize ; i++) {
             ScanlineShader shaderImpl = shader.get();
@@ -52,12 +50,12 @@ public enum ScanlineShaderFactory implements IShaderFactory {
     }
     
     @Override
-    public void add(ICanvasObject parent, Camera c, Dimension screen, ZBufferItemUpdater zBufferItemUpdater)
+    public void add(ICanvasObject parent, Camera c, Dimension screen, ZBufferItemUpdater zBufferItemUpdater, Collection<ILightSource> lightSources)
     {
         parent.getFacetList().parallelStream()
                              .filter(f -> parent.isProcessBackfaces() || GeneralPredicates.isFrontface(c).test(f))
                              .filter(f -> !isOffScreen(f,c,screen))
-                             .forEach(f -> add(f, parent, c, screen, zBufferItemUpdater));
+                             .forEach(f -> add(f, parent, c, screen, zBufferItemUpdater, lightSources));
 
     }
 
@@ -74,7 +72,7 @@ public enum ScanlineShaderFactory implements IShaderFactory {
         return null;
     }
     
-    private void add(Facet facet, ICanvasObject parent, Camera c, Dimension screen, ZBufferItemUpdater zBufferItemUpdater)
+    private void add(Facet facet, ICanvasObject parent, Camera c, Dimension screen, ZBufferItemUpdater zBufferItemUpdater, Collection<ILightSource> lightSources)
     {
         List<WorldCoord> points = facet.getAsList();
         
@@ -91,7 +89,7 @@ public enum ScanlineShaderFactory implements IShaderFactory {
         
         try (ScanlineShader localShader = getShader()) {
             if (localShader != null) {
-                localShader.init(parent, facet, c);
+                localShader.init(parent, facet, c, lightSources);
             }
             
             var lines = List.of(new LineEquation(points.get(0), points.get(1), c),

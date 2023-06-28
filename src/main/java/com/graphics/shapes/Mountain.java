@@ -18,6 +18,7 @@ public class Mountain extends CanvasObject {
 
     public Mountain(int levels, double height, double width) {
         super(self -> init(levels, height, width), Mountain.class);
+        fixCentre();
     }
 
     private static Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>> init(int levels, double height, double width) {

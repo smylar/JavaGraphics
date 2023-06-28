@@ -1,7 +1,6 @@
 package com.graphics.lib.plugins;
 
 import java.awt.Color;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -9,6 +8,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.graphics.lib.canvas.Canvas3D;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.graphics.lib.Axis;
@@ -25,7 +25,6 @@ import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ICanvasObjectList;
 import com.graphics.lib.interfaces.IOrientable;
 import com.graphics.lib.interfaces.IPlugable;
-import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.traits.TraitHandler;
 import com.graphics.lib.transform.MovementTransform;
@@ -50,7 +49,7 @@ public class PluginLibrary {
 			}
 			
 			Vector baseVector = mTrans.stream().map(trans -> new Vector(trans.getVelocity()))
-												.reduce(Vector.ZERO_VECTOR, (left, right) -> left.combine(right)); 
+												.reduce(Vector.ZERO_VECTOR, Vector::combine);
 			
 			
 			double speed = baseVector.getSpeed();
@@ -66,10 +65,10 @@ public class PluginLibrary {
 				double xVector = baseVector.x() + (Math.random()/2) - 0.25;
 				double yVector = baseVector.y() + (Math.random()/2) - 0.25;
 				double zVector = baseVector.z() + (Math.random()/2) - 0.25;
-				Transform rot1 = new RepeatingTransform<Rotation>(Axis.Y.getRotation(Math.random() * 5), 45);
+				Transform rot1 = new RepeatingTransform<>(Axis.Y.getRotation(Math.random() * 5), 45);
 				MovementTransform move = new MovementTransform(new Vector(xVector, yVector, zVector), speed - exhaustVelocity);
 				move.moveUntil(t -> rot1.isCompleteSpecific());
-				Transform rot2 = new RepeatingTransform<Rotation>(Axis.X.getRotation(Math.random() * 5), t -> rot1.isCompleteSpecific());				
+				Transform rot2 = new RepeatingTransform<>(Axis.X.getRotation(Math.random() * 5), t -> rot1.isCompleteSpecific());
 				CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(fragment, rot1, rot2);
 				fragment.addTransform(move);
 
@@ -98,8 +97,8 @@ public class PluginLibrary {
     			MovementTransform move = new MovementTransform(new Vector(xVector, yVector, zVector), Math.random() * 15 + 1 );
     			fragment.addTransform(move);
     			CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(fragment, 
-    																		new RepeatingTransform<Rotation>(Axis.Y.getRotation(Math.random() * 10), 
-    																		t -> move.isComplete()), new RepeatingTransform<Rotation>(Axis.X.getRotation(Math.random() * 10), 
+    																		new RepeatingTransform<>(Axis.Y.getRotation(Math.random() * 10),
+    																		t -> move.isComplete()), new RepeatingTransform<>(Axis.X.getRotation(Math.random() * 10),
     																		t -> move.isComplete()));
     			if (!obj.hasFlag(Events.EXPLODE_PERSIST)){
     				move.moveUntil(t -> t.getDistanceMoved() > 100);
@@ -117,13 +116,13 @@ public class PluginLibrary {
 		};
 	}
 	
-	public static IPlugin<IPlugable,Void> flash(Collection<ILightSource> lightSources)
+	public static IPlugin<IPlugable,Void> flash()
 	{
 		return plugable -> {
 		    ICanvasObject obj = plugable.getParent();
 			LightSource flash = new LightSource(obj.getCentre().x,  obj.getCentre().y, obj.getCentre().z);
 			flash.setRange(-1);
-			lightSources.add(flash);
+			Canvas3D.get().addLightSource(flash);
 			
 			new Thread(() -> {
 				try {
@@ -180,7 +179,7 @@ public class PluginLibrary {
 			}
 			
 			Vector baseVector = mTrans.stream().map(trans -> new Vector(trans.getVelocity()))
-												.reduce(Vector.ZERO_VECTOR, (left, right) -> left.combine(right));
+												.reduce(Vector.ZERO_VECTOR, Vector::combine);
 			
 			for (ICanvasObject impactee : objects.get()) {
 				if (impactee.equals(obj)) continue;

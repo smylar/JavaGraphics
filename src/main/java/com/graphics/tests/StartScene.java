@@ -78,9 +78,9 @@ public class StartScene extends FlooredFrame {
         
         lantern3 = new Lantern();        
         TraitHandler.INSTANCE.registerTrait(lantern3, OrientableTrait.class).setOrientation(new SimpleOrientation(OrientableTrait.ORIENTATION_TAG));
-        addSceneObject(new SceneObject(lantern3, new Point(400,100,100), ScanlineShaderFactory.NONE.getDefaultSelector()));
+        addSceneObject(new SceneObject(lantern3, new Point(300,100,100), ScanlineShaderFactory.NONE.getDefaultSelector()));
         l3.getLightSource().setDirection(() -> TraitHandler.INSTANCE.getTrait(lantern3, IOrientable.class).get().getOrientation().getForward());
-        l3.getLightSource().setLightConeAngle(40);
+        l3.getLightSource().setLightConeAngle(60);
         lantern3.attachLightsource(l3);
         lantern3.getFacetList().stream().filter(f -> f.getNormal().z() <= 0).forEach(f -> f.setColour(Color.BLACK));
         Transform l3spin = new RepeatingTransform<>(Axis.X.getRotation(4), 0);
@@ -183,13 +183,13 @@ public class StartScene extends FlooredFrame {
         }
         
         else if (key.getKeyChar() == '1') {
-            getFrameLightsources().get(0).toggle();
+            ((LightSource)getFrameLightsources().get(0)).toggle();
         }
         else if (key.getKeyChar() == '2') {
-            getFrameLightsources().get(1).toggle();
+            ((LightSource)getFrameLightsources().get(1)).toggle();
         }
         else if (key.getKeyChar() == '3') {
-            getFrameLightsources().get(2).toggle();
+            ((LightSource)getFrameLightsources().get(2)).toggle();
         }
     }
     

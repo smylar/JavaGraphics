@@ -20,6 +20,7 @@ import com.graphics.lib.shader.IShaderFactory;
 public class SlaveCanvas3D extends AbstractCanvas implements ISecondaryCamera {
 	@Serial
 	private static final long serialVersionUID = 1L;
+	private SceneWithOffset scene;
 	
 	public SlaveCanvas3D(Camera camera)
 	{
@@ -28,16 +29,17 @@ public class SlaveCanvas3D extends AbstractCanvas implements ISecondaryCamera {
 
 	private void processShape(Canvas3D source, ICanvasObject obj, IShaderFactory shader)
 	{
-		
-		if (obj.isVisible())
-		{
-			this.getCamera().getView(obj);
-			
-			this.getzBuffer().add(obj, shader, this.getCamera(), source.getHorizon());
+		if (scene.scene().getFrameObjects().stream().noneMatch(o -> o.object() == obj) && !source.isUnbound(obj)) {
+			return;
 		}
-		
-		for (ICanvasObject child : new HashSet<>(obj.getChildren()))
-		{
+
+		if (obj.isVisible()) {
+			this.getCamera().getView(obj);
+
+			this.getzBuffer().add(obj, shader, this.getCamera(), source.getHorizon(), source.getLightSources(scene.scene()));
+		}
+
+		for (ICanvasObject child : new HashSet<>(obj.getChildren())) {
 			this.processShape(source, child, shader);
 		}
 	}
@@ -57,7 +59,8 @@ public class SlaveCanvas3D extends AbstractCanvas implements ISecondaryCamera {
     }
 
 	@Override
-	public SceneWithOffset getRelevantFrame(SceneMap sceneMap) {
-		return sceneMap.getFrameFromPoint(getCamera().getPosition());
+	public SceneWithOffset getAndSetRelevantFrame(SceneMap sceneMap) {
+		scene = sceneMap.getFrameFromPoint(getCamera().getPosition());
+		return scene;
 	}
 }

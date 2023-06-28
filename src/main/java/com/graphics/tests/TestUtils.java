@@ -84,7 +84,7 @@ public class TestUtils {
 					clipLibrary.ifPresent(cl -> cl.playSound("EXPLODE", -20f));
 				}
 			});
-			plugable.registerSingleAfterDrawPlugin(Events.FLASH, PluginLibrary.flash(Canvas3D.get().getLightSources()));
+			plugable.registerSingleAfterDrawPlugin(Events.FLASH, PluginLibrary.flash());
 			return null;
 		};
 	}

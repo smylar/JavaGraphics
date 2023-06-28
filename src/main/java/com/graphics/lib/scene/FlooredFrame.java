@@ -12,6 +12,7 @@ import com.graphics.lib.Axis;
 import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
+import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.shader.ScanlineShaderFactory;
 import com.graphics.lib.texture.Texture;
@@ -50,7 +51,7 @@ public class FlooredFrame implements SceneFrame {
     }
 
     @Override
-    public List<LightSource> getFrameLightsources() {
+    public List<ILightSource> getFrameLightsources() {
         return List.copyOf(lightSources);
     }
 

@@ -1,9 +1,7 @@
 package com.graphics.lib.shader;
 
 import java.awt.Color;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.graphics.lib.Facet;
 import com.graphics.lib.IntensityComponents;
@@ -12,8 +10,8 @@ import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.camera.Camera;
-import com.graphics.lib.canvas.Canvas3D;
 import com.graphics.lib.interfaces.ICanvasObject;
+import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.plugins.Events;
 import com.graphics.lib.util.TriangleAreaCalculator;
 import com.graphics.lib.zbuffer.ScanLine;
@@ -37,8 +35,8 @@ public class GoraudShader extends DefaultScanlineShader {
 	protected Map<Point, IntensityComponents> pointLight = new HashMap<>();
 	
 	@Override
-	public void init(ICanvasObject parent, Facet facet, Camera c) {
-		super.init(parent, facet, c);
+	public void init(ICanvasObject parent, Facet facet, Camera c, Collection<ILightSource> lightSources) {
+		super.init(parent, facet, c, lightSources);
 	    pointLight.clear();
 	    //lineLength = 0;
 	    //this.facet = facet;
@@ -59,7 +57,7 @@ public class GoraudShader extends DefaultScanlineShader {
 		for (WorldCoord p : facet.getAsList())
 		{
 			Vector n = parent.getVertexNormalFinder().getVertexNormal(parent, p, facet);
-			pointLight.put(p.getTransformed(c), parent.getLightIntensityFinder().getLightIntensity(Canvas3D.get().getLightSources(), parent, p, n, facet));
+			pointLight.put(p.getTransformed(c), parent.getLightIntensityFinder().getLightIntensity(lightSources, parent, p, n, facet));
 		}
 	}
 

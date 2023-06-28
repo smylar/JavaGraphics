@@ -1,9 +1,11 @@
 package com.graphics.lib.zbuffer;
 
 import java.awt.image.BufferedImage;
+import java.util.Collection;
 
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasObject;
+import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.shader.IShaderFactory;
 
 /**
@@ -20,11 +22,11 @@ public sealed interface IZBuffer permits ZBuffer {
     /**
      * Add a facet to the Z Buffer
      * 
-     * @param parent - The CanvasObject the facet belongs to
+     * @param obj - The CanvasObject the facet belongs to
      * @param shader - The shader object that will handle colouring of the facet
      * @param c- The camera being processed
      */
-    public void add(ICanvasObject obj, IShaderFactory shader, Camera c, double horizon);
+    void add(ICanvasObject obj, IShaderFactory shader, Camera c, double horizon, Collection<ILightSource> lightSources);
     
     /**
      * Get the Z buffer, the form is (in an attempt for some performance when finding a specific entry):
@@ -32,29 +34,23 @@ public sealed interface IZBuffer permits ZBuffer {
      * <code>Map{xValue, Map{yValue, item}}</code>
      * @return The Z Buffer map
      */
-    public BufferedImage getBuffer();
+    BufferedImage getBuffer();
     
     /**
      * Refresh the image buffer with the current data
      */
-    public void refreshBuffer();
+    void refreshBuffer();
     
     
     /**
      * Set the width of the buffer in pixels
-     * @param width
-     * @param height
      */
-    public void setDimensions(int width, int height);
+    void setDimensions(int width, int height);
     
     /**
      * Get the item at the given x, y coordinates
-     * 
-     * @param x
-     * @param y
-     * @return
      */
-    public ZBufferItem getItemAt(int x, int y);
+    ZBufferItem getItemAt(int x, int y);
     
-    public void clear();
+    void clear();
 }

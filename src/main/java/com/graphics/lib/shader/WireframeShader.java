@@ -2,6 +2,7 @@ package com.graphics.lib.shader;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.DoubleStream;
@@ -14,6 +15,7 @@ import com.graphics.lib.Point;
 import com.graphics.lib.WorldCoord;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasObject;
+import com.graphics.lib.lightsource.ILightSource;
 
 public class WireframeShader implements IShaderFactory {
 
@@ -26,7 +28,7 @@ public class WireframeShader implements IShaderFactory {
     }
     
     @Override
-    public void add(ICanvasObject parent, Camera c, Dimension screen, ZBufferItemUpdater zBufferItemUpdater) {
+    public void add(ICanvasObject parent, Camera c, Dimension screen, ZBufferItemUpdater zBufferItemUpdater, Collection<ILightSource> lightSources) {
         Predicate<Point> isOnScreen = GeneralPredicates.isOnScreen(screen);
         parent.getFacetList()
               .parallelStream()
@@ -55,7 +57,7 @@ public class WireframeShader implements IShaderFactory {
     
     private void processX(final LineEquation l, final Dimension screen, final ZBufferItemUpdater zBufferItemUpdater, final Predicate<Point> isOnScreen) {
         final double startx = l.getMinX() < 0 ? 0 : l.getMinX();
-        final double endx = l.getMaxX() > screen.getWidth() ? screen.getWidth() : l.getMaxX();
+        final double endx = Math.min(l.getMaxX(), screen.getWidth());
 
         if (startx < endx) {
             DoubleStream.iterate(startx, x -> x < endx, x -> x+1)
@@ -65,7 +67,7 @@ public class WireframeShader implements IShaderFactory {
     
     private void processY(final LineEquation l, final Dimension screen, final ZBufferItemUpdater zBufferItemUpdater, final Predicate<Point> isOnScreen) {
         final double starty = l.getMinY() < 0 ? 0 : l.getMinY();
-        final double endy = l.getMaxY() > screen.getHeight() ? screen.getHeight() : l.getMaxY();
+        final double endy = Math.min(l.getMaxY(), screen.getHeight());
         if (starty < endy) {
             DoubleStream.iterate(starty, y -> y <= endy, y -> y+1)
                         .forEach(y -> addToBuffer(l.getXAtY(y), y, l, zBufferItemUpdater, isOnScreen));

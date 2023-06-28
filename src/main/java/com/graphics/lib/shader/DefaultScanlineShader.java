@@ -1,11 +1,13 @@
 package com.graphics.lib.shader;
 
 import java.awt.Color;
+import java.util.Collection;
 import java.util.function.Consumer;
 
 import com.graphics.lib.Facet;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasObject;
+import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.zbuffer.ScanLine;
 
 public class DefaultScanlineShader implements ScanlineShader { 
@@ -15,7 +17,7 @@ public class DefaultScanlineShader implements ScanlineShader {
     protected ICanvasObject parent;
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         if (onClose != null) {
             onClose.accept(this);
         }
@@ -28,7 +30,7 @@ public class DefaultScanlineShader implements ScanlineShader {
     }
 
     @Override
-    public void init(ICanvasObject obj, Facet f, Camera c) {
+    public void init(ICanvasObject obj, Facet f, Camera c, Collection<ILightSource> lightSources) {
         facet = f;
         parent = obj;
     }

@@ -3,13 +3,13 @@ package com.graphics.lib.zbuffer;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.function.IntFunction;
 import java.util.stream.IntStream;
 
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasObject;
+import com.graphics.lib.lightsource.ILightSource;
 import com.graphics.lib.shader.IShaderFactory;
 
 /**
@@ -30,11 +30,11 @@ public final class ZBuffer implements IZBuffer {
     }
     
     @Override
-    public void add(final ICanvasObject obj, final IShaderFactory shader, final Camera c, final double horizon)
+    public void add(final ICanvasObject obj, final IShaderFactory shader, final Camera c, final double horizon, final Collection<ILightSource> lightSources)
     {
         if (c.getPosition().distanceTo(obj.getCentre()) < horizon) {
 
-            shader.add(obj, c, dimension, (x,y,z,cs) -> addToBuffer(obj, x, y, z, cs));
+            shader.add(obj, c, dimension, (x,y,z,cs) -> addToBuffer(obj, x, y, z, cs), lightSources);
         }
     }
     

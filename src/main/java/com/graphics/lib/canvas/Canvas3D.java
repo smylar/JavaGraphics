@@ -16,6 +16,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.swing.SwingUtilities;
 
@@ -37,7 +38,6 @@ import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ISecondaryCamera;
 import com.graphics.lib.lightsource.ILightSource;
-import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.properties.Property;
 import com.graphics.lib.properties.PropertyInject;
 import com.graphics.lib.scene.SceneFrame;
@@ -118,7 +118,7 @@ public class Canvas3D extends AbstractCanvas {
 		this.drawShadows = drawShadows;
 	}
 
-	public void addLightSource(LightSource lightSource) {
+	public void addLightSource(ILightSource lightSource) {
 		if (lightSource != null) {
 		    this.lightSourcesToAdd.add(lightSource);
 		}
@@ -143,10 +143,6 @@ public class Canvas3D extends AbstractCanvas {
 	    if (!drawMode.fixedShader()) {
 	        this.shapes.replace(obj, selector);
 	    }
-	}
-
-	public Set<ILightSource> getLightSources() {
-		return lightSources;
 	}
 	
 	public Facet getFloorPlane() {
@@ -215,6 +211,14 @@ public class Canvas3D extends AbstractCanvas {
 		return renderShapes(processShapes);
 	}
 
+	Set<ILightSource> getLightSources(SceneFrame frame) {
+		return Stream.concat(lightSources.stream(), frame.getFrameLightsources().stream()).collect(Collectors.toSet());
+	}
+
+	boolean isUnbound(ICanvasObject obj) {
+		return obj.hasFlag(UNBOUND);
+	}
+
 	private void registerObject(ICanvasObject obj, Point position, IShaderSelector shaderSelector, boolean sceneBound)
 	{
 		if (Objects.isNull(obj) || shapes.containsKey(obj)) {
@@ -244,7 +248,7 @@ public class Canvas3D extends AbstractCanvas {
 		SceneWithOffset sceneWithOffset = sceneMap.getFrameFromPoint(camPos);
 		SceneFrame cameraFrame = sceneWithOffset.scene();
 
-		Set<SceneWithOffset> framesToLoad = slaves.stream().map(c -> c.getRelevantFrame(sceneMap)).collect(Collectors.toSet());
+		Set<SceneWithOffset> framesToLoad = slaves.stream().map(c -> c.getAndSetRelevantFrame(sceneMap)).collect(Collectors.toSet());
 		framesToLoad.add(sceneWithOffset);
 
 		// TODO this will load at the border, obviously will want something that loads as you get near while keeping the current one
@@ -270,7 +274,6 @@ public class Canvas3D extends AbstractCanvas {
 		newFrame.getFrameLightsources().forEach(ls -> {
 			Point lsPosition = ls.getPosition();
 			ls.setPosition(new Point(lsPosition.x + xOffset, lsPosition.y, lsPosition.z + zOffset));
-			addLightSource(ls);
 		});
 
 		newFrame.getFrameObjects().forEach(o -> {
@@ -302,7 +305,7 @@ public class Canvas3D extends AbstractCanvas {
 	                  s.onDrawComplete();  //cross object updates can happen here safer not to be parallel
 	                  notifyEvent(PROCESS, s);
 	              })
-				  .filter(s -> frameObjects.contains(s) || s.hasFlag(UNBOUND)) //only draw if in current frame, will need to do something with light sources too, to stop cross lighting
+				  .filter(s -> frameObjects.contains(s) || isUnbound(s)) //only draw if in current frame
 				  .doOnNext(s -> processShape(s, getzBuffer(), getShader(s, getCamera())))
 	              .doFinally(() -> {
 	                  getzBuffer().refreshBuffer();
@@ -332,7 +335,7 @@ public class Canvas3D extends AbstractCanvas {
 		{
 		    getCamera().getView(obj);
 			
-			zBuf.add(obj, shader, getCamera(), this.horizon);
+			zBuf.add(obj, shader, getCamera(), this.horizon, getLightSources(currentFrame));
 		}
 		
 		obj.getChildren().forEach(child -> this.processShape(child, zBuf, shader));
@@ -356,7 +359,7 @@ public class Canvas3D extends AbstractCanvas {
 		    return Sets.newHashSet();
 		}
 		final Color shadowColour = new Color(150,150,150,50);
-		return lightSources.stream()
+		return getLightSources(currentFrame).stream()
 		                   .filter(ILightSource::isOn)
 		                   .map(ls -> 
 		                       new CanvasObject(() -> {

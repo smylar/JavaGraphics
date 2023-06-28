@@ -8,5 +8,5 @@ import com.graphics.lib.scene.SceneWithOffset;
 public interface ISecondaryCamera {
 	void update(Canvas3D source, CanvasEvent event, ICanvasObject obj);
 
-	SceneWithOffset getRelevantFrame(SceneMap sceneMap);
+	SceneWithOffset getAndSetRelevantFrame(SceneMap sceneMap);
 }

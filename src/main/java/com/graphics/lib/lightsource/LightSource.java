@@ -55,6 +55,7 @@ public class LightSource extends SubmissionPublisher<String> implements ILightSo
 		return position;
 	}
 
+	@Override
 	public void setPosition(Point position) {
 		this.position = position;
 		this.flagChange(POSITIONCHANGE);
@@ -112,7 +113,7 @@ public class LightSource extends SubmissionPublisher<String> implements ILightSo
 		this.on = false;
 		this.flagChange(ONOFFCHANGE);
 	}
-	
+
 	public void toggle()
 	{
 		this.on = !this.on;

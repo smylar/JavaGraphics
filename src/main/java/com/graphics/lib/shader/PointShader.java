@@ -2,11 +2,13 @@ package com.graphics.lib.shader;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.util.Collection;
 
 import com.graphics.lib.GeneralPredicates;
 import com.graphics.lib.Point;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.interfaces.ICanvasObject;
+import com.graphics.lib.lightsource.ILightSource;
 
 /**
  * Draws a marker at point in the vertex list
@@ -22,7 +24,7 @@ public class PointShader implements IShaderFactory {
     }
 
     @Override
-    public void add(final ICanvasObject parent, final Camera c, final Dimension screen, final ZBufferItemUpdater zBufferItemUpdater) {
+    public void add(final ICanvasObject parent, final Camera c, final Dimension screen, final ZBufferItemUpdater zBufferItemUpdater, Collection<ILightSource> lightSources) {
         parent.getVertexList()
               .stream()
               .filter(v -> !v.hasTags())

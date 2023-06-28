@@ -7,11 +7,13 @@ import com.graphics.lib.Point;
 
 public interface ILightSource {
 
-	public boolean isDeleted();
+	boolean isDeleted();
 
-	public Point getPosition();
+	Point getPosition();
 
-	public Color getColour();
+	void setPosition(Point position);
+
+	Color getColour();
 
 	/**
 	 * Get the actual/apparent colour after applying any modifiers e.g. Intensity, the fact the light source is off etc
@@ -26,8 +28,8 @@ public interface ILightSource {
 	 * @param p
 	 * @return
 	 */
-	public IntensityComponents getIntensityComponents(Point p);
+	IntensityComponents getIntensityComponents(Point p);
 
-	public boolean isOn();
+	boolean isOn();
 
 }
