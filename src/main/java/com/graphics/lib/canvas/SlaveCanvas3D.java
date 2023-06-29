@@ -29,32 +29,28 @@ public class SlaveCanvas3D extends AbstractCanvas implements ISecondaryCamera {
 
 	private void processShape(Canvas3D source, ICanvasObject obj, IShaderFactory shader)
 	{
-		if (scene.scene().getFrameObjects().stream().noneMatch(o -> o.object() == obj) && !source.isUnbound(obj)) {
-			return;
-		}
-
 		if (obj.isVisible()) {
-			this.getCamera().getView(obj);
+			getCamera().getView(obj);
 
-			this.getzBuffer().add(obj, shader, this.getCamera(), source.getHorizon(), source.getLightSources(scene.scene()));
+			getzBuffer().add(obj, shader, getCamera(), source.getHorizon(), source.getLightSources(scene.scene()));
 		}
 
 		for (ICanvasObject child : new HashSet<>(obj.getChildren())) {
-			this.processShape(source, child, shader);
+			processShape(source, child, shader);
 		}
 	}
 	
 	@Override
     public void update(Canvas3D source, CanvasEvent event, ICanvasObject obj) {
         if (event.equals(CanvasEvent.PAINT)) {
-            this.getzBuffer().refreshBuffer();
+            getzBuffer().refreshBuffer();
             SwingUtilities.invokeLater(this::repaint);
         }
         else if (event.equals(CanvasEvent.PREPARE_BUFFER)) {
             prepareZBuffer();
         }
-        else {
-            this.processShape(source, obj, source.getShader(obj, getCamera()));
+        else if (scene.scene().getFrameObjects().stream().anyMatch(o -> o.object() == obj) || source.isUnbound(obj)) {
+            processShape(source, obj, source.getShader(obj, getCamera()));
         }
     }
 

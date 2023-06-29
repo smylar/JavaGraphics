@@ -12,6 +12,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Mountain extends CanvasObject {
@@ -21,19 +24,19 @@ public class Mountain extends CanvasObject {
         fixCentre();
     }
 
-    private static Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>> init(int levels, double height, double width) {
+    private static Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>> init(int levels, double height, double radius) {
         //use a fractal method, repeatedly divide triangles moving the height by a random amount each time
 
-        double z = Math.sin(Math.toRadians(60))*width;
-        double halfWidth = width/2;
-        //these form equilateral triangles in the x-z plane with length of each side equal to width
+        double z = Math.sin(Math.toRadians(60))*radius;
+        double halfRadius = radius/2;
+        //these form equilateral triangles in the x-z plane with length of each side equal to radius
         WorldCoord coord1 = new WorldCoord(0,-height,0);
-        WorldCoord coord2 = new WorldCoord(width,0,0);
-        WorldCoord coord3 = new WorldCoord(halfWidth,0,z);
-        WorldCoord coord4 = new WorldCoord(-halfWidth,0,z);
-        WorldCoord coord5 = new WorldCoord(-width,0,0);
-        WorldCoord coord6 = new WorldCoord(-halfWidth,0,-z);
-        WorldCoord coord7 = new WorldCoord(halfWidth,0,-z);
+        WorldCoord coord2 = new WorldCoord(radius,0,0);
+        WorldCoord coord3 = new WorldCoord(halfRadius,0,z);
+        WorldCoord coord4 = new WorldCoord(-halfRadius,0,z);
+        WorldCoord coord5 = new WorldCoord(-radius,0,0);
+        WorldCoord coord6 = new WorldCoord(-halfRadius,0,-z);
+        WorldCoord coord7 = new WorldCoord(halfRadius,0,-z);
 
         final Set<SharedPoint> sharedPoints = new HashSet<>();
         List<Facet> facets = Stream.of( //forms 6 triangles around central point coord1
@@ -46,20 +49,20 @@ public class Mountain extends CanvasObject {
                 .flatMap(f -> divideAndRaise(f, 1, levels, sharedPoints))
                 .toList();
 
-        //TODO transform generated shape to match given height either squishing or elongating
-        //get highest point work out a multiplier and apply to all y values
 
-        //extract unique vertices
-        List<WorldCoord> vl = facets.stream()
+        Map<WorldCoord, Long> coordCounts = facets.stream()
                 .flatMap(f -> f.getAsList().stream())
-                .distinct()
-                .toList();
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+        coordCounts.entrySet()
+                .stream()
+                .filter(e -> e.getValue() < 6)
+                .forEach(e -> e.getKey().y = 0); //set all edge coords to 0 so they join the floor
+        //though further triangles around the central 6 could help smooth this out
 
         //really should refactor away from Guava on CanvasObject lists now! copying immutable list to immutable list!!!
         //just immutableList makes it clear what is required without the parent having to test for it
-        return Pair.of(ImmutableList.copyOf(vl), ImmutableList.copyOf(facets));
-        // need to make transition into floor a lot nicer there are gaps around the base,
-        // may be able to use further triangles with different variation settings to smooth things out around the sides
+        return Pair.of(ImmutableList.copyOf(coordCounts.keySet()), ImmutableList.copyOf(facets));
     }
 
     private static Stream<Facet> divideAndRaise(Facet facet, final int level, final int maxLevel, final Set<SharedPoint> sharedPoints) {
@@ -90,7 +93,8 @@ public class Mountain extends CanvasObject {
                 .orElseGet(() -> {
                     Vector v = wc1.vectorToPoint(wc2);
                     double raiseAmount = (-100d/level) + Math.random() * (200d/level); //probably should be some function of height or configurable
-                    WorldCoord midPoint = new WorldCoord(wc1.x + v.x()/2, wc1.y + v.y()/2 - raiseAmount, wc1.z + v.z()/2); //n.b. world coords still flipped so decreasing y values are the upwards direction
+                    double y = wc1.y + v.y()/2 - raiseAmount;
+                    WorldCoord midPoint = new WorldCoord(wc1.x + v.x()/2, y > 0 ? 0 : y, wc1.z + v.z()/2); //n.b. world coords still flipped so decreasing y values are the upwards direction
                     sharedPoints.add(new SharedPoint(wc1, wc2, midPoint));
                     return midPoint;
                 });
