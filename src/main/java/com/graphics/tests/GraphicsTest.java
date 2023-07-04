@@ -6,6 +6,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.Serial;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -37,6 +38,7 @@ import com.graphics.lib.interfaces.IPlugable;
 import com.graphics.lib.lightsource.DirectionalLightSource;
 import com.graphics.lib.orientation.SimpleOrientation;
 import com.graphics.lib.plugins.Events;
+import com.graphics.lib.plugins.ExplosionSettings;
 import com.graphics.lib.plugins.IPlugin;
 import com.graphics.lib.scene.SceneFrame;
 import com.graphics.lib.scene.SceneMap;
@@ -72,15 +74,17 @@ import io.reactivex.disposables.Disposable;
 
 public class GraphicsTest extends JFrame {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 	private static ClipLibrary clipLibrary;
     
 	private final transient Disposable drawSubscription;
-	private boolean chaseCam = false;
-	private JFrame slave;
-	private Canvas3D canvas;
-	private AtomicReference<ICanvasObject> selectedObject = new AtomicReference<>();
+
+	private final JFrame slave;
+	private final Canvas3D canvas;
+	private final AtomicReference<ICanvasObject> selectedObject = new AtomicReference<>();
 	private MouseEvent select = null;
+	private boolean chaseCam = false;
 	
 
 	public static void main (String[] args) {
@@ -121,7 +125,7 @@ public class GraphicsTest extends JFrame {
 		slave.setSize(300, 300);
 		slave.setLocation(750, 50);
 		
-		IPlugin<IPlugable, Void> explode = TestUtils.getExplodePlugin(Optional.ofNullable(clipLibrary));
+		IPlugin<IPlugable, Void> explode = TestUtils.getExplodePlugin(Optional.ofNullable(clipLibrary), ExplosionSettings.getDefault());
 		
 		ViewAngleCamera slaveCam = new ViewAngleCamera(new SimpleOrientation(OrientableTrait.ORIENTATION_TAG));
 		slaveCam.setPosition(new Point(1550, 200, 350));
@@ -296,7 +300,7 @@ public class GraphicsTest extends JFrame {
 	}
 
 	private void checkEngineSound(CanvasObject source){
-		if (source.getTransformsOfType(MovementTransform.class).stream().anyMatch(t -> !t.isCancelled() && !t.isComplete() && t.getAcceleration() != 0)){
+		if (source.getTransformsOfType(MovementTransform.class).stream().anyMatch(t -> !t.isCancelled() && !t.isComplete() && t.getAcceleration() != null)){
 			clipLibrary.loopSound("ENGINE", -30f);
 		} else {
 			clipLibrary.stopSound("ENGINE");

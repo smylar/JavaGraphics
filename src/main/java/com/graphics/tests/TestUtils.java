@@ -8,6 +8,7 @@ import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.ICanvasObjectList;
 import com.graphics.lib.interfaces.IPlugable;
 import com.graphics.lib.plugins.Events;
+import com.graphics.lib.plugins.ExplosionSettings;
 import com.graphics.lib.plugins.IPlugin;
 import com.graphics.lib.plugins.PluginLibrary;
 import com.graphics.lib.shader.ScanlineShaderFactory;
@@ -64,7 +65,7 @@ public class TestUtils {
 		return () -> Canvas3D.get().getShapes(s -> s.isVisible() && !s.isDeleted() && !s.hasFlag(Events.PHASED));
 	}
 	
-	public static IPlugin<IPlugable,Void> getExplodePlugin(Optional<ClipLibrary> clipLibrary)
+	public static IPlugin<IPlugable,Void> getExplodePlugin(Optional<ClipLibrary> clipLibrary, ExplosionSettings explosionSettings)
 	{
 		return plugable -> {
 			ICanvasObject obj = plugable.getParent();
@@ -77,9 +78,10 @@ public class TestUtils {
 				}
 			}
 
-			PluginLibrary.explode().execute(plugable).forEach(c -> {
+			PluginLibrary.explode(explosionSettings).execute(plugable).forEach(c -> {
 				Canvas3D.get().replaceShader(obj, ScanlineShaderFactory.FLAT.getDefaultSelector());
-				TraitHandler.INSTANCE.registerTrait(c, PlugableTrait.class).registerPlugin(Events.CHECK_COLLISION, getBouncePlugin(), true);
+				TraitHandler.INSTANCE.registerTrait(c, PlugableTrait.class).registerPlugin(Events.CHECK_COLLISION, getBouncePlugin(0.6), true);
+				//may want to get the bounceFactor from elsewhere
 				if (!obj.hasFlag(SILENT_EXPLODE)) {
 					clipLibrary.ifPresent(cl -> cl.playSound("EXPLODE", -20f));
 				}
@@ -89,10 +91,10 @@ public class TestUtils {
 		};
 	}
 	
-	public static IPlugin<IPlugable,Void> getBouncePlugin(){
+	public static IPlugin<IPlugable,Void> getBouncePlugin(double bounceSpeedFactor){
 		return plugable -> {
 			ICanvasObject obj = plugable.getParent();
-			ICanvasObject impactee = PluginLibrary.hasCollided(TestUtils.getFilteredObjectList(),null, null).execute(plugable);
+			ICanvasObject impactee = PluginLibrary.hasCollided(TestUtils.getFilteredObjectList(),null, null, false).execute(plugable);
 			if (impactee != null){
 				if (impactee.hasFlag(Events.STICKY)){
 					obj.cancelTransforms();
@@ -100,7 +102,7 @@ public class TestUtils {
 					//TODO if already a child, object needs to stop being a child of that object, as observe and match also makes this fragment a child of impactee, get weird artifacts with the double processing
 				}
 				else {
-					PluginLibrary.bounce(impactee).execute(plugable);
+					PluginLibrary.bounce(impactee, bounceSpeedFactor).execute(plugable);
 				}
 			}
 			return null;

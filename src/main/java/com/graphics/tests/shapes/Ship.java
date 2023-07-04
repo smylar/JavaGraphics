@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.*;
 import java.util.Map.Entry;
 
+import com.graphics.lib.transform.*;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
@@ -20,10 +21,6 @@ import com.graphics.lib.interfaces.IEffector;
 import com.graphics.lib.plugins.Events;
 import com.graphics.lib.traits.PlugableTrait;
 import com.graphics.lib.traits.TraitHandler;
-import com.graphics.lib.transform.MovementTransform;
-import com.graphics.lib.transform.RepeatingTransform;
-import com.graphics.lib.transform.Rotation;
-import com.graphics.lib.transform.Transform;
 import com.graphics.tests.weapons.Hardpoint;
 import com.graphics.tests.weapons.IWeaponised;
 
@@ -69,7 +66,7 @@ public final class Ship extends CanvasObject implements IWeaponised {
 					plugable -> {
 					    Optional.ofNullable(plugable.getParent()).ifPresent(obj -> 
 					        obj.getTransformsOfType(MovementTransform.class).stream()
-					                                                        .filter(m -> m.getAcceleration() != 0 && Objects.nonNull(m.getVector()))
+					                                                        .filter(m -> m.getAcceleration() != null && Objects.nonNull(m.getVector()))
 					                                                        .findFirst()
 					                                                        .ifPresent(m -> generateTrail(obj, m))
 					    );
@@ -161,7 +158,13 @@ public final class Ship extends CanvasObject implements IWeaponised {
             double yVector = baseVector.y() + (Math.random()/2) - 0.25;
             double zVector = baseVector.z() + (Math.random()/2) - 0.25;
             Transform rot1 = new RepeatingTransform<>(new Rotation(Axis.Y, Math.random() * 10), 15);
-            MovementTransform move = new MovementTransform(new Vector(xVector, yVector, zVector), movement.getAcceleration() > 0 ? -20 : 20);
+
+			double speed = -20;
+			if (movement.getAcceleration() instanceof InlineAcceleration acc) {
+				speed = acc.accelerationValue() > 0 ? -20 : 20;
+			}
+
+			MovementTransform move = new MovementTransform(new Vector(xVector, yVector, zVector), speed);
             move.moveUntil(t -> rot1.isCompleteSpecific());
             Transform rot2 = new RepeatingTransform<>(new Rotation(Axis.X, Math.random() * 10), t -> rot1.isCompleteSpecific());
             CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(fragment, rot1, rot2);
@@ -180,22 +183,22 @@ public final class Ship extends CanvasObject implements IWeaponised {
 	
 	private static ImmutableList<WorldCoord> generateVertexList(final int width, final int depth, final int height) {
 	    return ImmutableList.of(new WorldCoord(0, 0, 0),
-	                            new WorldCoord(width/2, 0, depth),
-	                            new WorldCoord(-width/2, 0, depth),
-	                            new WorldCoord(0, height/2, depth * 0.8),
-	                            new WorldCoord(0, -height/2, depth * 0.8),
+	                            new WorldCoord(width/2d, 0, depth),
+	                            new WorldCoord(-width/2d, 0, depth),
+	                            new WorldCoord(0, height/2d, depth * 0.8),
+	                            new WorldCoord(0, -height/2d, depth * 0.8),
         
-	                            new WorldCoord(0, 0, depth/2),//centre point
+	                            new WorldCoord(0, 0, depth/2d),//centre point
         
-	                            new WorldCoord(width/2, 5, depth - 5),
-	                            new WorldCoord(width/2, -5, depth - 5), //wing flash left
+	                            new WorldCoord(width/2d, 5, depth - 5),
+	                            new WorldCoord(width/2d, -5, depth - 5), //wing flash left
         
-	                            new WorldCoord(-width/2, 5, depth - 5),
-	                            new WorldCoord(-width/2, -5, depth - 5), //wing flash left
+	                            new WorldCoord(-width/2d, 5, depth - 5),
+	                            new WorldCoord(-width/2d, -5, depth - 5), //wing flash left
 	    
 	                            new WorldCoord(0, 15, 20), //centre hardpoint
-	                            new WorldCoord(width/2, 0, depth - 30),  //left hardpoint
-	                            new WorldCoord(-width/2, 0, depth - 30));  //right hardpoint
+	                            new WorldCoord(width/2d, 0, depth - 30),  //left hardpoint
+	                            new WorldCoord(-width/2d, 0, depth - 30));  //right hardpoint
 	                            //at the moment hardpoint will specify where the effect manifests
 	                            //have to give some clearance outside the object to avoid colliding with self
 	                            //may need another mechanism in the weapon of effect to deal with this

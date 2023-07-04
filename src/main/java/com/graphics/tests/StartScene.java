@@ -17,6 +17,7 @@ import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.lightsource.ObjectTiedLightSource;
 import com.graphics.lib.orientation.SimpleOrientation;
 import com.graphics.lib.plugins.Events;
+import com.graphics.lib.plugins.ExplosionSettings;
 import com.graphics.lib.plugins.IPlugin;
 import com.graphics.lib.scene.FlooredFrame;
 import com.graphics.lib.scene.SceneObject;
@@ -27,11 +28,7 @@ import com.graphics.lib.traits.OrientableTrait;
 import com.graphics.lib.traits.PlugableTrait;
 import com.graphics.lib.traits.TexturableTrait;
 import com.graphics.lib.traits.TraitHandler;
-import com.graphics.lib.transform.MovementTransform;
-import com.graphics.lib.transform.RepeatingTransform;
-import com.graphics.lib.transform.ScaleTransform;
-import com.graphics.lib.transform.SequenceTransform;
-import com.graphics.lib.transform.Transform;
+import com.graphics.lib.transform.*;
 import com.graphics.shapes.*;
 import com.graphics.tests.shapes.FlapTest;
 import com.graphics.tests.shapes.Gate;
@@ -88,8 +85,11 @@ public class StartScene extends FlooredFrame {
         
         CanvasObject camcube = new Cuboid(20,20,20);
         addSceneObject(new SceneObject(camcube, new Point(1560, 200, 350), ScanlineShaderFactory.FLAT.getDefaultSelector()));
-        
-        IPlugin<IPlugable, Void> explode = TestUtils.getExplodePlugin(Optional.ofNullable(ClipLibrary.getInstance()));
+
+        Optional<ClipLibrary> clipLibrary = Optional.ofNullable(ClipLibrary.getInstance());
+        IPlugin<IPlugable, Void> explode = TestUtils.getExplodePlugin(clipLibrary, ExplosionSettings.getDefault());
+        IPlugin<IPlugable, Void> explodeWithGravity = TestUtils.getExplodePlugin(clipLibrary,
+                new ExplosionSettings(new TendToAcceleration(new Vector(0.3,2,0.3), new Vector(0,100,0)), 2, 16));
         
         Whale whale = new Whale(); 
         TraitHandler.INSTANCE.registerTrait(whale, PlugableTrait.class).registerPlugin(Events.EXPLODE, explode, false);
@@ -144,7 +144,7 @@ public class StartScene extends FlooredFrame {
         
         Sphere ball = new Sphere(100,15);
         TraitHandler.INSTANCE.registerTrait(ball, co -> new TexturableTrait(co, new OvoidTextureMapper())).addTexture(new BmpTexture("smily"));
-        TraitHandler.INSTANCE.registerTrait(ball, PlugableTrait.class).registerPlugin(Events.EXPLODE, explode, false);
+        TraitHandler.INSTANCE.registerTrait(ball, PlugableTrait.class).registerPlugin(Events.EXPLODE, explodeWithGravity, false);
         ball.setColour(new Color(255, 255, 0));
         ball.addFlag(Events.EXPLODE_PERSIST);
         addSceneObject(new SceneObject(ball, new Point(500,200,450), ScanlineShaderFactory.TEXGORAUD.getDefaultSelector()));

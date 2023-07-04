@@ -13,6 +13,7 @@ import com.graphics.lib.interfaces.IPlugable;
 import com.graphics.lib.orientation.OrientationData;
 import com.graphics.lib.orientation.SimpleOrientation;
 import com.graphics.lib.plugins.Events;
+import com.graphics.lib.plugins.ExplosionSettings;
 import com.graphics.lib.plugins.PluginLibrary;
 import com.graphics.lib.traits.OrientableTrait;
 import com.graphics.lib.traits.PlugableTrait;
@@ -34,8 +35,9 @@ public class ExplodingProjectile extends Projectile {
 		proj.setBaseIntensity(1);
 		proj.setColour(new Color(255, 0, 0, 80));
 		proj.setCastsShadow(false);
+		ExplosionSettings settings = new ExplosionSettings(null, 15,20);
 		TraitHandler.INSTANCE.registerTrait(proj, PlugableTrait.class)
-		                     .registerPlugin(Events.EXPLODE, TestUtils.getExplodePlugin(getClipLibrary()), false)
+		                     .registerPlugin(Events.EXPLODE, TestUtils.getExplodePlugin(getClipLibrary(), settings), false)
 		                     .registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollidedNew(TestUtils.getFilteredObjectList(), Events.EXPLODE, Events.EXPLODE), true);
 		proj.addFlag(TestUtils.SILENT_EXPLODE);
 
@@ -61,7 +63,7 @@ public class ExplodingProjectile extends Projectile {
 		move.moveUntil(t -> t.getDistanceMoved() >= this.getRange());
 		proj.addTransform(move);
 		
-		Transform projt = new RepeatingTransform<Rotation>(new Rotation(Axis.Z, 20), t -> move.isCompleteSpecific());
+		Transform projt = new RepeatingTransform<>(new Rotation(Axis.Z, 20), t -> move.isCompleteSpecific());
 
 		TraitHandler.INSTANCE.getTrait(proj, IOrientable.class).ifPresent(o -> proj.addTransform(o.toBaseOrientationTransform()));
 		

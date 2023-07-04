@@ -48,13 +48,13 @@ public class BouncyProjectile extends Projectile {
 		return obj -> {	
 				ICanvasObject impactee = PluginLibrary.hasCollidedNew(TestUtils.getFilteredObjectList(),null, null).execute(obj);
 				if (impactee != null){
-					if (impactee.hasFlag(Events.STICKY)){ 
+					if (impactee.hasFlag(Events.STICKY)){
 						PluginLibrary.stop2().execute(obj);
 						TraitHandler.INSTANCE.getTrait(obj.getParent(), ITracker.class).ifPresent(o -> o.observeAndMatch(impactee, Set.of()));
 						getClipLibrary().ifPresent(cl -> cl.playSound("STICK", -20f));
 					}
 					else {
-						PluginLibrary.bounce(impactee).execute(obj);
+						PluginLibrary.bounce(impactee, 1).execute(obj);
 						getClipLibrary().ifPresent(cl -> cl.playSound("BOUNCE", -20f));
 					}
 				}

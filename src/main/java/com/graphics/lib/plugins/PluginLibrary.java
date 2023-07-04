@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.graphics.lib.canvas.Canvas3D;
+import com.graphics.lib.transform.*;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.graphics.lib.Axis;
@@ -27,11 +28,6 @@ import com.graphics.lib.interfaces.IOrientable;
 import com.graphics.lib.interfaces.IPlugable;
 import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.traits.TraitHandler;
-import com.graphics.lib.transform.MovementTransform;
-import com.graphics.lib.transform.RepeatingTransform;
-import com.graphics.lib.transform.Rotation;
-import com.graphics.lib.transform.Transform;
-import com.graphics.lib.transform.Translation;
 
 public class PluginLibrary {
 	
@@ -80,7 +76,7 @@ public class PluginLibrary {
 		};
 	}
 	
-	public static IPlugin<IPlugable, Set<ICanvasObject>> explode() 
+	public static IPlugin<IPlugable, Set<ICanvasObject>> explode(ExplosionSettings settings)
 	{
 		return plugable -> {
 		    ICanvasObject obj = plugable.getParent();
@@ -94,7 +90,11 @@ public class PluginLibrary {
     			double xVector = baseVector.x() + (Math.random()/2) - 0.25;
     			double yVector = baseVector.y() + (Math.random()/2) - 0.25;
     			double zVector = baseVector.z() + (Math.random()/2) - 0.25;
-    			MovementTransform move = new MovementTransform(new Vector(xVector, yVector, zVector), Math.random() * 15 + 1 );
+    			//MovementTransform move = new MovementTransform(new Vector(xVector, yVector, zVector), Math.random() * 16 + 1 );
+				double force = settings.minForce() + ((settings.maxForce() - settings.minForce()) * Math.random());
+				MovementTransform move = new MovementTransform(new Vector(xVector, yVector, zVector), force);
+				//move.setAcceleration(new TendToAcceleration(new Vector(0.3,2,0.3), new Vector(0,100,0)));
+				move.setAcceleration(settings.fragementAcceleration());
     			fragment.addTransform(move);
     			CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(fragment, 
     																		new RepeatingTransform<>(Axis.Y.getRotation(Math.random() * 10),
@@ -138,7 +138,7 @@ public class PluginLibrary {
 		};
 	}
 	
-	public static IPlugin<IPlugable,ICanvasObject> hasCollided(ICanvasObjectList objects, String impactorPlugin, String impacteePlugin)
+	public static IPlugin<IPlugable,ICanvasObject> hasCollided(ICanvasObjectList objects, String impactorPlugin, String impacteePlugin, boolean maintainCollisionState)
 	{
 		return plugable -> {
 		    ICanvasObject obj = plugable.getParent();
@@ -156,8 +156,9 @@ public class PluginLibrary {
 					if (impacteePlugin != null) {
 					    TraitHandler.INSTANCE.getTrait(impactee, IPlugable.class).ifPresent(impacteePlugable -> impacteePlugable.executePlugin(impacteePlugin));
 					}
-
-					plugable.registerPlugin(IN_COLLISION, o -> impactee, false);
+					if (maintainCollisionState) {
+						plugable.registerPlugin(IN_COLLISION, o -> impactee, false);
+					}
 					return impactee;
 				}else if (impactee.equals(inCollision)) {
 					plugable.removePlugin(IN_COLLISION);
@@ -241,14 +242,14 @@ public class PluginLibrary {
 		return plugable -> {
 		    ICanvasObject obj = plugable.getParent();
 			for (MovementTransform t : obj.getTransformsOfType(MovementTransform.class)){
-				t.setSpeed(0);
+				t.stop();
 			}
 			plugable.removePlugins();
 			return null;
 		};
 	}
 	
-	public static IPlugin<IPlugable, Void> bounce(ICanvasObject impactee)
+	public static IPlugin<IPlugable, Void> bounce(ICanvasObject impactee, double bounceSpeedFactor)
 	{
 		return plugable -> {
 		    ICanvasObject obj = plugable.getParent();
@@ -285,7 +286,12 @@ public class PluginLibrary {
 					}
 				}
 			}
-			curFacet.ifPresent(facet -> Utils.reflect(move, facet.getNormal()));
+
+			curFacet.ifPresentOrElse(facet -> Utils.reflect(move, facet.getNormal(), bounceSpeedFactor),
+					() -> {
+						//there is a point inside but no crossover event, lets stop all movement
+						stop(true).execute(plugable);
+					});
 			
 			return null;
 		};

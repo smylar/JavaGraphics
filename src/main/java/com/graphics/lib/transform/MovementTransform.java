@@ -6,28 +6,32 @@ import java.util.function.Predicate;
 import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
 import com.graphics.lib.interfaces.IVectorFinder;
+import org.apache.commons.lang3.tuple.Pair;
 
 public class MovementTransform extends Transform {
 
 	private Vector vector;
-	private double speed;
-	private IVectorFinder vectorFinder;
+
+	private Vector velocity = Vector.ZERO_VECTOR;
+	private final IVectorFinder vectorFinder;
 	private double distanceMoved = 0;
-	private double acceleration = 0;
-	private double maxSpeed = 0;
+	private Acceleration acceleration = null;
+
+	private double lastSpeed;
+
 	Predicate<MovementTransform> until;
 	
-	public MovementTransform(IVectorFinder vectorFinder, double speed)
+	public MovementTransform(IVectorFinder vectorFinder, double speed) //TODO should split this into fixed and finder types
 	{
 		this.vectorFinder = vectorFinder;
-		this.speed = speed;
+		this.lastSpeed = speed;
 	}
 	
 	public MovementTransform(Vector vector, double speed)
 	{
 		this.vectorFinder = null;
-		this.speed = speed;
-		this.vector = vector;
+		this.lastSpeed = speed;
+		setVector(vector);
 	}
 	
 	public MovementTransform moveUntil(Predicate<MovementTransform> until)
@@ -42,44 +46,42 @@ public class MovementTransform extends Transform {
 
 	public MovementTransform setVector(Vector vector) {
 		this.vector = vector.getUnitVector();
+		this.velocity = vector.generateVelocity(lastSpeed);
 		return this;
-	}
-	
-	public double getMaxSpeed() {
-		return maxSpeed;
-	}
-
-	public void setMaxSpeed(double maxSpeed) {
-		this.maxSpeed = maxSpeed;
 	}
 
 	public double getSpeed() {
-		return speed;
+		return lastSpeed;
 	}
 	
 	/**
 	 * Get the vector combined with the speed (velocity)
 	 * (Note each call generates a new Vector object)
-	 * @return
 	 */
 	public Vector getVelocity(){
-		return new Vector(vector.x() * speed, vector.y() * speed, vector.z() * speed);
+		return velocity;
 	}
 
 	public void setSpeed(double speed) {
 		//TODO extra work around negative speeds
-		this.speed = (this.maxSpeed > 0 && speed > maxSpeed) ? maxSpeed : speed;
+		lastSpeed = speed;
+	}
+
+	public void stop() {
+		lastSpeed = 0;
+		velocity = Vector.ZERO_VECTOR;
+		acceleration = null;
 	}
 	
 	public double getDistanceMoved() {
 		return distanceMoved;
 	}
 
-	public double getAcceleration() {
+	public Acceleration getAcceleration() {
 		return acceleration;
 	}
 
-	public void setAcceleration(double acceleration) {
+	public void setAcceleration(Acceleration acceleration) {
 		this.acceleration = acceleration;
 	}
 
@@ -91,26 +93,32 @@ public class MovementTransform extends Transform {
 	@Override
 	public void afterTransform()
 	{
-		this.distanceMoved += this.speed;
-		if (this.maxSpeed == 0 || this.speed < this.maxSpeed){
-			this.speed += this.acceleration;
-		}
+		distanceMoved += lastSpeed;
 	}
 
 	@Override
 	public Consumer<Point> doTransformSpecific() {
 		return p -> {
-			p.x += vector.x() * speed;
-			p.y += vector.y() * speed;
-			p.z += vector.z() * speed;
+			p.x += velocity.x();
+			p.y += velocity.y();
+			p.z += velocity.z();
 		};
 	}
 
 	@Override
 	public void beforeTransform() {
-		if (vectorFinder != null)
-			this.vector = vectorFinder.getVector();
-		
+		if (vectorFinder != null) {
+			setVector(vectorFinder.getVector().getUnitVector());
+		}
+
+		if (acceleration != null) {
+			Pair<Vector,Double> newVelocity = acceleration.modify(vector, lastSpeed);
+			velocity = newVelocity.getLeft();
+			lastSpeed = newVelocity.getRight();
+			if (acceleration.changesDirection()) {
+				vector = velocity.getUnitVector();
+			}
+		}
 	}	
 
 }

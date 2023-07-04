@@ -36,7 +36,7 @@ public class Utils {
 		return (ls, obj, p, v, f) -> {
 			IntensityComponents maxIntensity = new IntensityComponents();
 			
-			ls.stream().filter(l -> l.isOn()).forEach(l ->
+			ls.stream().filter(ILightSource::isOn).forEach(l ->
 			{
 				IntensityComponents intComps = l.getIntensityComponents(p);
 				if (intComps.hasNoIntensity()) return;
@@ -140,16 +140,16 @@ public class Utils {
 		));
 	}
 	
-	public static void reflect (MovementTransform move, Vector surfaceNormal) {
+	public static void reflect (MovementTransform move, Vector surfaceNormal, double bounceSpeedFactor) {
 		Vector moveVector = move.getVector();
 	    //I know r=d-2(d.n)n is reflection vector in 2 dimension (hopefully it'll work on 3)
         double multiplier = moveVector.dotProduct(surfaceNormal) * -2;
-             
         move.setVector(new Vector(
         					 moveVector.x() + (surfaceNormal.x() * multiplier),
         					 moveVector.y() + (surfaceNormal.y() * multiplier),
         					 moveVector.z() + (surfaceNormal.z() * multiplier)
         					 ));
+		move.setSpeed(move.getSpeed()*bounceSpeedFactor);
 	}
 	
 	public static CanvasObject getParticle(final Point p, final double particleSize) {

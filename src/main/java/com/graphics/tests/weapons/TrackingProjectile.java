@@ -6,6 +6,7 @@ import com.graphics.lib.Point;
 import com.graphics.lib.canvas.CanvasObject;
 import com.graphics.lib.interfaces.IOrientation;
 import com.graphics.lib.plugins.Events;
+import com.graphics.lib.plugins.ExplosionSettings;
 import com.graphics.lib.plugins.PluginLibrary;
 import com.graphics.lib.traits.OrientableTrait;
 import com.graphics.lib.traits.PlugableTrait;
@@ -34,8 +35,8 @@ public class TrackingProjectile extends TargetedProjectile {
 		proj.addTransform(move);
 
 		TraitHandler.INSTANCE.registerTrait(proj, PlugableTrait.class)
-		  .registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollided(TestUtils.getFilteredObjectList(), Events.EXPLODE, Events.EXPLODE), true)
-		  .registerPlugin(Events.EXPLODE, TestUtils.getExplodePlugin(this.getClipLibrary()), false)
+		  .registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollided(TestUtils.getFilteredObjectList(), Events.EXPLODE, Events.EXPLODE, true), true)
+		  .registerPlugin(Events.EXPLODE, TestUtils.getExplodePlugin(this.getClipLibrary(), ExplosionSettings.getDefault()), false)
 		  .registerPlugin("Track", PluginLibrary.track(this.getTargetFinder().find(), 2), true);
 
 		TraitHandler.INSTANCE.registerTrait(proj, OrientableTrait.class).setOrientation(orientation);

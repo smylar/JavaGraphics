@@ -29,6 +29,11 @@ public record Vector(double x, double y, double z) {
 		
 		return new Vector(this.x/divider, this.y/divider, this.z/divider);
 	}
+
+	public Vector generateVelocity(double speed) {
+		Vector unit = getUnitVector();
+		return new Vector(unit.x() * speed, unit.y() * speed, unit.z() * speed);
+	}
 	
 	/**
 	 * Get speed of this vector compared to the unit vector

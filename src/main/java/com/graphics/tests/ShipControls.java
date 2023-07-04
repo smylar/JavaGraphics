@@ -10,9 +10,7 @@ import com.graphics.lib.control.ObjectInputController;
 import com.graphics.lib.interfaces.IEffector;
 import com.graphics.lib.interfaces.IOrientable;
 import com.graphics.lib.traits.TraitHandler;
-import com.graphics.lib.transform.MovementTransform;
-import com.graphics.lib.transform.RepeatingTransform;
-import com.graphics.lib.transform.Rotation;
+import com.graphics.lib.transform.*;
 import com.graphics.tests.shapes.Ship;
 
 /**
@@ -24,22 +22,26 @@ import com.graphics.tests.shapes.Ship;
 public final class ShipControls extends ObjectInputController<Ship> {
 
 	private final IOrientable orientable;
+	private final Acceleration forwardAcceleration;
+	private final Acceleration backwardAcceleration;
 	
 	public ShipControls(Ship controlledObject) throws Exception {
 		super(controlledObject);
 		orientable = TraitHandler.INSTANCE.getTrait(controlledObject, IOrientable.class).orElseThrow();
+		forwardAcceleration = new InlineAcceleration(controlledObject.getAcceleration(), 0);
+		backwardAcceleration = new InlineAcceleration(-controlledObject.getAcceleration(), 0);
 	}
 
 	public void increaseSpeed() {
-		getMovement(FORWARD).setAcceleration(this.controlledObject.getAcceleration());
+		getMovement(FORWARD).setAcceleration(forwardAcceleration);
 	}
 	
 	public void decreaseSpeed() {
-		getMovement(FORWARD).setAcceleration(-this.controlledObject.getAcceleration());
+		getMovement(FORWARD).setAcceleration(backwardAcceleration);
 	}
 	
 	public void stopAccelerating() {
-		getMovement(FORWARD).setAcceleration(0);
+		getMovement(FORWARD).setAcceleration(null);
 	}
 	
 	public void panRight() {
@@ -137,7 +139,7 @@ public final class ShipControls extends ObjectInputController<Ship> {
 	    params.ifPresent(p -> 
 	              p.stream().map(controlledObject::getWeapon)
 	                        .flatMap(Optional::stream)
-	                        .forEach(action::accept)
+	                        .forEach(action)
 	    );
 	}
 	

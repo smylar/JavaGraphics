@@ -9,6 +9,7 @@ import com.graphics.lib.canvas.CanvasObjectFunctions;
 import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IOrientation;
 import com.graphics.lib.plugins.Events;
+import com.graphics.lib.plugins.ExplosionSettings;
 import com.graphics.lib.plugins.PluginLibrary;
 import com.graphics.lib.traits.PlugableTrait;
 import com.graphics.lib.traits.TraitHandler;
@@ -28,8 +29,8 @@ public class DeflectionProjectile extends TargetedProjectile {
 		proj.setProcessBackfaces(true);
 
 		TraitHandler.INSTANCE.registerTrait(proj, PlugableTrait.class)
-		                     .registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollided(TestUtils.getFilteredObjectList(), Events.EXPLODE, Events.EXPLODE), true)
-		                     .registerPlugin(Events.EXPLODE, TestUtils.getExplodePlugin(this.getClipLibrary()), false);
+		                     .registerPlugin(Events.CHECK_COLLISION, PluginLibrary.hasCollided(TestUtils.getFilteredObjectList(), Events.EXPLODE, Events.EXPLODE, true), true)
+		                     .registerPlugin(Events.EXPLODE, TestUtils.getExplodePlugin(this.getClipLibrary(), ExplosionSettings.getDefault()), false);
 		
 		ICanvasObject target = this.getTargetFinder().find();
 		Vector vTrackee = (target == null || startPoint == null) ? orientation.getForward() : CanvasObjectFunctions.DEFAULT.get().plotDeflectionShot(target, startPoint, this.getSpeed()).getLeft();
