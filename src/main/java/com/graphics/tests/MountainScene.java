@@ -20,7 +20,7 @@ public class MountainScene extends FlooredFrame {
 
         super.buildFrame();
 
-        Mountain mountain = new Mountain(5, 500, 300);
+        Mountain mountain = new Mountain(5, 500, 300, 100);
         mountain.setSnowLine(350, Color.WHITE)
                 .setColour(new Color(217, 128, 69));
         mountain.useAveragedNormals(60);

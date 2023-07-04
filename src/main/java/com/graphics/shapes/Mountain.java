@@ -19,12 +19,12 @@ import java.util.stream.Stream;
 
 public class Mountain extends CanvasObject {
 
-    public Mountain(int levels, double height, double width) {
-        super(self -> init(levels, height, width), Mountain.class);
+    public Mountain(int levels, double height, double width, double variation) {
+        super(self -> init(levels, height, width, variation), Mountain.class);
         fixCentre();
     }
 
-    private static Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>> init(int levels, double height, double radius) {
+    private static Pair<ImmutableList<WorldCoord>, ImmutableList<Facet>> init(int levels, double height, double radius, double variation) {
         //use a fractal method, repeatedly divide triangles moving the height by a random amount each time
 
         double z = Math.sin(Math.toRadians(60))*radius;
@@ -46,7 +46,7 @@ public class Mountain extends CanvasObject {
             new Facet(coord1, coord5, coord6),
             new Facet(coord1, coord6, coord7),
             new Facet(coord1, coord7, coord2))
-                .flatMap(f -> divideAndRaise(f, 1, levels, sharedPoints))
+                .flatMap(f -> divideAndRaise(f, 1, levels, variation, sharedPoints))
                 .toList();
 
 
@@ -65,11 +65,12 @@ public class Mountain extends CanvasObject {
         return Pair.of(ImmutableList.copyOf(coordCounts.keySet()), ImmutableList.copyOf(facets));
     }
 
-    private static Stream<Facet> divideAndRaise(Facet facet, final int level, final int maxLevel, final Set<SharedPoint> sharedPoints) {
+    private static Stream<Facet> divideAndRaise(Facet facet, final int level, final int maxLevel, final double variation, final Set<SharedPoint> sharedPoints) {
         List<WorldCoord> fCoords = facet.getAsList();
-        WorldCoord mid1 = getRaisedMidpoint(fCoords.get(0), fCoords.get(1), level, sharedPoints);
-        WorldCoord mid2 = getRaisedMidpoint(fCoords.get(1), fCoords.get(2), level, sharedPoints);
-        WorldCoord mid3 = getRaisedMidpoint(fCoords.get(2), fCoords.get(0), level, sharedPoints);
+        double levelVariation = variation/level;
+        WorldCoord mid1 = getRaisedMidpoint(fCoords.get(0), fCoords.get(1), levelVariation, sharedPoints);
+        WorldCoord mid2 = getRaisedMidpoint(fCoords.get(1), fCoords.get(2), levelVariation, sharedPoints);
+        WorldCoord mid3 = getRaisedMidpoint(fCoords.get(2), fCoords.get(0), levelVariation, sharedPoints);
 
         Stream<Facet> facets = Stream.of(
                 new Facet(fCoords.get(0), mid1, mid3),
@@ -81,18 +82,16 @@ public class Mountain extends CanvasObject {
             return facets;
         }
 
-        return facets.flatMap(f -> divideAndRaise(f, level+1, maxLevel, sharedPoints));
+        return facets.flatMap(f -> divideAndRaise(f, level+1, maxLevel, variation, sharedPoints));
     }
 
-    private static WorldCoord getRaisedMidpoint(WorldCoord wc1, WorldCoord wc2, int level, Set<SharedPoint> sharedPoints) {
+    private static WorldCoord getRaisedMidpoint(WorldCoord wc1, WorldCoord wc2, double variation, Set<SharedPoint> sharedPoints) {
         return sharedPoints.stream()
-                .map(sp -> sp.getSharedMidPoint(wc1, wc2))//may want some better addressing rather than filtering, but isn't run after object initialised
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .flatMap(sp -> sp.getSharedMidPoint(wc1, wc2).stream())//may want some better addressing rather than filtering, but isn't run after object initialised
                 .findFirst()
                 .orElseGet(() -> {
                     Vector v = wc1.vectorToPoint(wc2);
-                    double raiseAmount = (-100d/level) + Math.random() * (200d/level); //probably should be some function of height or configurable
+                    double raiseAmount = Math.random() * (variation*2) - variation;
                     double y = wc1.y + v.y()/2 - raiseAmount;
                     WorldCoord midPoint = new WorldCoord(wc1.x + v.x()/2, y > 0 ? 0 : y, wc1.z + v.z()/2); //n.b. world coords still flipped so decreasing y values are the upwards direction
                     sharedPoints.add(new SharedPoint(wc1, wc2, midPoint));
