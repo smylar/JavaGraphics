@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -150,7 +151,7 @@ public class Canvas3D extends AbstractCanvas {
 			return null;
 
 	    }
-		return currentFrame.getFloor().getFacetList().get(0);
+		return currentFrame.getFloor().getFacetList().getFirst();
 	}
 	
 	public SceneFrame getCurrentScene() {
@@ -188,22 +189,22 @@ public class Canvas3D extends AbstractCanvas {
 	    tickCount++;
 	    switchFrames();
 		addPendingLightsources();
-		
+
 		getCamera().setViewport(this.getWidth(), this.getHeight());
-		
+
 		this.lightSources.removeIf(ILightSource::isDeleted);
-		
+
 		Set<ICanvasObject> processShapes = Set.copyOf(this.getShapes())
 		                                       .parallelStream()
 		                                       .filter(this::filterShapes)
 		                                       .map(ICanvasObject::applyTransforms)
 		                                       .collect(Collectors.toSet());
-		
+
 		getCamera().doTransforms();
-		
+
 		if (this.drawShadows && Objects.nonNull(this.getFloorPlane())) {
 
-		    processShapes.addAll(processShapes.stream() 
+		    processShapes.addAll(processShapes.stream()
 		                                      .flatMap(s -> getShadowOnFloor(s).parallelStream())
 		                                      .collect(Collectors.toSet()));
 		}
@@ -298,8 +299,31 @@ public class Canvas3D extends AbstractCanvas {
     }
 	
 	private Observable<ICanvasObject> renderShapes(Set<ICanvasObject> shapes) {
+		prepareZBuffer();
 		Set<ICanvasObject> frameObjects = currentFrame.getFrameObjects().stream().map(SceneObject::object).collect(Collectors.toSet());
-	    return Observable.fromIterable(shapes)
+		Map<ICanvasObject, Thread> shapeThreads = shapes.stream()
+				.peek(s -> {
+					s.onDrawComplete();  //cross object updates can happen here safer not to be parallel
+					notifyEvent(PROCESS, s);
+                })
+				.filter(s -> frameObjects.contains(s) || isUnbound(s)) //only draw if in current frame
+				.collect(Collectors.toUnmodifiableMap(
+						Function.identity(),
+						s -> Thread.startVirtualThread(() -> processShape(s, getzBuffer(), getShader(s, getCamera())))
+				));
+
+		return Observable.fromIterable(shapeThreads.entrySet())
+				.map(es -> {
+					es.getValue().join();
+					return es.getKey();
+				})
+				.doOnComplete(() -> {
+					getzBuffer().refreshBuffer();
+					SwingUtilities.invokeLater(this::repaint);
+					notifyEvent(PAINT);
+				});
+
+	    /*return Observable.fromIterable(shapes)
 	              .doOnSubscribe(d -> prepareZBuffer())
 	              .doOnNext(s -> {
 	                  s.onDrawComplete();  //cross object updates can happen here safer not to be parallel
@@ -311,7 +335,7 @@ public class Canvas3D extends AbstractCanvas {
 	                  getzBuffer().refreshBuffer();
 	                  SwingUtilities.invokeLater(this::repaint);
 	                  notifyEvent(PAINT);
-	              });
+	              });*/
 	}
 	
 	private void notifyEvent(CanvasEvent event) {

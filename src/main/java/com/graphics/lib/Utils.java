@@ -197,13 +197,13 @@ public class Utils {
     }
     
     
-    public static <T,R> R recurse(final Iterable<T> iteratable, final BiFunction<T,R,R> function, final R initital) {
+    public static <T,R> R recurse(final Iterable<T> iterable, final BiFunction<T,R,R> function, final R initial) {
         //actually quite similar to using stream().collect() or .reduce()
-        return recurse(iteratable.iterator(), function, initital);
+        return recurse(iterable.iterator(), function, initial);
     }
     
-    public static <T,R> R recurse(final Iterable<T> iteratable, final BiFunction<T,R,R> function) {
-        return recurse(iteratable.iterator(), function, null);
+    public static <T,R> R recurse(final Iterable<T> iterable, final BiFunction<T,R,R> function) {
+        return recurse(iterable.iterator(), function, null);
     }
     
     public static <T,R> R recurse(final Iterator<T> iterator, final BiFunction<T,R,R> function, final R prevResult) {
