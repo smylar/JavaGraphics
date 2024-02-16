@@ -83,14 +83,14 @@ public class Canvas3D extends AbstractCanvas {
 
 	
 	@Property(name="canvas.drawMode", defaultValue="NORMAL")
-    private DrawMode drawMode;
+  private DrawMode drawMode;
 
-	protected Canvas3D(Camera camera, SceneMap sceneMap) {
+  protected Canvas3D(Camera camera, SceneMap sceneMap) {
 		super(camera);
 		this.sceneMap = sceneMap;
   }
-	
-	public static Canvas3D get(Camera camera, SceneMap sceneMap) {
+
+  public static Canvas3D get(Camera camera, SceneMap sceneMap) {
 		if (cnv == null) {
 		    cnv = new Canvas3D(camera, sceneMap);
 		} else {
@@ -98,92 +98,91 @@ public class Canvas3D extends AbstractCanvas {
 		}
 		return cnv;
 	}
-	
-	public static Canvas3D get() {
+
+  public static Canvas3D get() {
 		return cnv;
 	}
-	
-	public double getHorizon() {
+
+  public double getHorizon() {
 		return horizon;
 	}
 
-	public void setHorizon(double horizon) {
+  public void setHorizon(double horizon) {
 		this.horizon = horizon;
 	}
-	
-	public boolean isDrawShadows() {
+
+  public boolean isDrawShadows() {
 		return drawShadows;
 	}
 
-	public void setDrawShadows(boolean drawShadows) {
+  public void setDrawShadows(boolean drawShadows) {
 		this.drawShadows = drawShadows;
 	}
 
-	public void addLightSource(ILightSource lightSource) {
+  public void addLightSource(ILightSource lightSource) {
 		if (lightSource != null) {
 		    this.lightSourcesToAdd.add(lightSource);
 		}
 	}
-	
-	public Set<ICanvasObject> getShapes(Predicate<ICanvasObject> predicate) {
+
+  public Set<ICanvasObject> getShapes(Predicate<ICanvasObject> predicate) {
 	    synchronized(shapes) {
 	        return shapes.keySet().stream().filter(predicate).collect(Collectors.toSet());
 	    }
 	}
-	
-	public Set<ICanvasObject> getShapes() {
+
+  public Set<ICanvasObject> getShapes() {
 		return shapes.keySet();
 	}
-	
-	public IShaderFactory getShader(ICanvasObject obj, Camera cam) {
+
+  public IShaderFactory getShader(ICanvasObject obj, Camera cam) {
 		return shapes.get(obj) == null ? ScanlineShaderFactory.NONE : shapes.get(obj).apply(obj, cam);
 	}
-	
-	public void replaceShader(ICanvasObject obj, IShaderSelector selector) {
-	    
-	    if (!drawMode.fixedShader()) {
-	        this.shapes.replace(obj, selector);
-	    }
+
+  public void replaceShader(ICanvasObject obj, IShaderSelector selector) {
+    if (!drawMode.fixedShader()) {
+      this.shapes.replace(obj, selector);
+    }
 	}
-	
-	public Facet getFloorPlane() {
+
+  public Facet getFloorPlane() {
     if (currentFrame == null) {
       return null;
     }
 		return currentFrame.getFloor().getFacetList().getFirst();
 	}
-	
-	public SceneFrame getCurrentScene() {
+
+  public SceneFrame getCurrentScene() {
 		return currentFrame;
 	}
-	
-	public void addObserver(ISecondaryCamera l){
+
+  public void addObserver(ISecondaryCamera l){
 		this.slaves.add(l);
 	}
-	
-	public long getTicks() {
+
+  public long getTicks() {
 	    return tickCount;
 	}
-	
-	public Optional<ICanvasObject> getObjectAt(final int x, final int y) {
+
+  public Optional<ICanvasObject> getObjectAt(final int x, final int y) {
 	    
 	    return Optional.ofNullable(getzBuffer())
 	                   .map(zBuf -> zBuf.getItemAt(x, y))
 	                   .map(ZBufferItem::getTopMostObject);
 	}
 
-	public void registerObject(ICanvasObject obj, Point position) {
+  public void registerObject(ICanvasObject obj, Point position) {
 		registerObject(obj, position, (o,c) -> ScanlineShaderFactory.NONE, false);
 	}
 
-	public void registerObject(ICanvasObject obj, Point position, IShaderSelector shaderSelector){
+  public void registerObject(ICanvasObject obj, Point position, IShaderSelector shaderSelector){
 		registerObject(obj, position, shaderSelector, false);
 	}
 
 	/**
 	 * Trigger a draw cycle
 	 */
-	public Observable<ICanvasObject> doDraw()
+  public Observable<ICanvasObject> doDraw()
 	{
 	  tickCount++;
 	  switchFrames();
@@ -211,15 +210,15 @@ public class Canvas3D extends AbstractCanvas {
 		return renderShapes(processShapes);
 	}
 
-	Set<ILightSource> getLightSources(SceneFrame frame) {
+  Set<ILightSource> getLightSources(SceneFrame frame) {
 		return Stream.concat(lightSources.stream(), frame.getFrameLightsources().stream()).collect(Collectors.toSet());
 	}
 
-	boolean isUnbound(ICanvasObject obj) {
+  boolean isUnbound(ICanvasObject obj) {
 		return obj.hasFlag(UNBOUND);
 	}
 
-	private void registerObject(ICanvasObject obj, Point position, IShaderSelector shaderSelector, boolean sceneBound)
+  private void registerObject(ICanvasObject obj, Point position, IShaderSelector shaderSelector, boolean sceneBound)
 	{
 		if (Objects.isNull(obj) || shapes.containsKey(obj)) {
 			return;
@@ -239,8 +238,8 @@ public class Canvas3D extends AbstractCanvas {
 		}
 
 	}
-	
-	private void switchFrames() {
+
+  private void switchFrames() {
 
 	  Point camPos = getCamera().getPosition();
 		//we'll presume frame floor coords are axis aligned as it makes sense to do so, therefore no transforms required
@@ -268,7 +267,7 @@ public class Canvas3D extends AbstractCanvas {
 		loadedFrames = framesToLoad;
 	}
 
-	private void loadScene (SceneFrame newFrame, int xOffset, int zOffset) {
+  private void loadScene (SceneFrame newFrame, int xOffset, int zOffset) {
 		newFrame.buildFrame();
 
 		newFrame.getFrameLightsources().forEach(ls -> {
@@ -281,8 +280,8 @@ public class Canvas3D extends AbstractCanvas {
 			registerObject(o.object(), new Point(position.x + xOffset, position.y, position.z + zOffset), o.shaderSelector(), true);
 		});
 	}
-	
-	private boolean filterShapes(ICanvasObject shape) {
+
+  private boolean filterShapes(ICanvasObject shape) {
 	  if (shape.isDeleted()) {
 	    shapes.remove(shape);
 	    return false;
@@ -292,20 +291,20 @@ public class Canvas3D extends AbstractCanvas {
 	}
 	
 	@Override
-	protected void prepareZBuffer() {
+  protected void prepareZBuffer() {
     super.prepareZBuffer();
     notifyEvent(PREPARE_BUFFER);
   }
-	
-	private Observable<ICanvasObject> renderShapes(Set<ICanvasObject> shapes) {
+
+  private Observable<ICanvasObject> renderShapes(Set<ICanvasObject> shapes) {
 		prepareZBuffer();
 		Set<ICanvasObject> frameObjects = currentFrame.getFrameObjects().stream().map(SceneObject::object).collect(Collectors.toSet());
 		Map<ICanvasObject, Thread> shapeThreads = shapes.stream()
 				.peek(s -> {
           s.onDrawComplete();  //cross object updates can happen here safer not to be parallel
-					notifyEvent(PROCESS, s);
+          notifyEvent(PROCESS, s);
         })
-				.filter(s -> frameObjects.contains(s) || isUnbound(s)) //only draw if in current frame
+        .filter(s -> frameObjects.contains(s) || isUnbound(s)) //only draw if in current frame
 				.collect(Collectors.toUnmodifiableMap(
             Function.identity(),
 						s -> Thread.startVirtualThread(() -> processShape(s, getzBuffer(), getShader(s, getCamera())))
@@ -337,23 +336,23 @@ public class Canvas3D extends AbstractCanvas {
 	                  notifyEvent(PAINT);
 	              });*/
 	}
-	
-	private void notifyEvent(CanvasEvent event) {
-        notifyEvent(event, null);
-    }
-	
-	private void notifyEvent(CanvasEvent event, ICanvasObject object) {
+
+  private void notifyEvent(CanvasEvent event) {
+    notifyEvent(event, null);
+  }
+
+  private void notifyEvent(CanvasEvent event, ICanvasObject object) {
 	    slaves.forEach(sl -> sl.update(this, event, object));
 	}
-	
-	private void addPendingLightsources() {
+
+  private void addPendingLightsources() {
 	    if (!lightSourcesToAdd.isEmpty()) {
         lightSources.addAll(lightSourcesToAdd);
         lightSourcesToAdd.clear();
       }
 	}
 
-	private void processShape(ICanvasObject obj, IZBuffer zBuf, IShaderFactory shader)
+  private void processShape(ICanvasObject obj, IZBuffer zBuf, IShaderFactory shader)
 	{
 		if (obj.isVisible() && !obj.isDeleted())
 		{
@@ -376,7 +375,7 @@ public class Canvas3D extends AbstractCanvas {
 	 * @param obj	Object to project a shadow for
 	 * @return		Set of generated shadow objects
 	 */
-	private Set<CanvasObject> getShadowOnFloor(ICanvasObject obj){	
+  private Set<CanvasObject> getShadowOnFloor(ICanvasObject obj){
 
 	  Facet floor = getFloorPlane();
 		if (floor == null || !obj.getCastsShadow()) {
@@ -406,8 +405,8 @@ public class Canvas3D extends AbstractCanvas {
 		                   })
 		                   .collect(Collectors.toSet());
 	}
-	
-	private void addShadowPoints(ILightSource ls, Facet f, Builder<WorldCoord> vertexList, Builder<Facet> facetList) {
+
+  private void addShadowPoints(ILightSource ls, Facet f, Builder<WorldCoord> vertexList, Builder<Facet> facetList) {
 	  List<WorldCoord> points = f.getAsList();
         
     WorldCoord p1 = getShadowPoint(ls.getPosition(), points.get(0));
@@ -426,7 +425,7 @@ public class Canvas3D extends AbstractCanvas {
     facetList.add(new Facet(p1,p2,p3));
 	}
 
-	private WorldCoord getShadowPoint(Point start, Point end) {
+  private WorldCoord getShadowPoint(Point start, Point end) {
 	  Facet floor = getFloorPlane();
 		Vector lightVector = start.vectorToPoint(end).getUnitVector();
 		Point intersect = floor.getIntersectionPointWithFacetPlane(end, lightVector);
