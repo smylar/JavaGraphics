@@ -3,7 +3,8 @@ package com.graphics.lib.shader;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.util.*;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
@@ -29,25 +30,31 @@ import com.graphics.lib.zbuffer.ScanLine;
  */
 @PropertyInject
 public enum ScanlineShaderFactory implements IShaderFactory {
-        GORAUD(GoraudShader::new, 8),
-        TEXGORAUD(TexturedGoraudShader::new, 8),
-        FLAT(FlatShader::new, 8),
-        NONE(DefaultScanlineShader::new, 8);
+        GORAUD(GoraudShader::new),
+        TEXGORAUD(TexturedGoraudShader::new),
+        FLAT(FlatShader::new),
+        NONE(DefaultScanlineShader::new);
 
-    private final LinkedBlockingQueue<ScanlineShader> pool;
+    private static final int SHADER_POOL_SIZE = shaderPoolSize();
+    private static final Semaphore semaphore = new Semaphore(SHADER_POOL_SIZE);
+    //idea here is to limit the amount of ANY shaders running to a proportion of available logical cores
+    //while allowing a specific shader type to use all space available
+    private final ConcurrentLinkedQueue<ScanlineShader> pool = new ConcurrentLinkedQueue<>();
     private final IShaderSelector defaultSelector = (o, c) -> this;
     
     @Property(name="zbuffer.skip", defaultValue="2")
     private Integer skip;
     
-    ScanlineShaderFactory(Supplier<ScanlineShader> shader, int poolSize) {
-        pool = new LinkedBlockingQueue<>(poolSize);
+    ScanlineShaderFactory(Supplier<ScanlineShader> shader) {
+        int poolSize = shaderPoolSize();
         for (int i = 0 ; i < poolSize ; i++) {
             ScanlineShader shaderImpl = shader.get();
-            shaderImpl.setCloseAction(pool::add);
+            shaderImpl.setCloseAction(this::release);
             pool.add(shaderImpl);
         }
     }
+
+
     
     @Override
     public void add(ICanvasObject parent, Camera c, Dimension screen, ZBufferItemUpdater zBufferItemUpdater, Collection<ILightSource> lightSources)
@@ -65,7 +72,8 @@ public enum ScanlineShaderFactory implements IShaderFactory {
 
     public ScanlineShader getShader() {
         try {
-            return pool.take();
+            semaphore.acquire();
+            return pool.poll();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
@@ -101,19 +109,20 @@ public enum ScanlineShaderFactory implements IShaderFactory {
                 final int xVal = x;
                 getScanline(x, lines).ifPresent(sl -> processScanline(sl, xVal, localShader, screen, zBufferItemUpdater));
             }
-        } catch (Exception e) { }
+        } catch (Exception ignored) { }
     }
     
     private Optional<ScanLine> getScanline(int xVal, List<LineEquation> lines)
     {
         ScanLine.Builder builder = ScanLine.builder();
         
-        List<LineEquation> activeLines = lines.stream().filter(line -> xVal >= line.getMinX() && xVal <= line.getMaxX())
-                                                       .filter(line -> {
-                                                           Double y = line.getYAtX(xVal);
-                                                           return Objects.nonNull(y) && y <= line.getMaxY() && y >= line.getMinY();
-                                                       })
-                                                       .toList();
+        List<LineEquation> activeLines = lines.stream()
+            .filter(line -> xVal >= line.getMinX() && xVal <= line.getMaxX())
+            .filter(line -> {
+                Double y = line.getYAtX(xVal);
+                return Objects.nonNull(y) && y <= line.getMaxY() && y >= line.getMinY();
+            })
+            .toList();
         
         
         if (activeLines.size() < 2) {
@@ -137,7 +146,10 @@ public enum ScanlineShaderFactory implements IShaderFactory {
         for(LineEquation line : activeLines)
         {
             Double y = line.getYAtX(xVal);
-            Double z = line.getZValue(xVal, y);
+            if (y == null) continue;
+            //shouldn't really happen as we can't intersect with a y = n line
+
+            double z = line.getZValue(xVal, y);
             
             if (builder.startY == null) {
                 builder.startY = y;
@@ -174,7 +186,7 @@ public enum ScanlineShaderFactory implements IShaderFactory {
         AtomicReference<Color> colour = new AtomicReference<>();
         
         IntFunction<Color> colourSupplier = yVal -> {
-            Color c = skip <= 1 || yVal % skip == 0 || colour.get() == null || shader == null ? shader.getColour(scanLine, x, yVal) : colour.get();
+            Color c = (skip <= 1 || yVal % skip == 0 || colour.get() == null) && shader != null ? shader.getColour(scanLine, x, yVal) : colour.get();
             colour.set(c);
             return c;
         };
@@ -200,5 +212,14 @@ public enum ScanlineShaderFactory implements IShaderFactory {
                                 p -> p.x > dimension.getWidth(),
                                 p -> p.y < 0,
                                 p -> p.y > dimension.getHeight()));
+    }
+
+    private void release(ScanlineShader shader) {
+        pool.add(shader);
+        semaphore.release();
+    }
+
+    private static int shaderPoolSize() {
+        return (int)Math.ceil(Runtime.getRuntime().availableProcessors() * 0.8);
     }
 }

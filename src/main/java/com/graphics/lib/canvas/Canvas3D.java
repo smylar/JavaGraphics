@@ -305,7 +305,7 @@ public class Canvas3D extends AbstractCanvas {
 				.peek(s -> {
 					s.onDrawComplete();  //cross object updates can happen here safer not to be parallel
 					notifyEvent(PROCESS, s);
-                })
+        })
 				.filter(s -> frameObjects.contains(s) || isUnbound(s)) //only draw if in current frame
 				.collect(Collectors.toUnmodifiableMap(
 						Function.identity(),
@@ -317,6 +317,7 @@ public class Canvas3D extends AbstractCanvas {
 					es.getValue().join();
 					return es.getKey();
 				})
+				.onErrorResumeNext(Observable.empty())
 				.doOnComplete(() -> {
 					getzBuffer().refreshBuffer();
 					SwingUtilities.invokeLater(this::repaint);
