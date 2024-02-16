@@ -88,7 +88,7 @@ public class Canvas3D extends AbstractCanvas {
 	protected Canvas3D(Camera camera, SceneMap sceneMap) {
 		super(camera);
 		this.sceneMap = sceneMap;
-    }
+  }
 	
 	public static Canvas3D get(Camera camera, SceneMap sceneMap) {
 		if (cnv == null) {
@@ -147,10 +147,9 @@ public class Canvas3D extends AbstractCanvas {
 	}
 	
 	public Facet getFloorPlane() {
-	    if (currentFrame == null) {
-			return null;
-
-	    }
+    if (currentFrame == null) {
+      return null;
+    }
 		return currentFrame.getFloor().getFacetList().getFirst();
 	}
 	
@@ -186,8 +185,8 @@ public class Canvas3D extends AbstractCanvas {
 	 */
 	public Observable<ICanvasObject> doDraw()
 	{
-	    tickCount++;
-	    switchFrames();
+	  tickCount++;
+	  switchFrames();
 		addPendingLightsources();
 
 		getCamera().setViewport(this.getWidth(), this.getHeight());
@@ -243,7 +242,7 @@ public class Canvas3D extends AbstractCanvas {
 	
 	private void switchFrames() {
 
-	    Point camPos = getCamera().getPosition();
+	  Point camPos = getCamera().getPosition();
 		//we'll presume frame floor coords are axis aligned as it makes sense to do so, therefore no transforms required
 		//we'll also assume they all have the same orientation (unless we start spinning rooms or something)
 		SceneWithOffset sceneWithOffset = sceneMap.getFrameFromPoint(camPos);
@@ -284,31 +283,31 @@ public class Canvas3D extends AbstractCanvas {
 	}
 	
 	private boolean filterShapes(ICanvasObject shape) {
-	    if (shape.isDeleted()) {
-	        shapes.remove(shape);
-	        return false;
-	    }
+	  if (shape.isDeleted()) {
+	    shapes.remove(shape);
+	    return false;
+	  }
 	    
-	    return !shape.hasFlag(TrackingTrait.TRACKING_TAG);
+	  return !shape.hasFlag(TrackingTrait.TRACKING_TAG);
 	}
 	
 	@Override
 	protected void prepareZBuffer() {
-        super.prepareZBuffer();
-        notifyEvent(PREPARE_BUFFER);
-    }
+    super.prepareZBuffer();
+    notifyEvent(PREPARE_BUFFER);
+  }
 	
 	private Observable<ICanvasObject> renderShapes(Set<ICanvasObject> shapes) {
 		prepareZBuffer();
 		Set<ICanvasObject> frameObjects = currentFrame.getFrameObjects().stream().map(SceneObject::object).collect(Collectors.toSet());
 		Map<ICanvasObject, Thread> shapeThreads = shapes.stream()
 				.peek(s -> {
-					s.onDrawComplete();  //cross object updates can happen here safer not to be parallel
+          s.onDrawComplete();  //cross object updates can happen here safer not to be parallel
 					notifyEvent(PROCESS, s);
         })
 				.filter(s -> frameObjects.contains(s) || isUnbound(s)) //only draw if in current frame
 				.collect(Collectors.toUnmodifiableMap(
-						Function.identity(),
+            Function.identity(),
 						s -> Thread.startVirtualThread(() -> processShape(s, getzBuffer(), getShader(s, getCamera())))
 				));
 
@@ -349,16 +348,16 @@ public class Canvas3D extends AbstractCanvas {
 	
 	private void addPendingLightsources() {
 	    if (!lightSourcesToAdd.isEmpty()) {
-            lightSources.addAll(lightSourcesToAdd);
-            lightSourcesToAdd.clear();
-        }
+        lightSources.addAll(lightSourcesToAdd);
+        lightSourcesToAdd.clear();
+      }
 	}
 
 	private void processShape(ICanvasObject obj, IZBuffer zBuf, IShaderFactory shader)
 	{
 		if (obj.isVisible() && !obj.isDeleted())
 		{
-		    getCamera().getView(obj);
+		  getCamera().getView(obj);
 			
 			zBuf.add(obj, shader, getCamera(), this.horizon, getLightSources(currentFrame));
 		}
@@ -379,7 +378,7 @@ public class Canvas3D extends AbstractCanvas {
 	 */
 	private Set<CanvasObject> getShadowOnFloor(ICanvasObject obj){	
 
-	    Facet floor = getFloorPlane();
+	  Facet floor = getFloorPlane();
 		if (floor == null || !obj.getCastsShadow()) {
 		    return Sets.newHashSet();
 		}
@@ -409,26 +408,26 @@ public class Canvas3D extends AbstractCanvas {
 	}
 	
 	private void addShadowPoints(ILightSource ls, Facet f, Builder<WorldCoord> vertexList, Builder<Facet> facetList) {
-	    List<WorldCoord> points = f.getAsList();
+	  List<WorldCoord> points = f.getAsList();
         
-        WorldCoord p1 = getShadowPoint(ls.getPosition(), points.get(0));
-        if (p1 == null) 
-            return;
-        WorldCoord p2 = getShadowPoint(ls.getPosition(), points.get(1));
-        if (p2 == null) 
-            return;
-        WorldCoord p3 = getShadowPoint(ls.getPosition(), points.get(2));
-        if (p3 == null) 
-            return;
+    WorldCoord p1 = getShadowPoint(ls.getPosition(), points.get(0));
+    if (p1 == null)
+      return;
+    WorldCoord p2 = getShadowPoint(ls.getPosition(), points.get(1));
+    if (p2 == null)
+      return;
+    WorldCoord p3 = getShadowPoint(ls.getPosition(), points.get(2));
+    if (p3 == null)
+      return;
         
-        vertexList.add(p1);
-        vertexList.add(p2);
-        vertexList.add(p3);
-        facetList.add(new Facet(p1,p2,p3));
+    vertexList.add(p1);
+    vertexList.add(p2);
+    vertexList.add(p3);
+    facetList.add(new Facet(p1,p2,p3));
 	}
 
 	private WorldCoord getShadowPoint(Point start, Point end) {
-	    Facet floor = getFloorPlane();
+	  Facet floor = getFloorPlane();
 		Vector lightVector = start.vectorToPoint(end).getUnitVector();
 		Point intersect = floor.getIntersectionPointWithFacetPlane(end, lightVector);
 		
