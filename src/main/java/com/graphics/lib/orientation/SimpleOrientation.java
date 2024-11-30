@@ -3,6 +3,7 @@ package com.graphics.lib.orientation;
 
 import java.util.stream.IntStream;
 
+import com.graphics.lib.traits.OrientableTrait;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableList;
@@ -16,10 +17,10 @@ import com.graphics.lib.interfaces.IOrientation;
 
 public class SimpleOrientation implements IOrientation {
 
-	private ICanvasObject orientation;
+	private final ICanvasObject orientation;
 	
 	public SimpleOrientation() {
-		this("");
+		this(OrientableTrait.ORIENTATION_TAG);
 	}
 
 	public SimpleOrientation(String tag) {
@@ -37,7 +38,7 @@ public class SimpleOrientation implements IOrientation {
 	
 	@Override
 	public Vector getForward() {
-		Point forward = orientation.getVertexList().get(0);
+		Point forward = orientation.getVertexList().getFirst();
 		return moveToOrigin(new Vector(forward.x, forward.y, forward.z));
 	}
 	
@@ -55,7 +56,7 @@ public class SimpleOrientation implements IOrientation {
 	
 	@Override
 	public Vector getBack() {
-		Point forward = orientation.getVertexList().get(0);
+		Point forward = orientation.getVertexList().getFirst();
 		return moveToOriginInverted(new Vector(-forward.x, -forward.y, -forward.z));
 	}
 	

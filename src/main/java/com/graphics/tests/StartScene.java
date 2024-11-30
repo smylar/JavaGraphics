@@ -1,10 +1,7 @@
 package com.graphics.tests;
 
-import java.awt.Color;
-import java.awt.event.KeyEvent;
-import java.util.Optional;
-
 import com.graphics.lib.Axis;
+import com.graphics.lib.GlobalObjects;
 import com.graphics.lib.Point;
 import com.graphics.lib.Vector;
 import com.graphics.lib.canvas.CanvasObject;
@@ -19,6 +16,7 @@ import com.graphics.lib.orientation.SimpleOrientation;
 import com.graphics.lib.plugins.Events;
 import com.graphics.lib.plugins.ExplosionSettings;
 import com.graphics.lib.plugins.IPlugin;
+import com.graphics.lib.plugins.PluginLibrary;
 import com.graphics.lib.scene.FlooredFrame;
 import com.graphics.lib.scene.SceneObject;
 import com.graphics.lib.shader.ScanlineShaderFactory;
@@ -29,12 +27,19 @@ import com.graphics.lib.traits.PlugableTrait;
 import com.graphics.lib.traits.TexturableTrait;
 import com.graphics.lib.traits.TraitHandler;
 import com.graphics.lib.transform.*;
-import com.graphics.shapes.*;
+import com.graphics.shapes.Cuboid;
+import com.graphics.shapes.Lantern;
+import com.graphics.shapes.Sphere;
+import com.graphics.shapes.Whale;
 import com.graphics.tests.shapes.FlapTest;
 import com.graphics.tests.shapes.Gate;
 import com.graphics.tests.shapes.TexturedCuboid;
 import com.graphics.tests.weapons.AmmoTracker;
 import com.sound.ClipLibrary;
+
+import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.util.Optional;
 
 public class StartScene extends FlooredFrame {
 
@@ -50,10 +55,6 @@ public class StartScene extends FlooredFrame {
         if (isLoaded()) return;
         
         super.buildFrame();
-
-        //Mountain mountain = new Mountain(5, 500, 300);
-        //mountain.setColour(new Color(217, 128, 69));
-        //addSceneObject(new SceneObject(mountain, new Point(0, floorLevel - 250,1000), ScanlineShaderFactory.FLAT.getDefaultSelector()));
 
         ObjectTiedLightSource<LightSource> l1 = new ObjectTiedLightSource<>(LightSource.class, 0,0,-500);
         l1.getLightSource().setColour(new Color(255, 0, 0));
@@ -143,8 +144,14 @@ public class StartScene extends FlooredFrame {
         cube.addTransform(cubet);
         
         Sphere ball = new Sphere(100,15);
+        SimpleOrientation faceOrientation = new SimpleOrientation();
+        faceOrientation.getRepresentation().applyTransform(Axis.Y.getRotation(90)); //face starts facing the right
+        TraitHandler.INSTANCE.registerTrait(ball, OrientableTrait.class).setOrientation(faceOrientation);
         TraitHandler.INSTANCE.registerTrait(ball, co -> new TexturableTrait(co, new OvoidTextureMapper())).addTexture(new BmpTexture("smily"));
-        TraitHandler.INSTANCE.registerTrait(ball, PlugableTrait.class).registerPlugin(Events.EXPLODE, explodeWithGravity, false);
+        TraitHandler.INSTANCE.registerTrait(ball, PlugableTrait.class)
+                .registerPlugin(Events.EXPLODE, explodeWithGravity, false)
+                .registerPlugin("lookAt", PluginLibrary.lookAt(() -> GlobalObjects.get("Ship"), 4), true);
+        //TODO probably need better mechanism to share global objects for scene to interact with
         ball.setColour(new Color(255, 255, 0));
         ball.addFlag(Events.EXPLODE_PERSIST);
         addSceneObject(new SceneObject(ball, new Point(500,200,450), ScanlineShaderFactory.TEXGORAUD.getDefaultSelector()));
@@ -166,7 +173,7 @@ public class StartScene extends FlooredFrame {
         };
         rpt.setResetAfterComplete(true);
         RepeatingTransform<?> spheret = new RepeatingTransform<>(rpt,30);
-            
+
         CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(ball, spheret);
     }
     
@@ -183,7 +190,7 @@ public class StartScene extends FlooredFrame {
         }
         
         else if (key.getKeyChar() == '1') {
-            ((LightSource)getFrameLightsources().get(0)).toggle();
+            ((LightSource)getFrameLightsources().getFirst()).toggle();
         }
         else if (key.getKeyChar() == '2') {
             ((LightSource)getFrameLightsources().get(1)).toggle();

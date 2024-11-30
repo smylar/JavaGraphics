@@ -10,11 +10,13 @@ import java.util.Set;
  *
  */
 public class Point {
+	public static final Point ORIGIN = new Point(0,0,0);
+
     //TODO refactor
-	public double x = 0;
-	public double y = 0;
-	public double z = 0;
-	private Set<String> tags = new HashSet<>();
+	public double x;
+	public double y;
+	public double z;
+	private final Set<String> tags = new HashSet<>();
 	
 	public Point(Point p)
 	{
@@ -32,8 +34,7 @@ public class Point {
 	
 	/**
 	 * Does point have the specified tag
-	 * 
-	 * @see #setTag(String)
+	 *
 	 * @return Tag
 	 */
 	public boolean hasTag(String tag) {

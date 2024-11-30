@@ -1,27 +1,7 @@
 package com.graphics.tests;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.io.Serial;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
-import javax.swing.WindowConstants;
-
-import com.graphics.lib.Axis;
 import com.graphics.lib.Point;
-import com.graphics.lib.Utils;
-import com.graphics.lib.Vector;
+import com.graphics.lib.*;
 import com.graphics.lib.camera.Camera;
 import com.graphics.lib.camera.ViewAngleCamera;
 import com.graphics.lib.canvas.Canvas3D;
@@ -54,23 +34,24 @@ import com.graphics.lib.zbuffer.ZBuffer;
 import com.graphics.shapes.Cuboid;
 import com.graphics.shapes.Surface;
 import com.graphics.tests.shapes.Ship;
-import com.graphics.tests.weapons.AmmoTracker;
-import com.graphics.tests.weapons.AutoAmmoProxy;
-import com.graphics.tests.weapons.BouncyProjectile;
-import com.graphics.tests.weapons.DefaultAmmoHandler;
-//import com.graphics.tests.weapons.DefaultAmmoHandler;
-import com.graphics.tests.weapons.DeflectionProjectile;
-import com.graphics.tests.weapons.ExplodingProjectile;
-import com.graphics.tests.weapons.ExtendedMagazineWeapon;
-import com.graphics.tests.weapons.GattlingRound;
-import com.graphics.tests.weapons.LaserWeapon;
-import com.graphics.tests.weapons.Projectile;
-import com.graphics.tests.weapons.ProjectileWeapon;
-import com.graphics.tests.weapons.TrackingProjectile;
+import com.graphics.tests.weapons.*;
 import com.sound.ClipLibrary;
-
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.Serial;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class GraphicsTest extends JFrame {
 
@@ -109,7 +90,7 @@ public class GraphicsTest extends JFrame {
 
 		//N.B. world coords follow the inverted Y screen coords, really should've had these the right way up
 		//and transformed in the camera transform but we're a bit far down the line here
-		ViewAngleCamera cam = new ViewAngleCamera(new SimpleOrientation(OrientableTrait.ORIENTATION_TAG));
+		ViewAngleCamera cam = new ViewAngleCamera(new SimpleOrientation());
 		cam.setPosition(new Point(350, 280, -200));
 		//FocusPointCamera cam = new FocusPointCamera();
 		//cam.setFocusPoint(new Point(300, 300, 1000));
@@ -127,7 +108,7 @@ public class GraphicsTest extends JFrame {
 		
 		IPlugin<IPlugable, Void> explode = TestUtils.getExplodePlugin(Optional.ofNullable(clipLibrary), ExplosionSettings.getDefault());
 		
-		ViewAngleCamera slaveCam = new ViewAngleCamera(new SimpleOrientation(OrientableTrait.ORIENTATION_TAG));
+		ViewAngleCamera slaveCam = new ViewAngleCamera(new SimpleOrientation());
 		slaveCam.setPosition(new Point(1550, 200, 350));
 		slaveCam.addTransform("INIT", new PanCamera(Axis.Y, -90));
 		slaveCam.doTransforms();
@@ -147,10 +128,11 @@ public class GraphicsTest extends JFrame {
 		Ship ship = new Ship (100, 100, 50);
 		
 		ship.setColour(new Color(50, 50, 50));
-		TraitHandler.INSTANCE.registerTrait(ship, OrientableTrait.class).setOrientation(new SimpleOrientation(OrientableTrait.ORIENTATION_TAG));
+		TraitHandler.INSTANCE.registerTrait(ship, OrientableTrait.class);
 		addWeapons(ship, cam);
 		ship.applyTransform(Axis.Y.getRotation(180));
 		cnv.registerObject(ship, new Point(350, 350, -50), ScanlineShaderFactory.GORAUD.getDefaultSelector());
+		GlobalObjects.add("Ship", ship);
 		
 	    TraitHandler.INSTANCE.registerTrait(ship, PlugableTrait.class)
           .registerPlugin("CHECK_FLOOR", 

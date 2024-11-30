@@ -9,6 +9,7 @@ package com.graphics.lib;
 public record Vector(double x, double y, double z) {
 
 	public static final Vector ZERO_VECTOR = new Vector(0,0,0);
+	public static final Vector FORWARDS = new Vector(0,0,1);
 	
 	public Vector(Vector from) {
 		this(from.x, from.y, from.z);

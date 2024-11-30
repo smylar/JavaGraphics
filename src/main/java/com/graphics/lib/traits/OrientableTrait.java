@@ -4,9 +4,8 @@ import com.graphics.lib.interfaces.ICanvasObject;
 import com.graphics.lib.interfaces.IOrientable;
 import com.graphics.lib.interfaces.IOrientation;
 import com.graphics.lib.orientation.OrientationData;
-import com.graphics.lib.transform.BaseOrientationTransform;
-import com.graphics.lib.transform.ReapplyOrientationTransform;
-import com.graphics.lib.transform.Transform;
+import com.graphics.lib.orientation.SimpleOrientation;
+import com.graphics.lib.transform.*;
 
 /**
  * Wrapper for a canvas object providing functionality to allow the object to be aware of its orientation, 
@@ -18,13 +17,14 @@ import com.graphics.lib.transform.Transform;
 public class OrientableTrait implements IOrientable {
 	public static final String ORIENTATION_TAG = "Orientation";
 	private IOrientation orientation;
-	private OrientationData oTrans = new OrientationData();
+	private final OrientationData oTrans = new OrientationData();
 	protected final ICanvasObject parent;
 	
 	public OrientableTrait(ICanvasObject parent) {
             this.parent = parent;
+			this.orientation = new SimpleOrientation();
             parent.observeTransforms()
-                  .subscribe(this::applyTransform);
+					.subscribe(this::applyTransform);
     }
 	
 	@Override

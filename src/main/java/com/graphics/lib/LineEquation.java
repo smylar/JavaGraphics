@@ -118,7 +118,10 @@ public final class LineEquation {
     
     public static double interpolateZ(final double startZ, final double endZ, final double percentLength)
     {
-        return 1d / ((1d/startZ) + (percentLength * ((1d/endZ) - (1d/startZ))));
+        double dif = endZ - startZ;
+
+		return startZ + (percentLength * dif);
+		//return 1d / ((1d/startZ) + (percentLength * ((1d/endZ) - (1d/startZ)))); //what was this for?!
     }
 
 	//generated
@@ -171,11 +174,8 @@ public final class LineEquation {
         } else if (!x.equals(other.x))
             return false;
         if (y == null) {
-            if (other.y != null)
-                return false;
-        } else if (!y.equals(other.y))
-            return false;
-        return true;
+            return other.y == null;
+        } else return y.equals(other.y);
     }	
 	
 	

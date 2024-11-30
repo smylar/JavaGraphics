@@ -101,7 +101,7 @@ public enum ScanlineShaderFactory implements IShaderFactory {
                 final int xVal = x;
                 getScanline(x, lines).ifPresent(sl -> processScanline(sl, xVal, localShader, screen, zBufferItemUpdater));
             }
-        } catch (Exception e) { }
+        } catch (Exception ignored) { }
     }
     
     private Optional<ScanLine> getScanline(int xVal, List<LineEquation> lines)
@@ -166,28 +166,32 @@ public enum ScanlineShaderFactory implements IShaderFactory {
     
     private void processScanline(ScanLine scanLine, int x, ScanlineShader shader, Dimension screen, ZBufferItemUpdater zBufferItemUpdater) {
         int ceilEnd = (int)Math.round(scanLine.getEndY());
-        //int ceilEnd = (int)Math.ceil(scanLine.getEndY());
         int floorStart = (int)Math.round(scanLine.getStartY());
-        //int floorStart = scanLine.getStartY().intValue();
-        int scanLineLength = ceilEnd - floorStart;
-        double percentDistCovered = 0;
+        int scanLineLength = ceilEnd - floorStart + 1;
+        double percentDistCovered;
         AtomicReference<Color> colour = new AtomicReference<>();
         
         IntFunction<Color> colourSupplier = yVal -> {
-            Color c = skip <= 1 || yVal % skip == 0 || colour.get() == null || shader == null ? shader.getColour(scanLine, x, yVal) : colour.get();
+            Color c = (skip <= 1 || yVal % skip == 0 || colour.get() == null) && shader != null ? shader.getColour(scanLine, x, yVal) : colour.get();
             colour.set(c);
             return c;
         };
-        for (int y = Math.max(floorStart, 0); y <= (ceilEnd > screen.getHeight() ? screen.getHeight() : ceilEnd) ; y++)
-        {
-            
-            if (scanLineLength != 0)
-            {
-                percentDistCovered = (double)(y - floorStart) / scanLineLength;
-            }
-            
+
+        int positionOnScanLine = 0;
+        if (floorStart < 0) {
+            positionOnScanLine = Math.abs(floorStart);
+        }
+
+        while (positionOnScanLine < scanLineLength) {
+            int y = floorStart + positionOnScanLine;
+            if (y > screen.getHeight()) break;
+
+            percentDistCovered = (double)positionOnScanLine / scanLineLength;
+
             double z = LineEquation.interpolateZ(scanLine.getStartZ(), scanLine.getEndZ(), percentDistCovered);
             zBufferItemUpdater.update(x, y, z, colourSupplier);
+
+            positionOnScanLine++;
         }
     }
     

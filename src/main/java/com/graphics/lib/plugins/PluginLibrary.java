@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.graphics.lib.canvas.Canvas3D;
@@ -28,6 +29,9 @@ import com.graphics.lib.interfaces.IOrientable;
 import com.graphics.lib.interfaces.IPlugable;
 import com.graphics.lib.lightsource.LightSource;
 import com.graphics.lib.traits.TraitHandler;
+
+import static com.graphics.lib.Point.ORIGIN;
+import static com.graphics.lib.Vector.FORWARDS;
 
 public class PluginLibrary {
 
@@ -86,7 +90,7 @@ public class PluginLibrary {
                 ICanvasObject fragment = Utils.getFragment(f);
                 fragment.setProcessBackfaces(true);
                 fragment.setColour(f.getColour() != null ? f.getColour() : obj.getColour());
-                Vector baseVector = fragment.getFacetList().get(0).getNormal();
+                Vector baseVector = fragment.getFacetList().getFirst().getNormal();
                 double xVector = baseVector.x() + (Math.random()/2) - 0.25;
                 double yVector = baseVector.y() + (Math.random()/2) - 0.25;
                 double zVector = baseVector.z() + (Math.random()/2) - 0.25;
@@ -129,7 +133,7 @@ public class PluginLibrary {
                         Thread.sleep(200);
                         flash.setIntensity(flash.getIntensity() - 0.075);
                     }
-                } catch (Exception e) {}
+                } catch (Exception ignored) {}
                 flash.setDeleted(true);
             }).start();
             return null;
@@ -264,7 +268,7 @@ public class PluginLibrary {
             List<MovementTransform> mTrans = obj.getTransformsOfType(MovementTransform.class);
             if (mTrans.isEmpty()) return null;
 
-            MovementTransform move = mTrans.get(0); //just getting the first one for now (if there is more than one)
+            MovementTransform move = mTrans.getFirst(); //just getting the first one for now (if there is more than one)
             Vector velocity = move.getVelocity();
 
             Optional<Facet> curFacet = Optional.empty();
@@ -302,40 +306,70 @@ public class PluginLibrary {
                     obj.getTransformsOfType(MovementTransform.class).stream()
                             .findFirst()
                             .flatMap(m -> TraitHandler.INSTANCE.getTrait(obj, IOrientable.class))
-                            .ifPresent(o -> track(o, obj, objectToTrack, rotationRate))
+                            .ifPresent(o -> trackDeflection(o, obj, objectToTrack, rotationRate))
             );
 
             return null;
         };
     }
 
-    private static void track(IOrientable orientable, ICanvasObject parent, ICanvasObject objectToTrack, double rotationRate) {
+    public static IPlugin<IPlugable, Void> lookAt(final Supplier<ICanvasObject> objectToTrack, final double rotationRate) {
+        return plugable -> {
+            ICanvasObject target = objectToTrack.get();
+            if (target == null) return null;
+
+            Optional.ofNullable(plugable.getParent()).ifPresent(obj ->
+                    TraitHandler.INSTANCE.getTrait(obj, IOrientable.class)
+                            .ifPresent(o -> track(o, obj, new Point(target.getCentre()), rotationRate))
+            );
+
+            return null;
+        };
+    }
+
+
+    private static void trackDeflection(IOrientable orientable, ICanvasObject parent, ICanvasObject objectToTrack, double rotationRate) {
         //plot deflection (if target moving) and aim for that
         Point centre = parent.getCentre();
         Pair<Vector,Point> target = CanvasObjectFunctions.DEFAULT.get().plotDeflectionShot(objectToTrack, centre, orientable.getOrientation().getForward().getSpeed());
+        track(orientable, parent, target.getRight(), rotationRate);
+    }
 
-        new Translation(-centre.x, -centre.y, -centre.z).doTransformSpecific().accept(target.getRight());
-        ICanvasObject rep = orientable.getOrientation().getRepresentation();
+    private static void track(IOrientable orientable, ICanvasObject parent, Point target, double rotationRate) {
+        double yRotationRate = rotationRate;
+        double xRotationRate = rotationRate;
+        Point centre = parent.getCentre();
+
+        new Translation(-centre.x, -centre.y, -centre.z).doTransformSpecific().accept(target);
+        boolean facingBack = orientable.getOrientation().getForward().z() < 0;
+        boolean facingUp = orientable.getOrientation().getUp().y() < 0;
 
         Transform toBase = orientable.toBaseOrientationTransform();
-        rep.applyTransform(toBase);
-        toBase.replay(target.getRight());
+        toBase.beforeTransform();
+        toBase.doTransformSpecific().accept(target);
+        Vector vectorToTarget = ORIGIN.vectorToPoint(target);
 
+        double xAngle = new Vector(0, vectorToTarget.y(), vectorToTarget.z()).angleBetween(FORWARDS);
+        double yAngle = new Vector(vectorToTarget.x(),0, vectorToTarget.z()).angleBetween(FORWARDS);
+
+        if (xAngle < 1 && yAngle < 1) return;
         double xAngleMod = 0;
         double yAngleMod = 0;
-        if (target.getRight().z < 0) {
-            yAngleMod = rotationRate;
-        } else {
-            if (target.getRight().x < 0) yAngleMod = -rotationRate;
-            if (target.getRight().x > 0) yAngleMod = rotationRate;
 
+        yRotationRate = Math.min(yAngle, yRotationRate);
+        xRotationRate = Math.min(xAngle, xRotationRate);
+
+        if (vectorToTarget.x() > 0) yAngleMod = yRotationRate;
+        else if (vectorToTarget.x() < 0) yAngleMod = -yRotationRate;
+
+        if (vectorToTarget.y() > 0) xAngleMod = -xRotationRate;
+        else if (vectorToTarget.y() < 0) xAngleMod = xRotationRate;
+
+        if (facingBack == facingUp) { //both true or both false
+            xAngleMod = -xAngleMod;
         }
 
-        if (target.getRight().y < 0) xAngleMod = rotationRate;
-        if (target.getRight().y > 0) xAngleMod = -rotationRate;
-
-        rep.applyTransform(Axis.X.getRotation(xAngleMod), Axis.Y.getRotation(yAngleMod), orientable.reapplyOrientationTransform());
-
+        CanvasObjectFunctions.DEFAULT.get().addTransformAboutCentre(parent, Axis.X.getRotation(xAngleMod), Axis.Y.getRotation(yAngleMod));
     }
 
 }
