@@ -56,21 +56,22 @@ public class StartScene extends FlooredFrame {
         
         super.buildFrame();
 
-        ObjectTiedLightSource<LightSource> l1 = new ObjectTiedLightSource<>(LightSource.class, 0,0,-500);
+        // as lightsource is object tied, create at origin, it will then move to the correct location when object is registered
+        ObjectTiedLightSource<LightSource> l1 = new ObjectTiedLightSource<>(LightSource.class);
         l1.getLightSource().setColour(new Color(255, 0, 0));
         addSceneLightSource(l1.getLightSource());
         Lantern lantern1 = new Lantern();
         lantern1.attachLightsource(l1);
         addSceneObject(new SceneObject(lantern1, new Point(0,0,-500), ScanlineShaderFactory.NONE.getDefaultSelector()));
         
-        ObjectTiedLightSource<LightSource> l2 = new ObjectTiedLightSource<>(LightSource.class, 500,200,-100);
+        ObjectTiedLightSource<LightSource> l2 = new ObjectTiedLightSource<>(LightSource.class);
         l2.getLightSource().setColour(new Color(0, 255, 0));
         addSceneLightSource(l2.getLightSource());
         Lantern lantern2 = new Lantern();
         lantern2.attachLightsource(l2);
         addSceneObject(new SceneObject(lantern2, new Point(500,200,-100), ScanlineShaderFactory.NONE.getDefaultSelector()));
         
-        l3 = new ObjectTiedLightSource<>(DirectionalLightSource.class, 400,100,100);
+        l3 = new ObjectTiedLightSource<>(DirectionalLightSource.class);
         l3.getLightSource().setColour(new Color(0, 0, 255));
         addSceneLightSource(l3.getLightSource());
         

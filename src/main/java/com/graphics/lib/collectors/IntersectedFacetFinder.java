@@ -1,10 +1,7 @@
 package com.graphics.lib.collectors;
 
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
@@ -29,9 +26,9 @@ import com.graphics.lib.interfaces.ICanvasObject;
  */
 public class IntersectedFacetFinder<T extends ICanvasObject> implements Collector<T, TreeSet<IntersectionData<T>>, TreeSet<IntersectionData<T>>> {
 
-	private Vector v;
-	private Point p;
-	private double maxDist;
+	private final Vector v;
+	private final Point p;
+	private final double maxDist;
 	
 	public IntersectedFacetFinder(Vector v, Point p, double maxDist)
 	{
@@ -49,7 +46,7 @@ public class IntersectedFacetFinder<T extends ICanvasObject> implements Collecto
 				double dist = p.distanceTo(entry.getValue());
 				if (dist < maxDist)
 				{
-					acc.add(new IntersectionData<T>(elem, entry.getKey(), entry.getValue(), dist));
+					acc.add(new IntersectionData<>(elem, entry.getKey(), entry.getValue(), dist));
 				}
 			}
 			
@@ -76,7 +73,7 @@ public class IntersectedFacetFinder<T extends ICanvasObject> implements Collecto
 
 	@Override
 	public Supplier<TreeSet<IntersectionData<T>>> supplier() {
-	    return () -> new TreeSet<IntersectionData<T>>((o1,o2) -> o1.getDistanceAway().compareTo(o2.getDistanceAway()));
+	    return () -> new TreeSet<>(Comparator.comparing(o -> o.getDistanceAway()));
 	}
 
 }

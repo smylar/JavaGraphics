@@ -10,5 +10,5 @@ import com.graphics.lib.lightsource.ILightSource;
 
 @FunctionalInterface
 public interface ILightIntensityFinder {
-	public IntensityComponents getLightIntensity(Collection<ILightSource> ls, ICanvasObject obj, Point p, Vector normal, Facet facet);
+	IntensityComponents getLightIntensity(Collection<ILightSource> ls, ICanvasObject obj, Point p, Vector normal, Facet facet);
 }

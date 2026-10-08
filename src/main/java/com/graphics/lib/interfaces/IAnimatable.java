@@ -11,11 +11,11 @@ public interface IAnimatable extends ITrait {
      * Start an animation sequence
      * @param key The sequence name
      */
-	public void startAnimation(String key);
+	void startAnimation(String key);
 	
 	/**
 	 * Stop an animation sequence
 	 * @param key The sequence name
 	 */
-	public void stopAnimation(String key);
+	void stopAnimation(String key);
 }

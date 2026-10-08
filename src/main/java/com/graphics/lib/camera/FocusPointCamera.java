@@ -15,7 +15,7 @@ public class FocusPointCamera extends Camera {
 	@Override
 	public void getViewSpecific(ICanvasObject obj) {
 
-		obj.getVertexList().stream().forEach(p -> {
+		obj.getVertexList().forEach(p -> {
 			p.resetTransformed(this);
 			double percent = p.z / focusPoint.z;
 			

@@ -3,13 +3,13 @@ package com.graphics.lib.interfaces;
 import java.util.Optional;
 
 public interface IEffector {
-	public void activate();
+	void activate();
 	
 	default void deActivate() {}
 	
-	public ICanvasObject getParent();
+	ICanvasObject getParent();
 	
-	public String getId();
+	String getId();
 	
 	default Optional<Class<?>> getEffectClass() { return Optional.empty(); }
 }

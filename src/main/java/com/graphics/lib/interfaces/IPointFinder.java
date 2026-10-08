@@ -4,5 +4,5 @@ import com.graphics.lib.Point;
 
 @FunctionalInterface
 public interface IPointFinder {
-	public Point find();
+	Point find();
 }

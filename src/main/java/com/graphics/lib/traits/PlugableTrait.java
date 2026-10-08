@@ -18,8 +18,6 @@ import com.graphics.lib.plugins.IPlugin;
  * to be triggered at the end of each draw cycle, or in response to other events
  * 
  * @author Paul Brandon
- *
- * @param <T> Type of the CanvasObject being wrapped
  */
 public class PlugableTrait implements IPlugable {
 	private Map<String,IPlugin<IPlugable,?>> plugins = new HashMap<>();

@@ -24,8 +24,8 @@ public class RollMarker implements DrawAction {
         //may also want to move this up and down depending on if we are looking down or up
         Camera cam = cnv.getCamera();
         OrientationData data = new OrientationData(cam.getOrientation());
-        final int centrex = (int)Math.round(cnv.getWidth() /2);
-        final int centrey = (int)Math.round(cnv.getHeight() /2);
+        final int centrex = Math.round((float) cnv.getWidth() /2);
+        final int centrey = Math.round((float) cnv.getHeight() /2);
         final Polygon indicator = new Polygon();
         indicator.addPoint(centrex - 75, centrey -1);
         indicator.addPoint(centrex + 60, centrey -1);

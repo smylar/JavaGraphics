@@ -13,7 +13,11 @@ import com.graphics.lib.transform.Transform;
  * @param <L> The type of the specific light source to tie to an object
  */
 public class ObjectTiedLightSource<L extends LightSource> extends TiedLightSource<L, CanvasObject> {
-	
+
+	public ObjectTiedLightSource(Class<L> ls) {
+		super(ls, 0, 0, 0);
+	}
+
 	public ObjectTiedLightSource(Class<L> ls, double x, double y, double z) {
 		super(ls, x, y, z);
 	}

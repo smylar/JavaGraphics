@@ -6,5 +6,5 @@ import com.graphics.lib.Vector;
 
 @FunctionalInterface
 public interface IVertexNormalFinder {
-	public Vector getVertexNormal(ICanvasObject obj, Point p, Facet f);
+	Vector getVertexNormal(ICanvasObject obj, Point p, Facet f);
 }

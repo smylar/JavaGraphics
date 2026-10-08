@@ -4,5 +4,5 @@ import java.util.Collection;
 
 @FunctionalInterface
 public interface ICanvasObjectList {
-	public Collection<ICanvasObject> get();
+	Collection<ICanvasObject> get();
 }
